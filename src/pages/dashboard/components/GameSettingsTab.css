@@ -1,0 +1,122 @@
+.game-settings-content {
+  padding: 20px;
+}
+
+.game-settings-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: rgba(19, 19, 42, 0.95);
+  border-radius: 8px;
+  border: 2px solid #71bbe9;
+}
+
+.board-settings-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.board-settings-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.board-settings-controls .game-settings-section {
+  margin-bottom: 20px;
+}
+
+.board-settings-controls .game-settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.board-preview-wrapper-container {
+  flex: 0 0 auto;
+  min-width: 280px;
+}
+
+@media screen and (max-width: 768px) {
+  .board-settings-container {
+    flex-direction: column;
+  }
+  
+  .board-preview-wrapper-container {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+.game-settings-section h3 {
+  margin: 0 0 15px 0;
+  color: #f5ce45;
+  font-size: 1.2rem;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: white;
+  font-size: 1rem;
+}
+
+.setting-description {
+  margin: 10px 0 0 0;
+  color: #aaa;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Switch styling - matches original game_board.css */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: #71bbe9;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.switch input:focus + .slider {
+  box-shadow: 0 0 1px #71bbe9;
+}
+

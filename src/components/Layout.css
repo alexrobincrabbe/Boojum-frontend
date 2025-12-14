@@ -1,0 +1,862 @@
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #1b1835;
+  background-image: linear-gradient(transparent, 50%, black);
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+/* Top Bar */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: rgba(19, 19, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #71bbe9;
+  box-shadow: 0 2px 10px rgba(113, 187, 233, 0.3);
+  z-index: 1003;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.burger-button {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.burger-button:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.1);
+}
+
+.top-bar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f5ce45;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  font-family: "Monoton", cursive;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Mobile Users Online Button */
+.mobile-users-button {
+  display: none; /* Hidden on desktop */
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mobile-users-button:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+}
+
+.mobile-users-count {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.mobile-users-label {
+  font-size: 0.85rem;
+}
+
+@media (min-width: 1024px) {
+  .mobile-users-button {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobile-users-button {
+    display: flex;
+  }
+}
+
+.notification-button {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.notification-button:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.1);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  background-color: #ff69b4;
+  border-radius: 50%;
+  border: 2px solid rgba(19, 19, 42, 0.95);
+}
+
+.profile-picture-button-top {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 3px solid #71bbe9;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(113, 187, 233, 0.5);
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.profile-picture-button-top:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8);
+}
+
+/* Left Sidebar */
+.left-sidebar {
+  position: fixed;
+  left: 0;
+  top: 70px; /* Start at top bar */
+  height: calc(100vh - 70px);
+  width: 250px;
+  background-color: rgba(19, 19, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-right: 2px solid #71bbe9;
+  box-shadow: 2px 0 10px rgba(113, 187, 233, 0.3);
+  z-index: 1001; /* Above players online bar and main content */
+  transition: transform 0.3s ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Very large screens: sidebar pushes content, not overlay */
+@media (min-width: 1440px) {
+  .left-sidebar {
+    position: fixed;
+    top: 70px; /* Start at top bar */
+    height: calc(100vh - 70px);
+    z-index: 1001; /* Above players online bar and main content */
+  }
+  
+  .left-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .left-sidebar.closed {
+    transform: translateX(-100%);
+  }
+}
+
+/* Mobile/Tablet/Standard Desktop: sidebar overlays content */
+@media (max-width: 1439px) {
+  .left-sidebar {
+    z-index: 1002;
+    top: 70px; /* Just top bar on mobile */
+    height: calc(100vh - 70px);
+  }
+  
+  .left-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .left-sidebar.closed {
+    transform: translateX(-100%);
+  }
+}
+
+.sidebar-header {
+  display: none;
+}
+
+.sidebar-toggle {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.1);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f5ce45;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  font-family: "Monoton", cursive;
+}
+
+.sidebar-nav {
+  padding: 20px 0;
+}
+
+.nav-section {
+  margin-bottom: 0;
+  position: relative;
+}
+
+.nav-section:not(:last-child)::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background-color: #71bbe9;
+  margin: 8px 20px;
+}
+
+.nav-section-title {
+  padding: 8px 20px;
+  color: #71bbe9;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.nav-link:hover {
+  background-color: rgba(113, 187, 233, 0.1);
+  border-left-color: #71bbe9;
+  color: #f5ce45;
+}
+
+.nav-link.active {
+  background-color: rgba(113, 187, 233, 0.2);
+  border-left-color: #f5ce45;
+  color: #f5ce45;
+}
+
+
+.logout-link {
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.profile-button-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-button-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Right Sidebar */
+.right-sidebar {
+  position: fixed;
+  right: 0;
+  top: 70px; /* Start at top bar, covers players online bar */
+  height: calc(100vh - 70px);
+  width: 250px;
+  background-color: rgba(19, 19, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-left: 2px solid #71bbe9;
+  box-shadow: -2px 0 10px rgba(113, 187, 233, 0.3);
+  z-index: 1001; /* Above players online bar (z-index 999) */
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.right-sidebar.open {
+  transform: translateX(0);
+}
+
+.right-sidebar.closed {
+  transform: translateX(100%);
+}
+
+.right-sidebar .sidebar-header {
+  justify-content: space-between;
+}
+
+.sidebar-title {
+  color: #f5ce45;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: "Monoton", cursive;
+}
+
+.sidebar-close {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.sidebar-close:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.1);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  min-height: calc(100vh - 70px);
+  margin-top: 70px;
+  width: 100%;
+  padding: 0;
+  padding-top: 0;
+  transition: margin-left 0.3s ease, margin-top 0.3s ease, padding-top 0.3s ease;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 997; /* Below players online bar (998), left sidebar (1001), and right sidebar (1001) */
+}
+
+/* Tablet/Desktop: content accounts for players online bar with padding */
+@media (min-width: 768px) {
+  .main-content {
+    margin-top: 70px; /* Just top bar */
+    padding-top: 100px; /* Padding to compensate for players online bar (~70px) */
+  }
+}
+
+/* Very large screens: content pushed by sidebar */
+@media (min-width: 1440px) {
+  .main-content.left-open {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+  
+  .main-content.left-closed {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Players Online - Desktop (below top bar) */
+.players-online-desktop {
+  display: none; /* Hidden on mobile */
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  background-color: rgba(19, 19, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #71bbe9;
+  box-shadow: 0 2px 10px rgba(113, 187, 233, 0.3);
+  z-index: 998; /* Below left sidebar (1001) and right sidebar (1001), but above main content (997) */
+  padding: 12px 20px;
+  overflow-x: auto;
+  overflow-y: visible;
+  min-height: 70px;
+  height: auto;
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .players-online-desktop {
+    display: block;
+  }
+}
+
+/* Very large screens: players online bar pushed to the right when sidebar is open */
+@media (min-width: 1440px) {
+  .players-online-desktop.left-open {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+  
+  .players-online-desktop.left-closed {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+.players-online-container {
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.players-online-count-label {
+  color: #71bbe9;
+  font-size: 0.9rem;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: "Monoton", cursive;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.players-online-count-label > div {
+  display: flex;
+  align-items: center;
+}
+
+.players-online-count-number {
+  color: #33c15b;
+  font-size: 1.1rem;
+  margin-left: 5px;
+}
+
+
+.players-online-list {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 5px 0;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+/* Scrollbar styling is now applied globally in index.css */
+
+.player-online-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  max-width: 200px;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.player-online-name {
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-online-name:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.player-online-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.online-dot {
+  background-color: #33c15b;
+}
+
+.offline-dot {
+  background-color: #888;
+}
+
+.status-text {
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.playing-text {
+  color: #33c15b;
+}
+
+.online-text {
+  color: #71bbe9;
+}
+
+.offline-text {
+  color: #888;
+}
+
+/* Mobile Users Dropdown */
+.mobile-users-dropdown {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  background-color: rgba(19, 19, 42, 0.98);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #71bbe9;
+  box-shadow: 0 4px 20px rgba(113, 187, 233, 0.5);
+  z-index: 1002;
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+
+.mobile-users-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 2px solid rgba(113, 187, 233, 0.3);
+}
+
+.mobile-users-dropdown-header h3 {
+  color: #71bbe9;
+  font-size: 1.2rem;
+  margin: 0;
+  font-family: "Monoton", cursive;
+}
+
+.mobile-users-close {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.mobile-users-close:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+}
+
+.mobile-users-dropdown-list {
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-users-dropdown-list .player-online-item {
+  min-width: auto;
+  width: 100%;
+  white-space: normal;
+}
+
+.mobile-users-dropdown-list .player-online-status {
+  flex-wrap: wrap;
+}
+
+.mobile-users-dropdown-list .status-text {
+  white-space: normal;
+}
+
+/* Mobile/Tablet: content full width, sidebar overlays */
+@media (max-width: 1023px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 70px; /* Just top bar - players online bar doesn't need overlay */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .left-sidebar {
+    width: 200px;
+  }
+
+  .right-sidebar {
+    width: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .left-sidebar {
+    z-index: 1002;
+    width: 250px;
+  }
+}
+
+/* Sidebar Activities */
+.sidebar-activities {
+  padding: 20px;
+  margin-top: 8px;
+  padding-top: 8px;
+  position: relative;
+}
+
+.sidebar-activities::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background-color: #f5ce45;
+}
+
+.sidebar-section-title {
+  color: #f5ce45;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: "Monoton", cursive;
+}
+
+.sidebar-activities-feed {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Yellow scrollbar for activities feed */
+.sidebar-activities-feed::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-activities-feed::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-activities-feed::-webkit-scrollbar-thumb {
+  background: #f5ce45;
+  border-radius: 2px;
+}
+
+/* Firefox scrollbar for activities feed */
+.sidebar-activities-feed {
+  scrollbar-width: thin;
+  scrollbar-color: #f5ce45 rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-activities-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-activity-item {
+  display: block;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+.sidebar-activity-item:last-child {
+  border-bottom: none;
+}
+
+.sidebar-activity-username {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.sidebar-activity-username:hover {
+  text-decoration: underline;
+}
+
+.sidebar-activity-description {
+  color: #fff;
+  margin-left: 5px;
+  display: inline;
+  word-wrap: break-word;
+}
+
+.sidebar-activity-timestamp {
+  color: #888;
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 5px;
+}
+
+.sidebar-no-activities {
+  color: #888;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9rem;
+}
+
+/* Sidebar Chat */
+.sidebar-chat {
+  padding: 20px;
+  border-top: 2px solid rgba(113, 187, 233, 0.3);
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 70px - 300px);
+}
+
+.sidebar-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 300px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+}
+
+.sidebar-chat-message {
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.sidebar-chat-user {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.sidebar-chat-content {
+  color: #fff;
+  margin-right: 10px;
+}
+
+.sidebar-chat-timestamp {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+.sidebar-chat-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-chat-input {
+  width: 100%;
+  padding: 8px;
+  background-color: rgba(19, 19, 42, 0.8);
+  border: 2px solid #71bbe9;
+  border-radius: 5px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.sidebar-chat-input:focus {
+  outline: none;
+  border-color: #f5ce45;
+  box-shadow: 0 0 10px rgba(245, 206, 69, 0.5);
+}
+
+.sidebar-chat-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebar-chat-send-button {
+  padding: 8px 16px;
+  background-color: #71bbe9;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.sidebar-chat-send-button:hover {
+  background-color: #5a9fd4;
+}
+

@@ -1,0 +1,37 @@
+/* Confirmation Dialog - matches game.css */
+.confirmation-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+}
+
+.confirmation-popup {
+  background-color: #13132a;
+  border: 2px solid #f4c943;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  color: white;
+}
+
+.confirmation-popup button {
+  margin: 20px;
+  padding: 10px;
+  background-color: #352870;
+  color: #f4c943;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 110%;
+}
+
+.confirmation-popup button:hover,
+.confirmation-popup button:active {
+  box-shadow: 0px 0px 6px white;
+}
+

@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Global scrollbar styling - applied to all scrollbars on the site */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #71bbe9;
+  border-radius: 2px;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #71bbe9 rgba(0, 0, 0, 0.2);
+}

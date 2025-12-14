@@ -1,0 +1,610 @@
+@import url("https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&");
+@import url("https://fonts.googleapis.com/css2?family=Italianno&family=League+Script&family=Major+Mono+Display&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Monoton&display=swap");
+
+.profile-container {
+  background-color: #1b1835;
+  background-image: linear-gradient(transparent, 50%, black);
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+}
+
+h1,
+h2 {
+  font-family: "Monoton", cursive;
+}
+
+h2 {
+  color: #eb539e;
+}
+
+/* Profile Name */
+#profile-name-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding-top: 60px;
+}
+
+#profile-name {
+  text-align: center;
+  color: #f5ce45;
+  font-size: 2.5rem;
+}
+
+/* Profile Pic/Game Stats */
+#profile-pic-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+
+#profile-pic {
+  position: relative;
+  width: 20vw;
+  min-width: 200px;
+  height: 20vw;
+  min-height: 200px;
+  border-radius: 50%;
+  margin: 20px;
+  border: 5px solid #71bbe9;
+  box-shadow: 0 0 20px #71bbe9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-pic-image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+}
+
+.profile-pic-default {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.default-avatar {
+  font-size: 5rem;
+}
+
+#edit-profile-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: solid #33c15b 3px;
+  padding: 5px 15px;
+  font-size: 150%;
+  border-radius: 10px;
+  color: #f5ce45;
+  background: #33c15b;
+  opacity: 0.7;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+
+#edit-profile-button:hover {
+  opacity: 1;
+}
+
+#game-details-container {
+  background-color: rgba(19, 19, 42, 0.5);
+  position: relative;
+  margin: 20px;
+  padding: 20px;
+  font-size: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Major Mono Display", monospace;
+  font-weight: 300;
+  border: 5px solid #71bbe9;
+  box-shadow: 0 0 10px #71bbe9;
+  text-transform: lowercase;
+  width: 100%;
+  max-width: 400px;
+}
+
+#game-details-container h2 {
+  font-size: 1.8rem;
+  font-family: "Major Mono Display", monospace;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #eb539e;
+}
+
+#game-details-container h5 {
+  margin-bottom: 0;
+  margin-top: 15px;
+  font-size: 1.2rem;
+}
+
+.game-scores-container {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.game-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-scores div {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  color: #f5ce45;
+}
+
+.game-scores .label {
+  font-weight: bold;
+  margin-right: 10px;
+  text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146);
+  color: rgb(113, 187, 233);
+}
+
+.yellow {
+  color: #f5ce45;
+}
+
+.pink {
+  color: #ff69b4;
+}
+
+.purple {
+  color: #5e4cb0;
+}
+
+.green {
+  color: #33c15b;
+}
+
+.blue {
+  color: rgb(113, 187, 233);
+  text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146);
+}
+
+#date-joined {
+  font-family: "Major Mono Display", monospace;
+  color: #f5ce45;
+  margin: 10px 0;
+}
+
+#date-joined .label {
+  font-weight: bold;
+  text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146);
+  color: rgb(113, 187, 233);
+}
+
+/* About Me Section */
+#who-are-you-container {
+  background-color: rgba(19, 19, 42, 0.5);
+  border: 5px solid #f5ce45;
+  box-shadow: 0 0 10px #f5ce45;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 10px;
+}
+
+#who-are-you {
+  min-height: 150px;
+  font-weight: bold;
+}
+
+#who-are-you-text {
+  line-height: 1.6;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 1.3rem;
+  text-align: center;
+  /* Define gradient as the background */
+  background: linear-gradient(
+    #f5ce45, #ff78c0, #5bff8a
+  );
+  /* Clip the background to the text */
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* Make the actual text transparent so the gradient shows through */
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Override gradient styles for textarea in edit mode */
+#who-are-you-text.edit-textarea,
+#who-are-you-text[class*="edit-textarea"] {
+  background: rgba(19, 19, 42, 0.8) !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+  cursor: text !important;
+}
+
+#who-are-you-header {
+  color: #eb539e;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 2rem;
+}
+
+/* Personal Details */
+#tell-us-more-container {
+  background-color: rgba(19, 19, 42, 0.5);
+  border: 5px solid #71bbe9;
+  box-shadow: 0 0 10px #71bbe9;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 10px;
+}
+
+#tell-us-more {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#pt-1,
+#pt-2 {
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-around;
+  border-radius: 20px;
+}
+
+#pt-1 {
+  border: 5px outset #f5ce45;
+}
+
+#tell-us-more-header {
+  color: #71bbe9;
+  margin: 10px 0;
+}
+
+.personal-details {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  gap: 5px;
+}
+
+.personal-details .blue {
+  font-weight: bold;
+  color: #71bbe9;
+}
+
+.detail-text {
+  color: #fff;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.detail-text.yellow {
+  color: #f5ce45;
+}
+
+.detail-text.pink {
+  color: #ff69b4;
+}
+
+.detail-text.green {
+  color: #33c15b;
+}
+
+/* Ensure row uses flexbox for ordering */
+.profile-content-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Center columns */
+.profile-content-row > [class*="col-"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  #profile-name {
+    font-size: 1.8rem;
+  }
+
+  #profile-pic {
+    width: 30vw;
+    height: 30vw;
+    min-width: 150px;
+    min-height: 150px;
+  }
+
+  #game-details-container {
+    font-size: 70%;
+  }
+
+  #game-details-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .profile-actions-top-right {
+    top: 200px; /* Below top bar (70px) + players online list (min 70px) + extra spacing */
+    right: 10px;
+  }
+
+  #profile-name-container {
+    padding-top: 60px;
+  }
+
+  #who-are-you-header {
+    font-size: 1.5rem;
+  }
+
+  #who-are-you-text {
+    font-size: 1.1rem;
+  }
+
+  /* Force order on mobile - profile pic first, then about me */
+  .profile-content-row {
+    flex-direction: column;
+  }
+
+  .profile-content-row .profile-pic-col {
+    order: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  .profile-content-row .about-me-col {
+    order: 2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}
+
+/* Personal Details Section - Always below other sections */
+.personal-details-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+#tell-us-more-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+/* Desktop: About me and profile pic side by side */
+@media (min-width: 769px) {
+  .profile-content-row {
+    flex-direction: row;
+  }
+
+  .profile-content-row .profile-pic-col {
+    order: 2;
+  }
+
+  .profile-content-row .about-me-col {
+    order: 1;
+  }
+}
+
+/* Profile Actions - Top Right */
+.profile-actions-top-right {
+  position: fixed;
+  top: 200px; /* Below top bar (70px) + players online list (min 70px) + extra spacing */
+  right: 20px;
+  z-index: 1004; /* Above sidebars (1001-1003) and other elements */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.edit-profile-top-button {
+  padding: 10px 20px;
+  border: 3px solid #33c15b;
+  border-radius: 10px;
+  background-color: #33c15b;
+  color: #f5ce45;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  opacity: 0.9;
+}
+
+.edit-profile-top-button:hover {
+  opacity: 1;
+}
+
+/* Edit Mode Styles */
+.edit-mode-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.save-button,
+.cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.save-button {
+  background-color: #33c15b;
+  color: #f5ce45;
+  border: 3px solid #33c15b;
+}
+
+.save-button:hover:not(:disabled) {
+  opacity: 1;
+  background-color: #2aa84f;
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background-color: transparent;
+  color: #f5ce45;
+  border: 3px solid #f5ce45;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: rgba(245, 206, 69, 0.2);
+}
+
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-error {
+  color: #ff69b4;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+/* Edit Input Styles */
+.edit-textarea {
+  width: 100%;
+  background-color: rgba(19, 19, 42, 0.8);
+  border: 2px solid #f5ce45;
+  border-radius: 5px;
+  padding: 10px;
+  color: #fff !important;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  cursor: text !important;
+  /* Override any gradient text styles */
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #fff !important;
+  background: rgba(19, 19, 42, 0.8) !important;
+  text-align: left !important;
+}
+
+/* Specific override for who-are-you textarea */
+#who-are-you textarea.edit-textarea,
+#who-are-you-container textarea.edit-textarea {
+  background: rgba(19, 19, 42, 0.8) !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: #fff !important;
+  color: #fff !important;
+  cursor: text !important;
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: #ff78c0;
+  box-shadow: 0 0 10px rgba(255, 120, 192, 0.5);
+}
+
+.detail-input,
+.detail-select,
+.detail-textarea {
+  width: 100%;
+  background-color: rgba(19, 19, 42, 0.8);
+  border: 2px solid #71bbe9;
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: #fff;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 1rem;
+  margin-top: 5px;
+}
+
+.detail-input:focus,
+.detail-select:focus,
+.detail-textarea:focus {
+  outline: none;
+  border-color: #f5ce45;
+  box-shadow: 0 0 10px rgba(245, 206, 69, 0.5);
+}
+
+.detail-input.yellow {
+  color: #f5ce45;
+}
+
+.detail-input.pink {
+  color: #ff69b4;
+}
+
+.detail-textarea.green {
+  color: #33c15b;
+}
+
+.edit-profile-picture-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: solid #33c15b 3px;
+  padding: 5px 15px;
+  font-size: 150%;
+  border-radius: 10px;
+  color: #f5ce45;
+  background: #33c15b;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.edit-profile-picture-label:hover {
+  opacity: 1;
+}
+
+#edit-profile-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: solid #33c15b 3px;
+  padding: 5px 15px;
+  font-size: 150%;
+  border-radius: 10px;
+  color: #f5ce45;
+  background: #33c15b;
+  opacity: 0.7;
+  text-decoration: none;
+  transition: opacity 0.3s;
+  cursor: pointer;
+}
+
+#edit-profile-button:hover {
+  opacity: 1;
+}
+

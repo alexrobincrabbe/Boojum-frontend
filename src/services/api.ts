@@ -1,0 +1,199 @@
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add token to requests if available
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Handle token refresh on 401 errors
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          const response = await axios.post(`${API_BASE_URL}/token/refresh/`, {
+            refresh: refreshToken,
+          });
+
+          const { access } = response.data;
+          localStorage.setItem('access_token', access);
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed, clear tokens but don't force redirect
+        // (user might be browsing as guest)
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export const authAPI = {
+  login: async (username: string, password: string) => {
+    const response = await api.post('/token/', { username, password });
+    return response.data;
+  },
+
+  register: async (username: string, email: string, password: string, password2: string) => {
+    const response = await api.post('/register/', {
+      username,
+      email,
+      password,
+      password2,
+    });
+    return response.data;
+  },
+
+  getUserInfo: async () => {
+    const response = await api.get('/user/');
+    return response.data;
+  },
+
+  getProfile: async (profileUrl: string) => {
+    const response = await api.get(`/profile/${profileUrl}/`);
+    return response.data;
+  },
+
+  updateProfile: async (profileData: FormData) => {
+    const response = await api.put('/profile/update/', profileData);
+    return response.data;
+  },
+
+  refreshToken: async (refreshToken: string) => {
+    const response = await api.post('/token/refresh/', { refresh: refreshToken });
+    return response.data;
+  },
+};
+
+export const dashboardAPI = {
+  getDashboardData: async () => {
+    const response = await api.get('/dashboard/');
+    return response.data;
+  },
+  updateEmail: async (email: string) => {
+    const response = await api.post('/dashboard/email/', { email });
+    return response.data;
+  },
+  updateDisplayName: async (displayName: string) => {
+    const response = await api.post('/dashboard/display-name/', { display_name: displayName });
+    return response.data;
+  },
+  changePassword: async (oldPassword: string, newPassword: string, confirmPassword: string) => {
+    const response = await api.post('/dashboard/password/', {
+      old_password: oldPassword,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    });
+    return response.data;
+  },
+  updateChatSettings: async (chatColor: string, profanityFilter: boolean) => {
+    const response = await api.post('/dashboard/chat-settings/', {
+      chat_color: chatColor,
+      profanity_filter: profanityFilter,
+    });
+    return response.data;
+  },
+  searchUsers: async (query: string) => {
+    const response = await api.get('/dashboard/search-users/', {
+      params: { q: query },
+    });
+    return response.data;
+  },
+  addBuddy: async (buddyDisplayName: string) => {
+    const response = await api.post('/dashboard/add-buddy/', {
+      buddy: buddyDisplayName,
+    });
+    return response.data;
+  },
+  removeBuddy: async (buddyId: number) => {
+    const response = await api.post('/dashboard/remove-buddy/', {
+      buddy_id: buddyId,
+    });
+    return response.data;
+  },
+};
+
+export const lobbyAPI = {
+  getLobbyData: async () => {
+    const response = await api.get('/lobby/');
+    return response.data;
+  },
+  getChatMessages: async () => {
+    const response = await api.get('/lobby/chat/messages/');
+    return response.data;
+  },
+  getLastMessageTimestamp: async () => {
+    const response = await api.get('/lobby/chat/last-timestamp/');
+    return response.data;
+  },
+  sendChatMessage: async (content: string) => {
+    const response = await api.post('/lobby/chat/send/', { content });
+    return response.data;
+  },
+  getRoomUsers: async () => {
+    const response = await api.get('/lobby/chat/rooms/');
+    return response.data;
+  },
+  getUsersOnline: async () => {
+    const response = await api.get('/lobby/chat/users-online/');
+    return response.data;
+  },
+  getNoUsersOnline: async () => {
+    const response = await api.get('/lobby/chat/no-users-online/');
+    return response.data;
+  },
+  checkNewActivities: async () => {
+    const response = await api.get('/lobby/chat/check-new-activities/');
+    return response.data;
+  },
+  markActivitiesSeen: async () => {
+    const response = await api.post('/lobby/chat/mark-activities-seen/');
+    return response.data;
+  },
+  votePoll: async (optionNo: number) => {
+    const response = await api.post('/lobby/poll/vote/', { optionNo });
+    return response.data;
+  },
+  getActivitiesFeed: async () => {
+    const response = await api.get('/lobby/activities/');
+    return response.data;
+  },
+  getDailyBoards: async () => {
+    const response = await api.get('/daily-boards/');
+    return response.data;
+  },
+};
+
+export default api;
+

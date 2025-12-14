@@ -1,0 +1,533 @@
+.dashboard-container {
+  min-height: calc(100vh - 70px);
+  padding: 20px;
+  background-color: #1b1835;
+  background-image: linear-gradient(transparent, 50%, black);
+}
+
+.dashboard-header {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+  text-align: center;
+  color: #f5ce45;
+  font-family: "Monoton", cursive;
+}
+
+.dashboard-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.dashboard-tab {
+  padding: 12px 24px;
+  border-radius: 30px;
+  border: 2px solid transparent;
+  background-color: rgba(19, 19, 42, 0.8);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.dashboard-tab:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  border-color: #71bbe9;
+}
+
+.dashboard-tab.active {
+  background-color: rgb(1, 184, 26);
+  color: rgb(54, 41, 112);
+  border-color: rgb(1, 184, 26);
+}
+
+.dashboard-content {
+  min-height: 400px;
+  position: relative;
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loading-gif {
+  width: 100px;
+  height: 100px;
+}
+
+.tab-content {
+  padding: 20px;
+}
+
+/* Notifications Tab */
+.notifications-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 50px;
+  justify-content: center;
+}
+
+#push-label {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+/* Account Tab */
+.account-content {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.account-section {
+  flex: 1;
+  min-width: 300px;
+}
+
+.short-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.short-form label {
+  width: 130px;
+  color: #fff;
+}
+
+.short-form input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #71bbe9;
+  background-color: rgba(19, 19, 42, 0.8);
+  color: #fff;
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.password-form > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.password-form label {
+  width: 150px;
+  color: #fff;
+}
+
+.password-form input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #71bbe9;
+  background-color: rgba(19, 19, 42, 0.8);
+  color: #fff;
+}
+
+/* Chat Settings Tab */
+.chat-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+#chat-form > label {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  width: 100%;
+}
+
+.chat-color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+  width: 100%;
+}
+
+.chat-color-item {
+  padding: 10px 20px;
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  background-color: rgba(19, 19, 42, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.chat-color-item:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.05);
+  border-color: #f5ce45;
+}
+
+.chat-color-item.selected {
+  background-color: rgba(113, 187, 233, 0.3);
+  border-color: #f5ce45;
+  border-width: 3px;
+  box-shadow: 0 0 15px rgba(245, 206, 69, 0.5);
+}
+
+.profanity-filter-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.profanity-filter-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.suggestion-item {
+  padding: 8px;
+  cursor: pointer;
+  color: #fff;
+  border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+}
+
+.success-message,
+.error-message {
+  display: none;
+}
+
+/* Playmates Tab */
+.playmates-content {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.playmates-section {
+  flex: 1;
+  min-width: 300px;
+}
+
+.playmates-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#buddy-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+#buddy-form label {
+  color: #fff;
+}
+
+#buddy-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #71bbe9;
+  background-color: rgba(19, 19, 42, 0.8);
+  color: #fff;
+}
+
+#suggestions-box {
+  margin-bottom: 10px;
+  min-height: 100px;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #71bbe9;
+  border-radius: 10px;
+  background-color: rgba(19, 19, 42, 0.5);
+}
+
+.playmates-list {
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.no-bullet-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.no-bullet-list li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remove-buddy-button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  display: inline-block;
+}
+
+.remove-buddy-button svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+}
+
+.remove-buddy-button:hover svg {
+  transform: scale(1.1);
+}
+
+.buddy-list-name {
+  display: inline-flex;
+  width: 150px;
+  overflow-x: hidden;
+  margin-right: 10px;
+  color: #fff;
+}
+
+.buddy-list-item {
+  font-style: italic;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.green-background {
+  background-color: rgb(1, 184, 26);
+}
+
+.grey-background {
+  background-color: grey;
+}
+
+.green {
+  color: rgb(1, 184, 26);
+}
+
+.last-seen {
+  margin-left: 10px;
+  font-style: italic;
+  color: grey;
+}
+
+.online {
+  color: rgb(1, 184, 26);
+}
+
+.activities-list {
+  height: 400px;
+  overflow: auto;
+  border: solid #f5ce45 2px;
+  border-radius: 20px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.activities-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.activities-list li {
+  margin-bottom: 20px;
+}
+
+.activities-list p {
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+.time-stamp {
+  color: grey;
+  font-style: italic;
+}
+
+h3 {
+  width: 100%;
+  color: #f5ce45;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-button {
+  border-radius: 10px;
+  background-color: rgb(54, 41, 112);
+  border: white solid 2px;
+  color: #f5ce45;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.dashboard-button:hover {
+  background-color: rgba(54, 41, 112, 0.8);
+  transform: scale(1.05);
+}
+
+/* Switch Toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .dashboard-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-tab {
+    width: 100%;
+  }
+
+  .account-content,
+  .playmates-content {
+    flex-direction: column;
+  }
+
+  .account-section,
+  .playmates-section {
+    width: 100%;
+  }
+
+  .short-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .short-form label {
+    width: 100%;
+  }
+
+  .short-form input {
+    width: 100%;
+  }
+
+  .password-form {
+    align-items: stretch;
+  }
+
+  .password-form > div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .password-form label {
+    width: 100%;
+  }
+
+  .chat-color-list {
+    justify-content: center;
+  }
+}
+
+

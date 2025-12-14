@@ -1,0 +1,378 @@
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useWordTracking } from '../game-room/services/useWordTracking';
+import { useGameWebSocket } from '../game-room/services/useGameWebSocket';
+import { GameBoard } from '../game-room/components/GameBoard';
+import { WordCounters } from '../game-room/components/WordCounters';
+import { WordLists } from '../game-room/components/WordLists';
+import { PlayersList } from '../game-room/components/PlayersList';
+import { ScoresModal } from '../game-room/components/ScoresModal';
+import { fetchDefinition } from '../../utils/dictionary';
+import type { WordData } from '../../ws/protocol';
+import { toast } from 'react-toastify';
+import '../game-room/GameRoom.css';
+
+export default function DailyBoardGameRoom() {
+  const { dailyBoardId } = useParams<{ dailyBoardId: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem('access_token') || '';
+  const isGuest = !user || !token;
+
+  // ✅ Single source of truth for guest name
+  const [guestName, setGuestName] = useState<string>('');
+  const [showStartButton, setShowStartButton] = useState(true);
+  const [showBackButton, setShowBackButton] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+
+  useEffect(() => {
+    if (!isGuest) {
+      setGuestName('');
+      return;
+    }
+
+    const existing = localStorage.getItem('guest_name');
+    if (existing) {
+      setGuestName(existing);
+      return;
+    }
+
+    const name = `Guest_${
+      crypto?.randomUUID?.().slice(0, 8) ?? Math.random().toString(16).slice(2, 10)
+    }`;
+
+    localStorage.setItem('guest_name', name);
+    setGuestName(name);
+  }, [isGuest]);
+
+  // (Optional) this helps you avoid connecting before guestName exists
+  const guestReady = !isGuest || !!guestName;
+
+  // Word tracking ref (WS can call into it)
+  const wordTrackingRef = useRef<{
+    initializeWordLists: (wordsByLength: Record<string, string[]>) => void;
+    updateWordsFromChat: (message: string, user: string) => void;
+  } | null>(null);
+
+  // Custom WebSocket URL for daily boards
+  const wsUrl = useMemo(() => {
+    if (!dailyBoardId) return '';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const djangoBaseUrl = apiBaseUrl.replace('/api', '');
+    const wsBaseUrl = djangoBaseUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
+    return `${wsBaseUrl}/ws/dailyboard/play/${dailyBoardId}/`;
+  }, [dailyBoardId]);
+
+  // GAME WS - using custom URL for daily boards
+  const {
+    connectionState,
+    gameState,
+    timerState,
+    hasBoardBeenShown,
+    previousBoard,
+    reconnect,
+    resetState,
+    sendJson,
+  } = useGameWebSocket({
+    roomId: dailyBoardId,
+    token,
+    isGuest,
+    wsUrl: wsUrl, // Pass custom WebSocket URL
+    initializeWordLists: (wordsByLength, gameState, sendJson) => {
+      wordTrackingRef.current?.initializeWordLists(wordsByLength, gameState, sendJson);
+    },
+    updateWordsFromChat: (message, user) => {
+      wordTrackingRef.current?.updateWordsFromChat(message, user);
+    },
+    onScoreInChat: (playerName, score) => {
+      // Daily boards don't have chat, so we don't need to handle score messages in chat
+    },
+    onMessage: (message) => {
+      // Handle show_back_button event
+      if (message.type === 'SHOW_BACK_BUTTON') {
+        setShowBackButton(true);
+      }
+      // Handle ERROR messages
+      if (message.type === 'ERROR') {
+        toast.error(message.message || 'An error occurred');
+        // If it's an "already played" error, navigate back to daily boards page
+        if (message.code === 'ALREADY_PLAYED') {
+          setTimeout(() => {
+            navigate('/daily-boards');
+          }, 2000); // Give user time to read the message
+        }
+      }
+    },
+  });
+
+  // Daily boards don't have chat - no chat WebSocket needed
+
+  // Word tracking (depends on gameState)
+  const {
+    wordsFound,
+    handleWordSubmit,
+    initializeWordLists,
+    updateWordsFromChat,
+    wordCounts,
+    wordCountMax,
+    wordsByLength,
+    submitFinalScore,
+    submitOneShotWord,
+    oneShotSubmitted,
+  } = useWordTracking(gameState);
+
+  // Wrapper for word submission that handles one-shot confirmation
+  const handleWordSubmitWithConfirmation = useCallback((word: string): string | void => {
+    if (!word || gameState?.gameStatus !== 'playing') return;
+    
+    // Check if word is valid
+    const isValidWord = gameState.boardWords?.includes(word) || false;
+    if (!isValidWord) return;
+    
+    // Check if already found
+    const wordLower = word.toLowerCase();
+    if (wordsFound.has(wordLower)) return;
+    
+    // For one-shot games, show confirmation dialog
+    if (gameState.oneShot && !oneShotSubmitted) {
+      return word; // Return word to trigger confirmation in GameBoard
+    }
+    
+    // Normal game - submit word directly
+    handleWordSubmit(word);
+  }, [gameState, wordsFound, oneShotSubmitted, handleWordSubmit]);
+
+  // Handle confirmed one-shot word submission
+  const handleOneShotConfirmed = useCallback((word: string) => {
+    if (!gameState || !timerState.displayTime || !timerState.initialTimer) return;
+    
+    // Calculate time: initialTimer - currentTime (in seconds)
+    const time = Math.max(0, timerState.initialTimer - timerState.displayTime);
+    
+    submitOneShotWord(word, time, sendJson);
+  }, [gameState, timerState, submitOneShotWord, sendJson]);
+
+  // Handle start game button
+  const handleStartGame = useCallback(() => {
+    if (sendJson && !gameStarted) {
+      sendJson({ type: 'START_GAME' });
+      setShowStartButton(false);
+      setGameStarted(true);
+    }
+  }, [sendJson, gameStarted]);
+
+  // Scores modal state
+  const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
+
+  // Submit final score when game ends
+  const prevGameStatusRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const currentStatus = gameState?.gameStatus;
+    const prevStatus = prevGameStatusRef.current;
+    
+    // Submit score when game status changes from 'playing' to 'finished'
+    if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
+      console.log('[Score] Game ended, submitting score');
+      submitFinalScore(sendJson);
+    }
+    
+    prevGameStatusRef.current = currentStatus;
+  }, [gameState?.gameStatus, gameState?.finalScores, submitFinalScore, sendJson]);
+
+  useEffect(() => {
+    wordTrackingRef.current = {
+      initializeWordLists,
+      updateWordsFromChat,
+    };
+  }, [initializeWordLists, updateWordsFromChat]);
+
+  // Open scores modal when final scores are received and show back button
+  useEffect(() => {
+    if (gameState?.finalScores && gameState.gameStatus === 'finished') {
+      setIsScoresModalOpen(true);
+      setShowBackButton(true); // Show back button when game finishes
+      
+      // Show unicorn message in chat for one-shot games
+      if (gameState.oneShot && gameState.wordsByLength) {
+        const findHighestScoringWord = (wordsByLength: Record<string, Record<string, WordData>> | Record<string, string[]>) => {
+          let highestScore = 0;
+          let highestWord = '';
+          
+          for (const length in wordsByLength) {
+            const words = wordsByLength[length];
+            if (typeof words === 'object' && !Array.isArray(words)) {
+              // Final format with WordData
+              for (const word in words) {
+                const wordData = words[word] as WordData;
+                if (wordData.score && wordData.score > highestScore) {
+                  highestScore = wordData.score;
+                  highestWord = word;
+                }
+              }
+            }
+          }
+          
+          return [highestWord, highestScore] as [string, number];
+        };
+        
+        // Daily boards don't have chat, so we don't show unicorn in chat
+      }
+    }
+  }, [gameState?.finalScores, gameState?.gameStatus, gameState?.oneShot, gameState?.wordsByLength]);
+
+  // Hide start button if game is already playing (e.g., on reconnect)
+  useEffect(() => {
+    if (gameState?.gameStatus === 'playing') {
+      setShowStartButton(false);
+      setGameStarted(true);
+    } else if (gameState?.gameStatus === 'waiting' && !gameStarted) {
+      // Only show start button if game is waiting and hasn't been started yet
+      setShowStartButton(true);
+    }
+  }, [gameState?.gameStatus, gameStarted]);
+
+  // Reset state when navigating to a different board
+  useEffect(() => {
+    if (dailyBoardId) {
+      const timeoutId = setTimeout(() => {
+        resetState();
+        setIsScoresModalOpen(false);
+        setShowStartButton(true);
+        setShowBackButton(false);
+        setGameStarted(false);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [dailyBoardId, resetState]);
+
+  if (!dailyBoardId) {
+    return <div className="game-room-error">Invalid daily board ID</div>;
+  }
+
+  // ✅ If guest, wait until guestName exists before rendering the WS-driven UI
+  if (!guestReady) {
+    return <div className="loading-state">Preparing guest session...</div>;
+  }
+
+  return (
+    <div className="game-room">
+      {gameState && (
+        <div className="game-content">
+          <div className="game-header">
+            <h1 style={{ color: '#71bbe9' }}>Daily Board</h1>
+            {showBackButton && (
+              <button 
+                className="back-button"
+                onClick={() => {
+                  // Navigate to daily boards page with board ID to show the correct board
+                  if (dailyBoardId) {
+                    navigate(`/daily-boards?board=${dailyBoardId}`);
+                  } else {
+                    navigate('/daily-boards');
+                  }
+                }}
+                style={{
+                  marginLeft: '20px',
+                  padding: '8px 16px',
+                  backgroundColor: '#71bbe9',
+                  color: '#1b1835',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                }}
+              >
+                ← Back to Daily Boards
+              </button>
+            )}
+          </div>
+
+          <PlayersList players={gameState.players ?? []} variant="mobile" />
+
+          <div className="game-main-layout">
+            <PlayersList players={gameState.players ?? []} variant="desktop" />
+
+            <div className={`board-section ${connectionState !== 'open' ? 'disconnected' : ''}`}>
+              {connectionState !== 'open' && (
+                <div className="connection-overlay">
+                  <div className="connection-overlay-content">
+                    <span className="status-icon">🎮</span>
+                    <span className="status-text">
+                      {connectionState === 'connecting' && 'Connecting to game...'}
+                      {connectionState === 'reconnecting' && 'Reconnecting game...'}
+                      {connectionState === 'closed' && 'Game connection closed'}
+                      {connectionState === 'closing' && 'Game connection closing...'}
+                    </span>
+                    {(connectionState === 'reconnecting' || connectionState === 'closed') && (
+                      <button onClick={reconnect} className="reconnect-button">
+                        Retry
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Start Game Button */}
+              {showStartButton && connectionState === 'open' && gameState.gameStatus === 'waiting' && (
+                <div className="start-game-overlay">
+                  <button 
+                    className="start-game-button"
+                    onClick={handleStartGame}
+                  >
+                    Start Game
+                  </button>
+                </div>
+              )}
+
+              <div className="word-counters-container">
+                <WordCounters
+                  wordCounts={wordCounts}
+                  wordCountMax={wordCountMax}
+                  gameStatus={gameState.gameStatus}
+                />
+              </div>
+
+              <GameBoard
+                gameState={gameState}
+                hasBoardBeenShown={hasBoardBeenShown}
+                previousBoard={previousBoard}
+                timerState={timerState}
+                onWordSubmit={handleWordSubmitWithConfirmation}
+                wordsFound={wordsFound}
+                boardWords={gameState.boardWords as string[] | undefined}
+                onShowScores={() => setIsScoresModalOpen(true)}
+                oneShotSubmitted={oneShotSubmitted}
+                onOneShotConfirmed={handleOneShotConfirmed}
+              />
+            </div>
+
+          </div>
+
+          <WordLists
+            wordsByLength={gameState.wordsByLength || wordsByLength}
+            wordsFound={wordsFound}
+            gameStatus={gameState.gameStatus}
+            hasFinalScores={!!gameState.finalScores}
+            boojum={gameState.boojum}
+            snark={gameState.snark}
+          />
+        </div>
+      )}
+
+      {!gameState && connectionState === 'open' && (
+        <div className="loading-state">Loading game state...</div>
+      )}
+
+      <ScoresModal
+        isOpen={isScoresModalOpen}
+        onClose={() => setIsScoresModalOpen(false)}
+        finalScores={gameState?.finalScores || null}
+        totalPoints={gameState?.totalPoints}
+        isOneShot={gameState?.oneShot || false}
+      />
+    </div>
+  );
+}
+
