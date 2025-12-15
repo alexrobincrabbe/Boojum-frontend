@@ -69,22 +69,40 @@
 
 .hint-button {
   padding: 10px 20px;
-  background-color: #eb5497;
+  background-color: #1b1835; /* Match dark background of site */
   color: #fff;
-  border: 2px solid #f5ce45;
-  border-radius: 4px;
+  border: 4px solid #eb5497; /* Increased border thickness, default pink */
+  border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   white-space: nowrap;
+  transition: border-color 0.3s, opacity 0.3s;
+  min-width: 140px; /* Fixed width to prevent size changes */
+  box-sizing: border-box;
+  box-shadow: none; /* Ensure no default box-shadow interferes with glow animations */
+  /* Don't transition box-shadow - let animations handle it */
+}
+
+/* Border colors based on state */
+.hint-button.hint-inactive {
+  border-color: #eb5497; /* Pink when not active */
+}
+
+.hint-button.hint-activating {
+  border-color: #f5ce45; /* Yellow when activating */
+}
+
+.hint-button.hint-active {
+  border-color: #33c15b; /* Green when active */
 }
 
 .hint-button:hover:not(:disabled) {
-  background-color: #f5ce45;
-  color: #1b1835;
+  background-color: rgba(245, 206, 69, 0.2); /* Slight yellow tint on hover */
 }
 
 .hint-button:disabled {
@@ -92,15 +110,37 @@
   cursor: not-allowed;
 }
 
+.hint-button:disabled:not(.hint-active-glow) {
+  opacity: 0.7;
+}
+
 .hints-remaining {
   color: #33c15b;
   font-weight: bold;
 }
 
-/* Persistent glow after border animation completes */
-.hint-active-glow {
-  box-shadow: 0 0 20px rgba(51, 193, 91, 0.8), 0 0 40px rgba(51, 193, 91, 0.6);
-  animation: hint-glow-pulse 2s ease-in-out infinite;
+/* Initial large glow that decreases to match pulsating glow base level */
+.hint-button.hint-glow-initial {
+  animation: hint-glow-decrease 1.5s ease-out forwards !important;
+  /* The animation will maintain the final state via 'forwards' */
+  /* Don't set initial box-shadow here - let the animation handle it */
+}
+
+@keyframes hint-glow-decrease {
+  0% {
+    box-shadow: 0 0 40px rgba(51, 193, 91, 1), 0 0 80px rgba(51, 193, 91, 0.9), 0 0 120px rgba(51, 193, 91, 0.7);
+  }
+  100% {
+    /* Match the base level of pulsating glow */
+    box-shadow: 0 0 20px rgba(51, 193, 91, 0.8), 0 0 40px rgba(51, 193, 91, 0.6);
+  }
+}
+
+/* Persistent pulsating glow after initial animation */
+.hint-button.hint-active-glow {
+  /* Override any previous animation and box-shadow */
+  animation: hint-glow-pulse 2s ease-in-out infinite !important;
+  /* Don't set initial box-shadow - let animation handle it */
 }
 
 @keyframes hint-glow-pulse {
@@ -117,7 +157,7 @@
   background-color: #f5ce45;
   color: #1b1835;
   border: 4px solid #eb5497;
-  border-radius: 8px;
+  border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
@@ -140,7 +180,7 @@
   background-color: #71bbe9;
   color: #1b1835;
   border: none;
-  border-radius: 4px;
+  border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;

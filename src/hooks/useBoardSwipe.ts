@@ -24,9 +24,13 @@ export function useBoardSwipe(
   gameStatus: 'waiting' | 'playing' | 'finished' | undefined,
   onWordSubmit?: (word: string) => void,
   boardWords?: string[],
-  wordsFound?: Set<string>
+  wordsFound?: Set<string>,
+  colorsOffOverride?: boolean, // Override global colorsOff setting (for timeless boards)
+  onExactMatch?: (word: string) => void // Callback when a word turns green (exact match found)
 ) {
-  const { darkMode, colorsOff } = useBoardTheme();
+  const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
+  // Use override if provided, otherwise use global setting
+  const colorsOff = colorsOffOverride !== undefined ? colorsOffOverride : globalColorsOff;
   const [swipeState, setSwipeState] = useState<SwipeState>({
     selectedLetters: [],
     lastX: null,
@@ -171,6 +175,9 @@ export function useBoardSwipe(
     }
   }, [boardRef]);
 
+  // Track last exact match to avoid duplicate callbacks
+  const lastExactMatchRef = useRef<string>('');
+  
   // Update tile colors based on match status - called synchronously to prevent blinking
   const updateTileColors = useCallback((tracePath: boolean[], word: string, wordsOnBoard: string[], foundWords: Set<string>) => {
     if (!boardRef.current || !wordsOnBoard || wordsOnBoard.length === 0) return;
@@ -184,21 +191,31 @@ export function useBoardSwipe(
       !foundWords.has(w.toLowerCase()) && !foundWords.has(w.toUpperCase())
     );
     
-    // Also check if the current word being swiped is already found
-    const currentWordFound = foundWords.has(word.toLowerCase()) || foundWords.has(word.toUpperCase());
     
     const exactMatch = checkMatch(word, availableWords);
     const partialMatch = checkPartialMatch(word, availableWords);
+    
+    // Call onExactMatch callback when word turns green (exact match found)
+    // Only call if it's a new exact match (not already found and different from last)
+    if (exactMatch && onExactMatch && word && word !== lastExactMatchRef.current) {
+      const upperWord = word.toUpperCase();
+      if (!foundWords.has(upperWord) && !foundWords.has(upperWord.toLowerCase())) {
+        lastExactMatchRef.current = word;
+        onExactMatch(word);
+      }
+    }
+    
+    // Reset last exact match if word is no longer an exact match
+    if (!exactMatch && lastExactMatchRef.current === word) {
+      lastExactMatchRef.current = '';
+    }
     
     // Determine tile class based on theme and colors setting
     let tileClass: string;
     const modeSuffix = darkMode ? 'dark' : 'light';
     
-    // If the current word is already found, don't show green highlight
-    if (currentWordFound) {
-      // Show grey for already found words
-      tileClass = `tile-no-match-grey-${modeSuffix}`;
-    } else if (colorsOff) {
+    // If the current word is already found
+     if (colorsOff) {
       // Grey mode - only show grey for no-match and partial-match, green for exact match
       if (exactMatch) {
         tileClass = `tile-match-${modeSuffix}`; // Green still shown
@@ -227,7 +244,7 @@ export function useBoardSwipe(
         letterEl.classList.add(tileClass);
       }
     }
-  }, [boardRef, checkMatch, checkPartialMatch, clearTileColors, darkMode, colorsOff]);
+  }, [boardRef, checkMatch, checkPartialMatch, clearTileColors, darkMode, colorsOff, wordsFound, onExactMatch]);
 
   // Handle letter touch/click
   const handleLetterTouch = useCallback((letter: LetterElement | null) => {
@@ -400,6 +417,8 @@ export function useBoardSwipe(
     clearLines();
     // Reset sound tracking when word is finalized
     lastSoundIndexRef.current = null;
+    // Reset exact match tracking when word is finalized
+    lastExactMatchRef.current = '';
     
     // Reset finalizing flag after a short delay to allow state to settle
     setTimeout(() => {

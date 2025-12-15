@@ -24,6 +24,8 @@ interface GameBoardProps {
   onShowScores?: () => void;
   oneShotSubmitted?: boolean; // Disable input if word already submitted in one-shot mode
   onOneShotConfirmed?: (word: string) => void; // Callback when one-shot word is confirmed
+  colorsOffOverride?: boolean; // Override global colorsOff setting (for timeless boards)
+  onExactMatch?: (word: string) => void; // Callback when a word turns green (exact match found)
 }
 
 export function GameBoard({
@@ -38,6 +40,8 @@ export function GameBoard({
   onShowScores,
   oneShotSubmitted = false,
   onOneShotConfirmed,
+  colorsOffOverride,
+  onExactMatch,
 }: GameBoardProps) {
   const [boardRotation, setBoardRotation] = useState(0);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -82,7 +86,9 @@ export function GameBoard({
     gameState?.gameStatus,
     oneShotSubmitted ? () => {} : handleWordSubmitWrapper, // Use wrapper to handle one-shot confirmation
     boardWords,
-    wordsFound
+    wordsFound,
+    colorsOffOverride,
+    onExactMatch
   );
 
   // Keyboard input functionality

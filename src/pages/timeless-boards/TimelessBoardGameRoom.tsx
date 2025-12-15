@@ -7,8 +7,6 @@ import { calculateWordScore } from '../game-room/utils/scoreCalculation';
 import { lobbyAPI } from '../../services/api';
 import { toast } from 'react-toastify';
 import { playBloop } from '../../utils/sounds';
-import { useBoardTheme } from '../../contexts/BoardThemeContext';
-import { borderAnimation } from '../game-room/utils/borderAnimation';
 import '../game-room/GameRoom.css';
 import './TimelessBoardGameRoom.css';
 
@@ -32,9 +30,15 @@ export default function TimelessBoardGameRoom() {
   const [submitting, setSubmitting] = useState(false);
   const [hintsRemaining, setHintsRemaining] = useState<number>(0);
   const [hintActive, setHintActive] = useState<boolean>(false);
+  const [hintLoading, setHintLoading] = useState<boolean>(false);
+  const [hintGlowInitial, setHintGlowInitial] = useState<boolean>(false);
+  const [hintActiveGlow, setHintActiveGlow] = useState<boolean>(false);
+  const hintApiSucceededRef = useRef<boolean>(false);
+  const glowStartTimeRef = useRef<number>(0);
   
-  const { colorsOff, toggleColors } = useBoardTheme();
-  const originalColorsOffRef = useRef<boolean>(false);
+  // Local state for colors - timeless boards always use grey mode by default
+  // This doesn't affect the global user setting
+  const [colorsOff, setColorsOff] = useState<boolean>(true); // Default to grey mode (true = colors off)
 
   // Offline word tracking
   const [wordsFound, setWordsFound] = useState<Set<string>>(new Set());
@@ -101,8 +105,11 @@ export default function TimelessBoardGameRoom() {
 
   // Save state to localStorage
   // This saves ALL words found across all levels for this board
-  const saveState = useCallback((boardId: string) => {
+  const saveState = useCallback((boardId: string, updatedWordsFound?: Set<string>) => {
     try {
+      // Use provided words set or fall back to current state
+      const wordsToSave = updatedWordsFound || wordsFound;
+      
       // Load existing saved state to merge with current level's words
       const existing = localStorage.getItem(`timeless_board_${boardId}`);
       let allWordsFound = new Set<string>();
@@ -124,7 +131,7 @@ export default function TimelessBoardGameRoom() {
       }
       
       // Merge current level's words with all saved words
-      wordsFound.forEach(word => allWordsFound.add(word));
+      wordsToSave.forEach(word => allWordsFound.add(word));
       
       const stateToSave = {
         wordsFound: Array.from(allWordsFound), // All words found across all levels
@@ -149,14 +156,9 @@ export default function TimelessBoardGameRoom() {
         setTimeRemaining(data.time_remaining_seconds);
         setHintsRemaining(data.hints_remaining || 0);
         
-        // Force grey mode on timeless board - always enable grey mode
-        originalColorsOffRef.current = colorsOff;
-        // Use setTimeout to ensure state is ready
-        setTimeout(() => {
-          if (!colorsOff) {
-            toggleColors(); // Enable grey mode
-          }
-        }, 0);
+        // Timeless boards always use grey mode by default (colorsOff = true)
+        // This is handled by local state, not global setting
+        setColorsOff(true);
         
         // Load saved state for this board, filtering to current level's words
         loadSavedState(timelessBoardId, data.board_words, data.boojum, data.board_letters);
@@ -559,22 +561,12 @@ export default function TimelessBoardGameRoom() {
     const { boojum, snark } = getBonusLetters(boardData.boojum, boardData.board_letters);
     const wordScore = calculateWordScore(upperWord, boojum, snark);
     
-    // If hint was active, deactivate it and turn grey mode back on immediately
-    if (hintActive) {
-      setHintActive(false);
-      // Re-enable grey mode
-      if (!colorsOff) {
-        toggleColors();
-      }
-      // Remove glow from hint button
-      const hintButton = document.getElementById('hints');
-      if (hintButton) {
-        hintButton.classList.remove('hint-active-glow');
-      }
-    }
+    // Note: Hint deactivation is now handled by onExactMatch callback
+    // This ensures it deactivates as soon as a word turns green, not on submission
     
-    // Add word
-    setWordsFound(prev => new Set([...prev, upperWord]));
+    // Add word and get updated set
+    const updatedWordsFound = new Set([...wordsFound, upperWord]);
+    setWordsFound(updatedWordsFound);
     
     // Update word counts
     const wordLength = upperWord.length;
@@ -607,9 +599,9 @@ export default function TimelessBoardGameRoom() {
       return newWordsByLength;
     });
     
-    // Save state to localStorage
+    // Save state to localStorage with updated words set
     if (timelessBoardId) {
-      saveState(timelessBoardId);
+      saveState(timelessBoardId, updatedWordsFound);
     }
     
     // Trigger fly animation after a short delay to allow word element to be created
@@ -692,35 +684,118 @@ export default function TimelessBoardGameRoom() {
   }, []);
 
   const handleHintClick = useCallback(async () => {
-    if (hintsRemaining <= 0 || hintActive || !timelessBoardId) {
+    if (hintsRemaining <= 0 || hintActive || hintLoading || !timelessBoardId) {
       return;
     }
 
+    // Reset API success flag
+    hintApiSucceededRef.current = false;
+
+    // Start glow animation immediately when button is pressed
+    glowStartTimeRef.current = Date.now();
+    
+    // Force animation restart by removing and re-adding the class
+    setHintGlowInitial(false);
+    // Use requestAnimationFrame to ensure DOM update before re-adding class
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setHintGlowInitial(true);
+      });
+    });
+    
+    // After initial glow animation (1100ms), check if we should switch to pulsating glow
+    setTimeout(() => {
+      console.log('[handleHintClick] Initial glow timeout fired, API succeeded:', hintApiSucceededRef.current);
+      // Only remove initial glow if API succeeded and we're adding pulsating glow
+      if (hintApiSucceededRef.current) {
+        console.log('[handleHintClick] Switching to pulsating glow');
+        setHintGlowInitial(false);
+        // Force restart pulsating animation
+        setHintActiveGlow(false);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setHintActiveGlow(true);
+          });
+        });
+      } else {
+        console.log('[handleHintClick] API not succeeded yet, keeping initial glow');
+      }
+      // If API hasn't succeeded yet, keep the initial glow (it maintains base level glow)
+    }, 1100);
+
     try {
+      setHintLoading(true);
       const response = await lobbyAPI.useTimelessHint(parseInt(timelessBoardId));
       setHintsRemaining(response.hints_remaining);
       setHintActive(true);
+      hintApiSucceededRef.current = true;
       
-      // Temporarily disable grey mode
-      if (colorsOff) {
-        toggleColors(); // Turn off grey mode to show colors
-      }
+      // Temporarily disable grey mode (local state only)
+      setColorsOff(false); // Turn off grey mode to show colors
       
-      // Trigger border animation on hint button
-      const hintButton = document.getElementById('hints');
-      if (hintButton) {
-        borderAnimation(hintButton);
-        // After animation completes (500ms), add persistent glow
+      // Clear loading state
+      setHintLoading(false);
+      
+      // Ensure pulsating glow is added after initial animation completes
+      const elapsedTime = Date.now() - glowStartTimeRef.current;
+      const animationDuration = 1100; // Match CSS animation duration
+      
+      if (elapsedTime >= animationDuration) {
+        // Animation has completed (enough time has passed), switch immediately
+        console.log('[handleHintClick] Animation completed, switching to pulsating glow immediately');
+        setHintGlowInitial(false);
+        // Force restart pulsating animation
+        setHintActiveGlow(false);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setHintActiveGlow(true);
+          });
+        });
+      } else {
+        // Animation still running, calculate remaining time and switch when it completes
+        const remainingTime = animationDuration - elapsedTime;
+        console.log('[handleHintClick] Animation still running, will switch in', remainingTime, 'ms');
         setTimeout(() => {
-          hintButton.classList.add('hint-active-glow');
-        }, 500);
+          // Use a ref check to avoid stale closure
+          if (hintApiSucceededRef.current) {
+            console.log('[handleHintClick] Switching to pulsating glow after animation completes');
+            setHintGlowInitial(false);
+            // Force restart pulsating animation
+            setHintActiveGlow(false);
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setHintActiveGlow(true);
+              });
+            });
+          }
+        }, remainingTime);
       }
     } catch (error: unknown) {
       console.error('Error using hint:', error);
       const axiosError = error as { response?: { data?: { error?: string } } };
       toast.error(axiosError.response?.data?.error || 'Failed to use hint');
+      setHintLoading(false);
+      
+      // Remove glow on error
+      setHintGlowInitial(false);
+      setHintActiveGlow(false);
     }
-  }, [hintsRemaining, hintActive, timelessBoardId, colorsOff, toggleColors]);
+  }, [hintsRemaining, hintActive, hintLoading, timelessBoardId]);
+
+  // Callback to deactivate hint when a word turns green
+  const handleExactMatch = useCallback((word: string) => {
+    if (hintActive) {
+      setHintActive(false);
+      // Re-enable grey mode (local state only)
+      setColorsOff(true);
+      // Remove glow from hint button
+      setHintGlowInitial(false);
+      setHintActiveGlow(false);
+    }
+  }, [hintActive]);
+
+  // Calculate bonus letters for rendering
+  const bonusLetters = boardData ? getBonusLetters(boardData.boojum, boardData.board_letters) : { boojum: '', snark: '' };
 
   if (loading) {
     return (
@@ -752,13 +827,29 @@ export default function TimelessBoardGameRoom() {
 
       <div className="timer-controls-container">
         <button 
-          className="hint-button" 
+          className={`hint-button ${
+            hintActive ? 'hint-active' : 
+            hintLoading ? 'hint-activating' : 
+            'hint-inactive'
+          } ${hintGlowInitial ? 'hint-glow-initial' : ''} ${hintActiveGlow ? 'hint-active-glow' : ''}`}
           id="hints"
           onClick={handleHintClick}
-          disabled={hintsRemaining <= 0 || hintActive}
+          disabled={hintsRemaining <= 0 || hintActive || hintLoading}
         >
-          <span>Clues:</span>
-          <span className="hints-remaining">{hintsRemaining}</span>
+          {hintLoading ? (
+            <>
+              <span>Activating</span>
+            </>
+          ) : hintActive ? (
+            <>
+              <span>Active</span>
+            </>
+          ) : (
+            <>
+              <span>Clues:</span>
+              <span className="hints-remaining">{hintsRemaining}</span>
+            </>
+          )}
         </button>
         <div className="timer-display">
           <span className="timer-label">Time remaining:</span>
@@ -783,60 +874,58 @@ export default function TimelessBoardGameRoom() {
         )}
       </div>
 
-      {boardData && (() => {
-        const bonusLetters = getBonusLetters(boardData.boojum, boardData.board_letters);
-        return (
-          <>
-            <div className="game-room-container">
-              <div className="game-board-section">
-                <WordCounters 
-                  wordCounts={wordCounts}
-                  wordCountMax={wordCountMax}
-                  gameStatus="playing"
-                />
-                <GameBoard
-                  gameState={{
-                    roomId: `timeless_${timelessBoardId}`,
-                    gameStatus: 'playing',
-                    players: [],
-                    currentPlayerId: '',
-                    board: boardData.board_letters,
-                    boardWords: boardData.board_words,
-                    wordsByLength: wordsByLength,
-                    gameRoundId: `timeless_${timelessBoardId}_${Date.now()}`,
-                  }}
-                  hasBoardBeenShown={true}
-                  previousBoard={null}
-                  scoreState={{
-                    currentScore: displayScore,
-                    totalScore: totalPossibleScoreRef.current,
-                  }}
-                  onWordSubmit={handleWordSubmit}
-                  wordsFound={wordsFound}
-                  boardWords={boardData.board_words}
-                />
-              </div>
-
-              <div className="word-lists-section">
-                <WordLists
-                  wordsByLength={wordsByLength}
-                  wordsFound={wordsFound}
-                  gameStatus="playing"
-                  boojum={bonusLetters.boojum}
-                  snark={bonusLetters.snark}
-                />
-              </div>
+      {boardData && (
+        <>
+          <div className="game-room-container">
+            <div className="game-board-section">
+              <WordCounters 
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
+                gameStatus="playing"
+              />
+              <GameBoard
+                gameState={{
+                  roomId: `timeless_${timelessBoardId}`,
+                  gameStatus: 'playing',
+                  players: [],
+                  currentPlayerId: '',
+                  board: boardData.board_letters,
+                  boardWords: boardData.board_words,
+                  wordsByLength: wordsByLength,
+                  gameRoundId: `timeless_${timelessBoardId}_${Date.now()}`,
+                }}
+                hasBoardBeenShown={true}
+                previousBoard={null}
+                scoreState={{
+                  currentScore: displayScore,
+                  totalScore: totalPossibleScoreRef.current,
+                }}
+                onWordSubmit={handleWordSubmit}
+                wordsFound={wordsFound}
+                boardWords={boardData.board_words}
+                colorsOffOverride={colorsOff}
+                onExactMatch={handleExactMatch}
+              />
             </div>
 
+            <div className="word-lists-section">
+              <WordLists
+                wordsByLength={wordsByLength}
+                wordsFound={wordsFound}
+                gameStatus="playing"
+                boojum={bonusLetters.boojum}
+                snark={bonusLetters.snark}
+              />
+            </div>
+          </div>
 
-            {timeRemaining <= 0 && (
-              <div className="timer-expired-message">
-                Time has expired. You can no longer submit your score.
-              </div>
-            )}
-          </>
-        );
-      })()}
+          {timeRemaining <= 0 && (
+            <div className="timer-expired-message">
+              Time has expired. You can no longer submit your score.
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
