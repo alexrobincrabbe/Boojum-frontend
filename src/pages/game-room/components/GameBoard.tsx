@@ -9,10 +9,14 @@ interface GameBoardProps {
   gameState: GameState;
   hasBoardBeenShown: boolean;
   previousBoard: string[][] | null;
-  timerState: {
+  timerState?: {
     displayTime: number | null;
     progressBarWidth: number;
     initialTimer: number;
+  };
+  scoreState?: {
+    currentScore: number;
+    totalScore: number;
   };
   onWordSubmit: (word: string) => void | string;
   wordsFound: Set<string>;
@@ -27,6 +31,7 @@ export function GameBoard({
   hasBoardBeenShown,
   previousBoard,
   timerState,
+  scoreState,
   onWordSubmit,
   wordsFound,
   boardWords,
@@ -208,34 +213,62 @@ export function GameBoard({
             &#8634;
           </button>
           <div id="timer-bar-container">
-            <span id="timer" className="info">
-              {timerState.displayTime !== null && gameState
-                ? `${
-                    gameState.gameStatus === 'playing'
-                      ? 'Remaining'
-                      : 'Next game'
-                  }: ${timerState.displayTime}s`
-                : '--'}
-            </span>
-            <span
-              id="timer-bar"
-              className={
-                gameState?.gameStatus === 'playing' &&
-                timerState.initialTimer > 0 &&
-                timerState.displayTime !== null
-                  ? timerState.displayTime / timerState.initialTimer >= 0.75
-                    ? 'green-background'
-                    : timerState.displayTime / timerState.initialTimer >= 0.5
-                    ? 'yellow-background'
-                    : 'pink-background'
-                  : gameState?.gameStatus === 'waiting'
-                  ? 'yellow-background'
-                  : ''
-              }
-              style={{
-                width: `${timerState.progressBarWidth}px`,
-              }}
-            ></span>
+            {scoreState ? (
+              <>
+                <span id="timer" className="info" data-score={scoreState.currentScore}>
+                  {scoreState.currentScore}/{scoreState.totalScore} pts
+                </span>
+                <span
+                  id="timer-bar"
+                  className={
+                    scoreState.totalScore > 0
+                      ? scoreState.currentScore / scoreState.totalScore >= 0.75
+                        ? 'green-background'
+                        : scoreState.currentScore / scoreState.totalScore >= 0.5
+                        ? 'yellow-background'
+                        : 'pink-background'
+                      : ''
+                  }
+                  style={{
+                    width: scoreState.totalScore > 0 
+                      ? `${(scoreState.currentScore / scoreState.totalScore) * 100}%`
+                      : '0%',
+                    transition: 'width 0.1s linear, background-color 0.3s ease',
+                  }}
+                ></span>
+              </>
+            ) : timerState ? (
+              <>
+                <span id="timer" className="info">
+                  {timerState.displayTime !== null && gameState
+                    ? `${
+                        gameState.gameStatus === 'playing'
+                          ? 'Remaining'
+                          : 'Next game'
+                      }: ${timerState.displayTime}s`
+                    : '--'}
+                </span>
+                <span
+                  id="timer-bar"
+                  className={
+                    gameState?.gameStatus === 'playing' &&
+                    timerState.initialTimer > 0 &&
+                    timerState.displayTime !== null
+                      ? timerState.displayTime / timerState.initialTimer >= 0.75
+                        ? 'green-background'
+                        : timerState.displayTime / timerState.initialTimer >= 0.5
+                        ? 'yellow-background'
+                        : 'pink-background'
+                      : gameState?.gameStatus === 'waiting'
+                      ? 'yellow-background'
+                      : ''
+                  }
+                  style={{
+                    width: `${timerState.progressBarWidth}px`,
+                  }}
+                ></span>
+              </>
+            ) : null}
           </div>
           <button
             id="clockwise-button"

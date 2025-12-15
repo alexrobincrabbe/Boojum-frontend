@@ -179,7 +179,13 @@ export function useBoardSwipe(
     clearTileColors();
     
     // Filter out found words from available words - only check against words not yet found
-    const availableWords = wordsOnBoard.filter(w => !foundWords.has(w.toLowerCase()));
+    // Check both uppercase and lowercase since foundWords may contain uppercase
+    const availableWords = wordsOnBoard.filter(w => 
+      !foundWords.has(w.toLowerCase()) && !foundWords.has(w.toUpperCase())
+    );
+    
+    // Also check if the current word being swiped is already found
+    const currentWordFound = foundWords.has(word.toLowerCase()) || foundWords.has(word.toUpperCase());
     
     const exactMatch = checkMatch(word, availableWords);
     const partialMatch = checkPartialMatch(word, availableWords);
@@ -188,7 +194,11 @@ export function useBoardSwipe(
     let tileClass: string;
     const modeSuffix = darkMode ? 'dark' : 'light';
     
-    if (colorsOff) {
+    // If the current word is already found, don't show green highlight
+    if (currentWordFound) {
+      // Show grey for already found words
+      tileClass = `tile-no-match-grey-${modeSuffix}`;
+    } else if (colorsOff) {
       // Grey mode - only show grey for no-match and partial-match, green for exact match
       if (exactMatch) {
         tileClass = `tile-match-${modeSuffix}`; // Green still shown

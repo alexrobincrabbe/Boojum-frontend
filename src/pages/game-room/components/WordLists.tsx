@@ -192,8 +192,9 @@ export function WordLists({
       const wordsArray = words as string[];
       if (isPlaying) {
         // During gameplay, only show found words
+        // Check both uppercase and lowercase since wordsFound may contain uppercase
         return wordsArray
-          .filter(word => wordsFound.has(word.toLowerCase()))
+          .filter(word => wordsFound.has(word.toUpperCase()) || wordsFound.has(word.toLowerCase()))
           .map(word => ({ word }))
           .sort((a, b) => a.word.localeCompare(b.word));
       } else {

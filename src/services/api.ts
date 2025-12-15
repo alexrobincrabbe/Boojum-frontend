@@ -193,7 +193,36 @@ export const lobbyAPI = {
     const response = await api.get('/daily-boards/');
     return response.data;
   },
+  getTimelessBoards: async (level: number = 10) => {
+    const response = await api.get(`/timeless-boards/`, { params: { level } });
+    return response.data;
+  },
+
+  getTimelessBoardsAll: async (levels: number[] = [4, 7, 10]) => {
+    const response = await api.get(`/timeless-boards/`, {
+      params: { levels: levels.join(",") },
+    });
+    return response.data;
+  },
+
+  getTimelessBoardGame: async (timelessBoardId: number, level: number) => {
+    const response = await api.get(`/timeless-boards/play/${timelessBoardId}/${level}/`);
+    return response.data;
+  },
+  submitTimelessScore: async (timelessBoardId: number, level: number, scoreData: {
+    score_percentage: number;
+    which_words_found: string[];
+    best_word: string;
+  }) => {
+    const response = await api.post(`/timeless-boards/submit/${timelessBoardId}/${level}/`, scoreData);
+    return response.data;
+  },
+  useTimelessHint: async (timelessBoardId: number) => {
+    const response = await api.post(`/timeless-boards/hint/${timelessBoardId}/`);
+    return response.data;
+  },
 };
+
 
 export default api;
 
