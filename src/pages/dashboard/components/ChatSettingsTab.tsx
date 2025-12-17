@@ -7,7 +7,15 @@ interface ChatColorChoice {
   label: string;
 }
 
-const ChatSettingsTab = () => {
+interface ChatSettingsTabProps {
+  bundle?: {
+    chat_color?: string;
+    chat_color_choices?: ChatColorChoice[];
+    profanity_filter?: boolean;
+  } | null;
+}
+
+const ChatSettingsTab = ({ bundle }: ChatSettingsTabProps) => {
   const [chatColor, setChatColor] = useState('#E38614');
   const [chatColorChoices, setChatColorChoices] = useState<ChatColorChoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +23,21 @@ const ChatSettingsTab = () => {
   const initialChatColor = useRef('#E38614');
 
   useEffect(() => {
+    const initFromBundle = () => {
+      if (bundle) {
+        const fetchedColor = bundle.chat_color || '#E38614';
+        setChatColor(fetchedColor);
+        initialChatColor.current = fetchedColor;
+        setChatColorChoices(bundle.chat_color_choices || []);
+        isInitialMount.current = false;
+        setLoading(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (initFromBundle()) return;
+
     const fetchData = async () => {
       try {
         const data = await dashboardAPI.getDashboardData();
@@ -32,7 +55,7 @@ const ChatSettingsTab = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [bundle]);
 
   // Auto-save when chat color changes (skip initial mount)
   useEffect(() => {
@@ -43,8 +66,7 @@ const ChatSettingsTab = () => {
     const saveSettings = async () => {
       try {
         // Get current profanity filter from backend
-        const data = await dashboardAPI.getDashboardData();
-        const currentProfanityFilter = data.profanity_filter ?? true;
+        const currentProfanityFilter = bundle?.profanity_filter ?? true;
         await dashboardAPI.updateChatSettings(chatColor, currentProfanityFilter);
         initialChatColor.current = chatColor;
         toast.success('Chat color updated');

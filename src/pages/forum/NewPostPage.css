@@ -1,0 +1,95 @@
+@import url("https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&");
+
+.new-post-page {
+  min-height: calc(100vh - 70px);
+  padding: 20px;
+}
+
+#new-post-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  background-color: transparent;
+  color: white;
+  border: 2px solid #71bbe9 !important;
+  border-radius: 10px;
+  padding: 10px;
+  width: 100%;
+  font-size: 120%;
+  margin-bottom: 15px;
+}
+
+.form-control:focus {
+  background-color: transparent;
+  color: white;
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ql-toolbar.ql-snow {
+  border: 2px solid #71bbe9 !important;
+  border-top-right-radius: 10px !important;
+  border-top-left-radius: 10px !important;
+  background-color: #13132a;
+}
+
+.ql-container.ql-snow {
+  border: 2px solid #71bbe9 !important;
+  border-top: 0 !important;
+  border-bottom-left-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+  background-color: #13132a;
+  margin-bottom: 20px !important;
+}
+
+.ql-editor {
+  font-size: 120% !important;
+  padding: 40px !important;
+  color: white;
+}
+
+.ql-editor img {
+  max-height: 200px;
+  height: auto;
+}
+
+.yellow-button {
+  border-radius: 5px;
+  border: outset 3px #f5ce45;
+  background-color: transparent;
+  color: white;
+  cursor: pointer;
+  padding: 5px 15px;
+  font-size: 100%;
+}
+
+.yellow-button:hover:not(:disabled) {
+  background-color: rgba(245, 206, 69, 0.2);
+}
+
+.yellow-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#cancel-post-btn {
+  margin-right: 15px;
+}
+
+#submit-post-btn:focus {
+  background-color: #33c15b;
+}
+
+#submit-post-btn:hover:not(:disabled) {
+  background-color: rgb(19, 66, 33);
+}
+

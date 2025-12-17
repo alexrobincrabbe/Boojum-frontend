@@ -11,27 +11,33 @@ interface Buddy {
   time_ago: string;
 }
 
-interface Activity {
-  username: string;
-  chat_color: string;
-  description: string;
-  timestamp_ago: string;
+interface PlaymatesBundle {
+  buddies?: Buddy[];
 }
 
-const PlaymatesTab = () => {
+const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [buddies, setBuddies] = useState<Buddy[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [suggestions, setSuggestions] = useState<{ id: number; display_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
+    const initFromBundle = () => {
+      if (bundle) {
+        setBuddies(bundle.buddies || []);
+        setLoading(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (initFromBundle()) return;
+
     const fetchData = async () => {
       try {
         const data = await dashboardAPI.getDashboardData();
         setBuddies(data.buddies || []);
-        setActivities(data.activities || []);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         toast.error('Error loading dashboard data');
@@ -40,7 +46,7 @@ const PlaymatesTab = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [bundle]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -73,8 +79,8 @@ const PlaymatesTab = () => {
       setSearchQuery('');
       setSuggestions([]);
       // Refresh buddies list
-      const data = await dashboardAPI.getDashboardData();
-      setBuddies(data.buddies || []);
+      const data = await dashboardAPI.getDashboardBundle();
+      setBuddies(data.playmates?.buddies || []);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Error adding buddy');
     }
@@ -85,9 +91,8 @@ const PlaymatesTab = () => {
       const response = await dashboardAPI.removeBuddy(buddyId);
       toast.success(response.message || 'Buddy removed successfully');
       // Refresh buddies list
-      const data = await dashboardAPI.getDashboardData();
-      setBuddies(data.buddies || []);
-      setActivities(data.activities || []);
+      const data = await dashboardAPI.getDashboardBundle();
+      setBuddies(data.playmates?.buddies || []);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Error removing buddy');
     }
@@ -151,63 +156,40 @@ const PlaymatesTab = () => {
                     <button
                       className="remove-buddy-button"
                       onClick={() => handleRemoveBuddy(buddy.id)}
+                      style={{
+                        border: '1px solid #eb5497',
+                        borderRadius: '4px',
+                        width: '28px',
+                        height: '28px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 0,
+                        lineHeight: '1',
+                      }}
                     >
-                      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="0" y="0" width="100" height="100" rx="20" ry="20" fill="purple" stroke="pink" strokeWidth="5" />
-                        <g transform="translate(25,25)">
-                          <line x1="0" y1="0" x2="50" y2="50" stroke="blue" strokeWidth="10" />
-                          <line x1="0" y1="50" x2="50" y2="0" stroke="blue" strokeWidth="10" />
-                        </g>
-                      </svg>
+                      <span
+                        style={{
+                          color: '#eb5497',
+                          fontSize: '1.4rem',
+                          fontWeight: 700,
+                          lineHeight: '1',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        &times;
+                      </span>
                     </button>
                     <div className="buddy-list-name" style={{ color: buddy.chat_color }}>
                       {buddy.display_name}
-                    </div>
-                    <div className="buddy-list-item">
-                      {buddy.playing ? (
-                        <>
-                          <span className="dot green-background"></span>
-                          <span className="green last-seen online">{buddy.playing}</span>
-                        </>
-                      ) : buddy.online === 'yes' ? (
-                        <>
-                          <span className="dot green-background"></span>
-                          <span className="green last-seen online">Online</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="dot grey-background"></span>
-                          <span className="last-seen">Online: {buddy.time_ago}</span>
-                        </>
-                      )}
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
               <p>You don't have any playmates yet.</p>
-            )}
-          </div>
-        </div>
-        <div className="playmates-section">
-          <h3>Activities</h3>
-          <div className="activities-list">
-            {activities.length > 0 ? (
-              <ul>
-                {activities.map((activity, index) => (
-                  <li key={index}>
-                    <p>
-                      <strong style={{ color: activity.chat_color }}>
-                        {activity.username}
-                      </strong>{' '}
-                      <span dangerouslySetInnerHTML={{ __html: activity.description }} />
-                    </p>
-                    <small className="time-stamp">{activity.timestamp_ago}</small>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No activities to display.</p>
             )}
           </div>
         </div>

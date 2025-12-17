@@ -5,6 +5,7 @@ import AccountTab from './components/AccountTab';
 import ChatSettingsTab from './components/ChatSettingsTab';
 import PlaymatesTab from './components/PlaymatesTab';
 import GameSettingsTab from './components/GameSettingsTab';
+import { dashboardAPI } from '../../services/api';
 import './DashboardPage.css';
 
 type TabType = 'notifications' | 'account' | 'chat' | 'playmates' | 'game';
@@ -12,7 +13,8 @@ type TabType = 'notifications' | 'account' | 'chat' | 'playmates' | 'game';
 const DashboardPage = () => {
   const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('game');
-  const [isLoading, setIsLoading] = useState(false);
+  const [bundle, setBundle] = useState<any | null>(null);
+  const [bundleLoading, setBundleLoading] = useState(true);
 
   // All tabs for authenticated users, only game settings for guests
   const allTabs = [
@@ -27,23 +29,28 @@ const DashboardPage = () => {
     ? allTabs 
     : allTabs.filter(tab => tab.guest);
 
+  useEffect(() => {
+    const loadBundle = async () => {
+      try {
+        const data = await dashboardAPI.getDashboardBundle();
+        setBundle(data);
+      } catch (error) {
+        console.error('Error loading dashboard bundle', error);
+      } finally {
+        setBundleLoading(false);
+      }
+    };
+    loadBundle();
+  }, []);
+
   const handleTabChange = (tabId: TabType) => {
     if (tabId !== activeTab) {
-      setIsLoading(true);
       setActiveTab(tabId);
-      // Small delay to show loading animation
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 300);
     }
   };
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>DASHBOARD</h1>
-      </div>
-      
       <div className="dashboard-tabs">
         {tabs.map((tab) => (
           <button
@@ -57,17 +64,30 @@ const DashboardPage = () => {
       </div>
 
       <div className="dashboard-content">
-        {isLoading ? (
+        {bundleLoading ? (
           <div className="dashboard-loading">
             <img src="/images/loading.gif" alt="Loading..." className="loading-gif" />
           </div>
         ) : (
           <>
-            {activeTab === 'game' && <GameSettingsTab />}
-            {activeTab === 'notifications' && <NotificationsTab />}
-            {activeTab === 'account' && <AccountTab />}
-            {activeTab === 'chat' && <ChatSettingsTab />}
-            {activeTab === 'playmates' && <PlaymatesTab />}
+            <div style={{ display: activeTab === 'game' ? 'block' : 'none' }}>
+              <GameSettingsTab
+                bundle={bundle?.game_settings}
+                isAuthenticated={isAuthenticated}
+              />
+            </div>
+            <div style={{ display: activeTab === 'notifications' ? 'block' : 'none' }}>
+              <NotificationsTab />
+            </div>
+            <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
+              <AccountTab bundle={bundle?.account} />
+            </div>
+            <div style={{ display: activeTab === 'chat' ? 'block' : 'none' }}>
+              <ChatSettingsTab bundle={bundle?.game_settings} />
+            </div>
+            <div style={{ display: activeTab === 'playmates' ? 'block' : 'none' }}>
+              <PlaymatesTab bundle={bundle?.playmates} />
+            </div>
           </>
         )}
       </div>

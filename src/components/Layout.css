@@ -467,11 +467,55 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
 .players-online-count-label > div {
   display: flex;
   align-items: center;
+}
+
+.players-filter-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.players-filter-switch input {
+  display: none;
+}
+
+.players-filter-slider {
+  position: relative;
+  width: 46px;
+  height: 24px;
+  background: rgba(113, 187, 233, 0.35);
+  border-radius: 12px;
+  transition: background 0.2s ease;
+  border: 1px solid #71bbe9;
+}
+
+.players-filter-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #71bbe9;
+  transition: transform 0.2s ease;
+}
+
+.players-filter-switch input:checked + .players-filter-slider::after {
+  transform: translateX(22px);
+}
+
+.players-filter-label {
+  color: #71bbe9;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .players-online-count-number {

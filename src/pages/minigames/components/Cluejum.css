@@ -1,0 +1,119 @@
+.word-clue-container {
+  margin: 20px auto;
+  max-width: 700px;
+}
+
+.clue {
+  font-size: 1.2em;
+  text-align: center;
+  min-height: 50px;
+  margin-bottom: 12px;
+}
+
+.word-clue-guess-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.word-clue-guess {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.letter-input {
+  width: 42px;
+  height: 42px;
+  margin: 0 4px;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  border: 2px solid #71bbe9;
+  border-radius: 6px;
+  background: transparent;
+  color: white;
+  text-transform: uppercase;
+}
+
+.letter-input:focus {
+  outline: none;
+  border-color: #f5ce45;
+  box-shadow: 0 0 10px rgba(245, 206, 69, 0.5);
+}
+
+.letter-input.letter-match {
+  background-color: rgb(73, 156, 127);
+  border-color: rgb(73, 156, 127);
+  color: white;
+}
+
+.enter-button {
+  width: 42px;
+  height: 42px;
+  margin-left: 6px;
+}
+
+.word-clue-option {
+  min-width: 240px;
+  border: 2px solid #71bbe9;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 8px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.word-clue-option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.option-correct {
+  background: rgba(51, 193, 91, 0.35);
+  border-color: #33c15b;
+  color: #e6ffe6;
+}
+
+.option-wrong {
+  background: rgba(235, 84, 151, 0.35);
+  border-color: #eb5497;
+  color: #ffe6f1;
+}
+
+.cluejum-next {
+  display: block;
+  margin: 16px auto;
+  padding: 10px 20px;
+  font-size: 1.1em;
+  cursor: pointer;
+  background-color: transparent;
+  color: #33c15b;
+  border: 2px solid #33c15b;
+  border-radius: 8px;
+}
+
+@keyframes greenTextGlowFade {
+  0% {
+    text-shadow: 0 0 10px rgba(51, 193, 91, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(51, 193, 91, 0);
+  }
+}
+
+@keyframes pinkTextGlowFade {
+  0% {
+    text-shadow: 0 0 10px rgba(235, 84, 151, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 0 rgba(235, 84, 151, 0);
+  }
+}
+

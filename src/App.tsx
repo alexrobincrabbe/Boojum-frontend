@@ -14,6 +14,12 @@ import DailyBoardPage from './pages/daily-boards/DailyBoardPage';
 import DailyBoardGameRoom from './pages/daily-boards/DailyBoardGameRoom';
 import TimelessBoardPage from './pages/timeless-boards/TimelessBoardPage';
 import TimelessBoardGameRoom from './pages/timeless-boards/TimelessBoardGameRoom';
+import LeaderboardsPage from './pages/leaderboards/LeaderboardsPage';
+import ForumPage from './pages/forum/ForumPage';
+import ViewPostPage from './pages/forum/ViewPostPage';
+import NewPostPage from './pages/forum/NewPostPage';
+import MinigamesPage from './pages/minigames/MinigamesPage';
+import DoodledumPage from './pages/minigames/DoodledumPage';
 import './App.css';
 
 const HomePage = () => {
@@ -91,6 +97,12 @@ function App() {
             <Route path="/daily-boards/play/:dailyBoardId" element={<DailyBoardGameRoom />} />
             <Route path="/timeless-boards" element={<TimelessBoardPage />} />
             <Route path="/timeless-boards/play/:timelessBoardId/:level" element={<TimelessBoardGameRoom />} />
+            <Route path="/leaderboards" element={<LeaderboardsPage />} />
+            <Route path="/forum/new-post" element={<NewPostPage />} />
+            <Route path="/forum/:slug" element={<ViewPostPage />} />
+            <Route path="/forum" element={<ForumPage />} />
+            <Route path="/minigames" element={<MinigamesPage />} />
+            <Route path="/doodledum" element={<DoodledumPage />} />
             <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
             <Route path="/" element={<HomePage />} />
           </Route>

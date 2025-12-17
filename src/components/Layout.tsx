@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { authAPI, lobbyAPI } from '../services/api';
+import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
 import { Menu, X, Bell } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './Layout.css';
@@ -60,6 +60,8 @@ const Layout = ({ children }: LayoutProps) => {
   const [onlineCount, setOnlineCount] = useState(0);
   const [guestsOnline, setGuestsOnline] = useState(0);
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
+  const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
+  const [playmateIds, setPlaymateIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
@@ -118,7 +120,15 @@ const Layout = ({ children }: LayoutProps) => {
     const loadActivities = async () => {
       try {
         const data = await lobbyAPI.getActivitiesFeed();
-        setActivities(data.activities || []);
+        const normalize = (html: string) =>
+          html
+            .replace(/\/minigames\?show_doodles=(true|1)/gi, '/doodledum')
+            .replace(/\/minigames/gi, '/doodledum');
+        const normalized = (data.activities || []).map((a: Activity) => ({
+          ...a,
+          description: normalize(a.description || ''),
+        }));
+        setActivities(normalized);
       } catch (error: any) {
         console.error('Error loading activities:', error);
       }
@@ -167,6 +177,25 @@ const Layout = ({ children }: LayoutProps) => {
     };
   }, []);
 
+  // Load playmates list once for authenticated users (for filtering online list)
+  useEffect(() => {
+    const loadPlaymates = async () => {
+      if (!isAuthenticated) {
+        setPlaymateIds(new Set());
+        setShowPlaymatesOnly(false);
+        return;
+      }
+      try {
+        const bundle = await dashboardAPI.getDashboardBundle();
+        const ids = new Set<number>((bundle.playmates?.buddies || []).map((b: any) => b.id));
+        setPlaymateIds(ids);
+      } catch (error) {
+        console.error('Error loading playmates for filter', error);
+      }
+    };
+    loadPlaymates();
+  }, [isAuthenticated]);
+
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -213,6 +242,10 @@ const Layout = ({ children }: LayoutProps) => {
     logout();
     navigate('/login');
   };
+
+  const filteredUsers = showPlaymatesOnly
+    ? usersOnline.filter((u) => playmateIds.has(u.id))
+    : usersOnline;
 
   return (
     <div className="layout-container">
@@ -283,6 +316,19 @@ const Layout = ({ children }: LayoutProps) => {
       <div className={`players-online-desktop ${leftSidebarOpen ? 'left-open' : 'left-closed'}`}>
         <div className="players-online-container">
           <div className="players-online-count-label">
+            {isAuthenticated && (
+              <label className="players-filter-switch">
+                <input
+                  type="checkbox"
+                  checked={showPlaymatesOnly}
+                  onChange={() => setShowPlaymatesOnly((v) => !v)}
+                />
+                <span className="players-filter-slider" />
+                <span className="players-filter-label">
+                  {showPlaymatesOnly ? "PM's" : 'all'}
+                </span>
+              </label>
+            )}
             <div>
               Online: <span className="players-online-count-number">{onlineCount}</span>
             </div>
@@ -293,7 +339,7 @@ const Layout = ({ children }: LayoutProps) => {
             )}
           </div>
           <div className="players-online-list">
-            {usersOnline.map((user) => (
+            {filteredUsers.map((user) => (
               <div key={user.id} className="player-online-item">
                 <Link
                   to={`/profile/${user.profile_url}`}
@@ -330,6 +376,19 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="mobile-users-dropdown">
           <div className="mobile-users-dropdown-header">
             <h3>Players Online ({onlineCount})</h3>
+            {isAuthenticated && (
+              <label className="players-filter-switch">
+                <input
+                  type="checkbox"
+                  checked={showPlaymatesOnly}
+                  onChange={() => setShowPlaymatesOnly((v) => !v)}
+                />
+                <span className="players-filter-slider" />
+                <span className="players-filter-label">
+                  {showPlaymatesOnly ? "PM's" : 'all'}
+                </span>
+              </label>
+            )}
             <button
               className="mobile-users-close"
               onClick={() => setMobileUsersDropdownOpen(false)}
@@ -339,7 +398,7 @@ const Layout = ({ children }: LayoutProps) => {
             </button>
           </div>
           <div className="mobile-users-dropdown-list">
-            {usersOnline.map((user) => (
+            {filteredUsers.map((user) => (
               <div key={user.id} className="player-online-item">
                 <Link
                   to={`/profile/${user.profile_url}`}
@@ -391,6 +450,12 @@ const Layout = ({ children }: LayoutProps) => {
               className={`nav-link ${location.pathname.startsWith('/minigames') ? 'active' : ''}`}
             >
               {leftSidebarOpen && <span>Mini-Games</span>}
+            </Link>
+            <Link
+              to="/doodledum"
+              className={`nav-link ${location.pathname.startsWith('/doodledum') ? 'active' : ''}`}
+            >
+              {leftSidebarOpen && <span>Doodledum</span>}
             </Link>
             <Link
               to="/daily-boards"

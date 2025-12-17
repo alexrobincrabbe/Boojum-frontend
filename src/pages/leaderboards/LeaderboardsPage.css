@@ -1,0 +1,251 @@
+@import url("https://fonts.googleapis.com/css2?family=Barriecito&family=Butterfly+Kids&family=Give+You+Glory&family=Monoton&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&");
+@import url('https://fonts.googleapis.com/css2?family=Italianno&family=League+Script&family=Major+Mono+Display&display=swap');
+
+.leaderboards-page {
+  padding: 20px;
+}
+
+/* Row layout for leaderboards */
+.leaderboards-page .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+
+/* Column layout - desktop: side by side, mobile: stacked */
+.leaderboards-page .col-lg-4,
+.leaderboards-page .col-lg-6 {
+  flex: 0 0 100%;
+  padding: 0 10px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 992px) {
+  .leaderboards-page .col-lg-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+  
+  .leaderboards-page .col-lg-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+.leaderboard-selectors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.selector-group {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  justify-content: center;
+}
+
+.selector-group select {
+  width: 100%;
+  max-width: 300px;
+}
+
+.table-container {
+  font-family: "Major Mono Display", monospace;
+  font-weight: 400;
+  font-style: normal;
+  width: 100%;
+}
+
+.table-container h5 {
+  color: #f5ce45;
+  font-size: 150%;
+  border-radius: 50px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  text-shadow: 2px 2px 10px rgb(38, 76, 146), -2px -2px 10px rgb(38, 76, 146),
+    2px -2px 10px rgb(38, 76, 146), -2px 2px 10px rgb(38, 76, 146);
+}
+
+.rank {
+  padding-right: 5px;
+}
+
+.one-shot-time {
+  font-weight: bold;
+  font-size: 130%;
+}
+
+.rounded-circle {
+  box-sizing: content-box;
+  border-radius: 50%;
+}
+
+/* Removed old selector styles - now using leaderboard-selectors */
+
+.leaderboard_table {
+  font-size: 70%;
+}
+
+.table-container {
+  height: fit-content;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.best-word {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  text-transform: lowercase;
+}
+
+.word {
+  text-transform: lowercase;
+}
+
+.word.pink {
+  color: #eb539e;
+}
+
+#gameMode,
+#leaderboardType {
+  border-radius: 8px;
+  color: white;
+  font-size: 100%;
+  color: #eb539e;
+  background-color: #13132a;
+  padding: 8px;
+  border: 1px solid #373774;
+}
+
+#gameMode option,
+#leaderboardType option {
+  background-color: #eb539e;
+  color: white;
+}
+
+#gameMode option:checked,
+#leaderboardType option:checked {
+  background-color: #33c15b;
+}
+
+.table-container table {
+  width: 100%;
+}
+
+.leaderboard_table_container {
+  padding: 20px;
+  border-radius: 20px;
+  background-color: #13132a;
+  box-shadow: 0 0 20px #373774;
+}
+
+.leaderboard_table_container.yellow-border {
+  border: 2px solid #f5ce45;
+}
+
+.leaderboard_table_container.pink-border {
+  border: 2px solid #eb539e;
+}
+
+.leaderboard_table_container.green-border {
+  border: 2px solid #33c15b;
+}
+
+.label {
+  font-size: 110%;
+  text-align: center;
+}
+
+.bw-rank {
+  font-size: 110%;
+  text-align: center;
+}
+
+.bw-rank.green {
+  color: #33c15b;
+}
+
+.table-container td,
+.table-container th {
+  height: 50px;
+  padding: 5px;
+}
+
+.player-name,
+.player-picture {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.player-name a,
+.player-picture a {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.number {
+  text-align: center;
+}
+
+.table-container table a {
+  color: #f5ce45;
+  width: 100px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.table-container a:hover {
+  color: aliceblue;
+}
+
+.yellow {
+  color: #f5ce45;
+}
+
+.blue {
+  color: #2277bd;
+}
+
+.profile-pic-standard {
+  display: inline-block;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.profile-pic-standard img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media screen and (max-width: 578px) {
+  .leaderboard-selectors {
+    padding: 0 10px;
+  }
+
+  .selector-group {
+    max-width: 100%;
+  }
+
+  #gameMode,
+  #leaderboardType {
+    border-radius: 8px;
+    font-size: 100%;
+    color: #eb539e;
+    width: 100%;
+  }
+}
+

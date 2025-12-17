@@ -1,0 +1,348 @@
+@import url("https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&");
+
+.view-post-page {
+  min-height: calc(100vh - 70px);
+  padding: 20px;
+}
+
+#back-button {
+  font-size: 130%;
+  width: fit-content;
+  border-radius: 5px;
+  padding: 5px 15px;
+  margin-left: 10px;
+  margin-bottom: 20px;
+  border: outset 3px #33c15b;
+  background-color: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+#back-button:hover {
+  box-shadow: 0px 0px 20px #33c15b;
+}
+
+.view-post-title {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: transparent;
+  font-size: 90%;
+  color: #eb5497;
+  border: 2px solid #71bbe9 !important;
+  border-radius: 10px;
+}
+
+.view-post-text {
+  border-radius: 20px;
+  border: solid 2px #71bbe9;
+  overflow-wrap: break-word;
+  font-family: "Darker Grotesque", serif;
+  background-color: #13132a;
+  padding: 40px 40px 0px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.view-post-text ol,
+.ql-editor ol,
+.view-post-text ul,
+.ql-editor ul,
+.reply-content ol,
+.reply-content ul {
+  color: #f4c943;
+}
+
+.view-post-text h2,
+.ql-editor h2,
+.reply-content h2 {
+  color: #33c15b;
+  font-size: 140%;
+  text-decoration: none;
+  text-align: left;
+}
+
+.view-post-text h3,
+.ql-editor h3,
+.reply-content h3 {
+  color: #eb5497;
+  text-decoration: none;
+  font-size: 1.17em;
+}
+
+.view-post-text a,
+.ql-editor a,
+.reply-content a {
+  text-decoration: underline;
+  color: #71bbe9;
+}
+
+.ql-toolbar.ql-snow {
+  border: 2px solid #71bbe9 !important;
+  border-top-right-radius: 10px !important;
+  border-top-left-radius: 10px !important;
+  background-color: #13132a;
+}
+
+.ql-container.ql-snow {
+  border: 2px solid #71bbe9 !important;
+  border-top: 0 !important;
+  border-bottom-left-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+  background-color: #13132a;
+  margin-bottom: 20px !important;
+}
+
+.view-post-footer {
+  display: flex;
+  justify-content: space-between;
+  font-style: italic;
+  font-family: "McLaren", sans-serif;
+  font-size: 85%;
+  margin-bottom: 0px !important;
+  margin-top: 20px;
+}
+
+.ql-editor img {
+  max-height: 200px;
+  height: auto;
+}
+
+.ql-editor {
+  font-size: 120% !important;
+  padding: 40px !important;
+}
+
+.ql-editor h2,
+.view-post-text h2,
+.ql-editor h3,
+.view-post-text h3,
+.ql-editor p,
+.view-post-text p {
+  margin-bottom: 0.5rem !important;
+}
+
+.reply-wrapper {
+  padding: 10px 20px 10px;
+}
+
+#replies {
+  padding: 0 40px;
+}
+
+#reply-btn-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+#reply-btn-wrapper.hidden {
+  display: none;
+}
+
+#reply-btn {
+  border-radius: 5px;
+  border: outset 3px #33c15b;
+  background-color: transparent;
+  margin-bottom: 10px;
+  color: white;
+  cursor: pointer;
+  padding: 5px 15px;
+}
+
+#reply-btn:hover {
+  background-color: rgb(65, 129, 65);
+}
+
+.reply-button:hover {
+  border: solid #f5ce45 2px;
+  color: #33c15b;
+}
+
+.reply-button:active {
+  box-shadow: 0 0 10px #33c15b;
+  color: white;
+}
+
+#submit-reply-btn-wrapper {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px;
+}
+
+#submit-reply-btn:focus,
+#submit-post-btn:focus {
+  background-color: #33c15b;
+}
+
+#submit-reply-btn,
+#submit-post-btn,
+.edit-button,
+.save-edit-button,
+#edit-post-btn,
+#save-post-btn {
+  border-radius: 5px;
+  border: outset 3px #33c15b;
+  color: white;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 5px 15px;
+}
+
+#submit-reply-btn:hover,
+#submit-post-btn:hover,
+.edit-button:hover,
+.save-edit-button:hover,
+#edit-post-btn:hover,
+#save-post-btn:hover {
+  background-color: rgb(19, 66, 33);
+}
+
+#cancel-post-btn {
+  margin-right: 15px;
+}
+
+#cancel-reply-btn,
+#cancel-post-btn,
+.delete-button,
+.cancel-edit-button,
+#cancel-post-edit-btn {
+  border-radius: 5px;
+  color: white;
+  border: outset 3px #eb5497;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 5px 15px;
+}
+
+#cancel-reply-btn:hover,
+#cancel-post-btn:hover,
+.delete-button:hover,
+.cancel-edit-button:hover,
+#cancel-post-edit-btn:hover {
+  background-color: #652341;
+}
+
+#edit-post-title {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #eb5497;
+  font-size: 180%;
+  font-family: "Chango", sans-serif;
+  width: 100%;
+  padding: 10px;
+}
+
+.edit-button,
+.delete-button {
+  font-size: 80%;
+}
+
+.delete-button,
+.cancel-edit-button {
+  margin-right: 20px;
+}
+
+.reply {
+  overflow-wrap: break-word;
+  font-family: "Darker Grotesque", serif;
+  font-size: 130%;
+}
+
+.reply-footer {
+  display: inline-flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+#reply-form {
+  padding: 0 40px;
+}
+
+.reply-footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reply-date {
+  white-space: nowrap;
+  font-size: 80%;
+}
+
+.view-post-text img,
+.reply img {
+  max-width: 300px;
+}
+
+hr {
+  margin-top: 0px;
+  margin-bottom: 10px;
+  border-top: solid #f5ce45 1px;
+  opacity: 1;
+}
+
+.form-control {
+  background-color: transparent;
+  color: white;
+  border: 2px solid #71bbe9 !important;
+  border-radius: 10px;
+}
+
+.form-control:focus {
+  background-color: transparent;
+  color: white;
+  outline: none;
+}
+
+.yellow-button {
+  border-radius: 5px;
+  border: outset 3px #f5ce45;
+  background-color: transparent;
+  color: white;
+  cursor: pointer;
+  padding: 5px 15px;
+}
+
+.yellow-button:hover {
+  background-color: rgba(245, 206, 69, 0.2);
+}
+
+.loading-state,
+.error-message {
+  text-align: center;
+  padding: 20px;
+  color: white;
+}
+
+@media screen and (max-width: 578px) {
+  .view-post-title {
+    font-size: 75%;
+  }
+
+  #edit-post-title {
+    font-size: 120%;
+  }
+
+  .view-post-text {
+    scrollbar-gutter: stable;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 20px;
+  }
+
+  #post-view {
+    margin-right: 20px;
+    margin-left: 20px;
+  }
+
+  .ql-editor {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  #post-edit {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+

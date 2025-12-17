@@ -97,6 +97,10 @@ export const authAPI = {
 };
 
 export const dashboardAPI = {
+  getDashboardBundle: async () => {
+    const response = await api.get('/dashboard/bundle/');
+    return response.data;
+  },
   getDashboardData: async () => {
     const response = await api.get('/dashboard/');
     return response.data;
@@ -223,6 +227,101 @@ export const lobbyAPI = {
   },
 };
 
+export const leaderboardsAPI = {
+  getLeaderboards: async (gameType: string, period: string) => {
+    const response = await api.get(`/leaderboards/${gameType}/${period}/`);
+    return response.data;
+  },
+  getAllLeaderboards: async () => {
+    const response = await api.get('/leaderboards/all/');
+    return response.data;
+  },
+};
+
+export const forumAPI = {
+  getPosts: async (page: number = 1) => {
+    const response = await api.get('/forum/posts/', { params: { page } });
+    return response.data;
+  },
+  getPost: async (slug: string) => {
+    const response = await api.get(`/forum/posts/${slug}/`);
+    return response.data;
+  },
+  createPost: async (title: string, text: string) => {
+    const response = await api.post('/forum/posts/create/', { title, text });
+    return response.data;
+  },
+  updatePost: async (slug: string, title: string, text: string) => {
+    const response = await api.put(`/forum/posts/${slug}/update/`, { title, text });
+    return response.data;
+  },
+  createReply: async (postId: number, text: string) => {
+    const response = await api.post(`/forum/posts/${postId}/replies/create/`, { text });
+    return response.data;
+  },
+  updateReply: async (replyId: number, text: string) => {
+    const response = await api.put(`/forum/replies/${replyId}/`, { text });
+    return response.data;
+  },
+  deleteReply: async (replyId: number) => {
+    const response = await api.delete(`/forum/replies/${replyId}/delete/`);
+    return response.data;
+  },
+  markAllRead: async () => {
+    const response = await api.post('/forum/mark-all-read/');
+    return response.data;
+  },
+  uploadImage: async (imageFile: File) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    const response = await api.post('/forum/upload-image/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+};
+
+
+export const minigamesAPI = {
+  getMinigamesData: async () => {
+    const response = await api.get('/minigames/');
+    return response.data;
+  },
+  getDoodledumFeed: async () => {
+    const response = await api.get('/minigames/doodledum/feed/');
+    return response.data;
+  },
+  checkDoodledum: async () => {
+    const response = await api.get('/minigames/doodledum/check/');
+    return response.data;
+  },
+  fetchDoodledum: async (difficulty: string) => {
+    const response = await api.get('/minigames/doodledum/fetch/', { params: { difficulty } });
+    return response.data;
+  },
+  uploadDrawing: async (imageData: string) => {
+    const response = await api.post('/minigames/doodledum/upload/', { image_data: imageData });
+    return response.data;
+  },
+  cancelDrawing: async () => {
+    const response = await api.post('/minigames/doodledum/cancel/');
+    return response.data;
+  },
+  makeDoodledumGuess: async (guess: string) => {
+    const response = await api.post('/minigames/doodledum/guess/', { guess });
+    return response.data;
+  },
+  setCluejumAchievement: async (stage1: number, stage2: number, stage3: number) => {
+    const response = await api.post('/minigames/cluejum/achievement/', { stage1, stage2, stage3 });
+    return response.data;
+  },
+  setBoojumbleAchievement: async (level: string) => {
+    const response = await api.post('/minigames/boojumble/achievement/', { boojumble_level: level });
+    return response.data;
+  },
+};
 
 export default api;
 

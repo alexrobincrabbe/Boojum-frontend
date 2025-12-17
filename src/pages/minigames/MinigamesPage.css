@@ -1,0 +1,80 @@
+.minigames-page {
+  min-height: 100vh;
+  background-color: #13132a;
+  color: white;
+  padding: 20px 0;
+}
+
+.minigames-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #71bbe9;
+  padding-bottom: 0;
+}
+
+.minigame-tab {
+  flex: 1;
+  padding: 15px 20px;
+  font-size: 140%;
+  font-weight: bold;
+  border: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: rgba(19, 19, 42, 0.5);
+  color: white;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.minigame-tab:hover {
+  opacity: 0.9;
+  background-color: rgba(19, 19, 42, 0.7);
+}
+
+.minigame-tab.active {
+  background-color: rgba(19, 19, 42, 0.9);
+  border-bottom: 3px solid;
+}
+
+.boojumble-tab.active {
+  border-bottom-color: #33c15b;
+  color: #33c15b;
+}
+
+.cluejum-tab.active {
+  border-bottom-color: #eb5497;
+  color: #eb5497;
+}
+
+.doodledum-tab.active {
+  border-bottom-color: #33c15b;
+  color: #33c15b;
+}
+
+.minigame-content {
+  margin-top: 20px;
+}
+
+#mini-games {
+  margin-top: 20px;
+}
+
+.collapse {
+  display: none;
+}
+
+.collapse.show {
+  display: block;
+}
+
+.minigames-page .container-fluid {
+  padding: 0 15px;
+}
+
+.minigames-page .row {
+  margin: 0;
+}
+

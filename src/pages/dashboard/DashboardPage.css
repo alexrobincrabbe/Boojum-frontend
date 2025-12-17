@@ -5,49 +5,57 @@
   background-image: linear-gradient(transparent, 50%, black);
 }
 
-.dashboard-header {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-.dashboard-header h1 {
-  text-align: center;
-  color: #f5ce45;
-  font-family: "Monoton", cursive;
-}
-
 .dashboard-tabs {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   gap: 10px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #71bbe9;
+  padding-bottom: 0;
   flex-wrap: wrap;
 }
 
 .dashboard-tab {
-  padding: 12px 24px;
-  border-radius: 30px;
-  border: 2px solid transparent;
-  background-color: rgba(19, 19, 42, 0.8);
-  color: #fff;
+  flex: 1;
+  min-width: 160px;
+  padding: 15px 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
-  font-weight: bold;
-  font-family: "Darker Grotesque", sans-serif;
+  background-color: rgba(19, 19, 42, 0.5);
+  color: white;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
 }
 
 .dashboard-tab:hover {
-  background-color: rgba(113, 187, 233, 0.2);
-  border-color: #71bbe9;
+  opacity: 0.9;
+  background-color: rgba(19, 19, 42, 0.7);
 }
 
 .dashboard-tab.active {
-  background-color: rgb(1, 184, 26);
-  color: rgb(54, 41, 112);
-  border-color: rgb(1, 184, 26);
+  background-color: rgba(19, 19, 42, 0.9);
+  border-bottom: 3px solid #71bbe9;
+  color: #71bbe9;
+}
+
+@media (max-width: 768px) {
+  .dashboard-tabs {
+    flex-direction: row;
+    gap: 4px;
+    border-bottom-width: 1px;
+  }
+  .dashboard-tab {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    line-height: 1.1;
+    white-space: normal;
+    word-break: break-word;
+  }
 }
 
 .dashboard-content {
@@ -319,20 +327,12 @@
 
 .remove-buddy-button {
   cursor: pointer;
-  border: none;
   background: none;
+  border: none;
   padding: 0;
-  display: inline-block;
-}
-
-.remove-buddy-button svg {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.2s;
-}
-
-.remove-buddy-button:hover svg {
-  transform: scale(1.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .buddy-list-name {
@@ -481,12 +481,14 @@ input:checked + .slider:before {
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .dashboard-tabs {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: stretch;
   }
 
   .dashboard-tab {
-    width: 100%;
+    width: auto;
+    min-width: 140px;
   }
 
   .account-content,

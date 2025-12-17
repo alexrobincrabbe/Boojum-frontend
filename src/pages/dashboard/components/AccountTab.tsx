@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { dashboardAPI } from '../../../services/api';
 
-const AccountTab = () => {
+interface AccountBundle {
+  email?: string;
+  display_name?: string;
+}
+
+const AccountTab = ({ bundle }: { bundle?: AccountBundle | null }) => {
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [oldPassword, setOldPassword] = useState('');
@@ -11,6 +16,18 @@ const AccountTab = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const initFromBundle = () => {
+      if (bundle) {
+        setEmail(bundle.email || '');
+        setDisplayName(bundle.display_name || '');
+        setLoading(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (initFromBundle()) return;
+
     const fetchData = async () => {
       try {
         const data = await dashboardAPI.getDashboardData();
@@ -24,7 +41,7 @@ const AccountTab = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [bundle]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

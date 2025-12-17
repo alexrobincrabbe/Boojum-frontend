@@ -5,11 +5,21 @@ import { useBoardTheme } from '../../../contexts/BoardThemeContext';
 import { BoardPreview } from './BoardPreview';
 import './GameSettingsTab.css';
 
-const GameSettingsTab = () => {
+interface GameSettingsTabProps {
+  bundle?: {
+    profanity_filter?: boolean;
+    chat_color?: string;
+    chat_color_choices?: { value: string; label: string }[];
+  } | null;
+  isAuthenticated?: boolean;
+}
+
+const GameSettingsTab = ({ bundle, isAuthenticated }: GameSettingsTabProps) => {
   const [profanityFilter, setProfanityFilter] = useState(true); // Default to true
   const [loading, setLoading] = useState(true);
   const isInitialMount = useRef(true);
   const initialProfanityFilter = useRef(true); // Default to true
+  const suppressToast = useRef(true); // avoid toasts on initial mount/remount
   
   const { darkMode, colorsOff, toggleDarkMode, toggleColors } = useBoardTheme();
   
@@ -27,6 +37,25 @@ const GameSettingsTab = () => {
   };
 
   useEffect(() => {
+    const initFromBundle = () => {
+      if (bundle && typeof bundle.profanity_filter !== 'undefined') {
+        const fetchedFilter = bundle.profanity_filter ?? true;
+        setProfanityFilter(fetchedFilter);
+        initialProfanityFilter.current = fetchedFilter;
+        localStorage.setItem('profanityFilter', fetchedFilter.toString());
+        isInitialMount.current = false;
+        suppressToast.current = true;
+        setTimeout(() => {
+          suppressToast.current = false;
+        }, 0);
+        setLoading(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (initFromBundle()) return;
+
     const fetchData = async () => {
       try {
         // Only fetch profanity filter if user is authenticated
@@ -56,10 +85,11 @@ const GameSettingsTab = () => {
         isInitialMount.current = false;
       } finally {
         setLoading(false);
+        suppressToast.current = false;
       }
     };
     fetchData();
-  }, []);
+  }, [bundle]);
 
   // Auto-save when profanity filter changes (skip initial mount)
   useEffect(() => {
@@ -72,8 +102,7 @@ const GameSettingsTab = () => {
       if (token) {
         // Authenticated user - save to backend
         try {
-          const data = await dashboardAPI.getDashboardData();
-          const chatColor = data.chat_color || '#E38614';
+          const chatColor = bundle?.chat_color || '#E38614';
           const response = await dashboardAPI.updateChatSettings(chatColor, profanityFilter);
           // Use the value returned from backend to ensure consistency
           const updatedFilter = response?.profanity_filter ?? profanityFilter;
@@ -83,7 +112,9 @@ const GameSettingsTab = () => {
           setProfanityFilter(updatedFilter);
           // Store in localStorage so Chat component can read it
           localStorage.setItem('profanityFilter', updatedFilter.toString());
-          toast.success(`Profanity filter ${updatedFilter ? 'enabled' : 'disabled'}`);
+          if (!suppressToast.current) {
+            toast.success(`Profanity filter ${updatedFilter ? 'enabled' : 'disabled'}`);
+          }
         } catch (error: any) {
           toast.error(error.response?.data?.error || 'Error updating profanity filter');
           // Revert to previous value on error
@@ -92,7 +123,9 @@ const GameSettingsTab = () => {
       } else {
         // Guest - save to localStorage
         localStorage.setItem('profanityFilter', profanityFilter.toString());
-        toast.success(`Profanity filter ${profanityFilter ? 'enabled' : 'disabled'}`);
+        if (!suppressToast.current) {
+          toast.success(`Profanity filter ${profanityFilter ? 'enabled' : 'disabled'}`);
+        }
       }
     };
 

@@ -1,0 +1,171 @@
+#boojumbles {
+  position: relative;
+}
+
+#boojumbles-help-container {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+}
+
+.boojumble.hidden {
+  display: none !important;
+}
+
+.boojumble:not(.hidden) {
+  display: block !important;
+}
+
+/* Scoped to #boojumbles to prevent affecting other game boards */
+#boojumbles .board-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+#boojumbles .board-container.board-3 {
+  min-width: 300px;
+}
+
+#boojumbles .board-container.board-4 {
+  min-width: 400px;
+}
+
+#boojumbles .board-container.board-5 {
+  min-width: 500px;
+}
+
+#boojumbles .board {
+  display: grid !important;
+  position: relative;
+  border-radius: 25px;
+  padding: 10px;
+  gap: 10px;
+  -webkit-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+  background-color: #eb5497 !important;
+  border: solid 5px #eb5497 !important;
+  background-image: radial-gradient(transparent, transparent 10%, #c45981 95%);
+  box-shadow: 0 0 10px black;
+  min-height: 300px !important;
+  min-width: 300px !important;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 0;
+}
+
+#boojumbles .board-container.board-3 .board {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+}
+
+#boojumbles .board-container.board-4 .board {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+}
+
+#boojumbles .board-container.board-5 .board {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(5, minmax(0, 1fr)) !important;
+}
+
+#boojumbles .letter {
+  position: relative;
+  background-color: transparent;
+  border: none;
+  z-index: 2;
+  overflow: visible;
+  min-height: 50px;
+  min-width: 50px;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#boojumbles .letter-child {
+  background: #7195e9 !important;
+  box-shadow: 0 0 2px black;
+  user-select: none;
+  cursor: move;
+  height: 100%;
+  width: 100%;
+  min-height: 50px !important;
+  min-width: 50px !important;
+  z-index: 3;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#boojumbles .letter-child.match-present {
+  background-color: rgb(173, 147, 86) !important;
+  box-shadow: 0 0 5px black !important;
+}
+
+#boojumbles .letter-child.match-correct {
+  background-color: rgb(73, 156, 127) !important;
+  box-shadow: 0 0 10px black !important;
+}
+
+#boojumbles .letValue {
+  color: #262659;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.boojumble-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.boojumble-button {
+  background-color: #352870;
+  border: 5px outset #352870;
+  color: #929295;
+  padding: 5px 15px;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+.boojumble-button-active {
+  background-color: #533eb1;
+  border: 5px outset #533eb1;
+  color: white;
+  font-weight: bold;
+}
+
+.boojumble-button:hover {
+  opacity: 0.9;
+}
+
+.help-button {
+  font-size: 120%;
+  border-radius: 50% !important;
+  height: 30px;
+  width: 30px;
+  border: none;
+  background-color: #13132a;
+  color: #f4c943;
+  cursor: pointer;
+}
+
+#boojumbles .placeholder {
+  background: transparent;
+  border: 2px dashed #7195e9;
+  border-radius: 50%;
+  min-height: 50px;
+  min-width: 50px;
+}
+
