@@ -87,7 +87,6 @@ export default function TimelessBoardGameRoom() {
           });
           
           totalScoreRef.current = levelScore;
-          setCurrentScore(levelScore);
           setWordCounts(levelWordCounts);
         }
         if (savedData.bestWord) {
@@ -577,7 +576,6 @@ export default function TimelessBoardGameRoom() {
     
     // Update total score
     totalScoreRef.current += wordScore;
-    setCurrentScore(totalScoreRef.current);
     setDisplayScore(totalScoreRef.current); // Update display score immediately when new word found
     
     // Update best word
@@ -782,7 +780,7 @@ export default function TimelessBoardGameRoom() {
   }, [hintsRemaining, hintActive, hintLoading, timelessBoardId]);
 
   // Callback to deactivate hint when a word turns green
-  const handleExactMatch = useCallback((word: string) => {
+  const handleExactMatch = useCallback((_word: string) => {
     if (hintActive) {
       setHintActive(false);
       // Re-enable grey mode (local state only)

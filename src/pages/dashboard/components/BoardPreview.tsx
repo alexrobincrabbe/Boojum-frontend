@@ -30,7 +30,7 @@ export function BoardPreview() {
       for (let i = 0; i < letters.length; i++) {
         const letter = letters[i] as HTMLElement;
         const rowIndex = Math.floor(i / 4);
-        const colIndex = i % 4;
+        const _colIndex = i % 4;
         
         // Update dark/light mode
         if (darkMode) {

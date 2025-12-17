@@ -248,10 +248,10 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       });
 
       if (overlapTarget && overlapTarget !== bestMatch) {
-        overlapTarget.querySelector('.letter-child')?.classList.remove('highlight');
+        (overlapTarget as HTMLElement).querySelector('.letter-child')?.classList.remove('highlight');
       }
       if (bestMatch) {
-        bestMatch.querySelector('.letter-child')?.classList.add('highlight');
+        (bestMatch as HTMLElement).querySelector('.letter-child')?.classList.add('highlight');
       }
       overlapTarget = bestMatch;
     };

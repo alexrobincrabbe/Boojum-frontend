@@ -80,7 +80,7 @@ export default function DailyBoardGameRoom() {
     isGuest,
     wsUrl: wsUrl, // Pass custom WebSocket URL
     initializeWordLists: (wordsByLength) => {
-      wordTrackingRef.current?.initializeWordLists(wordsByLength, gameState, sendJson);
+      wordTrackingRef.current?.initializeWordLists(wordsByLength);
     },
     updateWordsFromChat: (message, user) => {
       wordTrackingRef.current?.updateWordsFromChat(message, user);
