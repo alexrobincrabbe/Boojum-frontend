@@ -88,7 +88,7 @@ export default function GameRoom() {
     roomId,
     token,
     isGuest,
-    initializeWordLists: (wordsByLength, gameState, sendJson) => {
+    initializeWordLists: (wordsByLength) => {
       wordTrackingRef.current?.initializeWordLists(wordsByLength, gameState, sendJson);
     },
     updateWordsFromChat: (message, user) => {

@@ -53,7 +53,6 @@ export default function TimelessBoardGameRoom() {
   const totalScoreRef = useRef<number>(0);
   const bestWordRef = useRef<{ word: string; score: number }>({ word: '', score: 0 });
   const totalPossibleScoreRef = useRef<number>(0);
-  const [currentScore, setCurrentScore] = useState<number>(0);
   const [displayScore, setDisplayScore] = useState<number>(0); // For animated score display
   const animationRunRef = useRef<boolean>(false); // Track if animation has run
 
@@ -136,7 +135,7 @@ export default function TimelessBoardGameRoom() {
       const stateToSave = {
         wordsFound: Array.from(allWordsFound), // All words found across all levels
         bestWord: bestWordOverall, // Best word across all levels
-        // Note: currentScore and wordCounts are level-specific, so we don't save them globally
+        // Note: wordCounts are level-specific, so we don't save them globally
       };
       localStorage.setItem(`timeless_board_${boardId}`, JSON.stringify(stateToSave));
     } catch (error) {

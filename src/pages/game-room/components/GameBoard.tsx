@@ -77,8 +77,6 @@ export function GameBoard({
   const {
     svgContainerRef,
     handleMouseDown,
-    handleTouchStart,
-    handleTouchMove,
     handleTouchEnd,
     handleLetterTouch, // Get handleLetterTouch for direct use in touch handlers
   } = useBoardSwipe(

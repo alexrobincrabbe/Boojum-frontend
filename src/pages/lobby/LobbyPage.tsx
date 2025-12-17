@@ -24,17 +24,6 @@ interface PollOption {
   percentage: number;
 }
 
-interface UserOnline {
-  id: number;
-  display_name: string;
-  chat_color: string;
-  profile_url: string;
-  online: string;
-  time_ago: string;
-  playing: string;
-  activity: string;
-}
-
 interface Poll {
   id: number;
   question: string;
@@ -56,7 +45,7 @@ const LobbyPage = () => {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [wordOfTheDay, setWordOfTheDay] = useState<WordOfTheDay | null>(null);
   const [roomUsers, setRoomUsers] = useState<Record<string, number>>({});
-  const roomUsersPollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const roomUsersPollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load initial lobby data
   useEffect(() => {

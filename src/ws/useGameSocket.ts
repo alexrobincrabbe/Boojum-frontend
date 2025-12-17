@@ -414,7 +414,7 @@ export function useGameSocket({
       onErrorRef.current?.(e);
     };
 
-    ws.onclose = (event) => {
+    ws.onclose = (_event) => {
       clearTimers();
       isConnectingRef.current = false;
       

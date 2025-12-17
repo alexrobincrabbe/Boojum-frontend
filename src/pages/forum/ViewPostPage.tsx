@@ -404,7 +404,7 @@ const ViewPostPage = () => {
                       <em style={{ color: 'grey' }}>{reply.created_on_ago}</em>
                     </div>
                     <div className="reply-footer">
-                      {isAuthenticated && (reply.author.id === user?.id || user?.is_superuser) && (
+                      {isAuthenticated && (reply.author.id === user?.id || (user as any)?.is_superuser) && (
                         <>
                           <button
                             id={`reply-delete-${reply.id}`}

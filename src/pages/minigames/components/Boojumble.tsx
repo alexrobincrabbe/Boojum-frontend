@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
 import './Boojumble.css';
 
@@ -449,7 +449,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       checkOverlap();
     };
 
-    const onPointerUp = (event: MouseEvent | TouchEvent) => {
+    const onPointerUp = (_event: MouseEvent | TouchEvent) => {
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
       document.removeEventListener('touchmove', onPointerMove as any);
@@ -512,34 +512,6 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
 
       draggedElement = placeholderElement = overlapTarget = null;
-    };
-
-    const updateBoardState = () => {
-      if (!currentBoard) return;
-      
-      const letterElements = Array.from(currentBoard.querySelectorAll('.letter .letValue'));
-      const flatLetters: string[] = [];
-      letterElements.forEach(el => {
-        const text = el.textContent?.trim() || '';
-        flatLetters.push(text);
-      });
-
-      if (flatLetters.length === selectedLevel * selectedLevel) {
-        const reconstructed: string[][] = [];
-        for (let i = 0; i < selectedLevel; i++) {
-          reconstructed.push([]);
-          for (let j = 0; j < selectedLevel; j++) {
-            const idx = i * selectedLevel + j;
-            reconstructed[i].push(flatLetters[idx] || '');
-          }
-        }
-        
-        // Don't update React state - it causes re-renders that reset DOM positions
-        // The DOM is the source of truth during dragging
-        // Only save to localStorage and check words
-        storeBoojumbleState(reconstructed, selectedLevel);
-        checkWords(reconstructed, selectedLevel);
-      }
     };
 
     // Wait for letter elements to be in the DOM (they might not be ready yet)

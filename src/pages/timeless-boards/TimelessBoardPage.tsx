@@ -62,8 +62,8 @@ export default function TimelessBoardPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentLevel, setCurrentLevel] = useState<number>(10); // Default to Rabbit Hole
-  const { isAuthenticated, user } = useAuth();
-  const { darkMode, colorsOff } = useBoardTheme();
+  const { isAuthenticated } = useAuth();
+  const { darkMode } = useBoardTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
@@ -141,15 +141,15 @@ setBoardsByLevel({
         const boards7 = data?.data?.["7"]?.boards ?? [];
         const boards10 = data?.data?.["10"]?.boards ?? [];
         
-        if (boards4.some(b => b.id === boardId)) {
+        if (boards4.some((b: TimelessBoard) => b.id === boardId)) {
           foundLevel = 4;
-          boardIndex = boards4.findIndex(b => b.id === boardId);
-        } else if (boards7.some(b => b.id === boardId)) {
+          boardIndex = boards4.findIndex((b: TimelessBoard) => b.id === boardId);
+        } else if (boards7.some((b: TimelessBoard) => b.id === boardId)) {
           foundLevel = 7;
-          boardIndex = boards7.findIndex(b => b.id === boardId);
-        } else if (boards10.some(b => b.id === boardId)) {
+          boardIndex = boards7.findIndex((b: TimelessBoard) => b.id === boardId);
+        } else if (boards10.some((b: TimelessBoard) => b.id === boardId)) {
           foundLevel = 10;
-          boardIndex = boards10.findIndex(b => b.id === boardId);
+          boardIndex = boards10.findIndex((b: TimelessBoard) => b.id === boardId);
         }
         
         if (boardIndex !== -1) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { minigamesAPI } from '../../services/api';
 import Boojumble from './components/Boojumble';
 import Cluejum from './components/Cluejum';
