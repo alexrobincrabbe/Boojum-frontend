@@ -1,0 +1,6 @@
+{
+    "rewrites": [
+      { "source": "/api/(.*)", "destination": "/api/$1" },   // leave API alone if you proxy it
+      { "source": "/(.*)", "destination": "/index.html" }    // SPA fallback
+    ]
+  }
