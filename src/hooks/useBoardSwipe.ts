@@ -443,30 +443,6 @@ export function useBoardSwipe(
     }
   }, [gameStatus, getContainerDiv, handleLetterTouch]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
-    if (isMouseDownRef.current && gameStatus === 'playing') {
-      e.preventDefault();
-      const element = document.elementFromPoint(e.clientX, e.clientY);
-      const letter = getContainerDiv(element);
-      if (letter) {
-        handleLetterTouch(letter);
-      }
-    }
-  }, [gameStatus, getContainerDiv, handleLetterTouch]);
-
-  const handleMouseUp = useCallback((e: React.MouseEvent | MouseEvent) => {
-    if (isMouseDownRef.current) {
-      e.preventDefault();
-      isMouseDownRef.current = false;
-      setSwipeState(prev => {
-        const newState = { ...prev, isMouseDown: false };
-        swipeStateRef.current = newState;
-        return newState;
-      });
-      finalizeWordSelection();
-    }
-  }, [finalizeWordSelection]);
-
   // Touch event handlers
   // Note: These are called from direct DOM listeners in GameBoard.tsx with { passive: false }
   // The preventDefault/stopPropagation calls here are safe because they're called from non-passive listeners

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { forumAPI } from '../../services/api';
-import { ProfilePicture } from '../../components/ProfilePicture';
 import { toast } from 'react-toastify';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
@@ -98,7 +97,7 @@ const ViewPostPage = () => {
     }
     
     // Handle image uploads
-    const toolbar = quill.getModule('toolbar');
+    const toolbar: any = quill.getModule('toolbar');
     toolbar.addHandler('image', () => {
       const input = document.createElement('input');
       input.setAttribute('type', 'file');

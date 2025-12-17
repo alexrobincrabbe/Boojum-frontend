@@ -14,7 +14,7 @@ interface GameSettingsTabProps {
   isAuthenticated?: boolean;
 }
 
-const GameSettingsTab = ({ bundle, isAuthenticated }: GameSettingsTabProps) => {
+const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSettingsTabProps) => {
   const [profanityFilter, setProfanityFilter] = useState(true); // Default to true
   const [loading, setLoading] = useState(true);
   const isInitialMount = useRef(true);

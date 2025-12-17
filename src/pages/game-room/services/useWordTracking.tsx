@@ -19,7 +19,7 @@ interface UseWordTrackingReturn {
   initializeWordLists: (wordsByLength: Record<string, string[]>, gameState?: GameState | null, sendJson?: (message: any) => void) => void;
   updateWordsFromChat: (message: string, user: string) => void;
   submitFinalScore: (sendJson: (message: any) => void) => void;
-  submitOneShotWord: (word: string, time: number, sendJson: (message: any) => void, sendChatMessage: (message: string) => void) => void;
+  submitOneShotWord: (word: string, time: number, sendJson: (message: any) => void) => void;
   oneShotSubmitted: boolean;
 }
 

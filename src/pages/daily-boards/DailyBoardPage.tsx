@@ -49,7 +49,7 @@ export default function DailyBoardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<number | null>>(new Set()); // Empty = show all
   const { isAuthenticated, user } = useAuth();
-  const { darkMode, colorsOff } = useBoardTheme();
+  const { darkMode } = useBoardTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
@@ -101,7 +101,7 @@ export default function DailyBoardPage() {
         const boardIdParam = searchParams.get('board');
         if (boardIdParam) {
           const boardId = parseInt(boardIdParam, 10);
-          const boardIndex = boardsData.findIndex(board => board.id === boardId);
+          const boardIndex = boardsData.findIndex((board: DailyBoard) => board.id === boardId);
           if (boardIndex !== -1) {
             // Found the board - set to that page
             setCurrentPage(boardIndex);

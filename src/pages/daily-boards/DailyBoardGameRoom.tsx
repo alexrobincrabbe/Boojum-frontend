@@ -8,7 +8,6 @@ import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
 import { PlayersList } from '../game-room/components/PlayersList';
 import { ScoresModal } from '../game-room/components/ScoresModal';
-import { fetchDefinition } from '../../utils/dictionary';
 import type { WordData } from '../../ws/protocol';
 import { toast } from 'react-toastify';
 import '../game-room/GameRoom.css';
@@ -80,13 +79,13 @@ export default function DailyBoardGameRoom() {
     token,
     isGuest,
     wsUrl: wsUrl, // Pass custom WebSocket URL
-    initializeWordLists: (wordsByLength, gameState, sendJson) => {
+    initializeWordLists: (wordsByLength) => {
       wordTrackingRef.current?.initializeWordLists(wordsByLength, gameState, sendJson);
     },
     updateWordsFromChat: (message, user) => {
       wordTrackingRef.current?.updateWordsFromChat(message, user);
     },
-    onScoreInChat: (playerName, score) => {
+    onScoreInChat: (_playerName, _score) => {
       // Daily boards don't have chat, so we don't need to handle score messages in chat
     },
     onMessage: (message) => {
@@ -194,33 +193,8 @@ export default function DailyBoardGameRoom() {
       setIsScoresModalOpen(true);
       setShowBackButton(true); // Show back button when game finishes
       
-      // Show unicorn message in chat for one-shot games
-      if (gameState.oneShot && gameState.wordsByLength) {
-        const findHighestScoringWord = (wordsByLength: Record<string, Record<string, WordData>> | Record<string, string[]>) => {
-          let highestScore = 0;
-          let highestWord = '';
-          
-          for (const length in wordsByLength) {
-            const words = wordsByLength[length];
-            if (typeof words === 'object' && !Array.isArray(words)) {
-              // Final format with WordData
-              for (const word in words) {
-                const wordData = words[word] as WordData;
-                if (wordData.score && wordData.score > highestScore) {
-                  highestScore = wordData.score;
-                  highestWord = word;
-                }
-              }
-            }
-          }
-          
-          return [highestWord, highestScore] as [string, number];
-        };
-        
-        // Daily boards don't have chat, so we don't show unicorn in chat
-      }
     }
-  }, [gameState?.finalScores, gameState?.gameStatus, gameState?.oneShot, gameState?.wordsByLength]);
+  }, [gameState?.finalScores, gameState?.gameStatus]);
 
   // Hide start button if game is already playing (e.g., on reconnect)
   useEffect(() => {

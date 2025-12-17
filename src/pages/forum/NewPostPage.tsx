@@ -34,7 +34,7 @@ const NewPostPage = () => {
   const { isAuthenticated, loading } = useAuth();
   const [title, setTitle] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const quillRef = useRef<Quill | null>(null);
+  const quillRef = useRef<any>(null);
   const quillContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
