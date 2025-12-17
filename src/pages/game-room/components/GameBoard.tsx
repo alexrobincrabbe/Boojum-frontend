@@ -46,6 +46,8 @@ export function GameBoard({
   const [boardRotation, setBoardRotation] = useState(0);
   const boardRef = useRef<HTMLDivElement>(null);
   const [confirmationWord, setConfirmationWord] = useState<string | null>(null);
+  const lastTouchPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const processedLettersInTouchMoveRef = useRef<Set<number>>(new Set());
 
   // Wrapper for onWordSubmit that handles one-shot confirmation
   const handleWordSubmitWrapper = useCallback((word: string) => {
@@ -110,37 +112,75 @@ export function GameBoard({
     const boardElement = boardRef.current;
     if (!boardElement) return;
 
+    // Helper to get letter element from DOM element
+    const getLetterFromElement = (element: Element | null) => {
+      if (!element) return null;
+      
+      let letterEl: HTMLElement | null = null;
+      if (element.classList.contains('letter')) {
+        letterEl = element as HTMLElement;
+      } else if (element.parentElement?.classList.contains('letter')) {
+        letterEl = element.parentElement as HTMLElement;
+      }
+      
+      if (!letterEl) return null;
+      
+      const x = parseInt(letterEl.getAttribute('data-x') || '0');
+      const y = parseInt(letterEl.getAttribute('data-y') || '0');
+      const letter = letterEl.getAttribute('data-letter') || '';
+      const index = parseInt(letterEl.getAttribute('data-index') || '0');
+      return {
+        element: letterEl as HTMLDivElement,
+        x,
+        y,
+        letter,
+        index,
+      };
+    };
+
+    // Helper to sample path between two points and check for letters
+    const samplePathForLetters = (startX: number, startY: number, endX: number, endY: number) => {
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Sample every 12 pixels to catch all letters
+      const stepSize = 12;
+      const steps = Math.max(1, Math.ceil(distance / stepSize));
+      
+      // Reset processed letters set for this move
+      processedLettersInTouchMoveRef.current.clear();
+      
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = startX + dx * t;
+        const y = startY + dy * t;
+        
+        const element = document.elementFromPoint(x, y);
+        const letterElement = getLetterFromElement(element);
+        
+        // Only process each letter once per move event to avoid duplicates
+        if (letterElement && !processedLettersInTouchMoveRef.current.has(letterElement.index)) {
+          processedLettersInTouchMoveRef.current.add(letterElement.index);
+          handleLetterTouch(letterElement);
+        }
+      }
+    };
+
     const handleTouchStartDirect = (e: TouchEvent) => {
       if (gameState?.gameStatus !== 'playing') return;
       e.preventDefault();
       e.stopPropagation();
       clearKeyboardWord();
       const touch = e.touches[0];
+      // Reset last position for new swipe
+      lastTouchPositionRef.current = { x: touch.clientX, y: touch.clientY };
+      processedLettersInTouchMoveRef.current.clear();
+      
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (element) {
-        // Get letter element using the same logic as useBoardSwipe's getContainerDiv
-        let letterEl: HTMLElement | null = null;
-        if (element.classList.contains('letter')) {
-          letterEl = element as HTMLElement;
-        } else if (element.parentElement?.classList.contains('letter')) {
-          letterEl = element.parentElement as HTMLElement;
-        }
-        
-        if (letterEl) {
-          // Extract letter data and call handleLetterTouch directly
-          const x = parseInt(letterEl.getAttribute('data-x') || '0');
-          const y = parseInt(letterEl.getAttribute('data-y') || '0');
-          const letter = letterEl.getAttribute('data-letter') || '';
-          const index = parseInt(letterEl.getAttribute('data-index') || '0');
-          const letterElement = {
-            element: letterEl as HTMLDivElement,
-            x,
-            y,
-            letter,
-            index,
-          };
-          handleLetterTouch(letterElement);
-        }
+      const letterElement = getLetterFromElement(element);
+      if (letterElement) {
+        handleLetterTouch(letterElement);
       }
     };
 
@@ -149,37 +189,35 @@ export function GameBoard({
       e.preventDefault();
       e.stopPropagation();
       const touch = e.touches[0];
-      const element = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (element) {
-        // Get letter element using the same logic as useBoardSwipe's getContainerDiv
-        let letterEl: HTMLElement | null = null;
-        if (element.classList.contains('letter')) {
-          letterEl = element as HTMLElement;
-        } else if (element.parentElement?.classList.contains('letter')) {
-          letterEl = element.parentElement as HTMLElement;
-        }
-        
-        if (letterEl) {
-          // Extract letter data and call handleLetterTouch directly
-          const x = parseInt(letterEl.getAttribute('data-x') || '0');
-          const y = parseInt(letterEl.getAttribute('data-y') || '0');
-          const letter = letterEl.getAttribute('data-letter') || '';
-          const index = parseInt(letterEl.getAttribute('data-index') || '0');
-          const letterElement = {
-            element: letterEl as HTMLDivElement,
-            x,
-            y,
-            letter,
-            index,
-          };
+      const currentPos = { x: touch.clientX, y: touch.clientY };
+      
+      // If we have a last position, sample the path between them
+      if (lastTouchPositionRef.current) {
+        samplePathForLetters(
+          lastTouchPositionRef.current.x,
+          lastTouchPositionRef.current.y,
+          currentPos.x,
+          currentPos.y
+        );
+      } else {
+        // First move - just check current position
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        const letterElement = getLetterFromElement(element);
+        if (letterElement) {
           handleLetterTouch(letterElement);
         }
       }
+      
+      // Update last position
+      lastTouchPositionRef.current = currentPos;
     };
 
     const handleTouchEndDirect = (e: TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      // Reset last position
+      lastTouchPositionRef.current = null;
+      processedLettersInTouchMoveRef.current.clear();
       const syntheticEvent = {
         preventDefault: () => {},
         stopPropagation: () => {},
@@ -197,7 +235,7 @@ export function GameBoard({
       boardElement.removeEventListener('touchmove', handleTouchMoveDirect);
       boardElement.removeEventListener('touchend', handleTouchEndDirect);
     };
-  }, [boardRef, gameState?.gameStatus, clearKeyboardWord, handleLetterTouch]);
+  }, [boardRef, gameState?.gameStatus, clearKeyboardWord, handleLetterTouch, handleTouchEnd]);
 
   return (
     <div className="game-board">

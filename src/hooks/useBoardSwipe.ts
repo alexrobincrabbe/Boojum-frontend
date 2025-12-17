@@ -59,6 +59,8 @@ export function useBoardSwipe(
   const [currentWord, setCurrentWord] = useState('');
   const svgContainerRef = useRef<SVGSVGElement | null>(null);
   const isMouseDownRef = useRef(false);
+  const lastPointerPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const processedLettersInMoveRef = useRef<Set<number>>(new Set());
 
   // Get letter container from element
   const getContainerDiv = useCallback((element: Element | null): LetterElement | null => {
@@ -80,6 +82,39 @@ export function useBoardSwipe(
     }
     return null;
   }, []);
+
+  // Sample points along a path and check for letters at each point
+  // This ensures no letters are missed during fast swipes
+  const samplePathForLetters = useCallback((startX: number, startY: number, endX: number, endY: number, callback: (letter: LetterElement | null) => void) => {
+    if (!boardRef.current) return;
+    
+    // Calculate distance to determine number of samples
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Sample every 10-15 pixels to catch all letters (letters are typically 40-60px)
+    const stepSize = 12;
+    const steps = Math.max(1, Math.ceil(distance / stepSize));
+    
+    // Reset processed letters set for this move
+    processedLettersInMoveRef.current.clear();
+    
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const x = startX + dx * t;
+      const y = startY + dy * t;
+      
+      const element = document.elementFromPoint(x, y);
+      const letter = getContainerDiv(element);
+      
+      // Only process each letter once per move event to avoid duplicates
+      if (letter && !processedLettersInMoveRef.current.has(letter.index)) {
+        processedLettersInMoveRef.current.add(letter.index);
+        callback(letter);
+      }
+    }
+  }, [boardRef, getContainerDiv]);
 
   // Check if letter is adjacent to last selected letter
   const isAdjacent = useCallback((x: number, y: number, lastX: number | null, lastY: number | null): boolean => {
@@ -419,6 +454,9 @@ export function useBoardSwipe(
     lastSoundIndexRef.current = null;
     // Reset exact match tracking when word is finalized
     lastExactMatchRef.current = '';
+    // Reset pointer position tracking
+    lastPointerPositionRef.current = null;
+    processedLettersInMoveRef.current.clear();
     
     // Reset finalizing flag after a short delay to allow state to settle
     setTimeout(() => {
@@ -426,11 +464,45 @@ export function useBoardSwipe(
     }, 100);
   }, [onWordSubmit, clearLines, boardRef]);
 
+  // Handle pointer position with path sampling for fast swipes
+  const handlePointerPosition = useCallback((clientX: number, clientY: number) => {
+    const currentPos = { x: clientX, y: clientY };
+    
+    // If we have a last position, sample the path between them
+    if (lastPointerPositionRef.current) {
+      samplePathForLetters(
+        lastPointerPositionRef.current.x,
+        lastPointerPositionRef.current.y,
+        currentPos.x,
+        currentPos.y,
+        (letter) => {
+          if (letter) {
+            handleLetterTouch(letter);
+          }
+        }
+      );
+    } else {
+      // First position - just check current position
+      const element = document.elementFromPoint(clientX, clientY);
+      const letter = getContainerDiv(element);
+      if (letter) {
+        handleLetterTouch(letter);
+      }
+    }
+    
+    // Update last position
+    lastPointerPositionRef.current = currentPos;
+  }, [samplePathForLetters, getContainerDiv, handleLetterTouch]);
+
   // Mouse event handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (gameStatus !== 'playing') return;
     e.preventDefault();
     isMouseDownRef.current = true;
+    // Reset last position for new swipe
+    lastPointerPositionRef.current = { x: e.clientX, y: e.clientY };
+    processedLettersInMoveRef.current.clear();
+    
     const element = document.elementFromPoint(e.clientX, e.clientY);
     const letter = getContainerDiv(element);
     if (letter) {
@@ -456,6 +528,10 @@ export function useBoardSwipe(
       // Ignore errors if event is already handled
     }
     const touch = e.touches[0];
+    // Reset last position for new swipe
+    lastPointerPositionRef.current = { x: touch.clientX, y: touch.clientY };
+    processedLettersInMoveRef.current.clear();
+    
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
     const letter = getContainerDiv(element);
     if (letter) {
@@ -472,12 +548,8 @@ export function useBoardSwipe(
       // Ignore errors if event is already handled
     }
     const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    const letter = getContainerDiv(element);
-    if (letter) {
-      handleLetterTouch(letter);
-    }
-  }, [gameStatus, getContainerDiv, handleLetterTouch]);
+    handlePointerPosition(touch.clientX, touch.clientY);
+  }, [gameStatus, handlePointerPosition]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     try {
@@ -486,6 +558,9 @@ export function useBoardSwipe(
     } catch (err) {
       // Ignore errors if event is already handled
     }
+    // Reset last position
+    lastPointerPositionRef.current = null;
+    processedLettersInMoveRef.current.clear();
     finalizeWordSelection();
   }, [finalizeWordSelection]);
 
@@ -508,17 +583,16 @@ export function useBoardSwipe(
       const handleDocumentMouseMove = (e: MouseEvent) => {
         if (isMouseDownRef.current && gameStatus === 'playing') {
           e.preventDefault();
-          const element = document.elementFromPoint(e.clientX, e.clientY);
-          const letter = getContainerDiv(element);
-          if (letter) {
-            handleLetterTouch(letter);
-          }
+          handlePointerPosition(e.clientX, e.clientY);
         }
       };
       const handleDocumentMouseUp = (e: MouseEvent) => {
         if (isMouseDownRef.current) {
           e.preventDefault();
           isMouseDownRef.current = false;
+          // Reset last position
+          lastPointerPositionRef.current = null;
+          processedLettersInMoveRef.current.clear();
           setSwipeState(prev => {
         const newState = { ...prev, isMouseDown: false };
         swipeStateRef.current = newState;
@@ -537,7 +611,7 @@ export function useBoardSwipe(
         document.removeEventListener('mouseup', handleDocumentMouseUp);
       };
     }
-  }, [boardRef, gameStatus, getContainerDiv, handleLetterTouch, finalizeWordSelection]);
+  }, [boardRef, gameStatus, getContainerDiv, handleLetterTouch, finalizeWordSelection, handlePointerPosition]);
 
   return {
     swipeState,
