@@ -494,9 +494,10 @@ export function useBoardSwipe(
   useEffect(() => {
     if (svgContainerRef.current && boardRef.current) {
       const updateSize = () => {
-        if (svgContainerRef.current) {
-          svgContainerRef.current.style.width = `${document.documentElement.scrollWidth}px`;
-          svgContainerRef.current.style.height = `${document.documentElement.scrollHeight}px`;
+        if (svgContainerRef.current && boardRef.current) {
+          const rect = boardRef.current.getBoundingClientRect();
+          svgContainerRef.current.style.width = `${rect.width}px`;
+          svgContainerRef.current.style.height = `${rect.height}px`;
         }
       };
       updateSize();
