@@ -128,6 +128,12 @@ export const dashboardAPI = {
     });
     return response.data;
   },
+  updatePlaymatesFilter: async (filterOnlinePlaymatesOnly: boolean) => {
+    const response = await api.post('/dashboard/playmates-filter/', {
+      filter_online_playmates_only: filterOnlinePlaymatesOnly,
+    });
+    return response.data;
+  },
   searchUsers: async (query: string) => {
     const response = await api.get('/dashboard/search-users/', {
       params: { q: query },

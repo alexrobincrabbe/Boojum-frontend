@@ -272,14 +272,20 @@ export default function GameRoom() {
 
       {gameState && (
         <div className="game-content">
-          <div className="game-header">
-            <h1 style={{ color: roomColor }}>Room: {gameState.roomId}</h1>
-          </div>
-
-          <PlayersList players={gameState.players ?? []} variant="mobile" />
+          <PlayersList 
+            players={gameState.players ?? []} 
+            variant="mobile" 
+            roomId={gameState.roomId}
+            roomColor={roomColor}
+          />
 
           <div className="game-main-layout">
-            <PlayersList players={gameState.players ?? []} variant="desktop" />
+            <PlayersList 
+              players={gameState.players ?? []} 
+              variant="desktop" 
+              roomId={gameState.roomId}
+              roomColor={roomColor}
+            />
 
             <div className={`board-section ${connectionState !== 'open' ? 'disconnected' : ''}`}>
               {connectionState !== 'open' && (

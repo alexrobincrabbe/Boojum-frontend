@@ -1,5 +1,6 @@
 .game-room {
   padding: 20px;
+  padding-top:0px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -100,9 +101,9 @@
 }
 
 .game-content {
+    padding-top:20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
 /* Mobile: Horizontal player names above board */
@@ -139,6 +140,7 @@
 }
 
 .players-section-desktop {
+    margin-bottom: 30px;
   display: none;
   flex-shrink: 0;
 }
@@ -154,13 +156,18 @@
   align-items: center;
   gap: 20px;
   padding: 16px;
-  background-color: rgba(19, 19, 42, 0.95);
   border-radius: 8px;
 }
 
 .game-header h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 0.8rem;
+}
+
+@media screen and (max-width: 768px) {
+  .game-header h1 {
+    font-size: 1.1rem;
+  }
 }
 
 .players-section {
@@ -179,7 +186,7 @@
 .user-list {
   display: flex;
   flex-direction: column;
-  height: 550px;
+  height: 93%;
   overflow-y: auto;
   overflow-x: hidden;
   width: fit-content;
@@ -248,7 +255,7 @@
 }
 
 .game-board {
-  padding: 16px;
+  padding: 16px 16px 0px 16px;
   background-color: transparent;
   border: none;
   flex: 1;
@@ -644,7 +651,7 @@
   min-height: 50px;
   border-radius: 15px;
   font-size: 225%;
-  margin: 20px auto 0;
+  margin: 0px auto 0;
   font-weight: bold;
   /* Reserve space to prevent layout shifts */
   box-sizing: border-box;
@@ -756,12 +763,10 @@
   }
 
   #word-counters-container {
-    min-height: 70px;
     height: 70px;
   }
 
   .word-counters-container {
-    min-height: 70px;
     height: 70px;
   }
 }
@@ -805,12 +810,11 @@
   cursor: not-allowed;
 }
 
-.chat-desktop,
 .chat-mobile {
   width: 100%;
 }
 
-.chat-section {
+.game-chat-section {
   padding: 16px;
   background-color: rgba(19, 19, 42, 0.95);
   border-radius: 8px;
@@ -989,15 +993,16 @@
   }
 
   .chat-desktop {
+    justify-content: center;
+    align-items: center;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    min-width: 300px;
     max-width: 400px;
-    height: 550px;
+    margin-bottom:20px; 
   }
 
-  .chat-desktop .chat-section {
+  .chat-desktop .game-chat-section {
     flex: 1;
     min-height: 0;
     height: 100%;
@@ -1165,7 +1170,6 @@
 
 #word-counters-container {
   /* Always reserve space to prevent layout shifts */
-  min-height: 70px;
   height: 70px;
   display: flex;
   align-items: center;
@@ -1201,9 +1205,7 @@
   align-items: center;
   width: 100%;
   max-width: 100%;
-  margin-bottom: 20px;
   /* Always reserve space to prevent layout shifts */
-  min-height: 70px;
   height: 70px;
   box-sizing: border-box;
   overflow-x: hidden;
@@ -1264,7 +1266,7 @@
   transform: scale(0.95);
 }
 
-.chat-section.disconnected {
+.game-chat-section.disconnected {
   opacity: 0.5;
   pointer-events: none;
 }

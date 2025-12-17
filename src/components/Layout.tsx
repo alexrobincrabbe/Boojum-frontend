@@ -177,7 +177,7 @@ const Layout = ({ children }: LayoutProps) => {
     };
   }, []);
 
-  // Load playmates list once for authenticated users (for filtering online list)
+  // Load playmates list and filter preference once for authenticated users (for filtering online list)
   useEffect(() => {
     const loadPlaymates = async () => {
       if (!isAuthenticated) {
@@ -189,6 +189,8 @@ const Layout = ({ children }: LayoutProps) => {
         const bundle = await dashboardAPI.getDashboardBundle();
         const ids = new Set<number>((bundle.playmates?.buddies || []).map((b: any) => b.id));
         setPlaymateIds(ids);
+        // Load filter preference from backend
+        setShowPlaymatesOnly(bundle.playmates?.filter_online_playmates_only || false);
       } catch (error) {
         console.error('Error loading playmates for filter', error);
       }
@@ -316,19 +318,6 @@ const Layout = ({ children }: LayoutProps) => {
       <div className={`players-online-desktop ${leftSidebarOpen ? 'left-open' : 'left-closed'}`}>
         <div className="players-online-container">
           <div className="players-online-count-label">
-            {isAuthenticated && (
-              <label className="players-filter-switch">
-                <input
-                  type="checkbox"
-                  checked={showPlaymatesOnly}
-                  onChange={() => setShowPlaymatesOnly((v) => !v)}
-                />
-                <span className="players-filter-slider" />
-                <span className="players-filter-label">
-                  {showPlaymatesOnly ? "PM's" : 'all'}
-                </span>
-              </label>
-            )}
             <div>
               Online: <span className="players-online-count-number">{onlineCount}</span>
             </div>
@@ -376,19 +365,6 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="mobile-users-dropdown">
           <div className="mobile-users-dropdown-header">
             <h3>Players Online ({onlineCount})</h3>
-            {isAuthenticated && (
-              <label className="players-filter-switch">
-                <input
-                  type="checkbox"
-                  checked={showPlaymatesOnly}
-                  onChange={() => setShowPlaymatesOnly((v) => !v)}
-                />
-                <span className="players-filter-slider" />
-                <span className="players-filter-label">
-                  {showPlaymatesOnly ? "PM's" : 'all'}
-                </span>
-              </label>
-            )}
             <button
               className="mobile-users-close"
               onClick={() => setMobileUsersDropdownOpen(false)}

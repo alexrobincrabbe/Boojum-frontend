@@ -13,6 +13,7 @@ interface Buddy {
 
 interface PlaymatesBundle {
   buddies?: Buddy[];
+  filter_online_playmates_only?: boolean;
 }
 
 const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
@@ -21,11 +22,13 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
   const [suggestions, setSuggestions] = useState<{ id: number; display_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [filterOnlinePlaymatesOnly, setFilterOnlinePlaymatesOnly] = useState(false);
 
   useEffect(() => {
     const initFromBundle = () => {
       if (bundle) {
         setBuddies(bundle.buddies || []);
+        setFilterOnlinePlaymatesOnly(bundle.filter_online_playmates_only || false);
         setLoading(false);
         return true;
       }
@@ -103,6 +106,16 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
     setSuggestions([]);
   };
 
+  const handleFilterToggle = async (checked: boolean) => {
+    try {
+      await dashboardAPI.updatePlaymatesFilter(checked);
+      setFilterOnlinePlaymatesOnly(checked);
+      toast.success('Filter setting updated');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Error updating filter setting');
+    }
+  };
+
   if (loading) {
     return (
       <div className="tab-content">
@@ -117,6 +130,44 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
     <div className="tab-content">
       <div className="playmates-content">
         <div className="playmates-section">
+          <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: 'rgba(19, 19, 42, 0.5)', borderRadius: '8px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', userSelect: 'none' }}>
+              <input
+                type="checkbox"
+                checked={filterOnlinePlaymatesOnly}
+                onChange={(e) => handleFilterToggle(e.target.checked)}
+                style={{ display: 'none' }}
+              />
+              <span
+                style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  width: '50px',
+                  height: '24px',
+                  backgroundColor: filterOnlinePlaymatesOnly ? '#33A17E' : '#ccc',
+                  borderRadius: '12px',
+                  transition: 'background-color 0.3s',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '2px',
+                    left: filterOnlinePlaymatesOnly ? '26px' : '2px',
+                    width: '20px',
+                    height: '20px',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    transition: 'left 0.3s',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  }}
+                />
+              </span>
+              <span style={{ color: '#fff', fontSize: '0.9rem' }}>
+                Filter online users to show only playmates
+              </span>
+            </label>
+          </div>
           <form onSubmit={handleAddBuddy} id="buddy-form" className="short-form">
             <label htmlFor="buddy-search">Search Playmates:</label>
             <input

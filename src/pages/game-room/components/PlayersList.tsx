@@ -8,12 +8,19 @@ interface PlayersListProps {
     profileUrl?: string;
   })[];
   variant?: 'mobile' | 'desktop';
+  roomId?: string;
+  roomColor?: string;
 }
 
-export function PlayersList({ players, variant = 'desktop' }: PlayersListProps) {
+export function PlayersList({ players, variant = 'desktop', roomId, roomColor }: PlayersListProps) {
   if (variant === 'mobile') {
     return (
       <div className="players-section-mobile">
+        {roomId && (
+          <div className="game-header">
+            <h1 style={{ color: roomColor }}>{roomId}</h1>
+          </div>
+        )}
         <div className="user-list-mobile">
           {players.map((player) => {
             const chatColor = player.chatColor || '#71bbe9';
@@ -49,6 +56,11 @@ export function PlayersList({ players, variant = 'desktop' }: PlayersListProps) 
 
   return (
     <div className="players-section-desktop">
+      {roomId && (
+        <div className="game-header">
+          <h1 style={{ color: roomColor }}>{roomId}</h1>
+        </div>
+      )}
       <div className="user-list">
         {players.map((player) => {
           const profilePictureUrl = player.profilePictureUrl || '';

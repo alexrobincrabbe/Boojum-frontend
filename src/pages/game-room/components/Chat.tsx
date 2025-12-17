@@ -110,7 +110,7 @@ export function Chat({ messages, connectionState, onSendMessage, onReconnect }: 
   };
 
   return (
-    <div className={`chat-section ${connectionState !== 'open' ? 'disconnected' : ''}`}>
+    <div className={`game-chat-section ${connectionState !== 'open' ? 'disconnected' : ''}`}>
       {connectionState !== 'open' && (
         <div className="connection-overlay">
           <div className="connection-overlay-content">
