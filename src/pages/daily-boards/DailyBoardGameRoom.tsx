@@ -8,7 +8,7 @@ import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
 import { PlayersList } from '../game-room/components/PlayersList';
 import { ScoresModal } from '../game-room/components/ScoresModal';
-import type { WordData } from '../../ws/protocol';
+// WordData unused here
 import { toast } from 'react-toastify';
 import '../game-room/GameRoom.css';
 

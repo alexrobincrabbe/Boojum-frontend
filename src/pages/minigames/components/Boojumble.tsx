@@ -263,7 +263,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       if (!currentBoojumble || !currentBoojumble.rows || !currentBoojumble.cols) return;
 
       // Read current grid words from DOM
-      const letterTiles = Array.from(currentBoard.querySelectorAll('.letter'));
+      const letterTiles = Array.from(currentBoard.querySelectorAll('.letter') as NodeListOf<HTMLElement>);
       const rowWords: string[] = [];
       const colWords: string[] = [];
 
