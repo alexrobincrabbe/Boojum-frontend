@@ -334,7 +334,9 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
                 <div
                   className="clue"
                   id={`word-clue-1-${stepIdx}`}
-                  ref={(el) => (clueRefs.current[stepIdx - 1] = el)}
+                  ref={(el) => {
+                    clueRefs.current[stepIdx - 1] = el;
+                  }}
                   style={{ minHeight: 50 }}
                 />
                 <div className="word-clue-guess-container">
