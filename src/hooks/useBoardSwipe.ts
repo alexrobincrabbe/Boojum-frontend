@@ -29,6 +29,11 @@ export function useBoardSwipe(
     onExactMatch?: (word: string) => void // Callback when a word turns green (exact match found)
 ) {
     const [debugDot, setDebugDot] = useState<{ x: number; y: number; overLetter: boolean } | null>(null);
+    type DebugPoint = { x: number; y: number; overLetter: boolean };
+
+    const [debugPath, setDebugPath] = useState<DebugPoint[]>([]);
+    const debugPathRef = useRef<DebugPoint[]>([]);
+
 
     const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
     // Use override if provided, otherwise use global setting
@@ -84,6 +89,31 @@ export function useBoardSwipe(
         }
         return null;
     }, []);
+
+    const pushDebugPoint = useCallback((clientX: number, clientY: number) => {
+        if (!boardRef.current) return;
+      
+        const rect = boardRef.current.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+      
+        const el = document.elementFromPoint(clientX, clientY);
+        const hit = getContainerDiv(el);
+      
+        const p = { x, y, overLetter: !!hit };
+      
+        // update dot
+        setDebugDot(p);
+      
+        // update path (cap length so it doesn't blow up)
+        setDebugPath(prev => {
+          const next = [...prev, p];
+          const capped = next.length > 250 ? next.slice(next.length - 250) : next;
+          debugPathRef.current = capped;
+          return capped;
+        });
+      }, [boardRef, getContainerDiv]);
+      
 
     // Sample points along a path and check for letters at each point
     // This ensures no letters are missed during fast swipes
@@ -468,35 +498,70 @@ export function useBoardSwipe(
     }, [onWordSubmit, clearLines, boardRef]);
 
     // Handle pointer position with path sampling for fast swipes
-    const handlePointerPosition = useCallback((clientX: number, clientY: number) => {
-        if (!boardRef.current) return;
+    const handlePointerPosition = useCallback(
+        (clientX: number, clientY: number) => {
+          if (!boardRef.current) return;
       
-        const rect = boardRef.current.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+          const currentPos = { x: clientX, y: clientY };
+          const last = lastPointerPositionRef.current;
       
-        const element = document.elementFromPoint(clientX, clientY);
-        const hitLetter = getContainerDiv(element);
+          // --- 1) Breadcrumb / debug path (continuous points) ---
+          if (last) {
+            const dx = currentPos.x - last.x;
+            const dy = currentPos.y - last.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
       
-        setDebugDot({ x, y, overLetter: !!hitLetter });
+            const step = 10; // pixels between debug dots
+            const steps = Math.max(1, Math.ceil(dist / step));
       
-        const currentPos = { x: clientX, y: clientY };
+            for (let i = 1; i <= steps; i++) {
+              const t = i / steps;
+              const sx = last.x + dx * t;
+              const sy = last.y + dy * t;
       
-        if (lastPointerPositionRef.current) {
-          samplePathForLetters(
-            lastPointerPositionRef.current.x,
-            lastPointerPositionRef.current.y,
-            currentPos.x,
-            currentPos.y,
-            (l) => { if (l) handleLetterTouch(l); }
-          );
-        } else {
-          if (hitLetter) handleLetterTouch(hitLetter);
-        }
+              // updates debugDot + appends to debugPath
+              pushDebugPoint(sx, sy);
       
-        lastPointerPositionRef.current = currentPos;
-      }, [boardRef, samplePathForLetters, getContainerDiv, handleLetterTouch]);
+              // also check letters at each sampled point (fast swipes won't miss)
+              const el = document.elementFromPoint(sx, sy);
+              const letter = getContainerDiv(el);
+              if (letter) {
+                handleLetterTouch(letter);
+              }
+            }
+          } else {
+            // first point
+            pushDebugPoint(clientX, clientY);
       
+            const el = document.elementFromPoint(clientX, clientY);
+            const letter = getContainerDiv(el);
+            if (letter) {
+              handleLetterTouch(letter);
+            }
+          }
+      
+          // --- 2) Your existing "path sampling" (optional to keep) ---
+          // If you keep this, it may be redundant with the loop above, but it’s fine.
+          // If you want to avoid duplicates, you can remove this whole block.
+          if (last) {
+            samplePathForLetters(last.x, last.y, currentPos.x, currentPos.y, (l) => {
+              if (l) handleLetterTouch(l);
+            });
+          }
+      
+          // --- 3) Update last pointer position ---
+          lastPointerPositionRef.current = currentPos;
+        },
+        [
+          boardRef,
+          pushDebugPoint,
+          getContainerDiv,
+          handleLetterTouch,
+          samplePathForLetters,
+        ]
+      );
+      
+
 
     // Mouse event handlers
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -572,6 +637,9 @@ export function useBoardSwipe(
         lastPointerPositionRef.current = null;
         processedLettersInMoveRef.current.clear();
         setDebugDot(null);
+setDebugPath([]);
+debugPathRef.current = [];
+
         finalizeWordSelection();
     }, [finalizeWordSelection]);
 
@@ -614,6 +682,9 @@ export function useBoardSwipe(
                         return newState;
                     });
                     setDebugDot(null);
+setDebugPath([]);
+debugPathRef.current = [];
+
                     finalizeWordSelection();
                 }
             };
@@ -641,6 +712,7 @@ export function useBoardSwipe(
         finalizeWordSelection,
         handlePointerPosition,
         debugDot,
+        debugPath,
     };
 }
 

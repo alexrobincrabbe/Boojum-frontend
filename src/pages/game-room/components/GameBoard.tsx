@@ -92,7 +92,8 @@ export function GameBoard({
     handleLetterTouch,
     finalizeWordSelection,
     handlePointerPosition,
-    debugDot, // Get handleLetterTouch for direct use in touch handlers
+    debugDot,
+    debugPath,
   } = useBoardSwipe(
     boardRef,
     gameState?.gameStatus,
@@ -417,19 +418,24 @@ export function GameBoard({
               }}
               
           >
-            <div
-              style={{
-                position: "absolute",
-                left: 20,
-                top: 20,
-                width: 20,
-                height: 20,
-                borderRadius: 9999,
-                background: "red",
-                zIndex: 999999,
-                pointerEvents: "none",
-              }}
-            />
+            {debugPath?.map((p, i) => (
+  <div
+    key={i}
+    style={{
+      position: "absolute",
+      left: p.x - 4,
+      top: p.y - 4,
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+      background: p.overLetter ? "lime" : "red",
+      opacity: 0.8,
+      pointerEvents: "none",
+      zIndex: 9999,
+    }}
+  />
+))}
+
             {debugDot && (
               <div
                 style={{
