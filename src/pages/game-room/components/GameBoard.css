@@ -1,5 +1,7 @@
 /* Game Board styles are in GameRoom.css */
-
+.game-board {
+  position: relative;
+}
 .show-scores-button {
   position: absolute;
   bottom: calc(50% - 35px);
@@ -35,3 +37,74 @@
 .board-svg-overlay line {
   pointer-events: none;
 }
+
+/* Container */
+.debug-toggle {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+  }
+  
+  /* Label text */
+  .debug-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Switch wrapper */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+  }
+  
+  /* Hide default checkbox */
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* Slider track */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    transition: background-color 0.25s ease;
+  }
+  
+  /* Knob */
+  .slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    top: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Checked state */
+  .switch input:checked + .slider {
+    background-color: #3cff9e; /* neon green */
+  }
+  
+  .switch input:checked + .slider::before {
+    transform: translateX(20px);
+  }
+  
+  /* Focus ring (keyboard accessibility) */
+  .switch input:focus + .slider {
+    box-shadow: 0 0 0 2px rgba(60, 255, 158, 0.5);
+  }
+  

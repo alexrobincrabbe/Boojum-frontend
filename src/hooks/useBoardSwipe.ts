@@ -28,7 +28,8 @@ export function useBoardSwipe(
   boardWords?: string[],
   wordsFound?: Set<string>,
   colorsOffOverride?: boolean,
-  onExactMatch?: (word: string) => void
+  onExactMatch?: (word: string) => void,
+  debugMode: boolean = false
 ) {
   const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
   const colorsOff =
@@ -108,6 +109,7 @@ export function useBoardSwipe(
 
   const pushDebugPoint = useCallback(
     (clientX: number, clientY: number) => {
+        if (!debugMode) return; 
       if (!boardRef.current) return;
 
       const rect = boardRef.current.getBoundingClientRect();
@@ -126,7 +128,7 @@ export function useBoardSwipe(
         return capped;
       });
     },
-    [boardRef, getLetterUnderPoint]
+    [boardRef, getLetterUnderPoint, debugMode]
   );
 
   const samplePathForLetters = useCallback(

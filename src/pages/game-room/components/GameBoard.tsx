@@ -46,6 +46,7 @@ export function GameBoard({
   const [boardRotation, setBoardRotation] = useState(0);
   const boardRef = useRef<HTMLDivElement>(null);
   const [confirmationWord, setConfirmationWord] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
 
   const activePointerIdRef = useRef<number | null>(null);
   const isPointerDownRef = useRef(false);
@@ -98,7 +99,8 @@ export function GameBoard({
     boardWords,
     wordsFound,
     colorsOffOverride,
-    onExactMatch
+    onExactMatch,
+    debugMode
   );
 
   // Keyboard input functionality
@@ -125,6 +127,19 @@ export function GameBoard({
 
   return (
     <div className="game-board">
+      {/* add somewhere sensible, e.g. near rotate buttons */}
+      <div className="debug-toggle">
+  <label className="switch">
+    <input
+      type="checkbox"
+      checked={debugMode}
+      onChange={() => setDebugMode(v => !v)}
+    />
+    <span className="slider" />
+  </label>
+  <span className="debug-label">Debug</span>
+</div>
+
       <div className="board-container">
         {/* Rotate Buttons and Timer Bar */}
         <div id="rotate-buttons">
@@ -267,25 +282,26 @@ export function GameBoard({
               finalizeWordSelection();
             }}
           >
-            {debugPath?.map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  position: "absolute",
-                  left: p.x - 4,
-                  top: p.y - 4,
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: p.overLetter ? "lime" : "red",
-                  opacity: 0.8,
-                  pointerEvents: "none",
-                  zIndex: 9999,
-                }}
-              />
-            ))}
+            {debugMode &&
+              debugPath?.map((p, i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: p.x - 4,
+                    top: p.y - 4,
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: p.overLetter ? "lime" : "red",
+                    opacity: 0.8,
+                    pointerEvents: "none",
+                    zIndex: 9999,
+                  }}
+                />
+              ))}
 
-            {debugDot && (
+            {debugMode && debugDot && (
               <div
                 style={{
                   position: "absolute",
