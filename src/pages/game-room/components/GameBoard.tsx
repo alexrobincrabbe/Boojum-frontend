@@ -48,6 +48,7 @@ export function GameBoard({
   const [confirmationWord, setConfirmationWord] = useState<string | null>(null);
   const lastTouchPositionRef = useRef<{ x: number; y: number } | null>(null);
   const processedLettersInTouchMoveRef = useRef<Set<number>>(new Set());
+  const activeTouchIdRef = useRef<number | null>(null); // Track active touch for multi-touch handling on iPad
 
   // Wrapper for onWordSubmit that handles one-shot confirmation
   const handleWordSubmitWrapper = useCallback((word: string) => {
@@ -189,10 +190,15 @@ export function GameBoard({
 
     const handleTouchStartDirect = (e: TouchEvent) => {
       if (gameState?.gameStatus !== 'playing') return;
+      // iPad/Safari: Check if there are any touches before accessing
+      if (!e.touches || e.touches.length === 0) return;
+      
       e.preventDefault();
       e.stopPropagation();
       clearKeyboardWord();
       const touch = e.touches[0];
+      // Track this touch identifier for multi-touch handling (important on iPad)
+      activeTouchIdRef.current = touch.identifier;
       // Reset last position for new swipe
       lastTouchPositionRef.current = { x: touch.clientX, y: touch.clientY };
       processedLettersInTouchMoveRef.current.clear();
@@ -206,9 +212,18 @@ export function GameBoard({
 
     const handleTouchMoveDirect = (e: TouchEvent) => {
       if (gameState?.gameStatus !== 'playing') return;
+      // iPad/Safari: Check if there are any touches before accessing
+      if (!e.touches || e.touches.length === 0) return;
+      
+      // Find the active touch by identifier (handles multi-touch on iPad)
+      const touch = activeTouchIdRef.current !== null
+        ? Array.from(e.touches).find(t => t.identifier === activeTouchIdRef.current) || e.touches[0]
+        : e.touches[0];
+      
+      if (!touch) return;
+      
       e.preventDefault();
       e.stopPropagation();
-      const touch = e.touches[0];
       const currentPos = { x: touch.clientX, y: touch.clientY };
       
       // If we have a last position, sample the path between them
@@ -233,11 +248,23 @@ export function GameBoard({
     };
 
     const handleTouchEndDirect = (e: TouchEvent) => {
+      // iPad/Safari: Check if this is our active touch ending
+      // Handle both touchend (specific touch) and touchcancel (all touches)
+      if (e.type === 'touchend' && activeTouchIdRef.current !== null) {
+        // Check if the ended touch is our active one
+        const endedTouch = Array.from(e.changedTouches).find(t => t.identifier === activeTouchIdRef.current);
+        if (!endedTouch && e.changedTouches.length > 0) {
+          // Different touch ended, ignore it
+          return;
+        }
+      }
+      
       e.preventDefault();
       e.stopPropagation();
       // Reset last position
       lastTouchPositionRef.current = null;
       processedLettersInTouchMoveRef.current.clear();
+      activeTouchIdRef.current = null; // Clear active touch tracking
       const syntheticEvent = {
         preventDefault: () => {},
         stopPropagation: () => {},
@@ -245,15 +272,23 @@ export function GameBoard({
       handleTouchEnd(syntheticEvent);
     };
 
+    // iPad: Handle touchcancel for when system interrupts touch (notifications, gestures, etc.)
+    const handleTouchCancelDirect = (e: TouchEvent) => {
+      // Treat cancel same as end - reset everything
+      handleTouchEndDirect(e);
+    };
+
     // Attach with { passive: false } to allow preventDefault
     boardElement.addEventListener('touchstart', handleTouchStartDirect, { passive: false });
     boardElement.addEventListener('touchmove', handleTouchMoveDirect, { passive: false });
     boardElement.addEventListener('touchend', handleTouchEndDirect, { passive: false });
+    boardElement.addEventListener('touchcancel', handleTouchCancelDirect, { passive: false }); // Important for iPad
 
     return () => {
       boardElement.removeEventListener('touchstart', handleTouchStartDirect);
       boardElement.removeEventListener('touchmove', handleTouchMoveDirect);
       boardElement.removeEventListener('touchend', handleTouchEndDirect);
+      boardElement.removeEventListener('touchcancel', handleTouchCancelDirect);
     };
   }, [boardRef, gameState?.gameStatus, clearKeyboardWord, handleLetterTouch, handleTouchEnd]);
 
