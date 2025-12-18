@@ -32,6 +32,7 @@ export function useBoardSwipe(
     debugMode: boolean = false,
     boardRotationDeg: number = 0
 ) {
+
     const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
     const colorsOff =
         colorsOffOverride !== undefined ? colorsOffOverride : globalColorsOff;
@@ -187,6 +188,8 @@ export function useBoardSwipe(
     const isPreviousLetter = useCallback((letter: LetterElement, selected: LetterElement[]) => {
         return selected.length > 1 && selected.slice(0, -1).some((l) => l.element === letter.element);
     }, []);
+
+
 
     // ---------- drawing ----------
     const drawLine = useCallback((letter1: LetterElement, letter2: LetterElement) => {
@@ -465,17 +468,19 @@ export function useBoardSwipe(
      * - mouse: only track while isMouseDownRef.current === true
      * - touch/pen: track while pointer is active (your component should call setPointerCapture)
      */
+    const pointerRef = useRef({
+        isActive: false,
+        id: -1,
+        type: "mouse" as string,
+    });
+
+
+
     const handlePointerPosition = useCallback(
-        (clientX: number, clientY: number, pointerType?: string) => {
+        (clientX: number, clientY: number) => {
             if (!boardRef.current) return;
             if (gameStatus !== "playing") return;
-
-            const isMouse = (pointerType || "mouse") === "mouse";
-            if (isMouse && !isMouseDownRef.current) {
-                // still allow updating the dot if you want hover visuals; you can remove this line if not
-                // pushDebugPoint(clientX, clientY);
-                return;
-            }
+            if (!pointerRef.current.isActive) return;
 
             const currentPos = { x: clientX, y: clientY };
             const last = lastPointerPositionRef.current;
@@ -506,23 +511,9 @@ export function useBoardSwipe(
                 if (letter) handleLetterTouch(letter);
             }
 
-            // optional (safe) additional sampling – can be removed if you want less work
-            if (last) {
-                samplePathForLetters(last.x, last.y, currentPos.x, currentPos.y, (l) => {
-                    if (l) handleLetterTouch(l);
-                });
-            }
-
             lastPointerPositionRef.current = currentPos;
         },
-        [
-            boardRef,
-            gameStatus,
-            pushDebugPoint,
-            getLetterUnderPoint,
-            handleLetterTouch,
-            samplePathForLetters,
-        ]
+        [boardRef, gameStatus, pushDebugPoint, getLetterUnderPoint, handleLetterTouch]
     );
 
     // Mouse down only starts the swipe
@@ -547,6 +538,47 @@ export function useBoardSwipe(
         },
         [gameStatus, handlePointerPosition]
     );
+
+
+    // NEW: unified pointer state (mouse + touch + pen)
+    const isPointerActiveRef = useRef(false);
+
+    const handlePointerDown = useCallback(
+        (pointerId: number, pointerType: string, clientX: number, clientY: number) => {
+            if (gameStatus !== "playing") return;
+
+            pointerRef.current.isActive = true;
+            pointerRef.current.id = pointerId;
+            pointerRef.current.type = pointerType;
+
+            lastPointerPositionRef.current = null;
+            processedLettersInMoveRef.current.clear();
+
+            handlePointerPosition(clientX, clientY);
+        },
+        [gameStatus, handlePointerPosition]
+    );
+
+    const handlePointerMove = useCallback(
+        (pointerId: number, clientX: number, clientY: number) => {
+            if (!pointerRef.current.isActive) return;
+            if (pointerRef.current.id !== pointerId) return;
+
+            handlePointerPosition(clientX, clientY);
+        },
+        [handlePointerPosition]
+    );
+
+    const handlePointerUp = useCallback(() => {
+        if (!pointerRef.current.isActive) return;
+
+        pointerRef.current.isActive = false;
+        pointerRef.current.id = -1;
+
+        finalizeWordSelection();
+    }, [finalizeWordSelection]);
+
+
 
     // document mouse move/up (drag outside board)
     useEffect(() => {
@@ -584,7 +616,7 @@ export function useBoardSwipe(
             document.removeEventListener("mousemove", handleDocumentMouseMove);
             document.removeEventListener("mouseup", handleDocumentMouseUp);
         };
-    }, [gameStatus, handlePointerPosition, finalizeWordSelection]);
+    }, [gameStatus, handlePointerPosition, finalizeWordSelection, boardRef]);
 
     // keep svg overlay sized
     useEffect(() => {
@@ -613,6 +645,9 @@ export function useBoardSwipe(
         handlePointerPosition,
         debugDot,
         debugPath,
+        handlePointerDown,
+        handlePointerMove,
+        handlePointerUp,
     };
 }
 

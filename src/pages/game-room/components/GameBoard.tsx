@@ -50,6 +50,7 @@ export function GameBoard({
 
   const activePointerIdRef = useRef<number | null>(null);
   const isPointerDownRef = useRef(false);
+  const isOneShot = gameState?.oneShot;
 
   // Wrapper for onWordSubmit that handles one-shot confirmation
   const handleWordSubmitWrapper = useCallback(
@@ -59,7 +60,7 @@ export function GameBoard({
       // If result is a string (word), it means we need to show confirmation for one-shot
       if (
         typeof result === "string" &&
-        gameState.oneShot &&
+        isOneShot &&
         !oneShotSubmitted
       ) {
         setConfirmationWord(result);
@@ -69,7 +70,7 @@ export function GameBoard({
       // For normal games, onWordSubmit returns void/undefined and the submission is already handled
       // No additional action needed
     },
-    [onWordSubmit, gameState?.oneShot, oneShotSubmitted]
+    [onWordSubmit, isOneShot, oneShotSubmitted]
   );
 
   // Handle confirmation dialog
@@ -87,11 +88,13 @@ export function GameBoard({
   // Board swipe functionality
   const {
     svgContainerRef,
-    handleMouseDown,
-    finalizeWordSelection,
-    handlePointerPosition,
+ 
     debugDot,
     debugPath,
+ 
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
   } = useBoardSwipe(
     boardRef,
     gameState?.gameStatus,
@@ -101,7 +104,7 @@ export function GameBoard({
     colorsOffOverride,
     onExactMatch,
     debugMode,
-    boardRotation
+    boardRotation,
   );
 
   // Keyboard input functionality
@@ -114,17 +117,6 @@ export function GameBoard({
       onWordSubmit: oneShotSubmitted ? () => {} : handleWordSubmitWrapper, // Disable if one-shot submitted
     });
 
-  // Clear keyboard word when swipe starts
-  const handleMouseDownWithClear = useCallback(
-    (e: React.MouseEvent) => {
-      clearKeyboardWord();
-      handleMouseDown(e);
-    },
-    [clearKeyboardWord, handleMouseDown]
-  );
-
-  // Attach touch event listeners directly to DOM with non-passive option to prevent scrolling
-  // This avoids the "Unable to preventDefault inside passive event listener" warning
 
   return (
     <div className="game-board">
@@ -252,36 +244,29 @@ export function GameBoard({
               msTransform: `rotate(${boardRotation}deg)`,
               OTransform: `rotate(${boardRotation}deg)`,
             }}
-            onMouseDown={handleMouseDownWithClear}
+            
             onPointerDown={(e) => {
-              if (gameState?.gameStatus !== "playing") return;
-
-              isPointerDownRef.current = true;
-              activePointerIdRef.current = e.pointerId;
-
-              (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-
-              clearKeyboardWord();
-              handlePointerPosition(e.clientX, e.clientY, e.pointerType);
-            }}
-            onPointerMove={(e) => {
-              if (!isPointerDownRef.current) return;
-              if (activePointerIdRef.current !== e.pointerId) return;
-
-              handlePointerPosition(e.clientX, e.clientY, e.pointerType);
-            }}
-            onPointerUp={(e) => {
-              if (activePointerIdRef.current !== e.pointerId) return;
-
-              isPointerDownRef.current = false;
-              activePointerIdRef.current = null;
-              finalizeWordSelection();
-            }}
-            onPointerCancel={() => {
-              isPointerDownRef.current = false;
-              activePointerIdRef.current = null;
-              finalizeWordSelection();
-            }}
+                if (gameState?.gameStatus !== "playing") return;
+                if (e.pointerType === "mouse" && e.button !== 0) return;
+              
+                e.preventDefault();
+                clearKeyboardWord();
+              
+                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+              
+                handlePointerDown(e.pointerId, e.pointerType, e.clientX, e.clientY);
+              }}
+              onPointerMove={(e) => {
+                handlePointerMove(e.pointerId, e.clientX, e.clientY);
+              }}
+              onPointerUp={() => {
+                handlePointerUp();
+              }}
+              onPointerCancel={() => {
+                handlePointerUp();
+              }}
+              
+              
           >
             {debugMode &&
               debugPath?.map((p, i) => (
