@@ -144,24 +144,12 @@ export function GameBoard({
       const dy = endY - startY;
       const distance = Math.sqrt(dx * dx + dy * dy);
       
-      // Reset processed letters set for this move
-      processedLettersInTouchMoveRef.current.clear();
-      
-      // Optimization: Skip sampling if movement is very small (less than 5px)
-      // Just check the end position directly
-      if (distance < 5) {
-        const element = document.elementFromPoint(endX, endY);
-        const letterElement = getLetterFromElement(element);
-        if (letterElement) {
-          processedLettersInTouchMoveRef.current.add(letterElement.index);
-          handleLetterTouch(letterElement);
-        }
-        return;
-      }
-      
       // Sample every 12 pixels to catch all letters
       const stepSize = 12;
       const steps = Math.max(1, Math.ceil(distance / stepSize));
+      
+      // Reset processed letters set for this move
+      processedLettersInTouchMoveRef.current.clear();
       
       for (let i = 0; i <= steps; i++) {
         const t = i / steps;
