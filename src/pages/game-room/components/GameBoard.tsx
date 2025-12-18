@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import type { GameState } from "../../../ws/protocol";
 import { useBoardSwipe } from "../../../hooks/useBoardSwipe";
 import { useKeyboardInput } from "../../../hooks/useKeyboardInput";
