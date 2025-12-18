@@ -170,6 +170,7 @@ export function useBoardSwipe(
     line.setAttribute('stroke-width', '15');
     line.setAttribute('stroke-opacity', '0.3');
     line.setAttribute('stroke-linecap', 'round');
+    line.setAttribute('pointer-events', 'none');
     svgContainerRef.current.appendChild(line);
   }, []);
 
@@ -576,6 +577,10 @@ export function useBoardSwipe(
         }
       };
       updateSize();
+      if (svgContainerRef.current) {
+        svgContainerRef.current.style.pointerEvents = 'none';
+      }
+      
       window.addEventListener('resize', updateSize);
 
       // Attach document-level mouse events for proper drag handling

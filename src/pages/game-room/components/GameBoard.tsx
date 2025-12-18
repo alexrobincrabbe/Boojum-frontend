@@ -444,7 +444,7 @@ export function GameBoard({
             ) : null}
           </div>
           {/* SVG container for drawing lines between letters */}
-          <svg ref={svgContainerRef} id="svgContainer" />
+          <svg  className="board-svg-overlay" ref={svgContainerRef} id="svgContainer" />
           
           {/* Confirmation Dialog for One-Shot Games */}
           <ConfirmationDialog
