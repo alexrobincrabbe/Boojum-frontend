@@ -390,6 +390,14 @@
   z-index: 997; /* Below players online bar (998), left sidebar (1001), and right sidebar (1001) */
 }
 
+/* Mobile: content accounts for fixed navbar */
+@media (max-width: 767px) {
+  .main-content {
+    padding-top: 90px; /* Padding to compensate for fixed navbar (70px) + margin */
+    margin-top: 0; /* Remove margin-top since we're using padding-top */
+  }
+}
+
 /* Tablet/Desktop: content accounts for players online bar with padding */
 @media (min-width: 768px) {
   .main-content {

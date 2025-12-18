@@ -319,5 +319,34 @@
   .score-display-container {
     width: 100%;
   }
+
+  /* Reorder timer controls on mobile: timer first, then clues, then submit */
+  .timer-controls-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .timer-display {
+    order: 1;
+    width: 100%;
+  }
+
+  .hint-button {
+    order: 2;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .submit-score-button-header {
+    order: 3;
+    width: 100%;
+    max-width: 300px;
+  }
+  .timer-controls-container{
+  .timeless-game-room{
+    padding:20px 10px !important;
+  }
 }
 
+}
