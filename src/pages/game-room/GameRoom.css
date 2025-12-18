@@ -268,6 +268,7 @@
 
 #board{
     touch-action: none;
+    position:relative;
 }
 
 /* Board Container - matches game_board.css */

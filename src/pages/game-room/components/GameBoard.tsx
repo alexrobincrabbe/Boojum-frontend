@@ -48,7 +48,9 @@ export function GameBoard({
   const [confirmationWord, setConfirmationWord] = useState<string | null>(null);
   const lastTouchPositionRef = useRef<{ x: number; y: number } | null>(null);
   const processedLettersInTouchMoveRef = useRef<Set<number>>(new Set());
-
+  const activePointerIdRef = useRef<number | null>(null);
+  const isPointerDownRef = useRef(false);
+  
   // Wrapper for onWordSubmit that handles one-shot confirmation
   const handleWordSubmitWrapper = useCallback(
     (word: string) => {
@@ -88,6 +90,8 @@ export function GameBoard({
     handleMouseDown,
     handleTouchEnd,
     handleLetterTouch,
+    finalizeWordSelection,
+    handlePointerPosition,
     debugDot, // Get handleLetterTouch for direct use in touch handlers
   } = useBoardSwipe(
     boardRef,
@@ -374,6 +378,8 @@ export function GameBoard({
             id="board"
             className="" // Class will be set by BoardThemeContext
             style={{
+              position: "relative",
+              touchAction: "none",
               transform: `rotate(${boardRotation}deg)`,
               WebkitTransform: `rotate(${boardRotation}deg)`,
               MozTransform: `rotate(${boardRotation}deg)`,
@@ -381,20 +387,49 @@ export function GameBoard({
               OTransform: `rotate(${boardRotation}deg)`,
             }}
             onMouseDown={handleMouseDownWithClear}
+            onPointerDown={(e) => {
+                if (gameState?.gameStatus !== "playing") return;
+              
+                isPointerDownRef.current = true;
+                activePointerIdRef.current = e.pointerId;
+              
+                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                handlePointerPosition(e.clientX, e.clientY);
+              }}
+              
+              onPointerMove={(e) => {
+                if (!isPointerDownRef.current) return;
+                if (activePointerIdRef.current !== e.pointerId) return;
+                handlePointerPosition(e.clientX, e.clientY);
+              }}
+              
+              onPointerUp={(e) => {
+                if (activePointerIdRef.current !== e.pointerId) return;
+                isPointerDownRef.current = false;
+                activePointerIdRef.current = null;
+                finalizeWordSelection();
+              }}
+              
+              onPointerCancel={() => {
+                isPointerDownRef.current = false;
+                activePointerIdRef.current = null;
+                finalizeWordSelection();
+              }}
+              
           >
             <div
-  style={{
-    position: "absolute",
-    left: 20,
-    top: 20,
-    width: 20,
-    height: 20,
-    borderRadius: 9999,
-    background: "red",
-    zIndex: 999999,
-    pointerEvents: "none",
-  }}
-/>
+              style={{
+                position: "absolute",
+                left: 20,
+                top: 20,
+                width: 20,
+                height: 20,
+                borderRadius: 9999,
+                background: "red",
+                zIndex: 999999,
+                pointerEvents: "none",
+              }}
+            />
             {debugDot && (
               <div
                 style={{

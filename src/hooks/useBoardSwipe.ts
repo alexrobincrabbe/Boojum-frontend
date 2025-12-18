@@ -639,6 +639,7 @@ export function useBoardSwipe(
         handleTouchEnd,
         handleLetterTouch, // Export for direct use in touch handlers
         finalizeWordSelection,
+        handlePointerPosition,
         debugDot,
     };
 }
