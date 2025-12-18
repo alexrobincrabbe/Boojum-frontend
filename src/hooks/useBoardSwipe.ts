@@ -108,16 +108,8 @@ export function useBoardSwipe(
       return;
     }
     
-    // Adaptive step size: smaller for short distances, larger for long distances
-    // This ensures we catch all letters on short swipes while limiting work on long swipes
-    // Letters are typically 40-60px, so 12px step catches them reliably
-    const baseStepSize = 12;
-    // Maximum safe step size: letters are ~40-60px, so 20px ensures at least 2 samples per letter
-    const maxSafeStepSize = 20;
-    // Cap total samples to prevent performance issues on slower devices, but ensure step size never exceeds safe limit
-    const maxSamples = 20; // Increased from 15 to allow longer swipes without missing letters
-    const adaptiveStepSize = distance / maxSamples;
-    const stepSize = Math.min(maxSafeStepSize, Math.max(baseStepSize, adaptiveStepSize));
+    // Sample every 12 pixels to catch all letters (letters are typically 40-60px)
+    const stepSize = 12;
     const steps = Math.max(1, Math.ceil(distance / stepSize));
     
     for (let i = 0; i <= steps; i++) {
