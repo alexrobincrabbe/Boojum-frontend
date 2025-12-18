@@ -209,6 +209,19 @@ export function useBoardSwipe(
     return wordsOnBoard.some((listedWord) => listedWord.startsWith(word));
   }, []);
 
+  // Clear all tile colors first (like clearBoard in original)
+  const clearTileColors = useCallback(() => {
+    if (!boardRef.current) return;
+    const letterContainers = boardRef.current.getElementsByClassName('letter');
+    for (let i = 0; i < letterContainers.length; i++) {
+      const letterEl = letterContainers[i] as HTMLElement;
+      // Remove all tile color classes
+      letterEl.classList.remove('tile-no-match-dark', 'tile-match-dark', 'tile-partial-match-dark',
+        'tile-no-match-light', 'tile-match-light', 'tile-partial-match-light',
+        'tile-no-match-grey-dark', 'tile-no-match-grey-light', 'tile-match-grey-light');
+    }
+  }, [boardRef]);
+
   // Track last exact match to avoid duplicate callbacks
   const lastExactMatchRef = useRef<string>('');
   
