@@ -90,15 +90,26 @@ export function useBoardSwipe(
         return null;
     }, []);
 
+    const getLetterUnderPoint = useCallback((clientX: number, clientY: number) => {
+        const el = document.elementFromPoint(clientX, clientY);
+        const letter = getContainerDiv(el);
+        if (!letter) return null;
+      
+        // IMPORTANT: only accept if actually inside the circle
+        if (!isPointInsideCircle(letter.element, clientX, clientY)) return null;
+      
+        return letter;
+      }, [getContainerDiv]);
+      
+
     const pushDebugPoint = useCallback((clientX: number, clientY: number) => {
         if (!boardRef.current) return;
       
         const rect = boardRef.current.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
-      
-        const el = document.elementFromPoint(clientX, clientY);
-        const hit = getContainerDiv(el);
+        
+        const hit = getLetterUnderPoint(clientX, clientY);
       
         const p = { x, y, overLetter: !!hit };
       
@@ -112,7 +123,7 @@ export function useBoardSwipe(
           debugPathRef.current = capped;
           return capped;
         });
-      }, [boardRef, getContainerDiv]);
+      }, [boardRef, getLetterUnderPoint]);
       
 
     // Sample points along a path and check for letters at each point
@@ -137,8 +148,8 @@ export function useBoardSwipe(
             const x = startX + dx * t;
             const y = startY + dy * t;
 
-            const element = document.elementFromPoint(x, y);
-            const letter = getContainerDiv(element);
+            const letter = getLetterUnderPoint(x, y);
+
 
             // Only process each letter once per move event to avoid duplicates
             if (letter && !processedLettersInMoveRef.current.has(letter.index)) {
@@ -146,7 +157,7 @@ export function useBoardSwipe(
                 callback(letter);
             }
         }
-    }, [boardRef, getContainerDiv]);
+    }, [boardRef, getLetterUnderPoint]);
 
     // Check if letter is adjacent to last selected letter
     const isAdjacent = useCallback((x: number, y: number, lastX: number | null, lastY: number | null): boolean => {
@@ -523,8 +534,8 @@ export function useBoardSwipe(
               pushDebugPoint(sx, sy);
       
               // also check letters at each sampled point (fast swipes won't miss)
-              const el = document.elementFromPoint(sx, sy);
-              const letter = getContainerDiv(el);
+              const letter = getLetterUnderPoint(sx, sy);
+
               if (letter) {
                 handleLetterTouch(letter);
               }
@@ -533,8 +544,8 @@ export function useBoardSwipe(
             // first point
             pushDebugPoint(clientX, clientY);
       
-            const el = document.elementFromPoint(clientX, clientY);
-            const letter = getContainerDiv(el);
+            const letter = getLetterUnderPoint(clientX, clientY);
+
             if (letter) {
               handleLetterTouch(letter);
             }
@@ -555,7 +566,7 @@ export function useBoardSwipe(
         [
           boardRef,
           pushDebugPoint,
-          getContainerDiv,
+          getLetterUnderPoint,
           handleLetterTouch,
           samplePathForLetters,
         ]
@@ -572,8 +583,7 @@ export function useBoardSwipe(
         lastPointerPositionRef.current = { x: e.clientX, y: e.clientY };
         processedLettersInMoveRef.current.clear();
 
-        const element = document.elementFromPoint(e.clientX, e.clientY);
-        const letter = getContainerDiv(element);
+        const letter = getLetterUnderPoint(e.clientX, e.clientY);
         if (letter) {
             setSwipeState(prev => {
                 const newState = { ...prev, isMouseDown: true };
@@ -582,7 +592,7 @@ export function useBoardSwipe(
             });
             handleLetterTouch(letter);
         }
-    }, [gameStatus, getContainerDiv, handleLetterTouch]);
+    }, [gameStatus, getLetterUnderPoint, handleLetterTouch]);
 
     // Touch event handlers
     // Note: These are called from direct DOM listeners in GameBoard.tsx with { passive: false }
@@ -605,12 +615,11 @@ export function useBoardSwipe(
         lastPointerPositionRef.current = { x: touch.clientX, y: touch.clientY };
         processedLettersInMoveRef.current.clear();
 
-        const element = document.elementFromPoint(touch.clientX, touch.clientY);
-        const letter = getContainerDiv(element);
+        const letter = getLetterUnderPoint(touch.clientX, touch.clientY);
         if (letter) {
             handleLetterTouch(letter);
         }
-    }, [handlePointerPosition, gameStatus, getContainerDiv, handleLetterTouch]);
+    }, [handlePointerPosition, gameStatus, getLetterUnderPoint, handleLetterTouch]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
         console.log("TOUCH MOVE", e.type);
@@ -698,7 +707,7 @@ debugPathRef.current = [];
                 document.removeEventListener('mouseup', handleDocumentMouseUp);
             };
         }
-    }, [boardRef, gameStatus, getContainerDiv, handleLetterTouch, finalizeWordSelection, handlePointerPosition]);
+    }, [boardRef, gameStatus, getLetterUnderPoint, handleLetterTouch, finalizeWordSelection, handlePointerPosition]);
 
     return {
         swipeState,
@@ -716,3 +725,17 @@ debugPathRef.current = [];
     };
 }
 
+function isPointInsideCircle(el: HTMLElement, clientX: number, clientY: number) {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+  
+    // radius: use the smaller dimension / 2, optionally shrink a bit
+    const radius = Math.min(r.width, r.height) / 2 - 2;
+  
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+  
+    return dx * dx + dy * dy <= radius * radius;
+  }
+  
