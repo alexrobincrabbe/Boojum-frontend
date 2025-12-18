@@ -77,7 +77,7 @@ export function useWordTracking(gameState: GameState | null): UseWordTrackingRet
   const previousGameRoundIdRef = useRef<string | undefined>(undefined);
 
   // Initialize word lists and counters when board updates
-  const initializeWordLists = useCallback((newWordsByLength: Record<dstring, string[]>, passedGameState?: GameState | null, sendJson?: (message: any) => void) => {
+  const initializeWordLists = useCallback((newWordsByLength: Record<string, string[]>, passedGameState?: GameState | null, sendJson?: (message: any) => void) => {
     // Use passed gameState if provided (for STATE_SNAPSHOT), otherwise use current gameState
     const stateToUse = passedGameState ?? gameState;
     
