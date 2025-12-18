@@ -382,14 +382,27 @@ export function GameBoard({
             }}
             onMouseDown={handleMouseDownWithClear}
           >
+            <div
+  style={{
+    position: "absolute",
+    left: 20,
+    top: 20,
+    width: 20,
+    height: 20,
+    borderRadius: 9999,
+    background: "red",
+    zIndex: 999999,
+    pointerEvents: "none",
+  }}
+/>
             {debugDot && (
               <div
                 style={{
                   position: "absolute",
-                  left: debugDot.x - 6,
-                  top: debugDot.y - 6,
-                  width: 12,
-                  height: 12,
+                  left: debugDot.x - 12,
+                  top: debugDot.y - 12,
+                  width: 24,
+                  height: 24,
                   borderRadius: "50%",
                   background: debugDot.overLetter ? "lime" : "red",
                   boxShadow: debugDot.overLetter

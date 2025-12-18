@@ -523,6 +523,8 @@ export function useBoardSwipe(
     // Note: These are called from direct DOM listeners in GameBoard.tsx with { passive: false }
     // The preventDefault/stopPropagation calls here are safe because they're called from non-passive listeners
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        console.log("TOUCH START", e.type);
+
         if (gameStatus !== 'playing') return;
         // preventDefault/stopPropagation already called in direct listener, but keep for safety
         try {
@@ -546,6 +548,8 @@ export function useBoardSwipe(
     }, [handlePointerPosition, gameStatus, getContainerDiv, handleLetterTouch]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        console.log("TOUCH MOVE", e.type);
+
         if (gameStatus !== 'playing') return;
         try {
             e.preventDefault();
