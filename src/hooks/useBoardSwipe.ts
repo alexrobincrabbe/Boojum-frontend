@@ -93,12 +93,24 @@ export function useBoardSwipe(
     const dy = endY - startY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Sample every 10-15 pixels to catch all letters (letters are typically 40-60px)
-    const stepSize = 12;
-    const steps = Math.max(1, Math.ceil(distance / stepSize));
-    
     // Reset processed letters set for this move
     processedLettersInMoveRef.current.clear();
+    
+    // Optimization: Skip sampling if movement is very small (less than 5px)
+    // Just check the end position directly
+    if (distance < 5) {
+      const element = document.elementFromPoint(endX, endY);
+      const letter = getContainerDiv(element);
+      if (letter) {
+        processedLettersInMoveRef.current.add(letter.index);
+        callback(letter);
+      }
+      return;
+    }
+    
+    // Sample every 12 pixels to catch all letters (letters are typically 40-60px)
+    const stepSize = 12;
+    const steps = Math.max(1, Math.ceil(distance / stepSize));
     
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
@@ -217,8 +229,22 @@ export function useBoardSwipe(
   const updateTileColors = useCallback((tracePath: boolean[], word: string, wordsOnBoard: string[], foundWords: Set<string>) => {
     if (!boardRef.current || !wordsOnBoard || wordsOnBoard.length === 0) return;
     
-    // Clear all tile colors first (like clearBoard in original)
-    clearTileColors();
+    // Cache letter containers to avoid repeated DOM queries
+    const letterContainers = boardRef.current.getElementsByClassName('letter');
+    const letterElements: HTMLElement[] = [];
+    for (let i = 0; i < letterContainers.length; i++) {
+      letterElements.push(letterContainers[i] as HTMLElement);
+    }
+    
+    // Clear all tile colors first (like clearBoard in original) - optimized to use cached elements
+    const tileClassesToRemove = [
+      'tile-no-match-dark', 'tile-match-dark', 'tile-partial-match-dark',
+      'tile-no-match-light', 'tile-match-light', 'tile-partial-match-light',
+      'tile-no-match-grey-dark', 'tile-no-match-grey-light', 'tile-match-grey-light'
+    ];
+    for (const letterEl of letterElements) {
+      letterEl.classList.remove(...tileClassesToRemove);
+    }
     
     // Filter out found words from available words - only check against words not yet found
     // Check both uppercase and lowercase since foundWords may contain uppercase
@@ -270,16 +296,13 @@ export function useBoardSwipe(
       }
     }
     
-    // Apply colors only to tiles in tracePath
-    const letterContainers = boardRef.current.getElementsByClassName('letter');
-    for (let i = 0; i < letterContainers.length; i++) {
-      const letterEl = letterContainers[i] as HTMLElement;
+    // Apply colors only to tiles in tracePath - using cached elements
+    for (let i = 0; i < letterElements.length && i < tracePath.length; i++) {
       if (tracePath[i]) {
-        // Add the appropriate class
-        letterEl.classList.add(tileClass);
+        letterElements[i].classList.add(tileClass);
       }
     }
-  }, [boardRef, checkMatch, checkPartialMatch, clearTileColors, darkMode, colorsOff, wordsFound, onExactMatch]);
+  }, [boardRef, checkMatch, checkPartialMatch, darkMode, colorsOff, wordsFound, onExactMatch]);
 
   // Handle letter touch/click
   const handleLetterTouch = useCallback((letter: LetterElement | null) => {
