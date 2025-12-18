@@ -266,6 +266,10 @@
   touch-action: none;
 }
 
+#board{
+    touch-action: none;
+}
+
 /* Board Container - matches game_board.css */
 .board-container {
   display: flex;
