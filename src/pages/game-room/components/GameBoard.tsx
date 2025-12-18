@@ -100,7 +100,8 @@ export function GameBoard({
     wordsFound,
     colorsOffOverride,
     onExactMatch,
-    debugMode
+    debugMode,
+    boardRotation
   );
 
   // Keyboard input functionality
@@ -129,16 +130,16 @@ export function GameBoard({
     <div className="game-board">
       {/* add somewhere sensible, e.g. near rotate buttons */}
       <div className="debug-toggle">
-  <label className="switch">
-    <input
-      type="checkbox"
-      checked={debugMode}
-      onChange={() => setDebugMode(v => !v)}
-    />
-    <span className="slider" />
-  </label>
-  <span className="debug-label">Debug</span>
-</div>
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={debugMode}
+            onChange={() => setDebugMode((v) => !v)}
+          />
+          <span className="slider" />
+        </label>
+        <span className="debug-label">Debug</span>
+      </div>
 
       <div className="board-container">
         {/* Rotate Buttons and Timer Bar */}
