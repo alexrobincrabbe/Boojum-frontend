@@ -48,8 +48,6 @@ export function GameBoard({
   const [confirmationWord, setConfirmationWord] = useState<string | null>(null);
   const [debugMode, setDebugMode] = useState(false);
 
-  const activePointerIdRef = useRef<number | null>(null);
-  const isPointerDownRef = useRef(false);
   const isOneShot = gameState?.oneShot;
 
   // Wrapper for onWordSubmit that handles one-shot confirmation

@@ -132,40 +132,6 @@ export function useBoardSwipe(
         [boardRef, getLetterUnderPoint, debugMode, boardRotationDeg]
     );
 
-    const samplePathForLetters = useCallback(
-        (
-            startX: number,
-            startY: number,
-            endX: number,
-            endY: number,
-            callback: (letter: LetterElement | null) => void
-        ) => {
-            if (!boardRef.current) return;
-
-            const dx = endX - startX;
-            const dy = endY - startY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            const stepSize = 12;
-            const steps = Math.max(1, Math.ceil(distance / stepSize));
-
-            processedLettersInMoveRef.current.clear();
-
-            for (let i = 0; i <= steps; i++) {
-                const t = i / steps;
-                const x = startX + dx * t;
-                const y = startY + dy * t;
-
-                const letter = getLetterUnderPoint(x, y);
-                if (letter && !processedLettersInMoveRef.current.has(letter.index)) {
-                    processedLettersInMoveRef.current.add(letter.index);
-                    callback(letter);
-                }
-            }
-        },
-        [boardRef, getLetterUnderPoint]
-    );
-
     const isAdjacent = useCallback(
         (x: number, y: number, lastX: number | null, lastY: number | null) => {
             if (lastX === null || lastY === null) return true;
@@ -528,7 +494,7 @@ export function useBoardSwipe(
             processedLettersInMoveRef.current.clear();
 
             // ensure first point is processed
-            handlePointerPosition(e.clientX, e.clientY, "mouse");
+            handlePointerPosition(e.clientX, e.clientY);
 
             setSwipeState((prev) => {
                 const ns = { ...prev, isMouseDown: true };
@@ -538,10 +504,6 @@ export function useBoardSwipe(
         },
         [gameStatus, handlePointerPosition]
     );
-
-
-    // NEW: unified pointer state (mouse + touch + pen)
-    const isPointerActiveRef = useRef(false);
 
     const handlePointerDown = useCallback(
         (pointerId: number, pointerType: string, clientX: number, clientY: number) => {
@@ -587,7 +549,7 @@ export function useBoardSwipe(
         const handleDocumentMouseMove = (e: MouseEvent) => {
             if (isMouseDownRef.current && gameStatus === "playing") {
                 e.preventDefault();
-                handlePointerPosition(e.clientX, e.clientY, "mouse");
+                handlePointerPosition(e.clientX, e.clientY);
             }
         };
 
