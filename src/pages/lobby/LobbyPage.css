@@ -422,9 +422,22 @@
     min-width: 100%;
   }
 
+  .lobby-section {
+    padding: 0;
+  }
+
   .room-title {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.1rem;
+  }
+
+  .wotd-section h3 {
+    font-size: 1.3rem;
+  }
+
+  .wotd-section p {
+    font-size: 0.85rem;
   }
 }
 
