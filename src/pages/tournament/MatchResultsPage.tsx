@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { tournamentAPI } from '../../services/api';
 import { Loading } from '../../components/Loading';
 import { fetchDefinition } from '../../utils/dictionary';

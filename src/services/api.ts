@@ -2,20 +2,6 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
-// Get CSRF token from cookies (for Django)
-function getCSRFToken(): string | null {
-  const name = 'csrftoken';
-  if (typeof document === 'undefined') return null;
-  const cookies = document.cookie.split(';');
-  for (let i = 0; i < cookies.length; i++) {
-    const cookie = cookies[i].trim();
-    if (cookie.startsWith(`${name}=`)) {
-      return cookie.substring(name.length + 1);
-    }
-  }
-  return null;
-}
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
