@@ -133,14 +133,14 @@ export function ScoresModal({
                       </td>
                       {!isOneShot && (
                         <td className="number-of-words">
-                          {player.number_of_words_found || 0}
+                          {player.number_of_words_found === "-" ? "-" : (player.number_of_words_found || 0)}
                         </td>
                       )}
-                      <td className="dark best-word">{bestWord}</td>
-                      <td className="final-score">{player.final_score}</td>
+                      <td className="dark best-word">{bestWord === "-" ? "-" : bestWord}</td>
+                      <td className="final-score">{player.final_score === "-" ? "-" : player.final_score}</td>
                       {isOneShot && (
                         <td className="one-shot-time">
-                          <span className="yellow">{player.time}s</span>
+                          <span className="yellow">{player.time === "-" ? "-" : `${player.time}s`}</span>
                         </td>
                       )}
                     </tr>

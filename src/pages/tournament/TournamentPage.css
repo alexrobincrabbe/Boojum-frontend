@@ -351,6 +351,15 @@
   font-style: italic;
   color: #8b8b8b;
   margin-left: 10px;
+  font-weight: bold;
+}
+
+.match-status.pending {
+  color: #f5ce45; /* Yellow */
+}
+
+.match-status.played {
+  color: #33c15b; /* Green */
 }
 
 .play-button {

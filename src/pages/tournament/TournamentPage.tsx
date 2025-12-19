@@ -710,18 +710,18 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                   } else {
                                     // Show pending for other players
                                     player1Display = (
-                                      <span className="match-status">pending</span>
+                                      <span className="match-status pending">pending</span>
                                     );
                                   }
                                 } else if (onlyPlayer1Played) {
                                   // Only player 1 has played
-                                  if (isCurrentUserPlayer1 && match.result && typeof match.result.score_player_1 === 'number') {
+                                  if (isCurrentUserPlayer1 && match.result && match.result.score_player_1 !== null && match.result.score_player_1 !== undefined) {
                                     // Show result for current user
                                     player1Display = (
                                       <span 
                                         className="match-score"
                                         style={{
-                                          color: match.result.winner?.id === match.player_1.id ? '#33c15b' : '#ff5596'
+                                          color: '#33c15b' // Green for current player's score
                                         }}
                                       >
                                         {match.result.score_player_1}
@@ -730,7 +730,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                   } else {
                                     // Show "played" for other players
                                     player1Display = (
-                                      <span className="match-status">played</span>
+                                      <span className="match-status played">played</span>
                                     );
                                   }
                                 } else if (bothPlayed && match.result && typeof match.result.score_player_1 === 'number') {
@@ -783,18 +783,18 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                   } else {
                                     // Show pending for other players
                                     player2Display = (
-                                      <span className="match-status">pending</span>
+                                      <span className="match-status pending">pending</span>
                                     );
                                   }
                                 } else if (onlyPlayer2Played) {
                                   // Only player 2 has played
-                                  if (isCurrentUserPlayer2 && match.result && typeof match.result.score_player_2 === 'number') {
+                                  if (isCurrentUserPlayer2 && match.result && match.result.score_player_2 !== null && match.result.score_player_2 !== undefined) {
                                     // Show result for current user
                                     player2Display = (
                                       <span 
                                         className="match-score"
                                         style={{
-                                          color: match.result.winner?.id === match.player_2.id ? '#33c15b' : '#ff5596'
+                                          color: '#33c15b' // Green for current player's score
                                         }}
                                       >
                                         {match.result.score_player_2}
@@ -803,7 +803,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                   } else {
                                     // Show "played" for other players
                                     player2Display = (
-                                      <span className="match-status">played</span>
+                                      <span className="match-status played">played</span>
                                     );
                                   }
                                 } else if (bothPlayed && match.result && typeof match.result.score_player_2 === 'number') {
