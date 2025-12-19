@@ -26,7 +26,7 @@ import NewPostPage from "./pages/forum/NewPostPage";
 import MinigamesPage from "./pages/minigames/MinigamesPage";
 import DoodledumPage from "./pages/minigames/DoodledumPage";
 import "./App.css";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const HomePage = () => {
   const { user, isAuthenticated, loading } = useAuth();
