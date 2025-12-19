@@ -27,6 +27,7 @@ import MinigamesPage from "./pages/minigames/MinigamesPage";
 import DoodledumPage from "./pages/minigames/DoodledumPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react"
 
 const HomePage = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -42,6 +43,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen p-8">
       <SpeedInsights />
+      <Analytics />
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-4 text-yellow-400">
           Welcome to Boojum Games!
