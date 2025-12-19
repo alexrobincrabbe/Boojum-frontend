@@ -52,7 +52,6 @@ export default function DailyBoardGameRoom() {
   // Word tracking ref (WS can call into it)
   const wordTrackingRef = useRef<{
     initializeWordLists: (wordsByLength: Record<string, string[]>) => void;
-    updateWordsFromChat: (message: string, user: string) => void;
   } | null>(null);
 
   // Custom WebSocket URL for daily boards
@@ -82,9 +81,6 @@ export default function DailyBoardGameRoom() {
     initializeWordLists: (wordsByLength) => {
       wordTrackingRef.current?.initializeWordLists(wordsByLength);
     },
-    updateWordsFromChat: (message, user) => {
-      wordTrackingRef.current?.updateWordsFromChat(message, user);
-    },
     onScoreInChat: (_playerName, _score) => {
       // Daily boards don't have chat, so we don't need to handle score messages in chat
     },
@@ -113,7 +109,6 @@ export default function DailyBoardGameRoom() {
     wordsFound,
     handleWordSubmit,
     initializeWordLists,
-    updateWordsFromChat,
     wordCounts,
     wordCountMax,
     wordsByLength,
@@ -183,9 +178,8 @@ export default function DailyBoardGameRoom() {
   useEffect(() => {
     wordTrackingRef.current = {
       initializeWordLists,
-      updateWordsFromChat,
     };
-  }, [initializeWordLists, updateWordsFromChat]);
+  }, [initializeWordLists]);
 
   // Open scores modal when final scores are received and show back button
   useEffect(() => {
