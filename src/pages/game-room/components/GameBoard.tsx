@@ -26,6 +26,9 @@ interface GameBoardProps {
   onOneShotConfirmed?: (word: string) => void; // Callback when one-shot word is confirmed
   colorsOffOverride?: boolean; // Override global colorsOff setting (for timeless boards)
   onExactMatch?: (word: string) => void; // Callback when a word turns green (exact match found)
+  onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number) => void; // Recording callback for swipe
+  onRecordKeyboardWord?: (word: string, tracePath: boolean[]) => void; // Recording callback for keyboard
+  onRecordBoardRotation?: (rotation: number) => void; // Recording callback for board rotation
 }
 
 export function GameBoard({
@@ -42,6 +45,9 @@ export function GameBoard({
   onOneShotConfirmed,
   colorsOffOverride,
   onExactMatch,
+  onRecordSwipeLetter,
+  onRecordKeyboardWord,
+  onRecordBoardRotation,
 }: GameBoardProps) {
   const [boardRotation, setBoardRotation] = useState(0);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -103,6 +109,7 @@ export function GameBoard({
     onExactMatch,
     debugMode,
     boardRotation,
+    onRecordSwipeLetter, // Pass recording callback
   );
 
   // Keyboard input functionality
@@ -113,6 +120,7 @@ export function GameBoard({
       boardWords,
       wordsFound,
       onWordSubmit: oneShotSubmitted ? () => {} : handleWordSubmitWrapper, // Disable if one-shot submitted
+      onRecordKeyboardWord, // Pass recording callback
     });
 
 
@@ -140,7 +148,13 @@ export function GameBoard({
             tabIndex={-1}
             onClick={(e) => {
               e.currentTarget.blur();
-              setBoardRotation((prev) => prev - 90);
+              setBoardRotation((prev) => {
+                const newRotation = prev - 90;
+                if (onRecordBoardRotation) {
+                  onRecordBoardRotation(newRotation);
+                }
+                return newRotation;
+              });
             }}
             aria-label="Rotate board counter-clockwise"
           >
@@ -219,7 +233,13 @@ export function GameBoard({
             tabIndex={-1}
             onClick={(e) => {
               e.currentTarget.blur();
-              setBoardRotation((prev) => prev + 90);
+              setBoardRotation((prev) => {
+                const newRotation = prev + 90;
+                if (onRecordBoardRotation) {
+                  onRecordBoardRotation(newRotation);
+                }
+                return newRotation;
+              });
             }}
             aria-label="Rotate board clockwise"
           >

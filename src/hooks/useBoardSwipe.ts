@@ -30,7 +30,8 @@ export function useBoardSwipe(
     colorsOffOverride?: boolean,
     onExactMatch?: (word: string) => void,
     debugMode: boolean = false,
-    boardRotationDeg: number = 0
+    boardRotationDeg: number = 0,
+    onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number) => void
 ) {
 
     const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
@@ -305,6 +306,11 @@ export function useBoardSwipe(
                             lastSoundIndexRef.current = letter.index;
                         }
 
+                        // Record swipe letter event when going back
+                        if (onRecordSwipeLetter) {
+                            onRecordSwipeLetter(letter.letter, letter.x, letter.y, letter.index);
+                        }
+
                         const currentFound = wordsFound || new Set<string>();
                         if (boardWords && boardWords.length > 0 && word) {
                             updateTileColors(newTracePath, word, boardWords, currentFound);
@@ -350,6 +356,11 @@ export function useBoardSwipe(
                         lastSoundIndexRef.current = letter.index;
                     }
 
+                    // Record swipe letter event
+                    if (onRecordSwipeLetter) {
+                        onRecordSwipeLetter(letter.letter, letter.x, letter.y, letter.index);
+                    }
+
                     const currentFound = wordsFound || new Set<string>();
                     if (boardWords && boardWords.length > 0) {
                         updateTileColors(newTracePath, word, boardWords, currentFound);
@@ -385,6 +396,7 @@ export function useBoardSwipe(
             boardWords,
             updateTileColors,
             wordsFound,
+            onRecordSwipeLetter,
         ]
     );
 

@@ -11,6 +11,8 @@ import { ScoresModal } from '../game-room/components/ScoresModal';
 import { tournamentAPI } from '../../services/api';
 import { toast } from 'react-toastify';
 import { Loading } from '../../components/Loading';
+import { useGameRecording } from '../../hooks/useGameRecording';
+import type { OutboundMessage } from '../../ws/protocol';
 import '../game-room/GameRoom.css';
 
 interface MatchInfo {
@@ -127,6 +129,9 @@ export default function TournamentGameRoom() {
     },
   });
 
+  // Game recording for tournament games
+  const gameRecording = useGameRecording();
+
   // Word tracking (depends on gameState)
   const {
     wordsFound,
@@ -152,6 +157,9 @@ export default function TournamentGameRoom() {
     const wordLower = word.toLowerCase();
     if (wordsFound.has(wordLower)) return;
     
+    // Record word submit
+    gameRecording.recordWordSubmit(word);
+    
     // For one-shot games, show confirmation dialog
     if (gameState.oneShot && !oneShotSubmitted) {
       return word; // Return word to trigger confirmation in GameBoard
@@ -159,7 +167,7 @@ export default function TournamentGameRoom() {
     
     // Normal game - submit word directly
     handleWordSubmit(word);
-  }, [gameState, wordsFound, oneShotSubmitted, handleWordSubmit]);
+  }, [gameState, wordsFound, oneShotSubmitted, handleWordSubmit, gameRecording]);
 
   // Handle confirmed one-shot word submission
   const handleOneShotConfirmed = useCallback((word: string) => {
@@ -184,6 +192,20 @@ export default function TournamentGameRoom() {
   // Scores modal state
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
 
+  // Start recording when game starts
+  useEffect(() => {
+    if (gameState?.gameStatus === 'playing' && !gameRecording.isRecording) {
+      gameRecording.startRecording();
+    }
+  }, [gameState?.gameStatus, gameRecording]);
+
+  // Stop recording when game ends
+  useEffect(() => {
+    if (gameState?.gameStatus === 'finished' && gameRecording.isRecording) {
+      gameRecording.stopRecording();
+    }
+  }, [gameState?.gameStatus, gameRecording]);
+
   // Submit final score when game ends
   const prevGameStatusRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -193,11 +215,24 @@ export default function TournamentGameRoom() {
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
       console.log('[Score] Game ended, submitting score');
-      submitFinalScore(sendJson);
+      // Get recording data
+      const recording = gameRecording.getRecording();
+      console.log('[Recording] Game recording:', recording.length, 'events');
+      
+      // Create a wrapper sendJson that includes recording data
+      const sendJsonWithRecording = (message: OutboundMessage) => {
+        // If this is a submit_final_score message, add recording data
+        if (message.type === 'PLAYER_ACTION' && message.action === 'submit_final_score' && message.data) {
+          message.data.game_recording = recording;
+        }
+        sendJson(message);
+      };
+      
+      submitFinalScore(sendJsonWithRecording);
     }
     
     prevGameStatusRef.current = currentStatus;
-  }, [gameState?.gameStatus, gameState?.finalScores, submitFinalScore, sendJson]);
+  }, [gameState?.gameStatus, gameState?.finalScores, submitFinalScore, sendJson, gameRecording]);
 
   useEffect(() => {
     wordTrackingRef.current = {
@@ -363,6 +398,9 @@ export default function TournamentGameRoom() {
                 onShowScores={() => setIsScoresModalOpen(true)}
                 oneShotSubmitted={oneShotSubmitted}
                 onOneShotConfirmed={handleOneShotConfirmed}
+                onRecordSwipeLetter={gameRecording.recordSwipeLetter}
+                onRecordKeyboardWord={gameRecording.recordKeyboardWord}
+                onRecordBoardRotation={gameRecording.recordBoardRotation}
               />
             </div>
 

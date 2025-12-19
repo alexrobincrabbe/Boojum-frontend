@@ -4,6 +4,8 @@ import { tournamentAPI } from '../../services/api';
 import { Loading } from '../../components/Loading';
 import { fetchDefinition } from '../../utils/dictionary';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
+import { GameReplay } from './components/GameReplay';
+import type { RecordingEvent } from '../../hooks/useGameRecording';
 import '../game-room/GameRoom.css';
 import './MatchResultsPage.css';
 
@@ -38,6 +40,8 @@ interface MatchDetails {
     number_of_words_player_2: number;
     one_shot_time_player_1: number | null;
     one_shot_time_player_2: number | null;
+    game_recording_player_1: any[];
+    game_recording_player_2: any[];
     winner: {
       id: number;
       username: string;
@@ -73,6 +77,7 @@ export default function MatchResultsPage() {
   const [popup, setPopup] = useState<{ word: string; definition: string } | null>(null);
   const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
+  const [replayPlayer, setReplayPlayer] = useState<1 | 2 | null>(null);
 
   useEffect(() => {
     const loadMatchDetails = async () => {
@@ -269,6 +274,15 @@ export default function MatchResultsPage() {
                 </div>
               )}
             </div>
+            {data.result.game_recording_player_1 && data.result.game_recording_player_1.length > 0 && (
+              <button
+                onClick={() => setReplayPlayer(1)}
+                className="replay-button"
+                style={{ borderColor: data.player_1.chat_color }}
+              >
+                ▶ Watch Replay
+              </button>
+            )}
           </div>
 
           <div className="player-score-card">
@@ -299,10 +313,19 @@ export default function MatchResultsPage() {
               ) : (
                 <div className="stat-item">
                   <span className="stat-label yellow">Number of words:</span>
-                  <span className="stat-value">{data.result.number_of_words_player_2}</span>
+                  <span className="stat-value">{data.result.number_of_words_player_2}                  </span>
                 </div>
               )}
             </div>
+            {data.result.game_recording_player_2 && data.result.game_recording_player_2.length > 0 && (
+              <button
+                onClick={() => setReplayPlayer(2)}
+                className="replay-button"
+                style={{ borderColor: data.player_2.chat_color }}
+              >
+                ▶ Watch Replay
+              </button>
+            )}
           </div>
         </div>
 
@@ -476,6 +499,22 @@ export default function MatchResultsPage() {
           )}
         </div>
       </div>
+
+      {/* Game Replay Modal */}
+      {replayPlayer && data && (
+        <GameReplay
+          recording={replayPlayer === 1 
+            ? (data.result.game_recording_player_1 as RecordingEvent[])
+            : (data.result.game_recording_player_2 as RecordingEvent[])
+          }
+          board={data.board.letters}
+          boardWords={data.board.words}
+          playerColor={replayPlayer === 1 ? data.player_1.chat_color : data.player_2.chat_color}
+          playerName={replayPlayer === 1 ? data.player_1.display_name : data.player_2.display_name}
+          foundWords={replayPlayer === 1 ? data.player_1_found_words : data.player_2_found_words}
+          onClose={() => setReplayPlayer(null)}
+        />
+      )}
     </div>
   );
 }

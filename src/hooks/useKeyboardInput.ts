@@ -10,6 +10,7 @@ interface UseKeyboardInputParams {
   onWordSubmit?: (word: string) => void;
   onTracePathUpdate?: (tracePath: boolean[]) => void;
   onTileColorsUpdate?: (exactMatch: boolean, partialMatch: boolean, alreadyFound: boolean) => void;
+  onRecordKeyboardWord?: (word: string, tracePath: boolean[]) => void;
 }
 
 export function useKeyboardInput({
@@ -20,6 +21,7 @@ export function useKeyboardInput({
   onWordSubmit,
   onTracePathUpdate,
   onTileColorsUpdate,
+  onRecordKeyboardWord,
 }: UseKeyboardInputParams) {
   const { darkMode, colorsOff } = useBoardTheme();
   const [currentWord, setCurrentWord] = useState('');
@@ -208,9 +210,14 @@ export function useKeyboardInput({
       onTracePathUpdate(newTracePath);
     }
     
+    // Record keyboard word event
+    if (onRecordKeyboardWord && word) {
+      onRecordKeyboardWord(word, newTracePath);
+    }
+    
     // Update tile colors after tracePath is set
     updateTileColors(word, newTracePath);
-  }, [board, onTracePathUpdate, updateTileColors]);
+  }, [board, onTracePathUpdate, updateTileColors, onRecordKeyboardWord]);
 
   // Add letter to word
   const addLetter = useCallback((key: string) => {
@@ -244,6 +251,10 @@ export function useKeyboardInput({
         if (onTracePathUpdate) {
           onTracePathUpdate(emptyTracePath);
         }
+        // Record clear event
+        if (onRecordKeyboardWord) {
+          onRecordKeyboardWord('', emptyTracePath);
+        }
         return prev;
       }
       
@@ -263,8 +274,12 @@ export function useKeyboardInput({
         if (onTracePathUpdate) {
           onTracePathUpdate(emptyTracePath);
         }
+        // Record clear event
+        if (onRecordKeyboardWord) {
+          onRecordKeyboardWord('', emptyTracePath);
+        }
       } else {
-        // Search board (which will update colors)
+        // Search board (which will update colors and record)
         setTimeout(() => {
           searchBoard(newWord);
         }, 0);
@@ -272,7 +287,7 @@ export function useKeyboardInput({
       
       return newWord;
     });
-  }, [searchBoard, updateTileColors, onTracePathUpdate]);
+  }, [searchBoard, updateTileColors, onTracePathUpdate, onRecordKeyboardWord]);
 
   // Clear word
   const clearWord = useCallback(() => {
@@ -294,7 +309,12 @@ export function useKeyboardInput({
     if (onTracePathUpdate) {
       onTracePathUpdate(emptyTracePath);
     }
-  }, [onTracePathUpdate, board]);
+    
+    // Record clear event
+    if (onRecordKeyboardWord) {
+      onRecordKeyboardWord('', emptyTracePath);
+    }
+  }, [onTracePathUpdate, board, onRecordKeyboardWord]);
 
   // Handle keyboard input
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
