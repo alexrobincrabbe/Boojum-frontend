@@ -25,6 +25,9 @@ import ViewPostPage from "./pages/forum/ViewPostPage";
 import NewPostPage from "./pages/forum/NewPostPage";
 import MinigamesPage from "./pages/minigames/MinigamesPage";
 import DoodledumPage from "./pages/minigames/DoodledumPage";
+import TournamentPage from "./pages/tournament/TournamentPage";
+import TestTournamentPage from "./pages/tournament/TestTournamentPage";
+import MatchResultsPage from "./pages/tournament/MatchResultsPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react"
@@ -118,6 +121,9 @@ function App() {
               <Route path="/forum" element={<ForumPage />} />
               <Route path="/minigames" element={<MinigamesPage />} />
               <Route path="/doodledum" element={<DoodledumPage />} />
+              <Route path="/tournament" element={<TournamentPage />} />
+              <Route path="/tournament/test" element={<TestTournamentPage />} />
+              <Route path="/tournament/match/:matchId" element={<MatchResultsPage />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />
             </Route>

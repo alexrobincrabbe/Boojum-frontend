@@ -2,6 +2,20 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
+// Get CSRF token from cookies (for Django)
+function getCSRFToken(): string | null {
+  const name = 'csrftoken';
+  if (typeof document === 'undefined') return null;
+  const cookies = document.cookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim();
+    if (cookie.startsWith(`${name}=`)) {
+      return cookie.substring(name.length + 1);
+    }
+  }
+  return null;
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -229,6 +243,31 @@ export const lobbyAPI = {
   },
   useTimelessHint: async (timelessBoardId: number) => {
     const response = await api.post(`/timeless-boards/hint/${timelessBoardId}/`);
+    return response.data;
+  },
+};
+
+export const tournamentAPI = {
+  getTournamentData: async (type: 'active' | 'test' = 'active') => {
+    const response = await api.get('/tournament/', { params: { type } });
+    return response.data;
+  },
+  register: async (tournamentType: 'active' | 'test' = 'active') => {
+    // Use the API client which handles JWT authentication
+    const response = await api.post('/tournament/tournament-registration/', {
+      type: tournamentType,
+    });
+    return response.data;
+  },
+  unregister: async (tournamentType: 'active' | 'test' = 'active') => {
+    // Use the API client which handles JWT authentication
+    const response = await api.post('/tournament/tournament-unregistration/', {
+      type: tournamentType,
+    });
+    return response.data;
+  },
+  getMatchDetails: async (matchId: number) => {
+    const response = await api.get(`/tournament/match/${matchId}/`);
     return response.data;
   },
 };

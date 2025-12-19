@@ -559,13 +559,24 @@ const Layout = ({ children }: LayoutProps) => {
             {leftSidebarOpen && <div className="nav-section-title">Tournament</div>}
             <Link
               to="/tournament"
-              className={`nav-link ${location.pathname.startsWith('/tournament') ? 'active' : ''}`}
+              className={`nav-link ${location.pathname.startsWith('/tournament') && !location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}
               onClick={() => {
                 if (!isDesktop) setLeftSidebarOpen(false);
               }}
             >
               {leftSidebarOpen && <span>Tournament (Biweekly)</span>}
             </Link>
+            {user?.is_superuser && (
+              <Link
+                to="/tournament/test"
+                className={`nav-link ${location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Test Tournament</span>}
+              </Link>
+            )}
           </div>
         </nav>
         {/* Activities Feed */}
