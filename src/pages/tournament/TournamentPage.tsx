@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { tournamentAPI } from '../../services/api';
 import { Loading } from '../../components/Loading';
 import { X } from 'lucide-react';
@@ -703,9 +703,9 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                   if (isCurrentUserPlayer1) {
                                     // Show play button for current user
                                     player1Display = (
-                                      <button className="play-button blue">
+                                      <Link to={`/tournament/play/${match.id}`} className="play-button blue">
                                         Play
-                                      </button>
+                                      </Link>
                                     );
                                   } else {
                                     // Show pending for other players
@@ -776,9 +776,9 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                   if (isCurrentUserPlayer2) {
                                     // Show play button for current user
                                     player2Display = (
-                                      <button className="play-button blue">
+                                      <Link to={`/tournament/play/${match.id}`} className="play-button blue">
                                         Play
-                                      </button>
+                                      </Link>
                                     );
                                   } else {
                                     // Show pending for other players

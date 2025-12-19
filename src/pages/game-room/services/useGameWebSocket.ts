@@ -90,8 +90,10 @@ export function useGameWebSocket({
 
 
     const wsUrl = useMemo(() => {
-        // If custom URL is provided (for daily boards), use it
-        if (customWsUrl) return customWsUrl;
+        // If custom URL is provided (for daily boards or tournament), use it
+        // If customWsUrl is explicitly provided (even if empty string), use it
+        // This prevents falling back to default URL construction when waiting for matchInfo
+        if (customWsUrl !== undefined) return customWsUrl;
         
         if (!roomId) return "";
         const guestParam = isGuest ? guestName : "user";
@@ -325,6 +327,11 @@ export function useGameWebSocket({
                 case 'FINAL_SCORES': {
                     // Final scores are handled by the parent component
                     // We just pass them through via onGameStateChange
+                    console.log('[useGameWebSocket] Received FINAL_SCORES', {
+                        hasFinalScores: !!message.finalScores,
+                        totalPoints: message.totalPoints,
+                        hasWordsByLength: !!message.wordsByLength,
+                    });
                     setGameState((prev) => {
                         if (!prev) return prev;
                         const updated = {

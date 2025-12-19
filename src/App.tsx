@@ -28,6 +28,7 @@ import DoodledumPage from "./pages/minigames/DoodledumPage";
 import TournamentPage from "./pages/tournament/TournamentPage";
 import TestTournamentPage from "./pages/tournament/TestTournamentPage";
 import MatchResultsPage from "./pages/tournament/MatchResultsPage";
+import TournamentGameRoom from "./pages/tournament/TournamentGameRoom";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react"
@@ -124,6 +125,7 @@ function App() {
               <Route path="/tournament" element={<TournamentPage />} />
               <Route path="/tournament/test" element={<TestTournamentPage />} />
               <Route path="/tournament/match/:matchId" element={<MatchResultsPage />} />
+              <Route path="/tournament/play/:matchId" element={<TournamentGameRoom />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />
             </Route>

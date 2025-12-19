@@ -138,7 +138,9 @@ export function WordLists({
       // If player_found === 0 and sum_players_found === 0, no additional class (default styling)
     } else if (isPlaying) {
       // During gameplay, only show found words in green
-      if (wordsFound.has(word.toLowerCase())) {
+      // wordsFound stores lowercase, so check lowercase
+      const wordLower = word.toLowerCase();
+      if (wordsFound.has(wordLower)) {
         wordClass += ' green';
       }
     }
@@ -192,9 +194,9 @@ export function WordLists({
       const wordsArray = words as string[];
       if (isPlaying) {
         // During gameplay, only show found words
-        // Check both uppercase and lowercase since wordsFound may contain uppercase
+        // wordsFound stores lowercase, so check lowercase for all words
         return wordsArray
-          .filter(word => wordsFound.has(word.toUpperCase()) || wordsFound.has(word.toLowerCase()))
+          .filter(word => wordsFound.has(word.toLowerCase()))
           .map(word => ({ word }))
           .sort((a, b) => a.word.localeCompare(b.word));
       } else {
@@ -237,7 +239,10 @@ export function WordLists({
                   wordsToDisplay.map(({ word, wordData }) => {
                     const wordClass = getWordClass(word, wordData);
                     // Use wordData.score if available (final format), otherwise calculate score during gameplay
-                    const wordScore = wordData?.score ?? (isPlaying && wordsFound.has(word.toLowerCase()) 
+                    // wordsFound stores lowercase, so check lowercase
+                    const wordLower = word.toLowerCase();
+                    const isFound = wordsFound.has(wordLower);
+                    const wordScore = wordData?.score ?? (isPlaying && isFound 
                       ? calculateWordScore(word, boojum, snark) 
                       : undefined);
 

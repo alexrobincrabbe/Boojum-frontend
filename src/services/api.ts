@@ -256,6 +256,10 @@ export const tournamentAPI = {
     const response = await api.get(`/tournament/match/${matchId}/`);
     return response.data;
   },
+  getMatchInfo: async (matchId: number) => {
+    const response = await api.get(`/tournament/match/${matchId}/info/`);
+    return response.data;
+  },
 };
 
 export const leaderboardsAPI = {

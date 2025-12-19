@@ -99,6 +99,20 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
         timestamp: Date.now(),
       } as any;
 
+    case 'redirect':
+      // Tournament consumer sends redirect event when player already played
+      return {
+        type: 'ERROR',
+        code: 'ALREADY_PLAYED',
+        message: 'You have already played this match',
+      } as any;
+
+    case 'show_back_button':
+      // Tournament consumer sends this when game finishes
+      return {
+        type: 'SHOW_BACK_BUTTON',
+      } as any;
+
     case 'game_over':
       // Game has ended - trigger score submission by setting status to finished
       // Don't show as ERROR message
