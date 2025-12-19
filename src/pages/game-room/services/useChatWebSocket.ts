@@ -15,7 +15,7 @@ interface ChatWebSocketMessage {
   }>;
 }
 
-interface ChatMessage {
+export interface ChatMessage {
   user: string;
   message: string;
   timestamp: number;

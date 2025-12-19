@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { leaderboardsAPI } from '../../services/api';
 import { ProfilePicture } from '../../components/ProfilePicture';
+import { Loading } from '../../components/Loading';
 import './LeaderboardsPage.css';
 
 interface LeaderboardEntry {
@@ -407,26 +408,7 @@ const LeaderboardsPage = () => {
         </div>
       </div>
       <div id="leaderboard-wrapper" style={{ position: 'relative' }}>
-        {loading && (
-          <div
-            id="loading-spinner"
-            style={{
-              display: 'block',
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 10,
-            }}
-          >
-            <img
-              src="/images/loading.gif"
-              alt="Loading…"
-              width={350}
-              height={350}
-            />
-          </div>
-        )}
+        {loading && <Loading minHeight="calc(100vh - 70px)" />}
         {error && (
           <div className="error-message" style={{ color: 'red', textAlign: 'center', padding: '20px' }}>
             {error}

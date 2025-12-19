@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { dashboardAPI } from '../../../services/api';
 import { useBoardTheme } from '../../../contexts/BoardThemeContext';
 import { BoardPreview } from './BoardPreview';
+import { Loading } from '../../../components/Loading';
 import './GameSettingsTab.css';
 
 interface GameSettingsTabProps {
@@ -136,9 +137,7 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
   if (loading) {
     return (
       <div className="tab-content">
-        <div className="dashboard-loading">
-          <img src="/images/loading.gif" alt="Loading..." className="loading-gif" />
-        </div>
+        <Loading minHeight="400px" />
       </div>
     );
   }

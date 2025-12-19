@@ -3,6 +3,7 @@ import { minigamesAPI } from '../../services/api';
 import Boojumble from './components/Boojumble';
 import Cluejum from './components/Cluejum';
 import Poll from './components/Poll';
+import { Loading } from '../../components/Loading';
 import './MinigamesPage.css';
 
 interface BoojumbleData {
@@ -77,15 +78,7 @@ const MinigamesPage = () => {
 
 
   if (loading) {
-    return (
-      <div className="minigames-page">
-        <div className="container-fluid">
-          <div style={{ textAlign: 'center', padding: '20px', color: 'white' }}>
-            Loading minigames...
-          </div>
-        </div>
-      </div>
-    );
+    return <Loading minHeight="calc(100vh - 70px)" />;
   }
 
   return (

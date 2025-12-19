@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
-import { Menu, X, Bell } from 'lucide-react';
+import { Menu, X, Bell, BarChart3 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { PollModal } from './PollModal';
 import './Layout.css';
 
 interface LayoutProps {
@@ -37,6 +38,20 @@ interface UserOnline {
   activity: string;
 }
 
+interface PollOption {
+  value: string;
+  percentage: number;
+}
+
+interface Poll {
+  id: number;
+  question: string;
+  options: PollOption[];
+  total_votes: number;
+  user_vote: number | null;
+  discussion_link: string;
+}
+
 const Layout = ({ children }: LayoutProps) => {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(window.innerWidth >= 1440);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -62,6 +77,10 @@ const Layout = ({ children }: LayoutProps) => {
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
   const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
   const [playmateIds, setPlaymateIds] = useState<Set<number>>(new Set());
+  
+  // Poll state
+  const [poll, setPoll] = useState<Poll | null>(null);
+  const [pollModalOpen, setPollModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
@@ -198,6 +217,67 @@ const Layout = ({ children }: LayoutProps) => {
     loadPlaymates();
   }, [isAuthenticated]);
 
+  // Load poll data
+  useEffect(() => {
+    const loadPoll = async () => {
+      try {
+        const data = await lobbyAPI.getLobbyData();
+        setPoll(data.poll || null);
+      } catch (error: any) {
+        // Silently handle errors - poll is optional
+        console.error('Error loading poll:', error);
+      }
+    };
+    loadPoll();
+  }, []);
+
+  const handlePollVote = async (optionNo: number) => {
+    if (!isAuthenticated) {
+      toast.error('You must be logged in to vote');
+      return;
+    }
+
+    // Check if user already voted for this option
+    if (poll?.user_vote === optionNo) {
+      toast.info('You have already voted for this option');
+      return;
+    }
+
+    try {
+      const previousVote = poll?.user_vote;
+      const data = await lobbyAPI.votePoll(optionNo);
+      
+      // Reload poll data to get updated user_vote and ensure we have the latest state
+      const pollData = await lobbyAPI.getLobbyData();
+      const updatedPoll = pollData.poll;
+      
+      if (updatedPoll) {
+        setPoll({
+          ...updatedPoll,
+          options: data.poll_options,
+          total_votes: data.total_votes,
+        });
+        
+        // Only show success if the vote actually changed
+        if (updatedPoll.user_vote !== previousVote) {
+          toast.success('Vote recorded!');
+        } else {
+          toast.info('You have already voted on this poll');
+        }
+      } else {
+        // Fallback: update with what we got from vote response
+        setPoll({
+          ...poll!,
+          options: data.poll_options,
+          total_votes: data.total_votes,
+        });
+        toast.success('Vote recorded!');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to vote');
+    }
+  };
+
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -263,6 +343,17 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
         </div>
         <div className="top-bar-right">
+          {/* Poll Button */}
+          {poll && (
+            <button
+              className="poll-button"
+              onClick={() => setPollModalOpen(true)}
+              aria-label="Open poll"
+            >
+              <BarChart3 size={24} />
+              <span className="poll-button-label">Poll</span>
+            </button>
+          )}
           {isAuthenticated && (
             <>
               {/* Mobile Users Online Button */}
@@ -334,6 +425,9 @@ const Layout = ({ children }: LayoutProps) => {
                   to={`/profile/${user.profile_url}`}
                   className="player-online-name"
                   style={{ color: user.chat_color }}
+                  onClick={() => {
+                    if (!isDesktop) setLeftSidebarOpen(false);
+                  }}
                 >
                   {user.display_name}
                 </Link>
@@ -415,6 +509,9 @@ const Layout = ({ children }: LayoutProps) => {
             <Link
               to="/lobby"
               className={`nav-link ${location.pathname.startsWith('/lobby') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop) setLeftSidebarOpen(false);
+              }}
             >
               {leftSidebarOpen && <span>Live Games</span>}
             </Link>
@@ -424,24 +521,36 @@ const Layout = ({ children }: LayoutProps) => {
             <Link
               to="/minigames"
               className={`nav-link ${location.pathname.startsWith('/minigames') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop) setLeftSidebarOpen(false);
+              }}
             >
               {leftSidebarOpen && <span>Mini-Games</span>}
             </Link>
             <Link
               to="/doodledum"
               className={`nav-link ${location.pathname.startsWith('/doodledum') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop) setLeftSidebarOpen(false);
+              }}
             >
               {leftSidebarOpen && <span>Doodledum</span>}
             </Link>
             <Link
               to="/daily-boards"
               className={`nav-link ${location.pathname.startsWith('/daily-boards') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop) setLeftSidebarOpen(false);
+              }}
             >
               {leftSidebarOpen && <span>Everyday Board</span>}
             </Link>
             <Link
               to="/timeless-boards"
               className={`nav-link ${location.pathname.startsWith('/timeless-boards') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop) setLeftSidebarOpen(false);
+              }}
             >
               {leftSidebarOpen && <span>Timeless Board</span>}
             </Link>
@@ -451,6 +560,9 @@ const Layout = ({ children }: LayoutProps) => {
             <Link
               to="/tournament"
               className={`nav-link ${location.pathname.startsWith('/tournament') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop) setLeftSidebarOpen(false);
+              }}
             >
               {leftSidebarOpen && <span>Tournament (Biweekly)</span>}
             </Link>
@@ -469,7 +581,9 @@ const Layout = ({ children }: LayoutProps) => {
                         to={`/profile/${activity.profile_url}`}
                         className="sidebar-activity-username"
                         style={{ color: activity.chat_color }}
-                        onClick={() => setLeftSidebarOpen(false)}
+                        onClick={() => {
+                          if (!isDesktop) setLeftSidebarOpen(false);
+                        }}
                       >
                         {activity.username}
                       </Link>
@@ -623,6 +737,15 @@ const Layout = ({ children }: LayoutProps) => {
           }}
         />
       )}
+
+      {/* Poll Modal */}
+      <PollModal
+        poll={poll}
+        isOpen={pollModalOpen}
+        onClose={() => setPollModalOpen(false)}
+        onVote={handlePollVote}
+        isAuthenticated={isAuthenticated}
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { dashboardAPI } from '../../../services/api';
+import { Loading } from '../../../components/Loading';
 
 interface ChatColorChoice {
   value: string;
@@ -46,7 +47,13 @@ const ChatSettingsTab = ({ bundle }: ChatSettingsTabProps) => {
         initialChatColor.current = fetchedColor;
         setChatColorChoices(data.chat_color_choices || []);
         isInitialMount.current = false;
-      } catch (error) {
+      } catch (error: any) {
+        // Silently handle 401 errors (unauthorized) - user shouldn't see this tab anyway
+        if (error.response?.status === 401) {
+          setLoading(false);
+          isInitialMount.current = false;
+          return;
+        }
         console.error('Error fetching dashboard data:', error);
         toast.error('Error loading dashboard data');
         isInitialMount.current = false;
@@ -89,9 +96,7 @@ const ChatSettingsTab = ({ bundle }: ChatSettingsTabProps) => {
   if (loading) {
     return (
       <div className="tab-content">
-        <div className="dashboard-loading">
-          <img src="/images/loading.gif" alt="Loading..." className="loading-gif" />
-        </div>
+        <Loading minHeight="400px" />
       </div>
     );
   }

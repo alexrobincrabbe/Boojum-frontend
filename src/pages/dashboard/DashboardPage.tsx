@@ -6,6 +6,7 @@ import ChatSettingsTab from './components/ChatSettingsTab';
 import PlaymatesTab from './components/PlaymatesTab';
 import GameSettingsTab from './components/GameSettingsTab';
 import { dashboardAPI } from '../../services/api';
+import { Loading } from '../../components/Loading';
 import './DashboardPage.css';
 
 type TabType = 'notifications' | 'account' | 'chat' | 'playmates' | 'game';
@@ -65,29 +66,27 @@ const DashboardPage = () => {
 
       <div className="dashboard-content">
         {bundleLoading ? (
-          <div className="dashboard-loading">
-            <img src="/images/loading.gif" alt="Loading..." className="loading-gif" />
-          </div>
+          <Loading minHeight="400px" />
         ) : (
           <>
-            <div style={{ display: activeTab === 'game' ? 'block' : 'none' }}>
+            {activeTab === 'game' && (
               <GameSettingsTab
                 bundle={bundle?.game_settings}
                 isAuthenticated={isAuthenticated}
               />
-            </div>
-            <div style={{ display: activeTab === 'notifications' ? 'block' : 'none' }}>
+            )}
+            {isAuthenticated && activeTab === 'notifications' && (
               <NotificationsTab />
-            </div>
-            <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
+            )}
+            {isAuthenticated && activeTab === 'account' && (
               <AccountTab bundle={bundle?.account} />
-            </div>
-            <div style={{ display: activeTab === 'chat' ? 'block' : 'none' }}>
+            )}
+            {isAuthenticated && activeTab === 'chat' && (
               <ChatSettingsTab bundle={bundle?.game_settings} />
-            </div>
-            <div style={{ display: activeTab === 'playmates' ? 'block' : 'none' }}>
+            )}
+            {isAuthenticated && activeTab === 'playmates' && (
               <PlaymatesTab bundle={bundle?.playmates} />
-            </div>
+            )}
           </>
         )}
       </div>

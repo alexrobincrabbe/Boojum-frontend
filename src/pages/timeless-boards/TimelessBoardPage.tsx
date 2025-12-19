@@ -6,6 +6,7 @@ import { lobbyAPI } from '../../services/api';
 import { fetchDefinition } from '../../utils/dictionary';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
 import { toast } from 'react-toastify';
+import { Loading } from '../../components/Loading';
 import './TimelessBoardPage.css';
 import '../game-room/GameRoom.css';
 
@@ -282,7 +283,7 @@ setBoardsByLevel({
   };
 
   if (loading) {
-    return <div className="timeless-board-page">Loading timeless boards...</div>;
+    return <Loading minHeight="calc(100vh - 70px)" />;
   }
 
   if (!currentBoard) {

@@ -14,7 +14,6 @@ interface UseGameWebSocketParams {
     token: string;
     isGuest: boolean;
     initializeWordLists: (wordsByLength: Record<string, string[]>, gameState?: GameState | null, sendJson?: (message: any) => void) => void;
-    updateWordsFromChat: (message: string, user: string) => void;
     onGameStateChange?: (gameState: GameState | null) => void;
     onPreviousBoardChange?: (board: string[][] | null) => void;
     onScoreInChat?: (playerName: string, score: number) => void; // Callback for one-shot score messages
@@ -38,7 +37,6 @@ export function useGameWebSocket({
     token,
     isGuest,
     initializeWordLists,
-    updateWordsFromChat,
     onGameStateChange,
     onPreviousBoardChange,
     onScoreInChat,
@@ -139,12 +137,6 @@ export function useGameWebSocket({
                     setGameState((prev) => {
                         // If board is in delta update, always use it (for new players joining mid-game)
                         if (message.delta.board) {
-                            console.log('[useGameWebSocket] Board update received:', {
-                                hasPrev: !!prev,
-                                board: message.delta.board,
-                                boardWords: message.delta.boardWords,
-                            });
-                            
                             // Board update - merge with existing state or create new state
                             const updated: GameState = prev ? { ...prev, ...message.delta } : {
                                 roomId: '',
@@ -152,12 +144,6 @@ export function useGameWebSocket({
                                 gameStatus: (message.delta.gameStatus as 'waiting' | 'playing' | 'finished') || 'waiting',
                                 ...message.delta,
                             } as GameState;
-                            
-                            console.log('[useGameWebSocket] Updated state with board:', {
-                                hasBoard: !!updated?.board,
-                                boardLength: updated?.board?.length,
-                                gameStatus: updated?.gameStatus,
-                            });
                             
                             // Track when a board is first shown - set it immediately if board exists
                             if (updated?.board && !hasBoardBeenShownRef.current) {
@@ -317,13 +303,6 @@ export function useGameWebSocket({
                     break;
                 }
 
-                case 'CHAT': {
-                    // Update words from chat messages (chat now has its own WebSocket, but game WebSocket may still send word updates)
-                    if (message.user && message.message) {
-                        updateWordsFromChat(message.message, message.user);
-                    }
-                    break;
-                }
 
                 case 'SCORE_IN_CHAT': {
                     // Handle one-shot score message - format as "player got x points" in blue italics
@@ -371,7 +350,7 @@ export function useGameWebSocket({
                 }
             }
         },
-        [initializeWordLists, updateWordsFromChat, onGameStateChange, onPreviousBoardChange]
+        [initializeWordLists, onGameStateChange, onPreviousBoardChange]
     );
 
     const handleWsError = useCallback((err: Event | Error) => {

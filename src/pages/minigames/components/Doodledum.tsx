@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { minigamesAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
+import { Loading } from '../../../components/Loading';
 import './Doodledum.css';
 
 interface FeedItem {
@@ -1239,7 +1240,7 @@ const Doodledum: React.FC = () => {
       <div id="feed-container-container">
         <div id="feed-container">
           {loading ? (
-            <div>Loading…</div>
+            <Loading minHeight="400px" />
           ) : feed.length === 0 ? (
             <div>No recent activity</div>
           ) : (

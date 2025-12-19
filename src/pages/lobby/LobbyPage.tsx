@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import { lobbyAPI } from '../../services/api';
 import { toast } from 'react-toastify';
+import { Loading } from '../../components/Loading';
 import './LobbyPage.css';
 
 interface Room {
@@ -19,20 +19,6 @@ interface Room {
   color: string;
 }
 
-interface PollOption {
-  value: string;
-  percentage: number;
-}
-
-interface Poll {
-  id: number;
-  question: string;
-  options: PollOption[];
-  total_votes: number;
-  user_vote: number | null;
-  discussion_link: string;
-}
-
 interface WordOfTheDay {
   word: string;
   definition: string;
@@ -40,11 +26,10 @@ interface WordOfTheDay {
 }
 
 const LobbyPage = () => {
-  const { isAuthenticated } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [poll, setPoll] = useState<Poll | null>(null);
   const [wordOfTheDay, setWordOfTheDay] = useState<WordOfTheDay | null>(null);
   const [roomUsers, setRoomUsers] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(true);
   const roomUsersPollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load initial lobby data
@@ -53,11 +38,12 @@ const LobbyPage = () => {
       try {
         const data = await lobbyAPI.getLobbyData();
         setRooms(data.rooms || []);
-        setPoll(data.poll || null);
         setWordOfTheDay(data.word_of_the_day || null);
       } catch (error: any) {
         toast.error('Failed to load lobby data');
         console.error('Error loading lobby data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -89,25 +75,6 @@ const LobbyPage = () => {
     };
   }, []);
 
-  const handleVote = async (optionNo: number) => {
-    if (!isAuthenticated) {
-      toast.error('You must be logged in to vote');
-      return;
-    }
-
-    try {
-      const data = await lobbyAPI.votePoll(optionNo);
-      setPoll({
-        ...poll!,
-        options: data.poll_options,
-        total_votes: data.total_votes,
-        user_vote: data.user_vote,
-      });
-      toast.success('Vote recorded!');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to vote');
-    }
-  };
 
   const getRoomType = (room: Room) => {
     if (room.guest) return 'Short Game';
@@ -116,6 +83,10 @@ const LobbyPage = () => {
     if (room.one_shot) return 'One Word';
     return '';
   };
+
+  if (loading) {
+    return <Loading minHeight="calc(100vh - 70px)" />;
+  }
 
   return (
     <div className="lobby-container">
@@ -130,7 +101,6 @@ const LobbyPage = () => {
           )}
 
           <div className="lobby-section rooms-section">
-            <h2 className="rooms-title">Game Rooms</h2>
             <div className="rooms-list">
               {rooms.map((room) => (
                 <Link
@@ -146,9 +116,12 @@ const LobbyPage = () => {
                       </span>
                     </h2>
                     <div className="room-details">
-                      {getRoomType(room) && (
-                        <span className="room-rules">{getRoomType(room)}</span>
-                      )}
+                      {(() => {
+                        const roomType = getRoomType(room);
+                        return roomType === 'Bonus Letters' || roomType === 'One Word' ? (
+                          <span className="room-rules">{roomType}</span>
+                        ) : null;
+                      })()}
                       <span className="duration">{room.timer} seconds</span>
                     </div>
                   </div>
@@ -158,50 +131,6 @@ const LobbyPage = () => {
           </div>
         </div>
 
-        {/* Right Column - Poll */}
-        <div className="lobby-col-right">
-          {poll && (
-            <div className="lobby-section poll-section">
-              <h3 className="lobby-section-title">Poll</h3>
-              <p className="poll-question">{poll.question}</p>
-              <div className="poll-options">
-                {poll.options.map((option, idx) => {
-                  if (!option.value) return null;
-                  const optionNo = idx + 1;
-                  const isVoted = poll.user_vote === optionNo;
-                  return (
-                    <div key={idx} className="poll-option">
-                      <button
-                        className={`poll-option-button ${isVoted ? 'voted' : ''}`}
-                        onClick={() => handleVote(optionNo)}
-                        disabled={isVoted || !isAuthenticated}
-                      >
-                        {option.value}
-                      </button>
-                      {poll.total_votes > 0 && (
-                        <div className="poll-bar-container">
-                          <div
-                            className="poll-bar"
-                            style={{ width: `${option.percentage}%` }}
-                          />
-                          <span className="poll-percentage">{option.percentage}%</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              {poll.total_votes > 0 && (
-                <p className="poll-total">Total votes: {poll.total_votes}</p>
-              )}
-              {poll.discussion_link && (
-                <a href={poll.discussion_link} target="_blank" rel="noopener noreferrer" className="poll-discussion-link">
-                  Discussion
-                </a>
-              )}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

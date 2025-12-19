@@ -69,6 +69,37 @@
   gap: 15px;
 }
 
+/* Poll Button */
+.poll-button {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.poll-button:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.05);
+}
+
+.poll-button-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .poll-button-label {
+    display: none;
+  }
+}
+
 /* Mobile Users Online Button */
 .mobile-users-button {
   display: none; /* Hidden on desktop */

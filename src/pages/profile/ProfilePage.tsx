@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { authAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { Loading } from '../../components/Loading';
 import './ProfilePage.css';
 
 interface GameScore {
@@ -164,11 +165,7 @@ const ProfilePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading profile...</div>
-      </div>
-    );
+    return <Loading minHeight="calc(100vh - 70px)" />;
   }
 
   if (error || !profile) {

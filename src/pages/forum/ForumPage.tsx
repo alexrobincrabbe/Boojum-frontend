@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { forumAPI } from '../../services/api';
+import { Loading } from '../../components/Loading';
 import './ForumPage.css';
 
 interface ForumPost {
@@ -104,9 +105,7 @@ const ForumPage = () => {
             )}
           </div>
           
-          {loading && (
-            <div className="loading-state">Loading forum posts...</div>
-          )}
+          {loading && <Loading minHeight="calc(100vh - 70px)" />}
           
           {error && (
             <div className="error-message" style={{ color: 'red', textAlign: 'center', padding: '20px' }}>
