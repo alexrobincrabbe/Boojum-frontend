@@ -59,11 +59,6 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
       } as any;
 
     case 'board_update':
-      console.log('[useGameSocket] Normalizing board_update:', {
-        hasBoardLetters: !!raw.board_letters,
-        boardLettersType: Array.isArray(raw.board_letters) ? 'array' : typeof raw.board_letters,
-        boardWordsCount: raw.board_words?.length,
-      });
       return {
         type: 'DELTA_UPDATE',
         seq: raw.seq ?? 0,

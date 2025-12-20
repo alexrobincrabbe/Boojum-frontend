@@ -327,11 +327,6 @@ export function useGameWebSocket({
                 case 'FINAL_SCORES': {
                     // Final scores are handled by the parent component
                     // We just pass them through via onGameStateChange
-                    console.log('[useGameWebSocket] Received FINAL_SCORES', {
-                        hasFinalScores: !!message.finalScores,
-                        totalPoints: message.totalPoints,
-                        hasWordsByLength: !!message.wordsByLength,
-                    });
                     setGameState((prev) => {
                         if (!prev) return prev;
                         const updated = {

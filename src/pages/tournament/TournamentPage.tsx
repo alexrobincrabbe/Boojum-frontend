@@ -28,13 +28,13 @@ interface TournamentMatch {
   player_1: TournamentPlayer | null;
   player_2: TournamentPlayer | null;
   closed: boolean;
-  player_1_played: boolean;
-  player_2_played: boolean;
   result: {
     winner: TournamentPlayer | null;
     loser: TournamentPlayer | null;
     score_player_1: number;
     score_player_2: number;
+    player_1_submitted: boolean;
+    player_2_submitted: boolean;
   } | null;
 }
 
@@ -685,9 +685,12 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                       {roundMatches.map((match) => {
                         const isCurrentUserPlayer1 = user && match.player_1 && user.id === match.player_1.id;
                         const isCurrentUserPlayer2 = user && match.player_2 && user.id === match.player_2.id;
-                        const bothPlayed = match.player_1_played && match.player_2_played;
-                        const onlyPlayer1Played = match.player_1_played && !match.player_2_played;
-                        const onlyPlayer2Played = !match.player_1_played && match.player_2_played;
+                        // Use result fields - if result doesn't exist, default to not played
+                        const player1Played = match.result?.player_1_submitted ?? false;
+                        const player2Played = match.result?.player_2_submitted ?? false;
+                        const bothPlayed = player1Played && player2Played;
+                        const onlyPlayer1Played = player1Played && !player2Played;
+                        const onlyPlayer2Played = !player1Played && player2Played;
                         
                         return (
                           <div key={match.id} className="match-container">
@@ -698,7 +701,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                 
                                 // Determine what to show for player 1
                                 let player1Display: React.ReactElement | null = null;
-                                if (!match.player_1_played) {
+                                if (!player1Played) {
                                   // Player hasn't played
                                   if (isCurrentUserPlayer1) {
                                     // Show play button for current user
@@ -771,7 +774,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                 
                                 // Determine what to show for player 2
                                 let player2Display: React.ReactElement | null = null;
-                                if (!match.player_2_played) {
+                                if (!player2Played) {
                                   // Player hasn't played
                                   if (isCurrentUserPlayer2) {
                                     // Show play button for current user
@@ -839,7 +842,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                                 );
                               })()}
                             </div>
-                          {match.player_1_played && match.player_2_played && match.result && (
+                          {bothPlayed && match.result && (
                             <div className="match-actions">
                               <a href={`/tournament/match/${match.id}`} className="view-results-button blue">
                                 View Results

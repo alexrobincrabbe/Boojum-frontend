@@ -89,12 +89,6 @@ export default function MatchResultsPage() {
 
       try {
         const matchData = await tournamentAPI.getMatchDetails(parseInt(matchId));
-        console.log('Match data received:', {
-          hasBoojumArray: !!matchData.board?.boojum_array,
-          boojumArray: matchData.board?.boojum_array,
-          boojumBonus: matchData.board?.boojum_bonus,
-          snark: matchData.board?.snark,
-        });
         setData(matchData);
       } catch (err: unknown) {
         const error = err as { response?: { data?: { error?: string } } };

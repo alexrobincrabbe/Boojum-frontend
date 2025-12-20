@@ -214,10 +214,8 @@ export default function TournamentGameRoom() {
     
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
-      console.log('[Score] Game ended, submitting score');
       // Get recording data
       const recording = gameRecording.getRecording();
-      console.log('[Recording] Game recording:', recording.length, 'events');
       
       // Create a wrapper sendJson that includes recording data
       const sendJsonWithRecording = (message: OutboundMessage) => {
@@ -243,11 +241,6 @@ export default function TournamentGameRoom() {
   // Open scores modal when final scores are received and show back button
   useEffect(() => {
     if (gameState?.finalScores && gameState.gameStatus === 'finished') {
-      console.log('[TournamentGameRoom] Opening scores modal', { 
-        hasFinalScores: !!gameState.finalScores, 
-        gameStatus: gameState.gameStatus,
-        finalScores: gameState.finalScores 
-      });
       setIsScoresModalOpen(true);
       setShowBackButton(true); // Show back button when game finishes
     }

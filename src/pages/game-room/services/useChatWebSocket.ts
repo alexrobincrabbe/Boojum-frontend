@@ -151,7 +151,6 @@ export function useChatWebSocket({
     const isReconnecting = reconnectAttemptsRef.current > 0;
     setConnectionState(isReconnecting ? "reconnecting" : "connecting");
 
-    console.log("[ChatWS] Connecting:", chatWsUrl);
     const ws = new WebSocket(chatWsUrl);
     wsRef.current = ws;
 
@@ -194,13 +193,6 @@ export function useChatWebSocket({
 
       ws.onclose = (event) => {
       if (wsRef.current === ws) wsRef.current = null;
-
-      console.log("[ChatWS] WebSocket closed:", {
-        code: event.code,
-        reason: event.reason,
-        wasClean: event.wasClean,
-        url: chatWsUrl,
-      });
 
       if (isManualCloseRef.current) {
         setConnectionState("closed");

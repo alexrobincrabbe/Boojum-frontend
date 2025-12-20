@@ -20,7 +20,7 @@ export function GameReplay({
   boardWords,
   playerColor,
   playerName,
-  foundWords: _foundWords, // Prefixed with _ to indicate intentionally unused
+  foundWords: _foundWords, // eslint-disable-line @typescript-eslint/no-unused-vars
   onClose,
 }: GameReplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,7 +32,6 @@ export function GameReplay({
   const [swipeLines, setSwipeLines] = useState<Array<{ x1: number; y1: number; x2: number; y2: number }>>([]);
   const [foundWordsSet, setFoundWordsSet] = useState<Set<string>>(new Set());
   const [currentSwipeWord, setCurrentSwipeWord] = useState('');
-  const [recordedSwipeWord, setRecordedSwipeWord] = useState<string>(''); // Word from swipe_word events
   const [boardRotation, setBoardRotation] = useState(0);
   
   const animationFrameRef = useRef<number | null>(null);
@@ -45,45 +44,6 @@ export function GameReplay({
   const maxTime = recording.length > 0 
     ? Math.max(...recording.map(e => e.timestamp))
     : 0;
-
-  // Playback loop
-  useEffect(() => {
-    if (!isPlaying || recording.length === 0) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      return;
-    }
-
-    const startTime = performance.now() - (currentTime / playbackSpeed);
-    startTimeRef.current = startTime;
-
-    const update = () => {
-      const now = performance.now();
-      const elapsed = (now - startTime) * playbackSpeed;
-      const newTime = Math.min(elapsed, maxTime);
-      setCurrentTime(newTime);
-
-      // Process events up to current time
-      processEventsUpToTime(newTime);
-
-      if (newTime < maxTime) {
-        animationFrameRef.current = requestAnimationFrame(update);
-      } else {
-        setIsPlaying(false);
-      }
-    };
-
-    animationFrameRef.current = requestAnimationFrame(update);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-    };
-  }, [isPlaying, playbackSpeed, recording, maxTime]);
 
   // Helper functions for word matching (same as in useBoardSwipe and useKeyboardInput)
   const checkMatch = useCallback((word: string, availableWords: string[]): boolean => {
@@ -111,10 +71,8 @@ export function GameReplay({
     const newSwipeLines: Array<{ x1: number; y1: number; x2: number; y2: number }> = [];
     const swipePathIndexes: Array<[number, number]> = [];
     // Build found words set from initial + all word_submit events up to current time
-    let newFoundWordsSet = new Set<string>(initialFoundWordsRef.current);
+    const newFoundWordsSet = new Set<string>(initialFoundWordsRef.current);
     let newBoardRotation = 0;
-    let newRecordedSwipeWord = '';
-    let currentSwipeWordFromEvents = ''; // Track word from swipe_letter events as we process them
 
     // Track when the current swipe sequence started (after last word_submit or word_clear)
     let lastSwipeStartTime = 0;
@@ -129,12 +87,34 @@ export function GameReplay({
             const idx = event.y + event.x * 4;
             const positionKey = `${event.x},${event.y}`;
             
+            // Check if this event indicates a new word start
+            // This happens when the user starts a new swipe after clearing/submitting
+            // We detect this by checking if the event word doesn't start with the current path word
+            // OR if the event word is a single letter and the current path is much longer (clear reset)
+            const eventWord = 'word' in event ? event.word : undefined;
+            const currentPathWord = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
+            const isNewWordStart = eventWord !== undefined && swipePathIndexes.length > 0 && (
+              // Case 1: Event word is a single letter and current path is 2+ letters (clear new word)
+              (eventWord.length === 1 && currentPathWord.length >= 2) ||
+              // Case 2: Event word doesn't start with current path word (different word entirely)
+              (eventWord.length > 0 && !eventWord.startsWith(currentPathWord) && !currentPathWord.startsWith(eventWord))
+            );
+            
+            // If this is a new word start, clear the current path first
+            if (isNewWordStart) {
+              newSwipePath.fill(false);
+              swipePathIndexes.length = 0;
+              seenIndexes.clear();
+              lastSwipeStartTime = event.timestamp; // Reset to this event's timestamp
+            }
+            
             // Check if this letter is already in the path (going back)
             const existingIndex = swipePathIndexes.findIndex(([px, py]) => px === event.x && py === event.y);
             
             if (existingIndex >= 0) {
               // Going back to a previous letter - remove all letters after this one
               const removeCount = swipePathIndexes.length - existingIndex - 1;
+              
               for (let i = 0; i < removeCount; i++) {
                 const [removedX, removedY] = swipePathIndexes.pop()!;
                 const removedIdx = removedY + removedX * 4;
@@ -142,37 +122,25 @@ export function GameReplay({
                 const removedKey = `${removedX},${removedY}`;
                 seenIndexes.delete(removedKey);
               }
+              
               // Re-add the current letter to ensure it's highlighted
+              // The letter is already in swipePathIndexes at existingIndex, so we don't need to push it again
               newSwipePath[idx] = true;
+              // Make sure this letter's positionKey is in seenIndexes so it's not removed when swiping forward
+              seenIndexes.add(positionKey);
             } else {
               // New letter - add it to the path
               newSwipePath[idx] = true;
               swipePathIndexes.push([event.x, event.y]);
               seenIndexes.add(positionKey);
             }
-            
-            // Update word from event immediately (this is the most up-to-date word)
-            // The word in the event reflects the current state after going back/forward
-            // Always use the word from the event if available, as it's calculated at the exact moment
-            if ('word' in event && event.word !== undefined && event.word !== null) {
-              currentSwipeWordFromEvents = event.word;
-            } else {
-              // If no word in event, rebuild from current path (handles both going back and forward)
-              // After removing letters (if going back), rebuild from the updated path
-              currentSwipeWordFromEvents = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
-            }
           }
-        } else if (event.type === 'swipe_word') {
-          // Record the full swipe word when finalized
-          newRecordedSwipeWord = event.word;
         } else if (event.type === 'keyboard_word') {
           newKeyboardWord = event.word;
           newKeyboardTracePath = [...event.tracePath];
         } else if (event.type === 'word_clear') {
           newKeyboardWord = '';
           newKeyboardTracePath = Array(16).fill(false);
-          newRecordedSwipeWord = ''; // Clear recorded swipe word
-          currentSwipeWordFromEvents = ''; // Clear word from events
           // Clear swipe path when word is cleared
           newSwipePath.fill(false);
           swipePathIndexes.length = 0;
@@ -181,8 +149,6 @@ export function GameReplay({
         } else if (event.type === 'word_submit') {
           // Track found words
           newFoundWordsSet.add(event.word.toLowerCase());
-          newRecordedSwipeWord = ''; // Clear recorded swipe word after submit
-          currentSwipeWordFromEvents = ''; // Clear word from events
           // Clear swipe path and lines when word is submitted
           newSwipePath.fill(false);
           swipePathIndexes.length = 0;
@@ -201,22 +167,10 @@ export function GameReplay({
       newSwipeLines.push({ x1, y1, x2, y2 });
     }
 
-    // Build current swipe word
-    // Priority during active swipe: word from swipe_letter events (real-time updates)
-    // Priority when swipe is finalized: recorded swipe_word event
-    // If there's an active swipe (path has letters), use the real-time word from events
-    // Otherwise, use the finalized swipe_word if available
+    // Build current swipe word from path indexes
     let currentSwipeWord = '';
     if (swipePathIndexes.length > 0) {
-      // Active swipe in progress - use real-time word from swipe_letter events
-      currentSwipeWord = currentSwipeWordFromEvents;
-      // Fallback to building from path if no word in events
-      if (!currentSwipeWord) {
-        currentSwipeWord = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
-      }
-    } else {
-      // No active swipe - use finalized swipe_word if available
-      currentSwipeWord = newRecordedSwipeWord || '';
+      currentSwipeWord = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
     }
 
     setFoundWordsSet(newFoundWordsSet);
@@ -225,9 +179,60 @@ export function GameReplay({
     setCurrentKeyboardTracePath(newKeyboardTracePath);
     setSwipeLines(newSwipeLines);
     setCurrentSwipeWord(currentSwipeWord);
-    setRecordedSwipeWord(newRecordedSwipeWord);
     setBoardRotation(newBoardRotation);
   }, [recording, board]);
+
+  // Store processEventsUpToTime in a ref to avoid restarting the loop
+  const processEventsRef = useRef(processEventsUpToTime);
+  useEffect(() => {
+    processEventsRef.current = processEventsUpToTime;
+  }, [processEventsUpToTime]);
+
+  // Store currentTime in a ref to access it without causing re-renders
+  const currentTimeRef = useRef(currentTime);
+  useEffect(() => {
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  // Playback loop
+  useEffect(() => {
+    if (!isPlaying || recording.length === 0) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
+    const startTime = performance.now() - (currentTimeRef.current / playbackSpeed);
+    startTimeRef.current = startTime;
+
+    const update = () => {
+      const now = performance.now();
+      const elapsed = (now - startTime) * playbackSpeed;
+      const newTime = Math.min(elapsed, maxTime);
+      setCurrentTime(newTime);
+
+      // Process events up to current time using ref to avoid dependency issues
+      processEventsRef.current(newTime);
+
+      if (newTime < maxTime) {
+        animationFrameRef.current = requestAnimationFrame(update);
+      } else {
+        setIsPlaying(false);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(update);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, playbackSpeed, maxTime]);
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -264,7 +269,7 @@ export function GameReplay({
     if (recording.length > 0) {
       // Start with empty found words - they will be added as word_submit events are processed
       initialFoundWordsRef.current = new Set();
-      setFoundWordsSet(new Set());
+      // processEventsUpToTime will set foundWordsSet, so we don't need to set it here
       processEventsUpToTime(0);
     }
   }, [recording, processEventsUpToTime]);

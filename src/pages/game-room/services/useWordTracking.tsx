@@ -149,12 +149,6 @@ export function useWordTracking(
           bestWordRef.current = restored.bestWord;
           wordsFoundArrayRef.current = restored.wordsFoundArray;
           setOneShotSubmitted(restored.oneShotSubmitted);
-          console.log("[GameState] Restored state from localStorage:", {
-            username,
-            gameRoundId: currentGameRoundId,
-            totalScore: restored.totalScore,
-            wordsFound: restored.wordsFound.length,
-          });
 
           // Send restored score to backend if game is in progress
           if (
@@ -175,10 +169,6 @@ export function useWordTracking(
               bestWord: restored.bestWord,
               numberOfWordsFound: restored.wordsFoundArray.length,
               whichWordsFound: whichWordsFound,
-            });
-            console.log("[GameState] Sent restored score to backend:", {
-              finalScore: restored.totalScore,
-              numberOfWordsFound: restored.wordsFoundArray.length,
             });
           }
         } else {
@@ -346,11 +336,6 @@ export function useWordTracking(
         gameState.gameStatus !== "finished" ||
         scoreSubmittedRef.current
       ) {
-        console.log("[Score] Not submitting:", {
-          hasBoardWords: !!gameState?.boardWords,
-          gameStatus: gameState?.gameStatus,
-          alreadySubmitted: scoreSubmittedRef.current,
-        });
         return;
       }
 
@@ -371,8 +356,6 @@ export function useWordTracking(
         number_of_words_found: wordsFoundArrayRef.current.length,
         which_words_found: whichWordsFound,
       };
-
-      console.log("[Score] Submitting final score:", scoreData);
 
       sendJson({
         type: "PLAYER_ACTION",
@@ -413,8 +396,6 @@ export function useWordTracking(
         which_words_found: whichWordsFound,
         time: time, // Time in seconds
       };
-
-      console.log("[OneShot] Submitting word:", scoreData);
 
       sendJson({
         type: "PLAYER_ACTION",
