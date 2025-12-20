@@ -844,9 +844,9 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                             </div>
                           {bothPlayed && match.result && (
                             <div className="match-actions">
-                              <a href={`/tournament/match/${match.id}`} className="view-results-button blue">
+                              <Link to={`/tournament/match/${match.id}`} className="view-results-button blue">
                                 View Results
-                              </a>
+                              </Link>
                             </div>
                           )}
                           {match.closed && match.result && (

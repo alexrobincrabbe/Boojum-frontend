@@ -64,8 +64,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const response = await authAPI.login(username, password);
     localStorage.setItem('access_token', response.access);
     localStorage.setItem('refresh_token', response.refresh);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    setUser(response.user);
+    // Fetch full user info to get is_superuser and other fields
+    try {
+      const userInfo = await authAPI.getUserInfo();
+      localStorage.setItem('user', JSON.stringify(userInfo));
+      setUser(userInfo);
+    } catch (error) {
+      // Fallback to response.user if getUserInfo fails
+      localStorage.setItem('user', JSON.stringify(response.user));
+      setUser(response.user);
+    }
   };
 
   const register = async (username: string, email: string, password: string, password2: string) => {

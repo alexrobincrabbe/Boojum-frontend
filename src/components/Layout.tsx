@@ -56,7 +56,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(window.innerWidth >= 1440);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1440);
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -566,7 +566,7 @@ const Layout = ({ children }: LayoutProps) => {
             >
               {leftSidebarOpen && <span>Tournament (Biweekly)</span>}
             </Link>
-            {user?.is_superuser && (
+            {!authLoading && user?.is_superuser && (
               <Link
                 to="/tournament/test"
                 className={`nav-link ${location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}

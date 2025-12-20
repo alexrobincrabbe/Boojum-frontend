@@ -41,6 +41,10 @@ export function ScoresModal({
 
   if (!isOpen || !finalScores) return null;
 
+  const renderTime = performance.now();
+  const renderTimestamp = new Date().toISOString();
+  console.log(`[ScoresModal] [TIMESTAMP] Rendering scores modal at ${renderTimestamp} (${renderTime.toFixed(3)}ms)`);
+
   // Sort players by final score (descending)
   // Treat "-" (string) as 0 for sorting purposes
   const sortedScores = Object.entries(finalScores).sort(

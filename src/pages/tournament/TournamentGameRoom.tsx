@@ -241,6 +241,9 @@ export default function TournamentGameRoom() {
   // Open scores modal when final scores are received and show back button
   useEffect(() => {
     if (gameState?.finalScores && gameState.gameStatus === 'finished') {
+      const displayTime = performance.now();
+      const displayTimestamp = new Date().toISOString();
+      console.log(`[TournamentGameRoom] [TIMESTAMP] Opening scores modal at ${displayTimestamp} (${displayTime.toFixed(3)}ms)`);
       setIsScoresModalOpen(true);
       setShowBackButton(true); // Show back button when game finishes
     }
