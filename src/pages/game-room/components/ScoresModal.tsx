@@ -3,13 +3,13 @@ import './ScoresModal.css';
 
 interface FinalScore {
   display_name: string;
-  final_score: number;
-  number_of_words_found?: number;
+  final_score: number | string; // Can be "-" for tournament games when opponent hasn't played
+  number_of_words_found?: number | string; // Can be "-" for tournament games when opponent hasn't played
   best_word: {
     word: string;
     score: number;
   };
-  time?: number; // For one-shot games
+  time?: number | string; // For one-shot games, can be "-" for tournament games when opponent hasn't played
   profile_picture?: string;
   chat_color?: string;
   profile_url?: string;

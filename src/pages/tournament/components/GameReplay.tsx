@@ -20,7 +20,7 @@ export function GameReplay({
   boardWords,
   playerColor,
   playerName,
-  foundWords,
+  foundWords: _foundWords, // Prefixed with _ to indicate intentionally unused
   onClose,
 }: GameReplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,7 +32,6 @@ export function GameReplay({
   const [swipeLines, setSwipeLines] = useState<Array<{ x1: number; y1: number; x2: number; y2: number }>>([]);
   const [foundWordsSet, setFoundWordsSet] = useState<Set<string>>(new Set());
   const [currentSwipeWord, setCurrentSwipeWord] = useState('');
-  const [swipePathIndexes, setSwipePathIndexes] = useState<Array<[number, number]>>([]);
   const [boardRotation, setBoardRotation] = useState(0);
   
   const animationFrameRef = useRef<number | null>(null);
