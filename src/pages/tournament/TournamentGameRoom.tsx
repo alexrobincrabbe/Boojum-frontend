@@ -50,33 +50,21 @@ export default function TournamentGameRoom() {
     const activeMatchKey = `tournament_match_${matchId}`;
     const activeMatchData = localStorage.getItem(activeMatchKey);
     
-    console.log('[TournamentGameRoom] Checking localStorage on mount:', {
-      matchId,
-      activeMatchKey,
-      hasActiveMatchData: !!activeMatchData,
-    });
-    
     if (activeMatchData) {
       try {
         const data = JSON.parse(activeMatchData);
-        console.log('[TournamentGameRoom] Found active match data:', data);
         // Check if this is still the active match and game is in progress
         if (data.matchId === matchId && data.gameStatus === 'playing') {
-          console.log('[TournamentGameRoom] Game is in progress, hiding start button');
           setShowStartButton(false);
           setGameStarted(true);
         } else if (data.gameStatus === 'finished') {
           // Game finished, clean up localStorage
-          console.log('[TournamentGameRoom] Game finished, cleaning up localStorage');
           localStorage.removeItem(activeMatchKey);
         }
-      } catch (e) {
-        console.error('[TournamentGameRoom] Error parsing localStorage data:', e);
+      } catch {
         // Invalid data, clean up
         localStorage.removeItem(activeMatchKey);
       }
-    } else {
-      console.log('[TournamentGameRoom] No active match data in localStorage');
     }
   }, [matchId]);
 
@@ -154,12 +142,6 @@ export default function TournamentGameRoom() {
     isGuest: false, // Tournament games require authentication
     wsUrl: wsUrl, // Pass the wsUrl - it will be empty string until matchInfo loads, preventing connection
     initializeWordLists: (wordsByLength, gameState, sendJson) => {
-      console.log('[TournamentGameRoom] initializeWordLists called:', {
-        wordsByLengthKeys: Object.keys(wordsByLength || {}),
-        gameStateGameStatus: gameState?.gameStatus,
-        hasGameState: !!gameState,
-        playerWhichWordsFound: (gameState as { playerWhichWordsFound?: number[] })?.playerWhichWordsFound?.length || 0,
-      });
       wordTrackingRef.current?.initializeWordLists(wordsByLength, gameState, sendJson);
     },
     onScoreInChat: () => {
@@ -315,18 +297,6 @@ export default function TournamentGameRoom() {
     if (!matchId) return;
     
     const activeMatchKey = `tournament_match_${matchId}`;
-    
-    console.log('[TournamentGameRoom] Game state changed:', {
-      gameStatus: gameState?.gameStatus,
-      hasBoard: !!gameState?.board,
-      boardSize: gameState?.board ? `${gameState.board.length}x${gameState.board[0]?.length || 0}` : 'none',
-      timeRemaining: gameState?.timeRemaining,
-      initialTimer: gameState?.initialTimer,
-      hasBoardWords: !!gameState?.boardWords,
-      boardWordsCount: gameState?.boardWords?.length || 0,
-      gameStarted,
-      showStartButton,
-    });
     
     if (gameState?.gameStatus === 'playing') {
       setShowStartButton(false);
