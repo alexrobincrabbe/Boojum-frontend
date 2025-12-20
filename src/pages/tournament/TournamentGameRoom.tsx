@@ -399,6 +399,7 @@ export default function TournamentGameRoom() {
                 oneShotSubmitted={oneShotSubmitted}
                 onOneShotConfirmed={handleOneShotConfirmed}
                 onRecordSwipeLetter={gameRecording.recordSwipeLetter}
+                onRecordSwipeWord={gameRecording.recordSwipeWord}
                 onRecordKeyboardWord={gameRecording.recordKeyboardWord}
                 onRecordBoardRotation={gameRecording.recordBoardRotation}
               />

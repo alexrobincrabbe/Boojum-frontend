@@ -32,6 +32,7 @@ export function GameReplay({
   const [swipeLines, setSwipeLines] = useState<Array<{ x1: number; y1: number; x2: number; y2: number }>>([]);
   const [foundWordsSet, setFoundWordsSet] = useState<Set<string>>(new Set());
   const [currentSwipeWord, setCurrentSwipeWord] = useState('');
+  const [recordedSwipeWord, setRecordedSwipeWord] = useState<string>(''); // Word from swipe_word events
   const [boardRotation, setBoardRotation] = useState(0);
   
   const animationFrameRef = useRef<number | null>(null);
@@ -112,6 +113,8 @@ export function GameReplay({
     // Build found words set from initial + all word_submit events up to current time
     let newFoundWordsSet = new Set<string>(initialFoundWordsRef.current);
     let newBoardRotation = 0;
+    let newRecordedSwipeWord = '';
+    let currentSwipeWordFromEvents = ''; // Track word from swipe_letter events as we process them
 
     // Track when the current swipe sequence started (after last word_submit or word_clear)
     let lastSwipeStartTime = 0;
@@ -125,19 +128,51 @@ export function GameReplay({
           if (event.timestamp >= lastSwipeStartTime) {
             const idx = event.y + event.x * 4;
             const positionKey = `${event.x},${event.y}`;
-            // Only add if we haven't seen this position in the current swipe sequence
-            if (!seenIndexes.has(positionKey)) {
+            
+            // Check if this letter is already in the path (going back)
+            const existingIndex = swipePathIndexes.findIndex(([px, py]) => px === event.x && py === event.y);
+            
+            if (existingIndex >= 0) {
+              // Going back to a previous letter - remove all letters after this one
+              const removeCount = swipePathIndexes.length - existingIndex - 1;
+              for (let i = 0; i < removeCount; i++) {
+                const [removedX, removedY] = swipePathIndexes.pop()!;
+                const removedIdx = removedY + removedX * 4;
+                newSwipePath[removedIdx] = false;
+                const removedKey = `${removedX},${removedY}`;
+                seenIndexes.delete(removedKey);
+              }
+              // Re-add the current letter to ensure it's highlighted
+              newSwipePath[idx] = true;
+            } else {
+              // New letter - add it to the path
               newSwipePath[idx] = true;
               swipePathIndexes.push([event.x, event.y]);
               seenIndexes.add(positionKey);
             }
+            
+            // Update word from event immediately (this is the most up-to-date word)
+            // The word in the event reflects the current state after going back/forward
+            // Always use the word from the event if available, as it's calculated at the exact moment
+            if ('word' in event && event.word !== undefined && event.word !== null) {
+              currentSwipeWordFromEvents = event.word;
+            } else {
+              // If no word in event, rebuild from current path (handles both going back and forward)
+              // After removing letters (if going back), rebuild from the updated path
+              currentSwipeWordFromEvents = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
+            }
           }
+        } else if (event.type === 'swipe_word') {
+          // Record the full swipe word when finalized
+          newRecordedSwipeWord = event.word;
         } else if (event.type === 'keyboard_word') {
           newKeyboardWord = event.word;
           newKeyboardTracePath = [...event.tracePath];
         } else if (event.type === 'word_clear') {
           newKeyboardWord = '';
           newKeyboardTracePath = Array(16).fill(false);
+          newRecordedSwipeWord = ''; // Clear recorded swipe word
+          currentSwipeWordFromEvents = ''; // Clear word from events
           // Clear swipe path when word is cleared
           newSwipePath.fill(false);
           swipePathIndexes.length = 0;
@@ -146,6 +181,8 @@ export function GameReplay({
         } else if (event.type === 'word_submit') {
           // Track found words
           newFoundWordsSet.add(event.word.toLowerCase());
+          newRecordedSwipeWord = ''; // Clear recorded swipe word after submit
+          currentSwipeWordFromEvents = ''; // Clear word from events
           // Clear swipe path and lines when word is submitted
           newSwipePath.fill(false);
           swipePathIndexes.length = 0;
@@ -164,10 +201,22 @@ export function GameReplay({
       newSwipeLines.push({ x1, y1, x2, y2 });
     }
 
-    // Build current swipe word from path indexes
+    // Build current swipe word
+    // Priority during active swipe: word from swipe_letter events (real-time updates)
+    // Priority when swipe is finalized: recorded swipe_word event
+    // If there's an active swipe (path has letters), use the real-time word from events
+    // Otherwise, use the finalized swipe_word if available
     let currentSwipeWord = '';
     if (swipePathIndexes.length > 0) {
-      currentSwipeWord = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
+      // Active swipe in progress - use real-time word from swipe_letter events
+      currentSwipeWord = currentSwipeWordFromEvents;
+      // Fallback to building from path if no word in events
+      if (!currentSwipeWord) {
+        currentSwipeWord = swipePathIndexes.map(([x, y]) => board[x][y]).join('');
+      }
+    } else {
+      // No active swipe - use finalized swipe_word if available
+      currentSwipeWord = newRecordedSwipeWord || '';
     }
 
     setFoundWordsSet(newFoundWordsSet);
@@ -176,6 +225,7 @@ export function GameReplay({
     setCurrentKeyboardTracePath(newKeyboardTracePath);
     setSwipeLines(newSwipeLines);
     setCurrentSwipeWord(currentSwipeWord);
+    setRecordedSwipeWord(newRecordedSwipeWord);
     setBoardRotation(newBoardRotation);
   }, [recording, board]);
 
@@ -418,7 +468,7 @@ export function GameReplay({
       </div>
 
       <div className="game-replay-keyboard-word" style={{ color: playerColor }}>
-        {currentKeyboardWord || '\u00A0'}
+        {currentKeyboardWord || currentSwipeWord || '\u00A0'}
       </div>
     </div>
   );

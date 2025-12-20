@@ -3,7 +3,7 @@ import { useRef, useCallback } from 'react';
 /**
  * Game recording event types
  */
-export type RecordingEventType = 'swipe_letter' | 'keyboard_word' | 'word_submit' | 'word_clear' | 'board_rotation';
+export type RecordingEventType = 'swipe_letter' | 'swipe_word' | 'keyboard_word' | 'word_submit' | 'word_clear' | 'board_rotation';
 
 export interface SwipeLetterEvent {
   type: 'swipe_letter';
@@ -12,6 +12,13 @@ export interface SwipeLetterEvent {
   x: number;
   y: number;
   index: number; // 0-15 board position
+  word?: string; // Current word string being built (for debugging)
+}
+
+export interface SwipeWordEvent {
+  type: 'swipe_word';
+  timestamp: number;
+  word: string; // Full word string when swipe is finalized
 }
 
 export interface KeyboardWordEvent {
@@ -38,12 +45,13 @@ export interface BoardRotationEvent {
   rotation: number; // Total rotation angle in degrees
 }
 
-export type RecordingEvent = SwipeLetterEvent | KeyboardWordEvent | WordSubmitEvent | WordClearEvent | BoardRotationEvent;
+export type RecordingEvent = SwipeLetterEvent | SwipeWordEvent | KeyboardWordEvent | WordSubmitEvent | WordClearEvent | BoardRotationEvent;
 
 export interface UseGameRecordingReturn {
   startRecording: () => void;
   stopRecording: () => void;
-  recordSwipeLetter: (letter: string, x: number, y: number, index: number) => void;
+  recordSwipeLetter: (letter: string, x: number, y: number, index: number, word?: string) => void;
+  recordSwipeWord: (word: string) => void; // Record the full word when swipe is finalized
   recordKeyboardWord: (word: string, tracePath: boolean[]) => void;
   recordWordSubmit: (word: string) => void;
   recordWordClear: () => void;
@@ -79,7 +87,7 @@ export function useGameRecording(): UseGameRecordingReturn {
     return performance.now() - startTimeRef.current;
   }, []);
 
-  const recordSwipeLetter = useCallback((letter: string, x: number, y: number, index: number) => {
+  const recordSwipeLetter = useCallback((letter: string, x: number, y: number, index: number, word?: string) => {
     if (!isRecordingRef.current) return;
     
     const event: SwipeLetterEvent = {
@@ -89,6 +97,18 @@ export function useGameRecording(): UseGameRecordingReturn {
       x,
       y,
       index,
+      word, // Include word string for debugging
+    };
+    recordingRef.current.push(event);
+  }, [getRelativeTimestamp]);
+
+  const recordSwipeWord = useCallback((word: string) => {
+    if (!isRecordingRef.current) return;
+    
+    const event: SwipeWordEvent = {
+      type: 'swipe_word',
+      timestamp: getRelativeTimestamp(),
+      word,
     };
     recordingRef.current.push(event);
   }, [getRelativeTimestamp]);
@@ -145,6 +165,7 @@ export function useGameRecording(): UseGameRecordingReturn {
     startRecording,
     stopRecording,
     recordSwipeLetter,
+    recordSwipeWord,
     recordKeyboardWord,
     recordWordSubmit,
     recordWordClear,

@@ -31,7 +31,8 @@ export function useBoardSwipe(
     onExactMatch?: (word: string) => void,
     debugMode: boolean = false,
     boardRotationDeg: number = 0,
-    onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number) => void
+    onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number, word?: string) => void,
+    onRecordSwipeWord?: (word: string) => void
 ) {
 
     const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
@@ -308,7 +309,8 @@ export function useBoardSwipe(
 
                         // Record swipe letter event when going back
                         if (onRecordSwipeLetter) {
-                            onRecordSwipeLetter(letter.letter, letter.x, letter.y, letter.index);
+                            const currentWord = newSelected.map((l) => l.letter).join("");
+                            onRecordSwipeLetter(letter.letter, letter.x, letter.y, letter.index, currentWord);
                         }
 
                         const currentFound = wordsFound || new Set<string>();
@@ -358,7 +360,7 @@ export function useBoardSwipe(
 
                     // Record swipe letter event
                     if (onRecordSwipeLetter) {
-                        onRecordSwipeLetter(letter.letter, letter.x, letter.y, letter.index);
+                        onRecordSwipeLetter(letter.letter, letter.x, letter.y, letter.index, word);
                     }
 
                     const currentFound = wordsFound || new Set<string>();
@@ -422,7 +424,13 @@ export function useBoardSwipe(
         swipeStateRef.current = clearedState;
         setSwipeState(clearedState);
 
-        if (wordToSubmit && onWordSubmit) onWordSubmit(wordToSubmit);
+        if (wordToSubmit && onWordSubmit) {
+            onWordSubmit(wordToSubmit);
+            // Record the full swipe word for debugging
+            if (onRecordSwipeWord) {
+                onRecordSwipeWord(wordToSubmit);
+            }
+        }
 
         setCurrentWord("");
         clearLines();
@@ -439,7 +447,7 @@ export function useBoardSwipe(
         setTimeout(() => {
             isFinalizingRef.current = false;
         }, 100);
-    }, [onWordSubmit, clearLines, clearTileColors]);
+    }, [onWordSubmit, clearLines, clearTileColors, onRecordSwipeWord]);
 
     /**
      * IMPORTANT: pointerType is used to prevent "mouse hover selects letters"

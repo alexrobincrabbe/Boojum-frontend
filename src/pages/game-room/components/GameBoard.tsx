@@ -26,7 +26,8 @@ interface GameBoardProps {
   onOneShotConfirmed?: (word: string) => void; // Callback when one-shot word is confirmed
   colorsOffOverride?: boolean; // Override global colorsOff setting (for timeless boards)
   onExactMatch?: (word: string) => void; // Callback when a word turns green (exact match found)
-  onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number) => void; // Recording callback for swipe
+  onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number, word?: string) => void; // Recording callback for swipe
+  onRecordSwipeWord?: (word: string) => void; // Recording callback for swipe word finalized
   onRecordKeyboardWord?: (word: string, tracePath: boolean[]) => void; // Recording callback for keyboard
   onRecordBoardRotation?: (rotation: number) => void; // Recording callback for board rotation
 }
@@ -46,6 +47,7 @@ export function GameBoard({
   colorsOffOverride,
   onExactMatch,
   onRecordSwipeLetter,
+  onRecordSwipeWord,
   onRecordKeyboardWord,
   onRecordBoardRotation,
 }: GameBoardProps) {
@@ -110,6 +112,7 @@ export function GameBoard({
     debugMode,
     boardRotation,
     onRecordSwipeLetter, // Pass recording callback
+    onRecordSwipeWord, // Pass swipe word recording callback
   );
 
   // Keyboard input functionality
