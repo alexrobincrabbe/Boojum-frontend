@@ -1,17 +1,15 @@
 .game-replay-container {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #1a1a1a;
-  border: 2px solid #71bbe9;
-  border-radius: 8px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
-  z-index: 10050; /* Above top bar (1003) and users online bar (998) */
-  max-width: 90vw;
-  max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .game-replay-header {
@@ -22,28 +20,27 @@
 }
 
 .game-replay-header h3 {
+  color: white;
   margin: 0;
-  font-size: 1.5rem;
 }
 
 .close-button {
-  background: transparent;
+  background: none;
   border: none;
-  color: #fff;
+  color: white;
   font-size: 2rem;
   cursor: pointer;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.2s;
 }
 
 .close-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
 }
 
 .game-replay-controls {
@@ -56,45 +53,40 @@
 
 .play-pause-button,
 .reset-button {
-  background: #71bbe9;
+  background-color: #71bbe9;
   border: none;
-  color: #000;
-  font-size: 1.2rem;
-  padding: 8px 16px;
-  border-radius: 4px;
+  color: white;
+  font-size: 1.5rem;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .play-pause-button:hover,
 .reset-button:hover {
-  background: #5aa8d0;
+  background-color: #5a9fd4;
 }
 
 .time-display {
-  color: #fff;
-  font-size: 1rem;
-  min-width: 100px;
+  color: white;
+  font-size: 1.2rem;
+  font-family: monospace;
 }
 
 .speed-control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #fff;
-}
-
-.speed-control label {
-  font-size: 0.9rem;
+  gap: 10px;
+  color: white;
 }
 
 .speed-control select {
-  background: #2a2a2a;
-  color: #fff;
-  border: 1px solid #71bbe9;
+  padding: 5px 10px;
   border-radius: 4px;
-  padding: 4px 8px;
-  cursor: pointer;
+  border: 1px solid #71bbe9;
+  background-color: #1b1835;
+  color: white;
 }
 
 .game-replay-seekbar {
@@ -103,9 +95,9 @@
 
 .seekbar-input {
   width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #2a2a2a;
+  height: 8px;
+  border-radius: 4px;
+  background: #352870;
   outline: none;
   -webkit-appearance: none;
 }
@@ -113,16 +105,16 @@
 .seekbar-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #71bbe9;
   cursor: pointer;
 }
 
 .seekbar-input::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #71bbe9;
   cursor: pointer;
@@ -134,11 +126,137 @@
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
-  overflow: hidden;
+}
+
+.game-replay-keyboard-word {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 10px;
+  min-height: 2.5rem;
+  font-family: 'Chango', sans-serif;
+}
+
+/* Synchronized Replay Styles */
+.synchronized-replay-container {
+  padding: 20px;
+}
+
+.synchronized-replay-boards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
   width: 100%;
-  max-width: 400px; /* Approximate board size to prevent overflow */
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.synchronized-replay-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.synchronized-replay-score-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto 20px;
+}
+
+.synchronized-replay-score-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.synchronized-replay-score-bar-container .synchronized-replay-player-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: 'Chango', sans-serif;
+  min-width: 120px;
+  text-align: left;
+}
+
+.synchronized-replay-score-bar-fill-wrapper {
+  flex: 1;
+  height: 40px;
+  background-color: rgba(27, 24, 53, 0.8);
+  border-radius: 8px;
+  border: 2px solid #eb5497;
+  overflow: hidden;
+  position: relative;
+}
+
+.synchronized-replay-score {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #f5ce45;
+  font-family: 'Chango', sans-serif;
+  min-width: 100px;
+  text-align: right;
+}
+
+.synchronized-replay-board-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: 'Chango', sans-serif;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.synchronized-replay-score-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.synchronized-replay-score-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 100%);
+  pointer-events: none;
+}
+
+.synchronized-replay-board-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.synchronized-replay-board-wrapper {
+    display: flex;
+    justify-content: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.synchronized-replay-boards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.board-greyed-out {
+  filter: grayscale(100%);
+  opacity: 0.5;
 }
 
 .replay-svg-overlay {
@@ -146,32 +264,118 @@
   top: 0;
   left: 0;
   pointer-events: none;
+  z-index: 10;
 }
 
-.replay-swipe-highlight {
-  border: 2px solid white !important;
+/* Make boojum and snark borders responsive for replay boards */
+/* Mobile: 2px (handled in mobile media query below) */
+/* Tablet: 5px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .synchronized-replay-board-wrapper #board .boojum,
+  .synchronized-replay-board-wrapper #board .letter.boojum {
+    border: solid #33c15b 5px !important;
+    box-sizing: border-box;
+  }
+
+  .synchronized-replay-board-wrapper #board .snark,
+  .synchronized-replay-board-wrapper #board .letter.snark {
+    border: solid #febe38 5px !important;
+    box-sizing: border-box;
+  }
 }
 
-.replay-keyboard-highlight {
-  border: 2px solid #71bbe9 !important;
+/* Desktop: 10px (default) */
+@media (min-width: 1025px) {
+  .synchronized-replay-board-wrapper #board .boojum,
+  .synchronized-replay-board-wrapper #board .letter.boojum {
+    border: solid #33c15b 10px !important;
+    box-sizing: border-box;
+  }
+
+  .synchronized-replay-board-wrapper #board .snark,
+  .synchronized-replay-board-wrapper #board .letter.snark {
+    border: solid #febe38 10px !important;
+    box-sizing: border-box;
+  }
 }
 
-.game-replay-keyboard-word {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-top: 10px;
-  min-height: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+@media (max-width: 768px) {
+  .synchronized-replay-boards {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    max-width: 100%;
+    margin-top: 10px;
+  }
 
-.game-replay-message {
-  text-align: center;
-  color: #fff;
-  padding: 40px;
-  font-size: 1.1rem;
-}
+  .synchronized-replay-board-container {
+    max-width: 100%;
+    width: 45vw;
+  }
 
+  .synchronized-replay-board-wrapper {
+    max-width: 100%;
+    width: 45vw;
+  }
+
+  .synchronized-replay-board-wrapper .board-dark {
+    padding: 6px !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  .synchronized-replay-board-wrapper .letter {
+    font-size: 0.75rem !important;
+    min-height: 28px !important;
+    padding: 4px !important;
+  }
+
+  .synchronized-replay-board-wrapper .letValue {
+    font-size: 0.75rem !important;
+  }
+
+  /* Mobile: 2px borders for boojum and snark */
+  .synchronized-replay-board-wrapper #board .boojum,
+  .synchronized-replay-board-wrapper #board .letter.boojum {
+    border: solid #33c15b 2px !important;
+    box-sizing: border-box;
+  }
+
+  .synchronized-replay-board-wrapper #board .snark,
+  .synchronized-replay-board-wrapper #board .letter.snark {
+    border: solid #febe38 2px !important;
+    box-sizing: border-box;
+  }
+
+  .synchronized-replay-board-name {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+
+  .game-replay-keyboard-word {
+    font-size: 0.8rem;
+    margin-top: 5px;
+  }
+
+  .synchronized-replay-score-bars {
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .synchronized-replay-score-bar-container {
+    gap: 8px;
+  }
+
+  .synchronized-replay-score-bar-container .synchronized-replay-player-name {
+    font-size: 1rem;
+    min-width: 80px;
+  }
+
+  .synchronized-replay-score-bar-fill-wrapper {
+    height: 30px;
+  }
+
+  .synchronized-replay-score {
+    font-size: 1rem;
+    min-width: 70px;
+  }
+}

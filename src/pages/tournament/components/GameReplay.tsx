@@ -11,6 +11,7 @@ interface GameReplayProps {
   playerColor: string;
   playerName: string;
   foundWords?: boolean[]; // Array indicating which words were found (1 = found, 0 = not found)
+  boojumArray?: number[][]; // 2D array: 1 = snark, 2 = boojum, 0 = neither
   onClose?: () => void;
 }
 
@@ -21,6 +22,7 @@ export function GameReplay({
   playerColor,
   playerName,
   foundWords: _foundWords, // eslint-disable-line @typescript-eslint/no-unused-vars
+  boojumArray,
   onClose,
 }: GameReplayProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -436,6 +438,20 @@ export function GameReplay({
                     tileClass = 'tile-no-match-dark'; // Pink
                   }
                 }
+              }
+
+              // Check if this tile is a bonus tile (snark = 1, boojum = 2)
+              const boojumRow = boojumArray?.[rowIdx];
+              const bonusValue = boojumRow?.[colIdx] ?? 0;
+              const isSnark = bonusValue === 1;
+              const isBoojum = bonusValue === 2;
+
+              // Add boojum/snark classes
+              if (isSnark) {
+                tileClass += ' snark';
+              }
+              if (isBoojum) {
+                tileClass += ' boojum';
               }
 
               return (

@@ -12,7 +12,7 @@ import { tournamentAPI } from '../../services/api';
 import { toast } from 'react-toastify';
 import { Loading } from '../../components/Loading';
 import { useGameRecording } from '../../hooks/useGameRecording';
-import type { OutboundMessage } from '../../ws/protocol';
+import type { OutboundMessage, GameState } from '../../ws/protocol';
 import '../game-room/GameRoom.css';
 
 interface MatchInfo {
@@ -30,7 +30,7 @@ interface MatchInfo {
 
 export default function TournamentGameRoom() {
   const { matchId } = useParams<{ matchId: string }>();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const token = localStorage.getItem('access_token') || '';
@@ -43,8 +43,54 @@ export default function TournamentGameRoom() {
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
 
-  // Load match info
+  // Check localStorage for active match on mount
   useEffect(() => {
+    if (!matchId) return;
+    
+    const activeMatchKey = `tournament_match_${matchId}`;
+    const activeMatchData = localStorage.getItem(activeMatchKey);
+    
+    console.log('[TournamentGameRoom] Checking localStorage on mount:', {
+      matchId,
+      activeMatchKey,
+      hasActiveMatchData: !!activeMatchData,
+    });
+    
+    if (activeMatchData) {
+      try {
+        const data = JSON.parse(activeMatchData);
+        console.log('[TournamentGameRoom] Found active match data:', data);
+        // Check if this is still the active match and game is in progress
+        if (data.matchId === matchId && data.gameStatus === 'playing') {
+          console.log('[TournamentGameRoom] Game is in progress, hiding start button');
+          setShowStartButton(false);
+          setGameStarted(true);
+        } else if (data.gameStatus === 'finished') {
+          // Game finished, clean up localStorage
+          console.log('[TournamentGameRoom] Game finished, cleaning up localStorage');
+          localStorage.removeItem(activeMatchKey);
+        }
+      } catch (e) {
+        console.error('[TournamentGameRoom] Error parsing localStorage data:', e);
+        // Invalid data, clean up
+        localStorage.removeItem(activeMatchKey);
+      }
+    } else {
+      console.log('[TournamentGameRoom] No active match data in localStorage');
+    }
+  }, [matchId]);
+
+  // Clear localStorage if backend says game is waiting but localStorage says playing
+  // This handles the case where the game ended or room was cleaned up
+  // Note: This useEffect must be placed after gameState is defined (after useGameWebSocket call)
+
+  // Load match info - wait for auth to load first
+  useEffect(() => {
+    // Don't check until auth has finished loading
+    if (authLoading) {
+      return;
+    }
+
     const loadMatchInfo = async () => {
       if (!matchId || isGuest) {
         setError('Match ID is required and you must be logged in');
@@ -72,11 +118,15 @@ export default function TournamentGameRoom() {
     };
 
     loadMatchInfo();
-  }, [matchId, isGuest, navigate]);
+  }, [matchId, isGuest, navigate, authLoading]);
 
   // Word tracking ref (WS can call into it)
   const wordTrackingRef = useRef<{
-    initializeWordLists: (wordsByLength: Record<string, string[]>) => void;
+    initializeWordLists: (
+      wordsByLength: Record<string, string[]>,
+      gameState?: GameState | null,
+      sendJson?: (message: OutboundMessage) => void
+    ) => void;
   } | null>(null);
 
   // Custom WebSocket URL for tournament matches
@@ -103,8 +153,14 @@ export default function TournamentGameRoom() {
     token,
     isGuest: false, // Tournament games require authentication
     wsUrl: wsUrl, // Pass the wsUrl - it will be empty string until matchInfo loads, preventing connection
-    initializeWordLists: (wordsByLength) => {
-      wordTrackingRef.current?.initializeWordLists(wordsByLength);
+    initializeWordLists: (wordsByLength, gameState, sendJson) => {
+      console.log('[TournamentGameRoom] initializeWordLists called:', {
+        wordsByLengthKeys: Object.keys(wordsByLength || {}),
+        gameStateGameStatus: gameState?.gameStatus,
+        hasGameState: !!gameState,
+        playerWhichWordsFound: (gameState as { playerWhichWordsFound?: number[] })?.playerWhichWordsFound?.length || 0,
+      });
+      wordTrackingRef.current?.initializeWordLists(wordsByLength, gameState, sendJson);
     },
     onScoreInChat: () => {
       // Tournament games don't have chat, so we don't need to handle score messages in chat
@@ -181,13 +237,21 @@ export default function TournamentGameRoom() {
 
   // Handle start game button
   const handleStartGame = useCallback(() => {
-    if (sendJson && !gameStarted) {
+    if (sendJson && !gameStarted && matchId) {
       // sendJson automatically converts START_GAME to event_type: 'start_game'
       sendJson({ type: 'START_GAME' });
       setShowStartButton(false);
       setGameStarted(true);
+      
+      // Store active match in localStorage
+      const activeMatchKey = `tournament_match_${matchId}`;
+      localStorage.setItem(activeMatchKey, JSON.stringify({
+        matchId,
+        gameStatus: 'playing',
+        timestamp: Date.now(),
+      }));
     }
-  }, [sendJson, gameStarted]);
+  }, [sendJson, gameStarted, matchId]);
 
   // Scores modal state
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
@@ -241,9 +305,6 @@ export default function TournamentGameRoom() {
   // Open scores modal when final scores are received and show back button
   useEffect(() => {
     if (gameState?.finalScores && gameState.gameStatus === 'finished') {
-      const displayTime = performance.now();
-      const displayTimestamp = new Date().toISOString();
-      console.log(`[TournamentGameRoom] [TIMESTAMP] Opening scores modal at ${displayTimestamp} (${displayTime.toFixed(3)}ms)`);
       setIsScoresModalOpen(true);
       setShowBackButton(true); // Show back button when game finishes
     }
@@ -251,14 +312,45 @@ export default function TournamentGameRoom() {
 
   // Hide start button if game is already playing (e.g., on reconnect)
   useEffect(() => {
+    if (!matchId) return;
+    
+    const activeMatchKey = `tournament_match_${matchId}`;
+    
+    console.log('[TournamentGameRoom] Game state changed:', {
+      gameStatus: gameState?.gameStatus,
+      hasBoard: !!gameState?.board,
+      boardSize: gameState?.board ? `${gameState.board.length}x${gameState.board[0]?.length || 0}` : 'none',
+      timeRemaining: gameState?.timeRemaining,
+      initialTimer: gameState?.initialTimer,
+      hasBoardWords: !!gameState?.boardWords,
+      boardWordsCount: gameState?.boardWords?.length || 0,
+      gameStarted,
+      showStartButton,
+    });
+    
     if (gameState?.gameStatus === 'playing') {
       setShowStartButton(false);
       setGameStarted(true);
+      
+      // Update localStorage to reflect game is playing
+      localStorage.setItem(activeMatchKey, JSON.stringify({
+        matchId,
+        gameStatus: 'playing',
+        timestamp: Date.now(),
+      }));
+    } else if (gameState?.gameStatus === 'finished') {
+      // Game finished, clean up localStorage
+      localStorage.removeItem(activeMatchKey);
+      setShowStartButton(false);
     } else if (gameState?.gameStatus === 'waiting' && !gameStarted) {
       // Only show start button if game is waiting and hasn't been started yet
-      setShowStartButton(true);
+      // But check localStorage first
+      const activeMatchData = localStorage.getItem(activeMatchKey);
+      if (!activeMatchData) {
+        setShowStartButton(true);
+      }
     }
-  }, [gameState?.gameStatus, gameStarted]);
+  }, [gameState?.gameStatus, gameState?.board, gameState?.boardWords, gameState?.timeRemaining, gameState?.initialTimer, gameStarted, matchId, showStartButton]);
 
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;

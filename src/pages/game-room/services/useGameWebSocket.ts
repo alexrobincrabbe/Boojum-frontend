@@ -120,6 +120,60 @@ export function useGameWebSocket({
                     setGameState(newState);
                     onGameStateChange?.(newState);
 
+                    // Update timer if present in STATE_SNAPSHOT (for reconnection during active game)
+                    if (newState.timeRemaining !== undefined || newState.initialTimer !== undefined) {
+                        const timer = timerRef.current;
+                        if (newState.timeRemaining !== undefined) {
+                            timer.time = newState.timeRemaining;
+                            timer.progressBar = newState.timeRemaining;
+                            setDisplayTime(newState.timeRemaining);
+                        }
+                        if (newState.initialTimer !== undefined) {
+                            const initial = newState.initialTimer;
+                            timer.initialTimer = initial;
+                            timer.initialProgressBar = initial;
+                            setInitialTimer(initial);
+                        }
+                        // Restart timer sync when receiving STATE_SNAPSHOT with timer data
+                        timer.lastUpdateTime = performance.now();
+                        timer.lastUpdateTimeProgressBar = performance.now();
+
+                        // Clear existing intervals
+                        if (timer.timerInterval) clearInterval(timer.timerInterval);
+                        if (timer.progressBarInterval) clearInterval(timer.progressBarInterval);
+
+                        // Start new intervals to restart the offline timer
+                        timer.timerInterval = setInterval(() => {
+                            const t = timerRef.current;
+                            const elapsed = (performance.now() - t.lastUpdateTime) / 1000;
+                            t.lastUpdateTime = performance.now();
+                            if (t.time > 0) {
+                                t.time = Math.max(0, t.time - Math.round(elapsed));
+                                setDisplayTime(t.time);
+                            }
+                        }, 1000);
+
+                        timer.progressBarInterval = setInterval(() => {
+                            const t = timerRef.current;
+                            const elapsed =
+                                (performance.now() - t.lastUpdateTimeProgressBar) / 1000;
+                            t.lastUpdateTimeProgressBar = performance.now();
+
+                            if (t.initialProgressBar > 0) {
+                                const container = document.getElementById('timer-bar-container');
+                                if (container) {
+                                    const containerWidth = parseFloat(
+                                        window.getComputedStyle(container).width
+                                    );
+                                    const width =
+                                        (containerWidth * t.progressBar) / t.initialProgressBar;
+                                    setProgressBarWidth(Math.max(0, width));
+                                }
+                                t.progressBar = Math.max(0, t.progressBar - elapsed);
+                            }
+                        }, 100);
+                    }
+
                     // Track when a board is first shown - set it immediately if board exists
                     if (newState.board && !hasBoardBeenShownRef.current) {
                         hasBoardBeenShownRef.current = true;

@@ -38,7 +38,22 @@ export interface UseGameSocketReturn {
  */
 function normalizeInboundMessage(raw: any): InboundMessage | null {
   // Already in frontend protocol
-  if (raw?.type) return raw as InboundMessage;
+  if (raw?.type) {
+    if (raw.type === 'STATE_SNAPSHOT') {
+      console.log('[useGameSocket] Received STATE_SNAPSHOT (already normalized):', {
+        gameStatus: raw.state?.gameStatus,
+        hasBoard: !!raw.state?.board,
+        boardSize: raw.state?.board ? `${raw.state.board.length}x${raw.state.board[0]?.length || 0}` : 'none',
+        timeRemaining: raw.state?.timeRemaining,
+        initialTimer: raw.state?.initialTimer,
+        hasBoardWords: !!raw.state?.boardWords,
+        boardWordsCount: raw.state?.boardWords?.length || 0,
+        hasWordsByLength: !!raw.state?.wordsByLength,
+        players: raw.state?.players?.length || 0,
+      });
+    }
+    return raw as InboundMessage;
+  }
 
   // Heartbeat coming from backend
   if (raw?.event_type === 'pong') {
@@ -388,6 +403,7 @@ export function useGameSocket({
     wsRef.current = ws;
 
     ws.onopen = () => {
+      console.log('[useGameSocket] WebSocket opened, sending JOIN_ROOM');
       isConnectingRef.current = false;
       reconnectAttemptsRef.current = 0;
       setConnectionState('open');
@@ -400,12 +416,27 @@ export function useGameSocket({
     ws.onmessage = (event) => {
       try {
         const raw = JSON.parse(event.data);
+        console.log('[useGameSocket] Raw message received:', {
+          type: raw?.type,
+          event_type: raw?.event_type,
+          hasState: !!raw?.state,
+          stateKeys: raw?.state ? Object.keys(raw.state) : [],
+        });
 
         // If backend ever sends raw PONG as {type:'PONG'}
         if (raw?.type === 'PONG') return;
 
         const msg = normalizeInboundMessage(raw);
-        if (!msg) return;
+        if (!msg) {
+          console.warn('[useGameSocket] Message normalized to null:', raw);
+          return;
+        }
+
+        console.log('[useGameSocket] Normalized message:', {
+          type: msg.type,
+          hasState: 'state' in msg,
+          stateKeys: 'state' in msg ? Object.keys((msg as any).state) : [],
+        });
 
         updateLastSeq(msg);
         setLastMessage(msg);

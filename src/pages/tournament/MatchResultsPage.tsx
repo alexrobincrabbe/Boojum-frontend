@@ -4,7 +4,7 @@ import { tournamentAPI } from '../../services/api';
 import { Loading } from '../../components/Loading';
 import { fetchDefinition } from '../../utils/dictionary';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
-import { GameReplay } from './components/GameReplay';
+import { SynchronizedReplay } from './components/SynchronizedReplay';
 import type { RecordingEvent } from '../../hooks/useGameRecording';
 import '../game-room/GameRoom.css';
 import './MatchResultsPage.css';
@@ -268,7 +268,8 @@ export default function MatchResultsPage() {
                 </div>
               )}
             </div>
-            {data.result.game_recording_player_1 && data.result.game_recording_player_1.length > 0 && (
+            {((data.result.game_recording_player_1 && data.result.game_recording_player_1.length > 0) ||
+              (data.result.game_recording_player_2 && data.result.game_recording_player_2.length > 0)) && (
               <button
                 onClick={() => setReplayPlayer(1)}
                 className="replay-button"
@@ -311,15 +312,6 @@ export default function MatchResultsPage() {
                 </div>
               )}
             </div>
-            {data.result.game_recording_player_2 && data.result.game_recording_player_2.length > 0 && (
-              <button
-                onClick={() => setReplayPlayer(2)}
-                className="replay-button"
-                style={{ borderColor: data.player_2.chat_color }}
-              >
-                ▶ Watch Replay
-              </button>
-            )}
           </div>
         </div>
 
@@ -494,18 +486,32 @@ export default function MatchResultsPage() {
         </div>
       </div>
 
-      {/* Game Replay Modal */}
+      {/* Synchronized Replay Modal */}
       {replayPlayer && data && (
-        <GameReplay
-          recording={replayPlayer === 1 
-            ? (data.result.game_recording_player_1 as RecordingEvent[])
-            : (data.result.game_recording_player_2 as RecordingEvent[])
+        <SynchronizedReplay
+          player1={data.result.game_recording_player_1 && data.result.game_recording_player_1.length > 0
+            ? {
+                recording: data.result.game_recording_player_1 as RecordingEvent[],
+                playerColor: data.player_1.chat_color,
+                playerName: data.player_1.display_name,
+                foundWords: data.player_1_found_words,
+              }
+            : null
+          }
+          player2={data.result.game_recording_player_2 && data.result.game_recording_player_2.length > 0
+            ? {
+                recording: data.result.game_recording_player_2 as RecordingEvent[],
+                playerColor: data.player_2.chat_color,
+                playerName: data.player_2.display_name,
+                foundWords: data.player_2_found_words,
+              }
+            : null
           }
           board={data.board.letters}
           boardWords={data.board.words}
-          playerColor={replayPlayer === 1 ? data.player_1.chat_color : data.player_2.chat_color}
-          playerName={replayPlayer === 1 ? data.player_1.display_name : data.player_2.display_name}
-          foundWords={replayPlayer === 1 ? data.player_1_found_words : data.player_2_found_words}
+          boojum={data.board.boojum_bonus || undefined}
+          snark={data.board.snark || undefined}
+          boojumArray={data.board.boojum_array || undefined}
           onClose={() => setReplayPlayer(null)}
         />
       )}
