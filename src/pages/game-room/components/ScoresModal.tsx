@@ -42,8 +42,13 @@ export function ScoresModal({
   if (!isOpen || !finalScores) return null;
 
   // Sort players by final score (descending)
+  // Treat "-" (string) as 0 for sorting purposes
   const sortedScores = Object.entries(finalScores).sort(
-    (a, b) => (b[1].final_score || 0) - (a[1].final_score || 0)
+    (a, b) => {
+      const scoreA = typeof a[1].final_score === 'number' ? a[1].final_score : 0;
+      const scoreB = typeof b[1].final_score === 'number' ? b[1].final_score : 0;
+      return scoreB - scoreA;
+    }
   );
 
   const getProfileImage = (player: FinalScore) => {

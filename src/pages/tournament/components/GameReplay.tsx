@@ -176,7 +176,6 @@ export function GameReplay({
     setCurrentKeyboardTracePath(newKeyboardTracePath);
     setSwipeLines(newSwipeLines);
     setCurrentSwipeWord(currentSwipeWord);
-    setSwipePathIndexes(swipePathIndexes);
     setBoardRotation(newBoardRotation);
   }, [recording, board]);
 
