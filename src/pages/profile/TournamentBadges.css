@@ -24,9 +24,51 @@
 .tournament-medals-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 20px;
   justify-content: center;
+  align-items: flex-start;
 }
+
+.badge-stack-container {
+  position: relative;
+  display: inline-block;
+  margin-right: 15px;
+  margin-bottom: 15px;
+}
+
+.badge-stack {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  height: 60px;
+  vertical-align: top;
+}
+
+.badge-stack:not(.expanded) {
+  width: calc(60px + 8px * var(--stack-size, 0));
+  min-width: 60px;
+  padding-left: calc(8px * var(--stack-size, 0));
+}
+
+.badge-stack.expanded {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: auto;
+  height: auto;
+  min-width: 60px;
+}
+
+.badge-stack:not(.expanded) .tournament-medal {
+  position: absolute;
+  right: 0;
+}
+
+.badge-stack.expanded .tournament-medal {
+  position: relative;
+  left: auto !important;
+}
+
 
 .tournament-medal {
   width: 60px;
@@ -59,7 +101,13 @@
 }
 
 .tournament-medal:hover {
+  transform: scale(1.1) !important;
+  z-index: 100 !important;
+}
+
+.badge-stack.expanded .tournament-medal:hover {
   transform: scale(1.1);
+  z-index: 1;
 }
 
 
@@ -221,6 +269,36 @@
   font-weight: bold;
 }
 
+.medal-detail-actions {
+  width: 100%;
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(113, 187, 233, 0.3);
+}
+
+.medal-detail-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: rgba(113, 187, 233, 0.2);
+  color: #71bbe9;
+  border: 2px solid #71bbe9;
+  border-radius: 5px;
+  text-decoration: none;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.medal-detail-link:hover {
+  background-color: rgba(113, 187, 233, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(113, 187, 233, 0.3);
+}
+
 /* Mobile responsive */
 @media (max-width: 767px) {
   .tournament-badges-container {
@@ -258,5 +336,11 @@
   .medal-detail-title {
     font-size: 1.2rem;
   }
+  
+  .badge-stack {
+    min-width: 50px;
+    height: 50px;
+  }
+  
 }
 

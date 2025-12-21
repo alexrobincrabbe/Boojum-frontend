@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Trophy, X, Star } from 'lucide-react';
+import { X, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './TournamentBadges.css';
 
 interface TournamentWin {
@@ -18,6 +19,7 @@ interface TournamentBadgesProps {
 
 const TournamentBadges = ({ tournamentWins }: TournamentBadgesProps) => {
   const [selectedWin, setSelectedWin] = useState<TournamentWin | null>(null);
+  const [expandedStacks, setExpandedStacks] = useState<Set<string>>(new Set());
 
   if (!tournamentWins || tournamentWins.length === 0) {
     return null;
@@ -69,32 +71,85 @@ const TournamentBadges = ({ tournamentWins }: TournamentBadgesProps) => {
     return 0;
   });
 
+  // Group badges by type (position + pool combination)
+  const groupedBadges = sortedWins.reduce((acc, win) => {
+    const key = `${win.position}-${win.pool}`;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(win);
+    return acc;
+  }, {} as Record<string, TournamentWin[]>);
+
+  const toggleStack = (stackKey: string) => {
+    setExpandedStacks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(stackKey)) {
+        newSet.delete(stackKey);
+      } else {
+        newSet.add(stackKey);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <>
       <div className="tournament-badges-container">
-        <h2 className="tournament-badges-title">
-          <Trophy size={24} className="trophy-icon" />
-          Tournament Wins
-        </h2>
       <div className="tournament-medals-row">
-        {sortedWins.map((win) => {
-          const tierColor = getTierColor(win.pool);
+        {Object.entries(groupedBadges).map(([stackKey, wins]) => {
+          const isExpanded = expandedStacks.has(stackKey);
+          const [, pool] = stackKey.split('-').map(Number);
+          const tierColor = getTierColor(pool);
+          const stackSize = wins.length;
+          
           return (
-            <div
-              key={win.id}
-              className={`tournament-medal ${win.position === 1 ? 'gold' : win.position === 2 ? 'silver' : 'bronze'}`}
-              onClick={() => setSelectedWin(win)}
-              title={cleanTitle(win.name)}
-              style={{ boxShadow: `0 0 15px ${tierColor}40, 0 0 30px ${tierColor}20` }}
-            >
-              <Star 
-                size={56} 
-                className="medal-tier-star" 
-                style={{ fill: tierColor, stroke: '#000', strokeWidth: 1.5 }}
-              />
-              <span className="medal-position">
-                {win.position}
-              </span>
+            <div key={stackKey} className="badge-stack-container">
+              <div 
+                className={`badge-stack ${isExpanded ? 'expanded' : ''}`}
+                style={!isExpanded ? { '--stack-size': stackSize - 1 } as React.CSSProperties : {}}
+                onClick={() => {
+                  toggleStack(stackKey);
+                }}
+              >
+                {wins.map((win, index) => {
+                  const uniqueKey = `${win.id}-${win.pool}-${win.position}-${index}`;
+                  const zIndex = stackSize - index;
+                  const rightOffset = index * 8; // 8px overlap per badge to the left (using right positioning)
+                  
+                  return (
+                    <div
+                      key={uniqueKey}
+                      className={`tournament-medal ${win.position === 1 ? 'gold' : win.position === 2 ? 'silver' : 'bronze'}`}
+                      onClick={(e) => {
+                        if (isExpanded) {
+                          e.stopPropagation();
+                          setSelectedWin(win);
+                        }
+                      }}
+                      title={isExpanded ? cleanTitle(win.name) : `${stackSize} ${win.position === 1 ? '1st' : win.position === 2 ? '2nd' : '3rd'} place${stackSize > 1 ? 's' : ''}`}
+                      style={{ 
+                        boxShadow: `0 0 15px ${tierColor}40, 0 0 30px ${tierColor}20`,
+                        zIndex: zIndex,
+                        right: isExpanded ? 'auto' : `${rightOffset}px`,
+                        position: isExpanded ? 'relative' : 'absolute',
+                        marginLeft: isExpanded ? '0' : '0',
+                        marginRight: isExpanded ? '10px' : '0',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <Star 
+                        size={56} 
+                        className="medal-tier-star" 
+                        style={{ fill: tierColor, stroke: '#000', strokeWidth: 1.5 }}
+                      />
+                      <span className="medal-position">
+                        {win.position}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
@@ -147,6 +202,15 @@ const TournamentBadges = ({ tournamentWins }: TournamentBadgesProps) => {
                     <span className="medal-detail-value">{formatDate(selectedWin.start_date)}</span>
                   </div>
                 )}
+              </div>
+              <div className="medal-detail-actions">
+                <Link 
+                  to={`/tournament?id=${selectedWin.id}`}
+                  className="medal-detail-link"
+                  onClick={() => setSelectedWin(null)}
+                >
+                  View Tournament Archive
+                </Link>
               </div>
             </div>
           </div>
