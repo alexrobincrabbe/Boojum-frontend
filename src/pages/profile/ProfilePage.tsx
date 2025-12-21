@@ -1,9 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { authAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Loading } from '../../components/Loading';
+import HighScoreCharts from './HighScoreCharts';
+import TournamentBadges from './TournamentBadges';
+import DoodlesGallery from './DoodlesGallery';
+import { SortableSection } from './SortableSection';
+import ImageCropModal from './ImageCropModal';
 import './ProfilePage.css';
 
 interface GameScore {
@@ -45,6 +64,16 @@ interface Profile {
   long_game_scores: GameScore | null;
   oneshot_normal_game_scores: GameScore | null;
   oneshot_bonus_game_scores: GameScore | null;
+  tournament_wins?: Array<{
+    id: number;
+    name: string;
+    position: number;
+    start_date: string | null;
+    type: string;
+    one_shot: boolean;
+    pool: number;
+  }>;
+  profile_section_order?: string[];
 }
 
 const ProfilePage = () => {
@@ -56,6 +85,10 @@ const ProfilePage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [sectionOrder, setSectionOrder] = useState<string[]>(['content', 'doodles', 'charts']);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -69,6 +102,14 @@ const ProfilePage = () => {
     weird_facts: '',
     profile_picture: null as File | null,
   });
+
+  // Drag and drop sensors - must be called before any conditional returns
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -90,6 +131,11 @@ const ProfilePage = () => {
           weird_facts: data.weird_facts || '',
           profile_picture: null,
         });
+        // Set section order from profile or use default
+        const order = data.profile_section_order && Array.isArray(data.profile_section_order) && data.profile_section_order.length === 3
+          ? data.profile_section_order
+          : ['content', 'doodles', 'charts'];
+        setSectionOrder(order);
       } catch (err: any) {
         setError(err.response?.data?.detail || 'Failed to load profile');
       } finally {
@@ -107,9 +153,48 @@ const ProfilePage = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({ ...prev, profile_picture: e.target.files![0] }));
+      const file = e.target.files[0];
+      // Create a preview URL for the crop modal
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageToCrop(reader.result as string);
+        setShowCropModal(true);
+      };
+      reader.readAsDataURL(file);
     }
   };
+
+  const handleCropComplete = (croppedImageBlob: Blob) => {
+    // Convert blob to File
+    const file = new File([croppedImageBlob], 'profile-picture.jpg', { type: 'image/jpeg' });
+    setFormData(prev => ({ ...prev, profile_picture: file }));
+    
+    // Create preview URL from the cropped blob
+    const previewUrl = URL.createObjectURL(croppedImageBlob);
+    setPreviewImageUrl(previewUrl);
+    
+    setShowCropModal(false);
+    setImageToCrop(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setImageToCrop(null);
+    // Reset the file input
+    const fileInput = document.getElementById('profile-picture-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // Clean up preview URL when component unmounts or when saving
+  useEffect(() => {
+    return () => {
+      if (previewImageUrl) {
+        URL.revokeObjectURL(previewImageUrl);
+      }
+    };
+  }, [previewImageUrl]);
 
   const handleSave = async () => {
     if (!profile) return;
@@ -136,6 +221,17 @@ const ProfilePage = () => {
       setProfile(updatedProfile);
       setIsEditMode(false);
       setFormData(prev => ({ ...prev, profile_picture: null }));
+      
+      // Clean up preview URL after saving
+      if (previewImageUrl) {
+        URL.revokeObjectURL(previewImageUrl);
+        setPreviewImageUrl(null);
+      }
+      
+      // Dispatch custom event to notify Layout to update profile picture
+      window.dispatchEvent(new CustomEvent('profilePictureUpdated', {
+        detail: { profilePictureUrl: updatedProfile.profile_picture_url }
+      }));
       toast.success('Profile updated successfully');
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'Failed to save profile';
@@ -162,6 +258,12 @@ const ProfilePage = () => {
     });
     setIsEditMode(false);
     setSaveError(null);
+    
+    // Clean up preview URL when canceling
+    if (previewImageUrl) {
+      URL.revokeObjectURL(previewImageUrl);
+      setPreviewImageUrl(null);
+    }
   };
 
   if (loading) {
@@ -177,6 +279,108 @@ const ProfilePage = () => {
   }
 
   const isOwnProfile = currentUser?.id === profile.user.id;
+
+  // Drag and drop handler
+  const handleDragEnd = async (event: { active: { id: string | number }; over: { id: string | number } | null }) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sectionOrder.indexOf(active.id as string);
+      const newIndex = sectionOrder.indexOf(over.id as string);
+      const newOrder = arrayMove(sectionOrder, oldIndex, newIndex);
+      
+      setSectionOrder(newOrder);
+      
+      // Save the new order
+      try {
+        await authAPI.updateProfileSectionOrder(newOrder);
+        toast.success('Section order updated');
+      } catch (err: any) {
+        const errorMsg = err.response?.data?.error || 'Failed to update section order';
+        toast.error(errorMsg);
+        // Revert on error
+        setSectionOrder(profile?.profile_section_order || ['content', 'doodles', 'charts']);
+      }
+    }
+  };
+
+  // Render sections based on order
+  const renderSection = (sectionId: string) => {
+    if (!profile) return null;
+    
+    switch (sectionId) {
+      case 'content':
+        return (
+          <div key="content" className="row profile-content-row">
+            {/* Left Column - About Me */}
+            <div id="about-me-col" className="col-12 col-md-4 about-me-col">
+              <AboutMeSection 
+                aboutMe={isEditMode ? formData.about_me : profile.about_me}
+                isEditMode={isEditMode}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Center Column - Game Details */}
+            <div className="col-12 col-md-4 game-details-col">
+              <div id="game-details-container">
+                <h2>Game Details</h2>
+                <div id="game-details">
+                  <NormalGameStats 
+                    gameStats={profile.game_stats}
+                    gameScores={profile.normal_game_scores}
+                  />
+                  <BonusGameStats 
+                    gameStats={profile.game_stats}
+                    gameScores={profile.bonus_game_scores}
+                  />
+                  <LongGameStats 
+                    gameStats={profile.game_stats}
+                    gameScores={profile.long_game_scores}
+                  />
+                  <UnicornGameStats 
+                    gameStats={profile.game_stats}
+                    normalScores={profile.oneshot_normal_game_scores}
+                    bonusScores={profile.oneshot_bonus_game_scores}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Personal Details */}
+            <div className="col-12 col-md-4 personal-details-col">
+              <PersonalDetailsSection 
+                profile={profile}
+                formData={formData}
+                isEditMode={isEditMode}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+        );
+      case 'doodles':
+        return (
+          <div key="doodles" className="row">
+            <div className="col-12">
+              <DoodlesGallery 
+                profileUrl={profileUrl || ''} 
+                isEditMode={isEditMode}
+              />
+            </div>
+          </div>
+        );
+      case 'charts':
+        return (
+          <div key="charts" className="row">
+            <div className="col-12">
+              <HighScoreCharts profileUrl={profileUrl || ''} />
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="container-fluid profile-container">
@@ -225,67 +429,86 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Main Content Row - About Me and Profile Pic */}
-      <div className="row profile-content-row">
-        {/* Left Column - About Me - Second on mobile, first on desktop */}
-        <div id="about-me-col" className="col-12 col-sm-4 about-me-col order-2 order-sm-1">
-          <AboutMeSection 
-            aboutMe={isEditMode ? formData.about_me : profile.about_me}
-            isEditMode={isEditMode}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        {/* Center Column - Profile Pic and Game Details - First on mobile */}
-        <div className="col-12 col-sm-4 profile-pic-col order-1 order-sm-2">
-          <div id="profile-pic-container">
+      {/* Profile Picture Row */}
+      <div className="row">
+        <div className="col-12 profile-pic-row">
+          <div id="profile-pic-container-top">
             <ProfilePicture 
-              profilePictureUrl={profile.profile_picture_url}
+              profilePictureUrl={previewImageUrl || profile.profile_picture_url}
               isOwnProfile={isOwnProfile}
               isEditMode={isEditMode}
               onFileChange={handleFileChange}
             />
+            {showCropModal && imageToCrop && (
+              <ImageCropModal
+                imageSrc={imageToCrop}
+                onClose={handleCropCancel}
+                onCropComplete={handleCropComplete}
+              />
+            )}
             <div id="date-joined">
               <span className="label">Joined: </span>
               {profile.join_date_formatted || 'N/A'}
-            </div>
-            <div id="game-details-container">
-              <h2>Game Details</h2>
-              <div id="game-details">
-                <NormalGameStats 
-                  gameStats={profile.game_stats}
-                  gameScores={profile.normal_game_scores}
-                />
-                <BonusGameStats 
-                  gameStats={profile.game_stats}
-                  gameScores={profile.bonus_game_scores}
-                />
-                <LongGameStats 
-                  gameStats={profile.game_stats}
-                  gameScores={profile.long_game_scores}
-                />
-                <UnicornGameStats 
-                  gameStats={profile.game_stats}
-                  normalScores={profile.oneshot_normal_game_scores}
-                  bonusScores={profile.oneshot_bonus_game_scores}
-                />
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Personal Details Row - Below other sections */}
-      <div className="row">
-        <div className="col-12 personal-details-col">
-          <PersonalDetailsSection 
-            profile={profile}
-            formData={formData}
-            isEditMode={isEditMode}
-            onChange={handleInputChange}
-          />
+      {/* Tournament Badges Row */}
+      {profile.tournament_wins && profile.tournament_wins.length > 0 && (
+        <div className="row">
+          <div className="col-12">
+            <TournamentBadges tournamentWins={profile.tournament_wins} />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Draggable Sections */}
+      {(() => {
+        // Ensure we have a valid order
+        const order = (sectionOrder && Array.isArray(sectionOrder) && sectionOrder.length === 3) 
+          ? sectionOrder 
+          : ['content', 'doodles', 'charts'];
+        
+        if (isEditMode) {
+          return (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={order}
+                strategy={verticalListSortingStrategy}
+              >
+                {order.map((sectionId) => {
+                  const sectionContent = renderSection(sectionId);
+                  if (!sectionContent) return null;
+                  const title = sectionId === 'content' 
+                    ? 'About Me, Game Details & Personal Details'
+                    : sectionId === 'doodles'
+                    ? 'Doodles Album'
+                    : 'High Score Charts';
+                  return (
+                    <SortableSection key={sectionId} id={sectionId} isEditMode={isEditMode} title={title}>
+                      {sectionContent}
+                    </SortableSection>
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
+          );
+        } else {
+          return (
+            <>
+              {order.map((sectionId) => {
+                const sectionContent = renderSection(sectionId);
+                return sectionContent;
+              })}
+            </>
+          );
+        }
+      })()}
     </div>
   );
 };
@@ -525,6 +748,7 @@ const PersonalDetailsSection = ({
 }) => {
   return (
     <div id="tell-us-more-container">
+      <h2 id="tell-us-more-header">Tell us more</h2>
       <div id="tell-us-more">
         <div id="pt-1">
           <div className="personal-details">
@@ -591,7 +815,6 @@ const PersonalDetailsSection = ({
             )}
           </div>
         </div>
-        <h2 id="tell-us-more-header">Tell us more</h2>
         <div id="pt-2">
           <div className="personal-details">
             <span className="blue">Other games:</span> 

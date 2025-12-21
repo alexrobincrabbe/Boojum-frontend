@@ -207,6 +207,68 @@
   overflow-y: auto;
 }
 
+/* Tablet and Desktop: 10% wider */
+@media (min-width: 768px) {
+  .left-sidebar {
+    width: 275px;
+  }
+  
+  .right-sidebar {
+    width: 275px;
+  }
+}
+
+/* Nav link with pin button inline */
+.nav-link-with-pin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  position: relative;
+}
+
+.nav-link-with-pin .nav-link {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-pin-button-inline {
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.sidebar-pin-button-inline:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.1);
+}
+
+.sidebar-pin-button-inline:active {
+  transform: scale(0.95);
+}
+
+/* Large nav link for Live Games */
+.nav-link-large {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+}
+
+/* Pinned sidebar styles - no backdrop needed */
+.left-sidebar.pinned,
+.right-sidebar.pinned {
+  z-index: 1000; /* Lower z-index when pinned so it doesn't block game content */
+}
+
 /* Very large screens: sidebar pushes content, not overlay */
 @media (min-width: 1440px) {
   .left-sidebar {
@@ -214,6 +276,7 @@
     top: 70px; /* Start at top bar */
     height: calc(100vh - 70px);
     z-index: 1001; /* Above players online bar and main content */
+    width: 275px; /* 10% wider */
   }
   
   .left-sidebar.open {
@@ -323,6 +386,38 @@
   background-color: rgba(113, 187, 233, 0.2);
   border-left-color: #f5ce45;
   color: #f5ce45;
+}
+
+/* Two links per line grid for left sidebar */
+.nav-links-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.nav-links-grid .nav-link {
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  border-left: none;
+  border-bottom: 1px solid rgba(113, 187, 233, 0.1);
+  text-align: center;
+  justify-content: center;
+}
+
+.nav-links-grid .nav-link:nth-child(odd) {
+  border-right: 1px solid rgba(113, 187, 233, 0.1);
+}
+
+.nav-links-grid .nav-link:hover {
+  border-left: none;
+  border-bottom-color: #71bbe9;
+  background-color: rgba(113, 187, 233, 0.1);
+}
+
+.nav-links-grid .nav-link.active {
+  border-left: none;
+  border-bottom-color: #f5ce45;
+  background-color: rgba(113, 187, 233, 0.2);
 }
 
 
@@ -440,8 +535,8 @@
 /* Very large screens: content pushed by sidebar */
 @media (min-width: 1440px) {
   .main-content.left-open {
-    margin-left: 250px;
-    width: calc(100% - 250px);
+    margin-left: 275px;
+    width: calc(100% - 275px);
   }
   
   .main-content.left-closed {
@@ -478,8 +573,8 @@
 /* Very large screens: players online bar pushed to the right when sidebar is open */
 @media (min-width: 1440px) {
   .players-online-desktop.left-open {
-    margin-left: 250px;
-    width: calc(100% - 250px);
+    margin-left: 275px;
+    width: calc(100% - 275px);
   }
   
   .players-online-desktop.left-closed {
@@ -730,23 +825,30 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 999;
+  transition: opacity 0.3s ease;
+}
+
+/* Pinned sidebars should stay open and not show overlay */
+.left-sidebar.pinned.open,
+.right-sidebar.pinned.open {
+  z-index: 1000; /* Lower z-index when pinned so it doesn't block game content */
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .left-sidebar {
-    width: 200px;
+    width: 85vw;
   }
 
   .right-sidebar {
-    width: 200px;
+    width: 85vw;
   }
 }
 
 @media (max-width: 640px) {
   .left-sidebar {
     z-index: 1002;
-    width: 250px;
+    width: 85vw;
   }
 }
 

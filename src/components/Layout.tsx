@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
-import { Menu, X, Bell, BarChart3 } from 'lucide-react';
+import { Menu, X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
 import './Layout.css';
@@ -56,6 +56,9 @@ const Layout = ({ children }: LayoutProps) => {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(window.innerWidth >= 1440);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1440);
+  const [leftSidebarPinned, setLeftSidebarPinned] = useState(false);
+  const [rightSidebarPinned, setRightSidebarPinned] = useState(false);
+  const [isTabletOrDesktop, setIsTabletOrDesktop] = useState(window.innerWidth >= 768);
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const location = useLocation();
@@ -96,6 +99,23 @@ const Layout = ({ children }: LayoutProps) => {
     };
 
     fetchProfilePicture();
+    
+    // Listen for profile picture updates
+    const handleProfilePictureUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ profilePictureUrl: string | null }>;
+      if (customEvent.detail?.profilePictureUrl !== undefined) {
+        setProfilePictureUrl(customEvent.detail.profilePictureUrl);
+      } else {
+        // If no URL provided, refetch the profile
+        fetchProfilePicture();
+      }
+    };
+    
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+    
+    return () => {
+      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+    };
   }, [isAuthenticated, user]);
 
   // Load chat messages
@@ -301,9 +321,15 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     const handleResize = () => {
       const desktop = window.innerWidth >= 1440;
+      const tabletOrDesktop = window.innerWidth >= 768;
       setIsDesktop(desktop);
-      // Only set initial state on mount, don't override user interactions
-      // This effect only runs once on mount
+      setIsTabletOrDesktop(tabletOrDesktop);
+      
+      // On very large screens, automatically unpin sidebars (they don't need pinning)
+      if (desktop) {
+        setLeftSidebarPinned(false);
+        setRightSidebarPinned(false);
+      }
     };
 
     // Set initial state based on screen size
@@ -314,11 +340,39 @@ const Layout = ({ children }: LayoutProps) => {
       setLeftSidebarOpen(false);
       setIsDesktop(false);
     }
+    setIsTabletOrDesktop(window.innerWidth >= 768);
 
     // Listen for resize to update isDesktop state
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // On mobile: close one sidebar when the other opens
+  const handleLeftSidebarToggle = () => {
+    const isMobile = !isTabletOrDesktop;
+    if (isMobile && rightSidebarOpen) {
+      setRightSidebarOpen(false);
+      setRightSidebarPinned(false);
+    }
+    // If closing, automatically unpin
+    if (leftSidebarOpen) {
+      setLeftSidebarPinned(false);
+    }
+    setLeftSidebarOpen(!leftSidebarOpen);
+  };
+
+  const handleRightSidebarToggle = () => {
+    const isMobile = !isTabletOrDesktop;
+    if (isMobile && leftSidebarOpen) {
+      setLeftSidebarOpen(false);
+      setLeftSidebarPinned(false);
+    }
+    // If closing, automatically unpin
+    if (rightSidebarOpen) {
+      setRightSidebarPinned(false);
+    }
+    setRightSidebarOpen(!rightSidebarOpen);
+  };
 
   const handleLogout = () => {
     logout();
@@ -336,7 +390,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="top-bar-left">
           <button
             className="burger-button"
-            onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+            onClick={handleLeftSidebarToggle}
             aria-label="Toggle sidebar"
           >
             <Menu size={24} />
@@ -379,7 +433,7 @@ const Layout = ({ children }: LayoutProps) => {
           )}
           <button
             className="profile-picture-button-top"
-            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+            onClick={handleRightSidebarToggle}
             aria-label="Toggle profile menu"
           >
             {isAuthenticated ? (
@@ -426,7 +480,7 @@ const Layout = ({ children }: LayoutProps) => {
                   className="player-online-name"
                   style={{ color: user.chat_color }}
                   onClick={() => {
-                    if (!isDesktop) setLeftSidebarOpen(false);
+                    if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                   }}
                 >
                   {user.display_name}
@@ -502,58 +556,78 @@ const Layout = ({ children }: LayoutProps) => {
       )}
 
       {/* Left Sidebar */}
-      <aside className={`left-sidebar ${leftSidebarOpen ? 'open' : 'closed'}`}>
+      <aside className={`left-sidebar ${leftSidebarOpen ? 'open' : 'closed'} ${leftSidebarPinned ? 'pinned' : ''}`}>
         <nav className="sidebar-nav">
           <div className="nav-section">
-            {leftSidebarOpen && <div className="nav-section-title">Live</div>}
-            <Link
-              to="/lobby"
-              className={`nav-link ${location.pathname.startsWith('/lobby') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Live Games</span>}
-            </Link>
+            <div className="nav-link-with-pin">
+              <Link
+                to="/lobby"
+                className={`nav-link nav-link-large ${location.pathname.startsWith('/lobby') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Live Games</span>}
+              </Link>
+              {isTabletOrDesktop && !isDesktop && (
+                <button
+                  className="sidebar-pin-button-inline"
+                  onClick={() => {
+                    const newPinnedState = !leftSidebarPinned;
+                    setLeftSidebarPinned(newPinnedState);
+                    // If pinning, ensure sidebar is open
+                    if (newPinnedState && !leftSidebarOpen) {
+                      setLeftSidebarOpen(true);
+                    }
+                  }}
+                  aria-label={leftSidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                  title={leftSidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                >
+                  {leftSidebarPinned ? <PinOff size={18} /> : <Pin size={18} />}
+                </button>
+              )}
+            </div>
           </div>
           <div className="nav-section">
             {leftSidebarOpen && <div className="nav-section-title">Daily Challenges</div>}
-            <Link
-              to="/minigames"
-              className={`nav-link ${location.pathname.startsWith('/minigames') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Mini-Games</span>}
-            </Link>
-            <Link
-              to="/doodledum"
-              className={`nav-link ${location.pathname.startsWith('/doodledum') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Doodledum</span>}
-            </Link>
-            <Link
-              to="/daily-boards"
-              className={`nav-link ${location.pathname.startsWith('/daily-boards') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Everyday Board</span>}
-            </Link>
-            <Link
-              to="/timeless-boards"
-              className={`nav-link ${location.pathname.startsWith('/timeless-boards') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Timeless Board</span>}
-            </Link>
+            <div className="nav-links-grid">
+              <Link
+                to="/minigames"
+                className={`nav-link ${location.pathname.startsWith('/minigames') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Mini-Games</span>}
+              </Link>
+              <Link
+                to="/doodledum"
+                className={`nav-link ${location.pathname.startsWith('/doodledum') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Doodledum</span>}
+              </Link>
+              <Link
+                to="/daily-boards"
+                className={`nav-link ${location.pathname.startsWith('/daily-boards') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Everyday Board</span>}
+              </Link>
+              <Link
+                to="/timeless-boards"
+                className={`nav-link ${location.pathname.startsWith('/timeless-boards') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Timeless Board</span>}
+              </Link>
+            </div>
           </div>
           <div className="nav-section">
             {leftSidebarOpen && <div className="nav-section-title">Tournament</div>}
@@ -561,7 +635,7 @@ const Layout = ({ children }: LayoutProps) => {
               to="/tournament"
               className={`nav-link ${location.pathname.startsWith('/tournament') && !location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}
               onClick={() => {
-                if (!isDesktop) setLeftSidebarOpen(false);
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
               }}
             >
               {leftSidebarOpen && <span>Tournament (Biweekly)</span>}
@@ -571,7 +645,7 @@ const Layout = ({ children }: LayoutProps) => {
                 to="/tournament/test"
                 className={`nav-link ${location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}
                 onClick={() => {
-                  if (!isDesktop) setLeftSidebarOpen(false);
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                 }}
               >
                 {leftSidebarOpen && <span>Test Tournament</span>}
@@ -593,7 +667,7 @@ const Layout = ({ children }: LayoutProps) => {
                         className="sidebar-activity-username"
                         style={{ color: activity.chat_color }}
                         onClick={() => {
-                          if (!isDesktop) setLeftSidebarOpen(false);
+                          if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                         }}
                       >
                         {activity.username}
@@ -621,37 +695,64 @@ const Layout = ({ children }: LayoutProps) => {
       </main>
 
       {/* Right Sidebar */}
-      <aside className={`right-sidebar ${rightSidebarOpen ? 'open' : 'closed'}`}>
+      <aside className={`right-sidebar ${rightSidebarOpen ? 'open' : 'closed'} ${rightSidebarPinned ? 'pinned' : ''}`}>
         <nav className="sidebar-nav">
           {/* Dashboard link - visible to all users (guests and authenticated) */}
-          <Link
-            to="/dashboard"
-            className={`nav-link ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
-            onClick={() => setRightSidebarOpen(false)}
-          >
-            <span>Dashboard</span>
-          </Link>
+          <div className="nav-link-with-pin">
+            <Link
+              to="/dashboard"
+              className={`nav-link ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
+              onClick={() => {
+                if (!rightSidebarPinned) setRightSidebarOpen(false);
+              }}
+            >
+              <span>Dashboard</span>
+            </Link>
+            {isTabletOrDesktop && !isDesktop && (
+              <button
+                className="sidebar-pin-button-inline"
+                onClick={() => {
+                  const newPinnedState = !rightSidebarPinned;
+                  setRightSidebarPinned(newPinnedState);
+                  // If pinning, ensure sidebar is open
+                  if (newPinnedState && !rightSidebarOpen) {
+                    setRightSidebarOpen(true);
+                  }
+                }}
+                aria-label={rightSidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+                title={rightSidebarPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+              >
+                {rightSidebarPinned ? <PinOff size={18} /> : <Pin size={18} />}
+              </button>
+            )}
+          </div>
           
           {isAuthenticated ? (
             <>
               <Link
                 to={`/profile/${user?.username.toLowerCase()}`}
                 className={`nav-link ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
-                onClick={() => setRightSidebarOpen(false)}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
               >
                 <span>Profile</span>
               </Link>
               <Link
                 to="/leaderboards"
                 className={`nav-link ${location.pathname.startsWith('/leaderboards') ? 'active' : ''}`}
-                onClick={() => setRightSidebarOpen(false)}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
               >
                 <span>High Scores</span>
               </Link>
               <Link
                 to="/forum"
                 className={`nav-link ${location.pathname.startsWith('/forum') ? 'active' : ''}`}
-                onClick={() => setRightSidebarOpen(false)}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
               >
                 <span>Forum</span>
               </Link>
@@ -667,21 +768,27 @@ const Layout = ({ children }: LayoutProps) => {
               <Link
                 to="/leaderboards"
                 className={`nav-link ${location.pathname.startsWith('/leaderboards') ? 'active' : ''}`}
-                onClick={() => setRightSidebarOpen(false)}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
               >
                 <span>High Scores</span>
               </Link>
               <Link
                 to="/forum"
                 className={`nav-link ${location.pathname.startsWith('/forum') ? 'active' : ''}`}
-                onClick={() => setRightSidebarOpen(false)}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
               >
                 <span>Forum</span>
               </Link>
               <Link
                 to="/login"
                 className="nav-link"
-                onClick={() => setRightSidebarOpen(false)}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
               >
                 <span>Login</span>
               </Link>
@@ -735,15 +842,18 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </aside>
 
-      {/* Overlay - only show for right sidebar on desktop, both on mobile/tablet */}
-      {((!isDesktop && leftSidebarOpen) || rightSidebarOpen || mobileUsersDropdownOpen) && (
+      {/* Overlay - only show when sidebars are not pinned */}
+      {(((!isDesktop && leftSidebarOpen && !leftSidebarPinned) || (rightSidebarOpen && !rightSidebarPinned) || mobileUsersDropdownOpen)) && (
         <div
           className="sidebar-overlay"
           onClick={() => {
-            if (!isDesktop) {
+            // Only close sidebars if they're not pinned
+            if (!isDesktop && !leftSidebarPinned) {
               setLeftSidebarOpen(false);
             }
-            setRightSidebarOpen(false);
+            if (!rightSidebarPinned) {
+              setRightSidebarOpen(false);
+            }
             setMobileUsersDropdownOpen(false);
           }}
         />

@@ -1,0 +1,82 @@
+.sortable-section {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.sortable-section.dragging {
+  opacity: 0.8;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px !important;
+  max-height: 60px !important;
+  overflow: hidden;
+}
+
+.sortable-section.dragging > * {
+  transform: scale(1) !important;
+}
+
+.sortable-section-minified {
+  padding: 15px 20px;
+  background-color: rgba(19, 19, 42, 0.8);
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  height: 60px !important;
+  max-height: 60px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 200px;
+  max-width: 90%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  margin: 0 auto;
+  overflow: hidden;
+  transform: scale(1) !important;
+}
+
+.sortable-section-title {
+  margin: 0;
+  font-family: "Monoton", cursive;
+  font-size: 1.5rem;
+  color: #71bbe9;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transform: scale(1) !important;
+}
+
+.sortable-handle {
+  position: absolute;
+  left: -30px;
+  top: 20px;
+  cursor: grab;
+  color: #71bbe9;
+  z-index: 10;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.sortable-handle:hover {
+  color: #f5ce45;
+}
+
+.sortable-handle:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 768px) {
+  .sortable-handle {
+    left: -25px;
+    top: 10px;
+  }
+}
+

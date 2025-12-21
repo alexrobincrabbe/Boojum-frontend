@@ -1,0 +1,193 @@
+.image-crop-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 10005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.image-crop-modal {
+  background-color: rgba(19, 19, 42, 0.95);
+  border: 2px solid #71bbe9;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 30px rgba(113, 187, 233, 0.5);
+}
+
+.image-crop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #71bbe9;
+}
+
+.image-crop-title {
+  font-family: "Monoton", cursive;
+  font-size: 1.8rem;
+  color: #71bbe9;
+  margin: 0;
+}
+
+.image-crop-close {
+  background: none;
+  border: none;
+  color: #71bbe9;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.image-crop-close:hover {
+  color: #f5ce45;
+}
+
+.image-crop-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.image-crop-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Override react-easy-crop styles for dark backdrop */
+.image-crop-container .reactEasyCrop_Container {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.image-crop-container .reactEasyCrop_CropArea {
+  border: 2px solid #71bbe9;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+}
+
+.image-crop-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #71bbe9;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.zoom-control label {
+  font-weight: bold;
+}
+
+.zoom-slider {
+  flex: 1;
+  height: 6px;
+  background: rgba(113, 187, 233, 0.3);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #71bbe9;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.zoom-slider::-webkit-slider-thumb:hover {
+  background: #f5ce45;
+}
+
+.zoom-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #71bbe9;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.zoom-slider::-moz-range-thumb:hover {
+  background: #f5ce45;
+}
+
+.zoom-control span {
+  min-width: 40px;
+  text-align: right;
+}
+
+.crop-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.crop-cancel-button,
+.crop-save-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.crop-cancel-button {
+  background-color: transparent;
+  color: #f5ce45;
+  border: 2px solid #f5ce45;
+}
+
+.crop-cancel-button:hover {
+  background-color: rgba(245, 206, 69, 0.2);
+}
+
+.crop-save-button {
+  background-color: #33c15b;
+  color: #f5ce45;
+  border: 2px solid #33c15b;
+}
+
+.crop-save-button:hover {
+  background-color: #2aa84f;
+}
+
+@media (max-width: 768px) {
+  .image-crop-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .image-crop-container {
+    height: 300px;
+  }
+}
+

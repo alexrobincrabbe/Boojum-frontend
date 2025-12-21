@@ -1,8 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Monoton&display=swap");
+
 .tournament-container {
   min-height: calc(100vh - 70px);
   padding: 20px;
   background-color: #1b1835;
   background-image: linear-gradient(transparent, 50%, black);
+}
+
+.tournament-archives-button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tournament-archives-button {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 2px solid #71bbe9;
+  background-color: transparent;
+  color: #71bbe9;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tournament-archives-button:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.05);
 }
 
 #tournament-wrapper {
@@ -14,6 +41,8 @@
   text-align: center;
   font-size: 2rem;
   margin-bottom: 10px;
+  font-family: "Monoton", cursive;
+  color: #33c15b; /* Green color */
 }
 
 .round-remaining-container {

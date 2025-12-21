@@ -104,10 +104,18 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
   const [roundTimeRemaining, setRoundTimeRemaining] = useState<Record<number, string>>({});
   const { isAuthenticated, user } = useAuth();
 
+  const cleanTournamentName = (name: string) => {
+    return name.replace(/&nbsp;/g, '').trim();
+  };
+
   useEffect(() => {
     const loadTournamentData = async () => {
       try {
-        const tournamentData = await tournamentAPI.getTournamentData(tournamentType);
+        // Get tournament ID from URL params if viewing a specific tournament from archives
+        const tournamentIdParam = searchParams.get('id');
+        const tournamentId = tournamentIdParam ? parseInt(tournamentIdParam, 10) : undefined;
+        
+        const tournamentData = await tournamentAPI.getTournamentData(tournamentType, tournamentId);
         setData(tournamentData);
         // Set default round to current round, or last round if current round exceeds rounds
         if (tournamentData.tournament?.current_round) {
@@ -118,18 +126,23 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
           setSelectedRound(defaultRound);
         }
         // Set default tier and group based on user's pool and group
-        // If player_pool is available, use it; otherwise derive from user_group
-        if (tournamentData.player_pool) {
-          setSelectedTier(tournamentData.player_pool);
-        } else if (tournamentData.user_group) {
-          // Derive tier from group number: Groups 1-2 = Tier 1, Groups 3-4 = Tier 2, Groups 5-6 = Tier 3
-          if (tournamentData.user_group <= 2) {
-            setSelectedTier(1);
-          } else if (tournamentData.user_group <= 4) {
-            setSelectedTier(2);
-          } else if (tournamentData.user_group <= 6) {
-            setSelectedTier(3);
+        // Only set if pools exist
+        if (tournamentData.pools && tournamentData.pools.length > 0) {
+          if (tournamentData.player_pool) {
+            setSelectedTier(tournamentData.player_pool);
+          } else if (tournamentData.user_group) {
+            // Derive tier from group number: Groups 1-2 = Tier 1, Groups 3-4 = Tier 2, Groups 5-6 = Tier 3
+            if (tournamentData.user_group <= 2) {
+              setSelectedTier(1);
+            } else if (tournamentData.user_group <= 4) {
+              setSelectedTier(2);
+            } else if (tournamentData.user_group <= 6) {
+              setSelectedTier(3);
+            }
           }
+        } else {
+          // No pools - reset to default
+          setSelectedTier(1);
         }
         
         // Set default group based on user's group number
@@ -396,6 +409,15 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
   return (
     <div className="tournament-container">
       <div id="tournament-wrapper" className="container-fluid">
+        {/* View Archives Button (only for active tournament, not test) */}
+        {tournamentType !== 'test' && (
+          <div className="tournament-archives-button-container">
+            <Link to="/tournament/archives" className="tournament-archives-button blue">
+              View Tournament Archives
+            </Link>
+          </div>
+        )}
+        
         {/* Round time remaining */}
         {data.round_time_remaining.map((roundData) => {
           const timeRemaining = roundTimeRemaining[roundData.round] || roundData.time_remaining;
@@ -419,7 +441,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         <div className="row justify-content-center">
           {/* Tournament Details */}
           <div className="col-12">
-            <h1 className="tournament-title pink">{tournament.name}</h1>
+            <h1 className="tournament-title pink">{cleanTournamentName(tournament.name)}</h1>
             <button
               className="tournament-rules-button blue"
               onClick={() => setRulesModalOpen(true)}
@@ -532,25 +554,27 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
               </div>
             </div>
 
-            {/* Tier/Pool Selection Tab - Underneath round tabs */}
-            <div className="tier-tabs-container">
-              <div className="tier-tabs">
-                {data.pools.map((pool) => (
-                  <button
-                    key={pool}
-                    className={`tier-tab ${selectedTier === pool ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedTier(pool);
-                      if (selectedRound === 1 && tournament.round_format === 'group_phase') {
-                        setSelectedGroup(1); // Reset to group 1 when tier changes
-                      }
-                    }}
-                  >
-                    {pool === 1 ? 'SuperStars' : pool === 2 ? 'RisingStars' : 'ShootingStars'}
-                  </button>
-                ))}
+            {/* Tier/Pool Selection Tab - Underneath round tabs (only show if pools exist) */}
+            {data.pools && data.pools.length > 0 && (
+              <div className="tier-tabs-container">
+                <div className="tier-tabs">
+                  {data.pools.map((pool) => (
+                    <button
+                      key={pool}
+                      className={`tier-tab ${selectedTier === pool ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedTier(pool);
+                        if (selectedRound === 1 && tournament.round_format === 'group_phase') {
+                          setSelectedGroup(1); // Reset to group 1 when tier changes
+                        }
+                      }}
+                    >
+                      {pool === 1 ? 'SuperStars' : pool === 2 ? 'RisingStars' : 'ShootingStars'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Selected Round Content */}
             <div className="round-section">
@@ -559,8 +583,21 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                 const roundTimeData = data.round_time_remaining.find(r => r.round === selectedRound);
                 const roundMatches = data.matches.filter(m => {
                   if (m.round !== selectedRound) return false;
+                  
+                  // If no pools exist, show all matches for this round
+                  if (!data.pools || data.pools.length === 0) {
+                    return true;
+                  }
+                  
+                  // For knockout tournaments, there are no groups - only filter by pool if pools exist
+                  if (tournament.round_format === 'knockout') {
+                    // Filter by pool (tier = pool)
+                    return m.pool === selectedTier;
+                  }
+                  
+                  // For group phase tournaments
                   if (tournament.round_format === 'group_phase') {
-                    // For group phase, round 1 uses groups, rounds 2+ use pools
+                    // Round 1 uses groups, rounds 2+ use pools
                     if (selectedRound === 1) {
                       // In round 1, filter by group (tiers map to groups: 1-2=SuperStars, 3-4=RisingStars, 5-6=ShootingStars)
                       if (selectedTier === 1) {
@@ -578,10 +615,10 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                       // For rounds after 1, filter by pool (tier = pool)
                       return m.pool === selectedTier;
                     }
-                  } else {
-                    // For non-group phase, filter by pool
-                    return m.pool === selectedTier;
                   }
+                  
+                  // Default: filter by pool
+                  return m.pool === selectedTier;
                 });
 
                 const timeRemaining = roundTimeRemaining[selectedRound] || (roundTimeData?.time_remaining);

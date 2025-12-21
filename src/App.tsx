@@ -27,6 +27,7 @@ import MinigamesPage from "./pages/minigames/MinigamesPage";
 import DoodledumPage from "./pages/minigames/DoodledumPage";
 import TournamentPage from "./pages/tournament/TournamentPage";
 import TestTournamentPage from "./pages/tournament/TestTournamentPage";
+import TournamentArchivesPage from "./pages/tournament/TournamentArchivesPage";
 import MatchResultsPage from "./pages/tournament/MatchResultsPage";
 import TournamentGameRoom from "./pages/tournament/TournamentGameRoom";
 import "./App.css";
@@ -124,6 +125,7 @@ function App() {
               <Route path="/doodledum" element={<DoodledumPage />} />
               <Route path="/tournament" element={<TournamentPage />} />
               <Route path="/tournament/test" element={<TestTournamentPage />} />
+              <Route path="/tournament/archives" element={<TournamentArchivesPage />} />
               <Route path="/tournament/match/:matchId" element={<MatchResultsPage />} />
               <Route path="/tournament/play/:matchId" element={<TournamentGameRoom />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />

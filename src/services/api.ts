@@ -16,6 +16,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // If the data is FormData, remove Content-Type header to let axios set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -85,8 +89,41 @@ export const authAPI = {
     return response.data;
   },
 
+  getHistoricalHighScores: async (profileUrl: string, period: 'weekly' | 'monthly' | 'yearly', includePositions: boolean = true) => {
+    const response = await api.get(`/profile/${profileUrl}/historical-scores/`, {
+      params: { period, positions: includePositions },
+    });
+    return response.data;
+  },
+
+  getProfileDoodles: async (profileUrl: string) => {
+    const response = await api.get(`/profile/${profileUrl}/doodles/`);
+    return response.data;
+  },
+
+  getDoodleAlbum: async (profileUrl: string, page: number = 1, pageSize: number = 3) => {
+    const response = await api.get(`/profile/${profileUrl}/doodle-album/`, {
+      params: { page, page_size: pageSize },
+    });
+    return response.data;
+  },
+
+  setDoodlePublic: async (doodleId: number, isPublic: boolean) => {
+    const response = await api.post(`/doodle/${doodleId}/set-public/`, {
+      public: isPublic,
+    });
+    return response.data;
+  },
+
   updateProfile: async (profileData: FormData) => {
     const response = await api.put('/profile/update/', profileData);
+    return response.data;
+  },
+
+  updateProfileSectionOrder: async (sectionOrder: string[]) => {
+    const response = await api.post('/profile/section-order/', {
+      section_order: sectionOrder,
+    });
     return response.data;
   },
 
@@ -234,8 +271,18 @@ export const lobbyAPI = {
 };
 
 export const tournamentAPI = {
-  getTournamentData: async (type: 'active' | 'test' = 'active') => {
-    const response = await api.get('/tournament/', { params: { type } });
+  getTournamentData: async (type: 'active' | 'test' = 'active', tournamentId?: number) => {
+    const params: { type?: string; id?: number } = {};
+    if (tournamentId) {
+      params.id = tournamentId;
+    } else {
+      params.type = type;
+    }
+    const response = await api.get('/tournament/', { params });
+    return response.data;
+  },
+  getTournamentList: async () => {
+    const response = await api.get('/tournament/list/');
     return response.data;
   },
   register: async (tournamentType: 'active' | 'test' = 'active') => {

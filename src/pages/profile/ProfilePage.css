@@ -25,8 +25,8 @@ h2 {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin: 20px 0;
-  padding-top: 60px;
+  margin: 0 0 20px 0;
+  padding-top: 0;
 }
 
 #profile-name {
@@ -193,12 +193,38 @@ h2 {
 
 /* About Me Section */
 #who-are-you-container {
-  background-color: rgba(19, 19, 42, 0.5);
-  border: 5px solid #f5ce45;
-  box-shadow: 0 0 10px #f5ce45;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
   padding: 20px;
   margin: 20px 0;
   border-radius: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+}
+
+/* Custom scrollbar for about you container */
+#who-are-you-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+#who-are-you-container::-webkit-scrollbar-track {
+  background: rgba(19, 19, 42, 0.3);
+  border-radius: 4px;
+}
+
+#who-are-you-container::-webkit-scrollbar-thumb {
+  background: #71bbe9;
+  border-radius: 4px;
+}
+
+#who-are-you-container::-webkit-scrollbar-thumb:hover {
+  background: #5aa8d8;
 }
 
 #who-are-you {
@@ -244,11 +270,14 @@ h2 {
 /* Personal Details */
 #tell-us-more-container {
   background-color: rgba(19, 19, 42, 0.5);
-  border: 5px solid #71bbe9;
-  box-shadow: 0 0 10px #71bbe9;
+  border: none;
+  box-shadow: none;
   padding: 20px;
   margin: 20px 0;
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
 #tell-us-more {
@@ -273,7 +302,9 @@ h2 {
 
 #tell-us-more-header {
   color: #71bbe9;
-  margin: 10px 0;
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-size: 2rem;
 }
 
 .personal-details {
@@ -305,11 +336,28 @@ h2 {
   color: #33c15b;
 }
 
+/* Profile Picture Row */
+.profile-pic-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+#profile-pic-container-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
 /* Ensure row uses flexbox for ordering */
 .profile-content-row {
   display: flex;
   flex-wrap: wrap;
+  gap: 20px;
   justify-content: center;
+  align-items: stretch; /* Make all columns equal height */
 }
 
 /* Center columns */
@@ -317,7 +365,49 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  padding: 0 10px;
+}
+
+.about-me-col,
+.game-details-col,
+.personal-details-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop/Tablet: Match heights and center content */
+@media (min-width: 769px) {
+  .about-me-col,
+  .game-details-col,
+  .personal-details-col {
+    align-items: stretch;
+  }
+
+  .about-me-col > *,
+  .game-details-col > *,
+  .personal-details-col > * {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  #who-are-you-container {
+    justify-content: center;
+    max-height: none;
+  }
+
+  #tell-us-more-container {
+    justify-content: center;
+  }
+
+  #game-details-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 /* Responsive Design */
@@ -342,8 +432,8 @@ h2 {
   }
 
   .profile-actions-top-right {
-    top: 200px; /* Below top bar (70px) + players online list (min 70px) + extra spacing */
-    right: 10px;
+    top: 150px;
+    right: 40px;
   }
 
   #profile-name-container {
@@ -358,61 +448,52 @@ h2 {
     font-size: 1.1rem;
   }
 
-  /* Force order on mobile - profile pic first, then about me */
+  /* Stack sections on mobile */
   .profile-content-row {
     flex-direction: column;
+    gap: 15px;
   }
 
-  .profile-content-row .profile-pic-col {
-    order: 1 !important;
+  .profile-content-row > [class*="col-"] {
     width: 100% !important;
     max-width: 100% !important;
     flex: 0 0 100% !important;
-  }
-
-  .profile-content-row .about-me-col {
-    order: 2 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 0 0 100% !important;
+    padding: 0;
   }
 }
 
-/* Personal Details Section - Always below other sections */
+/* Personal Details Section */
 .personal-details-col {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
-  margin-top: 20px;
+  justify-content: flex-start;
 }
 
 #tell-us-more-container {
   width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
 }
 
-/* Desktop: About me and profile pic side by side */
+/* Desktop: Three columns side by side */
 @media (min-width: 769px) {
   .profile-content-row {
     flex-direction: row;
+    gap: 20px;
   }
 
-  .profile-content-row .profile-pic-col {
-    order: 2;
-  }
-
-  .profile-content-row .about-me-col {
-    order: 1;
+  .about-me-col,
+  .game-details-col,
+  .personal-details-col {
+    flex: 1 1 0;
+    max-width: calc(33.333% - 14px);
   }
 }
 
 /* Profile Actions - Top Right */
 .profile-actions-top-right {
   position: fixed;
-  top: 200px; /* Below top bar (70px) + players online list (min 70px) + extra spacing */
-  right: 20px;
+  top: 150px;
+  right: 40px;
   z-index: 1004; /* Above sidebars (1001-1003) and other elements */
   display: flex;
   flex-direction: column;

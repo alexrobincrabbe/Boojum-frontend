@@ -1,0 +1,271 @@
+.doodles-gallery-container {
+  margin: 40px auto;
+  max-width: 1200px;
+  padding: 20px;
+}
+
+.doodles-gallery-title {
+  text-align: center;
+  font-family: "Monoton", cursive;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #71bbe9;
+}
+
+.doodles-manage-button {
+  display: block;
+  margin: 0 auto 30px;
+  padding: 10px 20px;
+  background-color: rgba(19, 19, 42, 0.8);
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.doodles-manage-button:hover {
+  background-color: #71bbe9;
+  color: #13132a;
+  box-shadow: 0 0 15px #71bbe9;
+}
+
+.doodles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  justify-items: center;
+}
+
+.doodle-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+}
+
+.doodle-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  background-color: white;
+}
+
+.doodle-word {
+  text-align: center;
+  font-size: 1.2rem;
+  font-family: "Darker Grotesque", sans-serif;
+  color: #71bbe9;
+  margin-top: 8px;
+}
+
+.doodles-loading,
+.doodles-empty-message {
+  text-align: center;
+  color: #71bbe9;
+  font-family: "Darker Grotesque", sans-serif;
+  padding: 20px;
+}
+
+/* Doodle Album Modal */
+.doodle-album-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.doodle-album-modal {
+  background-color: rgba(19, 19, 42, 0.95);
+  border: 2px solid #71bbe9;
+  border-radius: 10px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 30px rgba(113, 187, 233, 0.5);
+}
+
+.doodle-album-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #71bbe9;
+}
+
+.doodle-album-title {
+  font-family: "Monoton", cursive;
+  font-size: 1.8rem;
+  color: #71bbe9;
+  margin: 0;
+}
+
+.doodle-album-close {
+  background: none;
+  border: none;
+  color: #71bbe9;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.doodle-album-close:hover {
+  color: #f5ce45;
+}
+
+.doodle-album-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.doodle-album-info {
+  color: #71bbe9;
+  font-family: "Darker Grotesque", sans-serif;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.doodle-album-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.doodle-album-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: rgba(19, 19, 42, 0.5);
+  border-radius: 10px;
+}
+
+.doodle-album-card.is-private {
+  opacity: 0.7;
+}
+
+.doodle-album-word {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 500px;
+  font-size: 1.5rem;
+  padding: 20px;
+  font-family: "Darker Grotesque", sans-serif;
+  color: #71bbe9;
+  position: relative;
+}
+
+.doodle-public-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  position: absolute;
+  right: 20px;
+  cursor: pointer;
+}
+
+.doodle-public-toggle-label.green {
+  color: #33c15b;
+}
+
+.doodle-public-toggle-label.yellow {
+  color: #f5ce45;
+}
+
+.doodle-public-toggle {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.doodle-album-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  display: block;
+  background-color: white;
+  margin-top: 10px;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.doodle-album-image.doodle-private {
+  filter: blur(3px) grayscale(100%);
+  opacity: 0.5;
+}
+
+.doodle-album-loading-more {
+  text-align: center;
+  padding: 20px;
+  color: #71bbe9;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.doodle-album-spinner {
+  display: inline-block;
+}
+
+.doodle-album-sentinel {
+  height: 1px;
+  width: 100%;
+}
+
+.doodle-album-loading,
+.doodle-album-error,
+.doodle-album-empty {
+  text-align: center;
+  color: #71bbe9;
+  font-family: "Darker Grotesque", sans-serif;
+  padding: 40px;
+}
+
+.doodle-album-error {
+  color: #eb5497;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .doodles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doodle-album-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .doodle-album-word {
+    font-size: 1.2rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .doodle-public-toggle-label {
+    position: static;
+  }
+}
+
