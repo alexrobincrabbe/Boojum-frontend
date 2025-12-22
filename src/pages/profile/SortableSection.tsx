@@ -17,6 +17,8 @@ const getSectionTitle = (id: string): string => {
       return 'Doodles Album';
     case 'charts':
       return 'High Score Charts';
+    case 'medals':
+      return 'Tournament Medals';
     default:
       return 'Section';
   }

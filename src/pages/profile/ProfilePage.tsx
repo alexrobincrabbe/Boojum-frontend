@@ -86,7 +86,7 @@ const ProfilePage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [sectionOrder, setSectionOrder] = useState<string[]>(['content', 'doodles', 'charts']);
+  const [sectionOrder, setSectionOrder] = useState<string[]>(['medals', 'content', 'charts', 'doodles']);
   const [showCropModal, setShowCropModal] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
@@ -139,9 +139,9 @@ const ProfilePage = () => {
           profile_picture: null,
         });
         // Set section order from profile or use default
-        const order = data.profile_section_order && Array.isArray(data.profile_section_order) && data.profile_section_order.length === 3
+        const order = data.profile_section_order && Array.isArray(data.profile_section_order) && data.profile_section_order.length === 4
           ? data.profile_section_order
-          : ['content', 'doodles', 'charts'];
+          : ['medals', 'content', 'charts', 'doodles'];
         setSectionOrder(order);
       } catch (err: any) {
         setError(err.response?.data?.detail || 'Failed to load profile');
@@ -306,7 +306,7 @@ const ProfilePage = () => {
         const errorMsg = err.response?.data?.error || 'Failed to update section order';
         toast.error(errorMsg);
         // Revert on error
-        setSectionOrder(profile?.profile_section_order || ['content', 'doodles', 'charts']);
+        setSectionOrder(profile?.profile_section_order || ['medals', 'content', 'charts', 'doodles']);
       }
     }
   };
@@ -382,6 +382,20 @@ const ProfilePage = () => {
           <div key="charts" className="row">
             <div className="col-12">
               <HighScoreCharts profileUrl={profileUrl || ''} />
+            </div>
+          </div>
+        );
+      case 'medals':
+        return (
+          <div key="medals" className="row">
+            <div className="col-12">
+              {profile.tournament_wins && profile.tournament_wins.length > 0 ? (
+                <TournamentBadges tournamentWins={profile.tournament_wins} />
+              ) : (
+                <div className="empty-section-message">
+                  <p>No tournament medals yet.</p>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -462,21 +476,12 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Tournament Badges Row */}
-      {profile.tournament_wins && profile.tournament_wins.length > 0 && (
-        <div className="row">
-          <div className="col-12">
-            <TournamentBadges tournamentWins={profile.tournament_wins} />
-          </div>
-        </div>
-      )}
-
       {/* Draggable Sections */}
       {(() => {
         // Ensure we have a valid order
-        const order = (sectionOrder && Array.isArray(sectionOrder) && sectionOrder.length === 3) 
+        const order = (sectionOrder && Array.isArray(sectionOrder) && sectionOrder.length === 4) 
           ? sectionOrder 
-          : ['content', 'doodles', 'charts'];
+          : ['medals', 'content', 'charts', 'doodles'];
         
         if (isEditMode) {
           return (
@@ -496,7 +501,9 @@ const ProfilePage = () => {
                     ? 'About Me, Game Details & Personal Details'
                     : sectionId === 'doodles'
                     ? 'Doodles Album'
-                    : 'High Score Charts';
+                    : sectionId === 'charts'
+                    ? 'High Score Charts'
+                    : 'Tournament Medals';
                   return (
                     <SortableSection key={sectionId} id={sectionId} isEditMode={isEditMode} title={title}>
                       {sectionContent}
