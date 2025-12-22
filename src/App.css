@@ -14,6 +14,12 @@
 .Toastify__toast-container--top-right {
   top: 80px !important;
   right: 1em !important;
+  z-index: 10020 !important; /* Above modal overlay (10010) and modal (10011) */
+}
+
+/* Ensure individual toasts also have high z-index */
+.Toastify__toast {
+  z-index: 10020 !important;
 }
 
 .logo {

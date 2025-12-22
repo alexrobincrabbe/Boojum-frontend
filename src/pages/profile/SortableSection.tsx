@@ -48,7 +48,7 @@ export const SortableSection = ({ id, children, isEditMode, title }: SortableSec
     >
       {isEditMode && !isDragging && (
         <div className="sortable-handle" {...attributes} {...listeners}>
-          <GripVertical size={20} />
+          <GripVertical className="sortable-handle-icon" size={24} />
         </div>
       )}
       {isDragging ? (

@@ -109,9 +109,31 @@ export const authAPI = {
   },
 
   setDoodlePublic: async (doodleId: number, isPublic: boolean) => {
-    const response = await api.post(`/doodle/${doodleId}/set-public/`, {
-      public: isPublic,
-    });
+    const response = await api.post(`/doodles/${doodleId}/set-public/`, { public: isPublic });
+    return response.data;
+  },
+  getDoodleComments: async (doodleId: number) => {
+    const response = await api.get(`/doodles/${doodleId}/comments/`);
+    return response.data;
+  },
+  createDoodleComment: async (doodleId: number, commentText: string) => {
+    const response = await api.post(`/doodles/${doodleId}/comments/`, { comment_text: commentText });
+    return response.data;
+  },
+  replyToDoodleComment: async (commentId: number, replyText: string) => {
+    const response = await api.post(`/doodles/comments/${commentId}/reply/`, { comment_text: replyText });
+    return response.data;
+  },
+  deleteDoodleComment: async (commentId: number) => {
+    const response = await api.delete(`/doodles/comments/${commentId}/`);
+    return response.data;
+  },
+  getNotifications: async () => {
+    const response = await api.get('/notifications/');
+    return response.data;
+  },
+  markNotificationsRead: async () => {
+    const response = await api.post('/notifications/mark-read/');
     return response.data;
   },
 

@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import { authAPI } from '../../services/api';
+import DoodleFullscreenModal from './DoodleFullscreenModal';
 import './DoodlesGallery.css';
 
 interface Doodle {
@@ -14,13 +16,15 @@ interface Doodle {
 interface DoodlesGalleryProps {
   profileUrl: string;
   isEditMode?: boolean;
+  initialDoodleId?: number;
 }
 
-const DoodlesGallery = ({ profileUrl, isEditMode = false }: DoodlesGalleryProps) => {
+const DoodlesGallery = ({ profileUrl, isEditMode = false, initialDoodleId }: DoodlesGalleryProps) => {
   const [doodles, setDoodles] = useState<Doodle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAlbum, setShowAlbum] = useState(false);
+  const [selectedDoodle, setSelectedDoodle] = useState<Doodle | null>(null);
 
   const canManageDoodles = isEditMode; // Only show manage button in edit mode
 
@@ -32,6 +36,14 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false }: DoodlesGalleryProps)
         // Only show public doodles on the profile
         const publicDoodles = (data.doodles || []).filter((d: Doodle) => d.public);
         setDoodles(publicDoodles);
+        
+        // If initialDoodleId is provided, open that doodle
+        if (initialDoodleId && publicDoodles.length > 0) {
+          const doodleToOpen = publicDoodles.find((d: Doodle) => d.id === initialDoodleId);
+          if (doodleToOpen) {
+            setSelectedDoodle(doodleToOpen);
+          }
+        }
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to load doodles');
       } finally {
@@ -40,7 +52,7 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false }: DoodlesGalleryProps)
     };
 
     fetchDoodles();
-  }, [profileUrl]);
+  }, [profileUrl, initialDoodleId]);
 
   if (loading) {
     return (
@@ -84,6 +96,8 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false }: DoodlesGalleryProps)
                     src={doodle.image_url} 
                     alt={doodle.word}
                     className="doodle-image"
+                    onClick={() => setSelectedDoodle(doodle)}
+                    style={{ cursor: 'pointer' }}
                   />
                 )}
                 <div className="doodle-word blue-glow">{doodle.word}</div>
@@ -108,6 +122,13 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false }: DoodlesGalleryProps)
             });
           }}
         />
+      )}
+      {selectedDoodle && createPortal(
+        <DoodleFullscreenModal
+          doodle={selectedDoodle}
+          onClose={() => setSelectedDoodle(null)}
+        />,
+        document.body
       )}
     </>
   );

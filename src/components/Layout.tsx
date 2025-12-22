@@ -5,6 +5,7 @@ import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
 import { Menu, X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
+import NotificationDropdown from './NotificationDropdown';
 import './Layout.css';
 
 interface LayoutProps {
@@ -76,6 +77,8 @@ const Layout = ({ children }: LayoutProps) => {
   // Users online state
   const [usersOnline, setUsersOnline] = useState<UserOnline[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [guestsOnline, setGuestsOnline] = useState(0);
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
   const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
@@ -251,6 +254,45 @@ const Layout = ({ children }: LayoutProps) => {
     loadPoll();
   }, []);
 
+  // Load notifications
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadNotifications(0);
+      return;
+    }
+
+    const loadNotifications = async () => {
+      try {
+        const data = await authAPI.getNotifications();
+        setUnreadNotifications(data.unread_count || 0);
+      } catch (error: any) {
+        // Silently handle errors
+        console.error('Error loading notifications:', error);
+      }
+    };
+
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  const handleNotificationClick = async () => {
+    if (!isAuthenticated) return;
+    
+    const newShowState = !showNotifications;
+    setShowNotifications(newShowState);
+  };
+
+  const handleNotificationsRead = async () => {
+    // Mark notifications as read when closing the dropdown
+    try {
+      await authAPI.markNotificationsRead();
+      setUnreadNotifications(0);
+    } catch (error: any) {
+      console.error('Error marking notifications as read:', error);
+    }
+  };
+
   const handlePollVote = async (optionNo: number) => {
     if (!isAuthenticated) {
       toast.error('You must be logged in to vote');
@@ -421,14 +463,20 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
               <button
                 className="notification-button"
-                onClick={() => {
-                  // TODO: Open notifications
-                }}
+                onClick={handleNotificationClick}
                 aria-label="Notifications"
               >
                 <Bell size={24} />
-                {/* TODO: Add notification badge if there are unread notifications */}
+                {unreadNotifications > 0 && (
+                  <span className="notification-badge" />
+                )}
               </button>
+              <NotificationDropdown
+                isOpen={showNotifications}
+                onClose={() => setShowNotifications(false)}
+                unreadCount={unreadNotifications}
+                onNotificationsRead={handleNotificationsRead}
+              />
             </>
           )}
           <button

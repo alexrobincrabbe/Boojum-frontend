@@ -1,0 +1,182 @@
+.notification-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10006;
+  background-color: transparent;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 75px;
+  right: 20px;
+  width: 400px;
+  max-width: 90vw;
+  height: auto;
+  max-height: calc(100vh - 100px);
+  background-color: rgba(19, 19, 42, 0.98);
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10007;
+}
+
+.notification-dropdown-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.notification-dropdown-header h3 {
+  margin: 0;
+  color: #f5ce45;
+  font-family: "Monoton", cursive;
+  font-size: 1.2rem;
+}
+
+.notification-unread-badge {
+  background-color: #ff69b4;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.notification-dropdown-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 0;
+  min-height: 0; /* Allows flex child to shrink */
+  max-height: calc(100vh - 200px); /* Account for header and spacing */
+}
+
+.notification-loading,
+.notification-empty {
+  text-align: center;
+  color: #71bbe9;
+  padding: 20px;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(113, 187, 233, 0.2);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-sizing: border-box;
+  min-width: 0; /* Allows flex child to shrink */
+  overflow: hidden;
+}
+
+.notification-item:hover {
+  background-color: rgba(113, 187, 233, 0.1);
+}
+
+.notification-item.unread {
+  background-color: rgba(113, 187, 233, 0.05);
+}
+
+.notification-item-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.notification-item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 8px;
+  min-width: 0; /* Allows flex child to shrink */
+}
+
+.notification-title {
+  font-weight: bold;
+  color: #f5ce45;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  flex: 1;
+  min-width: 0; /* Allows flex child to shrink */
+}
+
+.notification-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #ff69b4;
+  border-radius: 50%;
+  flex-shrink: 0; /* Prevent dot from shrinking */
+  margin-top: 6px; /* Align with text */
+  box-shadow: 0 0 6px rgba(255, 105, 180, 0.8);
+}
+
+.notification-message {
+  color: #fff;
+  font-family: "Darker Grotesque", sans-serif;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.notification-date {
+  color: #888;
+  font-size: 0.8rem;
+  font-family: "Darker Grotesque", sans-serif;
+}
+
+/* Scrollbar styling */
+.notification-dropdown-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-track {
+  background: rgba(19, 19, 42, 0.3);
+  border-radius: 4px;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-thumb {
+  background: #71bbe9;
+  border-radius: 4px;
+}
+
+.notification-dropdown-content::-webkit-scrollbar-thumb:hover {
+  background: #5aa8d8;
+}
+
+@media (max-width: 768px) {
+  .notification-dropdown {
+    right: 10px;
+    width: calc(100vw - 20px);
+    max-width: 400px;
+  }
+}
+

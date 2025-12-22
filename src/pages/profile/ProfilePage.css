@@ -230,6 +230,10 @@ h2 {
 #who-are-you {
   min-height: 150px;
   font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
 }
 
 #who-are-you-text {
@@ -258,6 +262,9 @@ h2 {
   -webkit-text-fill-color: #fff !important;
   color: #fff !important;
   cursor: text !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  flex: 1;
 }
 
 #who-are-you-header {
@@ -598,6 +605,8 @@ h2 {
 /* Specific override for who-are-you textarea */
 #who-are-you textarea.edit-textarea,
 #who-are-you-container textarea.edit-textarea {
+  height: 100% !important;
+  min-height: 100% !important;
   background: rgba(19, 19, 42, 0.8) !important;
   -webkit-background-clip: initial !important;
   background-clip: initial !important;

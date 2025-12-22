@@ -97,6 +97,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-container:hover {
@@ -331,6 +333,22 @@
     width: 100% !important;
     height: 100% !important;
   }
+  
+  /* Fix close button size in fullscreen on mobile */
+  .fullscreen-chart-container .close-fullscreen-button-inline {
+    padding: 6px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    flex-shrink: 0;
+  }
+  
+  .fullscreen-chart-container .close-fullscreen-button-inline svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
 }
 
 .fullscreen-chart-wrapper {
@@ -446,8 +464,39 @@
   }
 }
 
+/* Mobile: Fix close button in fullscreen */
+@media (max-width: 767px) {
+  .fullscreen-chart-container .close-fullscreen-button-inline {
+    padding: 6px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    flex-shrink: 0;
+  }
+  
+  .fullscreen-chart-container .close-fullscreen-button-inline svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
 /* Mobile: stack charts vertically */
 @media (max-width: 767px) {
+  .high-score-charts-container {
+    padding: 15px 10px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .charts-grid {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
   .charts-header {
     flex-direction: column;
     align-items: flex-start;
@@ -458,8 +507,168 @@
     justify-content: center;
   }
   
-  .chart-container {
-    padding: 15px;
+  /* Only apply to normal view charts, not fullscreen */
+  .high-score-charts-container .chart-container {
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: 0;
+    overflow: hidden;
+    margin: 0;
+  }
+  
+  /* Ensure ResponsiveContainer calculates width correctly and uses full container */
+  .high-score-charts-container .chart-container > .recharts-responsive-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  /* Override any inline styles that might constrain width */
+  .high-score-charts-container .chart-container .recharts-responsive-container[style*="width"] {
+    width: 100% !important;
+  }
+  
+  .high-score-charts-container .chart-container .chart-header {
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  
+  .high-score-charts-container .chart-container .chart-controls {
+    flex-shrink: 0;
+  }
+  
+  .high-score-charts-container .chart-container .fullscreen-button {
+    padding: 6px !important;
+    font-size: 0.75rem !important;
+    min-width: auto !important;
+    max-width: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    flex-shrink: 0;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .high-score-charts-container .chart-container .fullscreen-button svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0;
+  }
+  
+  .high-score-charts-container .chart-container .view-toggle-button {
+    padding: 6px 12px !important;
+    font-size: 0.75rem !important;
+    min-width: auto !important;
+    width: auto !important;
+    flex-shrink: 0;
+  }
+  
+  .high-score-charts-container .chart-container .line-filters {
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  
+  /* Reduce chart height on mobile - let it flex but with max height */
+  /* Only apply to normal view charts, not fullscreen */
+  .high-score-charts-container .chart-container .recharts-responsive-container {
+    height: 200px !important;
+    max-height: 200px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+  }
+  
+  .high-score-charts-container .chart-container .recharts-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 200px !important;
+    max-height: 200px !important;
+    position: relative;
+    box-sizing: border-box;
+  }
+  
+  .high-score-charts-container .chart-container .recharts-surface {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 200px !important;
+    max-height: 200px !important;
+    position: relative;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure the chart SVG uses full width and respects height */
+  .high-score-charts-container .chart-container svg {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 200px !important;
+    max-height: 200px !important;
+    overflow: hidden;
+    display: block;
+    box-sizing: border-box;
+  }
+  
+  /* Force ResponsiveContainer to recalculate on mobile - only normal view */
+  .high-score-charts-container .chart-container .recharts-responsive-container {
+    min-width: 0 !important;
+  }
+  
+  /* Override any aspect ratio constraints - force SVG to fill width */
+  .high-score-charts-container .chart-container .recharts-wrapper svg {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Force the chart plot area to use full width by expanding the viewBox area */
+  .high-score-charts-container .chart-container .recharts-wrapper {
+    transform: scaleX(1) !important;
+  }
+  
+  /* Ensure all chart layers use full width */
+  .high-score-charts-container .chart-container .recharts-layer {
+    width: 100% !important;
+    transform: scaleX(1) !important;
+  }
+  
+  /* Force cartesian grid and axes to span full width */
+  .high-score-charts-container .chart-container .recharts-cartesian-grid,
+  .high-score-charts-container .chart-container .recharts-cartesian-axis {
+    width: 100% !important;
+  }
+  
+  /* Force the plot area to expand by overriding internal calculations */
+  .high-score-charts-container .chart-container .recharts-surface {
+    width: 100% !important;
+  }
+  
+  /* Override any clip paths that might be constraining the plot area */
+  .high-score-charts-container .chart-container .recharts-layer[clip-path] {
+    clip-path: none !important;
+  }
+  
+  /* Ensure the reference area (plot area) uses full width */
+  .high-score-charts-container .chart-container .recharts-reference-line,
+  .high-score-charts-container .chart-container .recharts-reference-area {
+    width: 100% !important;
+  }
+  
+  /* Remove preserveAspectRatio constraint via attribute override if possible */
+  .chart-container .recharts-surface {
+    overflow: visible !important;
+  }
+  
+  /* Force the chart to use full available width */
+  .chart-container > * {
+    max-width: 100%;
   }
 }
 

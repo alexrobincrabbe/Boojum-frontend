@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   DndContext,
@@ -78,6 +78,7 @@ interface Profile {
 
 const ProfilePage = () => {
   const { profileUrl } = useParams<{ profileUrl: string }>();
+  const [searchParams] = useSearchParams();
   const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,8 +105,14 @@ const ProfilePage = () => {
   });
 
   // Drag and drop sensors - must be called before any conditional returns
+  // Configure PointerSensor with delay for touch devices to prevent conflicts with scrolling
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 250, // 250ms delay before activating drag on touch devices
+        tolerance: 5, // Allow 5px of movement during delay
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -365,6 +372,7 @@ const ProfilePage = () => {
               <DoodlesGallery 
                 profileUrl={profileUrl || ''} 
                 isEditMode={isEditMode}
+                initialDoodleId={searchParams.get('doodle') ? parseInt(searchParams.get('doodle') || '0') : undefined}
               />
             </div>
           </div>
@@ -534,7 +542,6 @@ const AboutMeSection = ({
               name="about_me"
               value={aboutMe || ''}
               onChange={onChange}
-              rows={6}
               maxLength={500}
               className="edit-textarea"
             />

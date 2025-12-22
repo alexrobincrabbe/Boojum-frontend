@@ -1,6 +1,7 @@
 .sortable-section {
   position: relative;
   margin-bottom: 20px;
+  touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal panning during drag */
 }
 
 .sortable-section.dragging {
@@ -58,11 +59,21 @@
   cursor: grab;
   color: #71bbe9;
   z-index: 10;
-  padding: 5px;
+  padding: 10px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color 0.3s ease;
+  touch-action: none; /* Prevent default touch behaviors on the handle */
+  -webkit-touch-callout: none; /* Prevent iOS callout menu */
+  user-select: none; /* Prevent text selection */
+}
+
+.sortable-handle-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .sortable-handle:hover {
@@ -77,6 +88,15 @@
   .sortable-handle {
     left: -25px;
     top: 10px;
+    padding: 12px;
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: none; /* Ensure touch-action is set on mobile */
+  }
+  
+  .sortable-handle-icon {
+    width: 32px;
+    height: 32px;
   }
 }
 

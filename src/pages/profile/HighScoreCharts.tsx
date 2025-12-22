@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { authAPI } from '../../services/api';
@@ -77,9 +77,61 @@ const ChartComponent = ({ title, data, colors, viewMode, visibleLines, onToggleL
   const yAxisLabel = viewMode === 'points' ? 'Points' : 'Position';
   const reversed = viewMode === 'position'; // Lower position is better, so reverse Y axis
   const isPositionMode = viewMode === 'position';
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [containerWidth, setContainerWidth] = useState<number | string>("100%");
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 767;
+      setIsMobile(mobile);
+      
+      // On mobile, use actual container width for ResponsiveContainer
+      // On desktop, always use "100%"
+      if (mobile && containerRef.current) {
+        const width = containerRef.current.offsetWidth;
+        if (width > 0) {
+          setContainerWidth(width);
+        }
+      } else {
+        setContainerWidth("100%");
+      }
+    };
+    
+    // Initial check
+    checkMobile();
+    
+    // Check on window resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Also check on container resize (with a small delay to ensure container is rendered)
+    let resizeObserver: ResizeObserver | null = null;
+    const timeoutId = setTimeout(() => {
+      if (containerRef.current) {
+        resizeObserver = new ResizeObserver(() => {
+          checkMobile();
+        });
+        resizeObserver.observe(containerRef.current);
+      }
+    }, 100);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      clearTimeout(timeoutId);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, []);
+
+  // Reduce margins on mobile to maximize chart width - minimize all margins
+  // On mobile, use minimal margins to maximize plot area
+  const chartMargins = isMobile 
+    ? { top: 5, right: 0, left: -20, bottom: 5 }
+    : { top: 5, right: 20, left: 0, bottom: 5 };
 
   return (
-    <div className="chart-container">
+    <div className="chart-container" ref={containerRef}>
       <div className="chart-header">
         <h3>{title}</h3>
         <div className="chart-controls">
@@ -133,22 +185,27 @@ const ChartComponent = ({ title, data, colors, viewMode, visibleLines, onToggleL
           );
         })}
       </div>
-      <ResponsiveContainer width="100%" height={isFullscreen ? "100%" : 300}>
-        <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+      <ResponsiveContainer 
+        width={typeof containerWidth === 'number' && containerWidth > 0 ? containerWidth : "100%"} 
+        height={isFullscreen ? "100%" : 300}
+      >
+        <LineChart data={data} margin={chartMargins}>
           <CartesianGrid strokeDasharray="3 3" stroke="#71bbe9" opacity={0.3} />
           <XAxis 
             dataKey="date" 
             stroke="#71bbe9"
-            style={{ fontSize: '12px' }}
+            style={{ fontSize: isMobile ? '10px' : '12px' }}
+            {...(isMobile ? { height: 30 } : {})}
           />
           <YAxis 
             stroke="#71bbe9"
-            style={{ fontSize: '12px' }}
+            style={{ fontSize: isMobile ? '10px' : '12px' }}
             reversed={reversed}
             domain={isPositionMode ? [1, 10] : undefined}
             ticks={isPositionMode ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : undefined}
             allowDecimals={!isPositionMode}
-            label={{ value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#71bbe9' } }}
+            {...(isMobile ? { width: 30 } : {})}
+            label={isMobile ? undefined : { value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#71bbe9' } }}
           />
           <Tooltip 
             contentStyle={{ 
