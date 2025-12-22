@@ -74,7 +74,7 @@
   max-width: 100%;
   width: auto;
   height: auto;
-  max-height: 50vh; /* 50% of viewport height for image */
+  max-height: 30vh; /* 50% of viewport height for image */
   object-fit: contain;
   border-radius: 8px;
   border: 2px solid #71bbe9;
