@@ -18,8 +18,10 @@
   background-color: rgba(19, 19, 42, 0.95);
   border: 2px solid #71bbe9;
   border-radius: 12px;
-  max-width: 600px;
-  width: 100%;
+  max-width: 90vw;
+  width: auto;
+  min-width: 300px;
+  height: 90vh;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -63,17 +65,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  flex-shrink: 0;
 }
 
 .doodle-fullscreen-image {
   max-width: 100%;
-  max-height: 400px;
+  width: auto;
+  height: auto;
+  max-height: 50vh; /* 50% of viewport height for image */
   object-fit: contain;
   border-radius: 8px;
   border: 2px solid #71bbe9;
   margin-bottom: 15px;
   background-color: white;
+}
+
+/* On mobile, keep a reasonable max height */
+@media (max-width: 768px) {
+  .doodle-fullscreen-modal {
+    height: 85vh;
+    max-height: 85vh;
+  }
+  
+  .doodle-fullscreen-image {
+    max-height: 40vh;
+  }
 }
 
 .doodle-fullscreen-word {
@@ -213,6 +231,13 @@
   font-weight: bold;
   color: #f5ce45;
   font-family: "Darker Grotesque", sans-serif;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.doodle-comment-author:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .doodle-comment-date {

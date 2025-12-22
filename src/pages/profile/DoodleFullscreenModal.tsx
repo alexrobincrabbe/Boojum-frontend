@@ -22,6 +22,8 @@ interface Comment {
   user: {
     id: number;
     username: string;
+    profile_url?: string;
+    chat_color?: string;
   };
   comment_text: string;
   parent_comment: number | null;
@@ -225,7 +227,26 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
                 {comments.map((comment) => (
                   <div key={comment.id} className="doodle-comment-item">
                     <div className="doodle-comment-header">
-                      <span className="doodle-comment-author">{comment.user.username}</span>
+                      {comment.user.profile_url ? (
+                        <a 
+                          href={`/profile/${comment.user.profile_url}`}
+                          className="doodle-comment-author"
+                          style={{ color: comment.user.chat_color || '#71bbe9' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClose();
+                          }}
+                        >
+                          {comment.user.username}
+                        </a>
+                      ) : (
+                        <span 
+                          className="doodle-comment-author"
+                          style={{ color: comment.user.chat_color || '#71bbe9' }}
+                        >
+                          {comment.user.username}
+                        </span>
+                      )}
                       <span className="doodle-comment-date">
                         {new Date(comment.created_at).toLocaleDateString()}
                       </span>
@@ -292,7 +313,26 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
                         {comment.replies.map((reply) => (
                           <div key={reply.id} className="doodle-comment-reply">
                             <div className="doodle-comment-header">
-                              <span className="doodle-comment-author">{reply.user.username}</span>
+                              {reply.user.profile_url ? (
+                                <a 
+                                  href={`/profile/${reply.user.profile_url}`}
+                                  className="doodle-comment-author"
+                                  style={{ color: reply.user.chat_color || '#f5ce45' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClose();
+                                  }}
+                                >
+                                  {reply.user.username}
+                                </a>
+                              ) : (
+                                <span 
+                                  className="doodle-comment-author"
+                                  style={{ color: reply.user.chat_color || '#f5ce45' }}
+                                >
+                                  {reply.user.username}
+                                </span>
+                              )}
                               <span className="doodle-comment-date">
                                 {new Date(reply.created_at).toLocaleDateString()}
                               </span>

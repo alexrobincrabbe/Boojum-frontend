@@ -13,6 +13,9 @@ interface Notification {
   read: boolean;
   created_at: string;
   related_id: number | null;
+  commenter_username?: string;
+  commenter_profile_url?: string;
+  commenter_chat_color?: string;
 }
 
 interface NotificationDropdownProps {
@@ -62,6 +65,48 @@ const NotificationDropdown = ({ isOpen, onClose, unreadCount, onNotificationsRea
     }
   };
 
+  const renderNotificationMessage = (notification: Notification) => {
+    // For comment/reply notifications, extract username and display with color
+    if (notification.notification_type === 'doodle_comment' || notification.notification_type === 'doodle_reply') {
+      if (notification.commenter_username) {
+        const messageParts = notification.message.split(notification.commenter_username);
+        const beforeUsername = messageParts[0];
+        const afterUsername = messageParts.slice(1).join(notification.commenter_username);
+        
+        return (
+          <>
+            {beforeUsername}
+            {notification.commenter_profile_url ? (
+              <a
+                href={`/profile/${notification.commenter_profile_url}`}
+                className="notification-username-link"
+                style={{ color: notification.commenter_chat_color || '#71bbe9' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/profile/${notification.commenter_profile_url}`);
+                  onClose();
+                }}
+              >
+                {notification.commenter_username}
+              </a>
+            ) : (
+              <span
+                className="notification-username"
+                style={{ color: notification.commenter_chat_color || '#71bbe9' }}
+              >
+                {notification.commenter_username}
+              </span>
+            )}
+            {afterUsername}
+          </>
+        );
+      }
+    }
+    
+    // For other notifications, just display the message
+    return <>{notification.message}</>;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -80,16 +125,16 @@ const NotificationDropdown = ({ isOpen, onClose, unreadCount, onNotificationsRea
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                  className="notification-item"
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="notification-item-content">
                     {!notification.read && <span className="notification-dot" />}
+                    {notification.read && <span className="notification-dot-spacer" />}
                     <div className="notification-item-text">
-                      <div className="notification-item-header">
-                        <span className="notification-title">{notification.title}</span>
+                      <div className="notification-message">
+                        {renderNotificationMessage(notification)}
                       </div>
-                      <div className="notification-message">{notification.message}</div>
                       <div className="notification-date">
                         {new Date(notification.created_at).toLocaleDateString()}
                       </div>

@@ -87,15 +87,17 @@
   background-color: rgba(113, 187, 233, 0.1);
 }
 
-.notification-item.unread {
-  background-color: rgba(113, 187, 233, 0.05);
-}
-
 .notification-item-content {
   display: flex;
   gap: 12px;
   align-items: flex-start;
   min-width: 0;
+}
+
+.notification-dot-spacer {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0; /* Prevent spacer from shrinking */
 }
 
 .notification-item-text {
@@ -145,6 +147,18 @@
   word-break: break-word;
   max-width: 100%;
   overflow: hidden;
+}
+
+.notification-username-link,
+.notification-username {
+  font-weight: bold;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.notification-username-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .notification-date {
