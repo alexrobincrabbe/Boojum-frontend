@@ -165,6 +165,10 @@
 }
 
 @media screen and (max-width: 768px) {
+    .word-sublist {
+        margin: 0px !important;
+        font-size: 0.5rem !important;
+      }
   .game-header h1 {
     font-size: 1.1rem;
   }
@@ -370,7 +374,7 @@
   max-width: 100%;
 }
 
-/* Board Wrapper - square with rounded corners */
+/* Board Wrapper - square with rounded corners - applies to all boards */
 .board-wrapper {
   position: relative;
   border-radius: 25px;
@@ -380,6 +384,18 @@
   max-width: 100%;
   box-sizing: border-box;
   touch-action: none; /* Prevent default touch behaviors like scrolling */
+}
+
+/* Board display container - applies to all boards */
+.board-display-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 30px;
 }
 
 /* SVG Container for drawing lines */
@@ -393,8 +409,10 @@
   z-index: 10;
 }
 
-/* Board Grid - matches game_board.css */
-#board {
+/* Board Grid - matches game_board.css - applies to all boards */
+#board,
+#daily-board,
+#timeless-board {
   display: grid;
   position: relative;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -415,26 +433,34 @@
 }
 
 /* Board dark mode background */
-/* Board theme styles */
+/* Board theme styles - applies to all boards */
 #board.board-dark,
+#board .board-dark,
+#daily-board.board-dark,
+#daily-board .board-dark,
+#timeless-board.board-dark,
+#timeless-board .board-dark,
 .board-dark {
   background-color: #352870;
   border: solid #eb5497 3px;
 }
 
 #board.board-light,
+#board .board-light,
+#daily-board.board-light,
+#daily-board .board-light,
+#timeless-board.board-light,
+#timeless-board .board-light,
 .board-light {
   background-color: #abb3ce;
   border: solid #1b1835 3px;
 }
 
-#board.board-light {
-  background-color: #abb3ce;
-  border: solid #1b1835 3px;
-}
-
-/* Letter cells - matches game_board.css */
-.letter {
+/* Letter cells - matches game_board.css - applies to all boards */
+.letter,
+#board .letter,
+#daily-board .letter,
+#timeless-board .letter {
   display: flex;
   border: 1px solid white;
   font-family: "Rubik", sans-serif;
@@ -452,66 +478,93 @@
   color: white;
 }
 
-.letter.dark-mode {
+.letter.dark-mode,
+#board .letter.dark-mode,
+#daily-board .letter.dark-mode,
+#timeless-board .letter.dark-mode {
   color: white;
   background-color: #1b1835;
 }
 
-.letter.light-mode {
+.letter.light-mode,
+#board .letter.light-mode,
+#daily-board .letter.light-mode,
+#timeless-board .letter.light-mode {
   background-color: white;
   color: #13132a;
 }
 
-/* Tile color classes - matches game_board.css */
+/* Tile color classes - matches game_board.css - applies to all boards */
 /* Dark mode */
-#board .tile-no-match-dark {
-  background-color: rgb(155, 95, 155);
-  box-shadow: none;
+#board .tile-no-match-dark,
+#daily-board .tile-no-match-dark,
+#timeless-board .tile-no-match-dark {
+  background-color: rgb(155, 95, 155) !important;
+  box-shadow: none !important;
 }
 
-#board .tile-partial-match-dark {
-  background-color: rgb(173, 147, 86);
-  box-shadow: 0 0 8px #f5ce45;
+#board .tile-partial-match-dark,
+#daily-board .tile-partial-match-dark,
+#timeless-board .tile-partial-match-dark {
+  background-color: rgb(173, 147, 86) !important;
+  box-shadow: 0 0 8px #f5ce45 !important;
 }
 
-#board .tile-match-dark {
-  background-color: rgb(73, 156, 127);
-  box-shadow: 0 0 30px #33c15b;
+#board .tile-match-dark,
+#daily-board .tile-match-dark,
+#timeless-board .tile-match-dark {
+  background-color: rgb(73, 156, 127) !important;
+  box-shadow: 0 0 30px #33c15b !important;
 }
 
 /* Light mode */
-#board .tile-no-match-light {
-  background-color: rgb(245, 160, 202);
+#board .tile-no-match-light,
+#daily-board .tile-no-match-light,
+#timeless-board .tile-no-match-light {
+  background-color: rgb(245, 160, 202) !important;
 }
 
-#board .tile-partial-match-light {
-  background-color: rgb(238, 212, 119);
-  box-shadow: 0 0 10px rgb(0, 0, 0);
+#board .tile-partial-match-light,
+#daily-board .tile-partial-match-light,
+#timeless-board .tile-partial-match-light {
+  background-color: rgb(238, 212, 119) !important;
+  box-shadow: 0 0 10px rgb(0, 0, 0) !important;
 }
 
-#board .tile-match-light {
-  background-color: rgb(87, 255, 92);
-  box-shadow: 0 0 30px rgb(0, 0, 0);
+#board .tile-match-light,
+#daily-board .tile-match-light,
+#timeless-board .tile-match-light {
+  background-color: rgb(87, 255, 92) !important;
+  box-shadow: 0 0 30px rgb(0, 0, 0) !important;
 }
 
 /* Grey mode - dark */
-#board .tile-no-match-grey-dark {
-  background-color: rgb(145, 155, 190);
-  box-shadow: 0 0 10px #919bbe;
+#board .tile-no-match-grey-dark,
+#daily-board .tile-no-match-grey-dark,
+#timeless-board .tile-no-match-grey-dark {
+  background-color: rgb(145, 155, 190) !important;
+  box-shadow: 0 0 10px #919bbe !important;
 }
 
 /* Grey mode - light */
-#board .tile-no-match-grey-light {
-  background-color: rgb(158, 174, 232);
-  box-shadow: 0 0 10px rgb(0, 0, 0);
+#board .tile-no-match-grey-light,
+#daily-board .tile-no-match-grey-light,
+#timeless-board .tile-no-match-grey-light {
+  background-color: rgb(158, 174, 232) !important;
+  box-shadow: 0 0 10px rgb(0, 0, 0) !important;
 }
 
-#board .tile-match-grey-light {
-  background-color: rgb(87, 255, 92);
-  box-shadow: 0 0 30px rgb(0, 0, 0);
+#board .tile-match-grey-light,
+#daily-board .tile-match-grey-light,
+#timeless-board .tile-match-grey-light {
+  background-color: rgb(87, 255, 92) !important;
+  box-shadow: 0 0 30px rgb(0, 0, 0) !important;
 }
 
-.letValue {
+.letValue,
+#board .letValue,
+#daily-board .letValue,
+#timeless-board .letValue {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -521,17 +574,73 @@
 }
 
 /* Faded letters between games */
-.letValue.grey {
+.letValue.grey,
+#board .letValue.grey,
+#daily-board .letValue.grey,
+#timeless-board .letValue.grey {
   color: #8b8b8b;
 }
 
-/* Bonus letter styles - matches game_board.css */
-#board .boojum {
+/* Bonus letter styles - matches game_board.css - applies to all boards */
+#board .boojum,
+#board .letter.boojum,
+#daily-board .boojum,
+#daily-board .letter.boojum,
+#timeless-board .boojum,
+#timeless-board .letter.boojum {
   border: solid #33c15b 10px;
+  box-sizing: border-box;
 }
 
-#board .snark {
+#board .snark,
+#board .letter.snark,
+#daily-board .snark,
+#daily-board .letter.snark,
+#timeless-board .snark,
+#timeless-board .letter.snark {
   border: solid #febe38 10px;
+  box-sizing: border-box;
+}
+
+/* Responsive boojum and snark borders - override border-width in media queries */
+@media screen and (max-width: 768px) {
+  #board .boojum,
+  #board .letter.boojum,
+  #daily-board .boojum,
+  #daily-board .letter.boojum,
+  #timeless-board .boojum,
+  #timeless-board .letter.boojum {
+    border-width: 5px !important;
+  }
+
+  #board .snark,
+  #board .letter.snark,
+  #daily-board .snark,
+  #daily-board .letter.snark,
+  #timeless-board .snark,
+  #timeless-board .letter.snark {
+    border-width: 5px !important;
+  }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1199px) {
+  #board .boojum,
+  #board .letter.boojum,
+  #daily-board .boojum,
+  #daily-board .letter.boojum,
+  #timeless-board .boojum,
+  #timeless-board .letter.boojum {
+    border-width: 7px !important;
+  }
+
+  #board .snark,
+  #board .letter.snark,
+  #daily-board .snark,
+  #daily-board .letter.snark,
+  #timeless-board .snark,
+  #timeless-board .letter.snark {
+    border-width: 7px !important;
+  }
 }
 
 /* Pulsating dots - matches game_board.css */
@@ -752,18 +861,26 @@
     font-size: 120%;
   }
 
-  #board {
+  #board,
+  #daily-board,
+  #timeless-board {
     width: min(92vw, calc(100vh - 300px));
     aspect-ratio: 1;
     gap: 15px;
     padding: 25px;
   }
 
-  .letter {
+  .letter,
+  #board .letter,
+  #daily-board .letter,
+  #timeless-board .letter {
     font-size: 10vw;
   }
 
-  .letValue {
+  .letValue,
+  #board .letValue,
+  #daily-board .letValue,
+  #timeless-board .letValue {
     font-size: 10vw;
   }
 
@@ -821,18 +938,26 @@
     line-height: 50px;
   }
 
-  #board {
+  #board,
+  #daily-board,
+  #timeless-board {
     width: min(35vw, calc(100vh - 200px));
     aspect-ratio: 1;
     gap: 15px;
     padding: 20px;
   }
 
-  .letter {
+  .letter,
+  #board .letter,
+  #daily-board .letter,
+  #timeless-board .letter {
     font-size: 4.2vw;
   }
 
-  .letValue {
+  .letValue,
+  #board .letValue,
+  #daily-board .letValue,
+  #timeless-board .letValue {
     font-size: 4.2vw;
   }
 
@@ -1150,9 +1275,15 @@
   color: white;
 }
 
-#word-lists {
-  flex-direction: row;
+.word-lists-wrapper {
   width: 100%;
+  overflow-x: auto;
+}
+
+#word-lists {
+  min-width: 100%;
+  width: fit-content !important;
+  flex-direction: row;
   height: 500px;
   overflow-y: scroll;
   display: flex;

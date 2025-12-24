@@ -252,6 +252,14 @@
   .doodles-grid {
     grid-template-columns: 1fr;
   }
+  .doodles-gallery-container{
+    padding: 5px;
+    margin: 5px 0;
+  }
+
+  .doodles-gallery-title{
+    font-size: 1.5rem;
+  }
 
   .doodle-album-modal {
     max-width: 95vw;

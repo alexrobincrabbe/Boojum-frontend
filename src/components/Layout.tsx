@@ -617,7 +617,7 @@ const Layout = ({ children }: LayoutProps) => {
               >
                 {leftSidebarOpen && <span>Live Games</span>}
               </Link>
-              {isTabletOrDesktop && !isDesktop && (
+              {isTabletOrDesktop && (
                 <button
                   className="sidebar-pin-button-inline"
                   onClick={() => {
@@ -756,7 +756,7 @@ const Layout = ({ children }: LayoutProps) => {
             >
               <span>Dashboard</span>
             </Link>
-            {isTabletOrDesktop && !isDesktop && (
+            {isTabletOrDesktop && (
               <button
                 className="sidebar-pin-button-inline"
                 onClick={() => {

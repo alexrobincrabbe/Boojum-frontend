@@ -1,12 +1,176 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { GameBoard } from '../game-room/components/GameBoard';
 import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
 import { lobbyAPI } from '../../services/api';
 import { toast } from 'react-toastify';
-import { playBloop } from '../../utils/sounds';
+import { playBloop, playSound } from '../../utils/sounds';
+import { triggerBoardAnimation, triggerWordCounterAnimation } from '../game-room/utils/borderAnimation';
+
+// Helper function to show "Perfect!" message
+const showPerfect = (elementId: string) => {
+  // Try to find the board element (could be #board, #daily-board, or #timeless-board)
+  const element = document.getElementById(elementId) || 
+                  document.getElementById('board') || 
+                  document.getElementById('daily-board') || 
+                  document.getElementById('timeless-board');
+  if (!element) {
+    console.warn('[showPerfect] Board element not found');
+    return;
+  }
+  
+  const rect = element.getBoundingClientRect();
+  const perfect = document.createElement('div');
+  perfect.className = 'perfect-text';
+  perfect.textContent = 'Perfect!';
+  perfect.classList.add('yellow');
+  Object.assign(perfect.style, {
+    position: 'absolute',
+    top: `${window.scrollY + rect.top}px`,
+    left: `${window.scrollX + rect.left}px`,
+    width: `${rect.width}px`,
+    height: `${rect.height}px`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '200%',
+    fontWeight: 'bold',
+    textShadow: '0 0 10px rgba(255, 255, 255, 0.7)',
+    opacity: '1',
+    transition: 'opacity 3s ease-out',
+    zIndex: '9998',
+    pointerEvents: 'none',
+  });
+  document.body.appendChild(perfect);
+  
+  // Fade out after 2 seconds
+  setTimeout(() => {
+    perfect.style.opacity = '0';
+    perfect.addEventListener('transitionend', () => perfect.remove(), { once: true });
+  }, 2000);
+};
+
+// Helper function to add looping arrows around submit button
+const addLoopingArrows = (selector: string, delay: number = 1000, arrowOffset: number = 60) => {
+  const el = document.querySelector(selector);
+  if (!el) {
+    console.warn('[addLoopingArrows] Button element not found with selector:', selector);
+    return;
+  }
+  const rect = el.getBoundingClientRect();
+
+  console.log('[addLoopingArrows] Found button, creating arrows:', {
+    selector,
+    rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
+  });
+
+  setTimeout(() => {
+    ['left', 'right'].forEach((side) => {
+      const a = document.createElement('div');
+      a.classList.add('animated-arrow', `arrow-${side}`);
+      // ← for right label, → for left label (pointing toward center)
+      a.textContent = side === 'left' ? '🡺' : '🡸';
+
+      // Vertical centering
+      const top = window.scrollY + rect.top + rect.height / 2;
+      a.style.top = `${top}px`;
+
+      // Horizontal position: further out by arrowOffset
+      let left: number;
+      if (side === 'left') {
+        left = window.scrollX + rect.left - 34;
+      } else {
+        left = window.scrollX + rect.right;
+      }
+      a.style.left = `${left}px`;
+
+      // Set additional required styles
+      a.style.position = 'absolute';
+      a.style.zIndex = '10000';
+      a.style.color = '#f5ce45';
+      a.style.textShadow = '0 0 10px rgba(245, 206, 69, 0.8)';
+
+      console.log(`[addLoopingArrows] Creating ${side} arrow at:`, { top, left });
+      document.body.appendChild(a);
+    });
+  }, delay);
+};
+
+// Helper function to create shatter effect
+const shatter = (elementId: string, rows: number = 10, cols: number = 10) => {
+  // Try to find the board element (could be #board, #daily-board, or #timeless-board)
+  const element = document.getElementById(elementId) || 
+                  document.getElementById('board') || 
+                  document.getElementById('daily-board') || 
+                  document.getElementById('timeless-board');
+  if (!element) {
+    console.warn('[shatter] Board element not found');
+    return;
+  }
+  
+  const rect = element.getBoundingClientRect();
+  const style = getComputedStyle(element);
+  element.style.visibility = 'hidden';
+  
+  const maxDist = Math.hypot(rect.width, rect.height);
+  
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // Create the shard
+      const shard = document.createElement('div');
+      shard.className = 'shard';
+      shard.style.width = `${rect.width / cols}px`;
+      shard.style.height = `${rect.height / rows}px`;
+      shard.style.top = `${window.scrollY + rect.top + r * (rect.height / rows)}px`;
+      shard.style.left = `${window.scrollX + rect.left + c * (rect.width / cols)}px`;
+      shard.style.position = 'absolute';
+      shard.style.overflow = 'hidden';
+      shard.style.transition = 'transform 3s ease-out, opacity 3s ease-out';
+      shard.style.pointerEvents = 'none';
+      shard.style.opacity = '0';
+      
+      // Inner piece that shows the right slice
+      const inner = document.createElement('div');
+      inner.style.position = 'absolute';
+      inner.style.width = `${rect.width}px`;
+      inner.style.height = `${rect.height}px`;
+      inner.style.top = `${-r * (rect.height / rows)}px`;
+      inner.style.left = `${-c * (rect.width / cols)}px`;
+      
+      if (style.backgroundImage !== 'none') {
+        inner.style.backgroundImage = style.backgroundImage;
+        inner.style.backgroundSize = style.backgroundSize;
+        inner.style.backgroundRepeat = style.backgroundRepeat;
+        inner.style.backgroundPosition = style.backgroundPosition;
+      } else {
+        inner.style.backgroundColor = style.backgroundColor;
+      }
+      inner.innerHTML = element.innerHTML;
+      
+      shard.appendChild(inner);
+      document.body.appendChild(shard);
+      
+      // Pick a random direction and rotation
+      const angle = Math.random() * Math.PI * 2;
+      const distance = maxDist * (0.7 + Math.random() * 0.3);
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+      const rot = (Math.random() - 0.5) * 90;
+      
+      // Trigger animation on next frame
+      requestAnimationFrame(() => {
+        shard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+        shard.style.opacity = '1';
+      });
+      
+      // Cleanup
+      shard.addEventListener('transitionend', () => shard.remove(), { once: true });
+    }
+  }
+};
 import '../game-room/GameRoom.css';
 import './TimelessBoardGameRoom.css';
 
@@ -22,6 +186,7 @@ interface TimelessBoardData {
 export default function TimelessBoardGameRoom() {
   const { timelessBoardId, level } = useParams<{ timelessBoardId: string; level: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [boardData, setBoardData] = useState<TimelessBoardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -303,7 +468,7 @@ export default function TimelessBoardGameRoom() {
     setWordsByLength(filteredWordsByLength);
   }, [wordsFound, boardData]);
 
-  // Helper function to animate letters
+  // Helper function to animate letters - matches original animateLetterClone from tracks-swipe.js
   const animateLetters = useCallback((letterElements: Element[], targetElement: HTMLElement) => {
     letterElements.forEach((letterEl, index) => {
       // Get the actual letter container (has data-x, data-y attributes)
@@ -314,65 +479,109 @@ export default function TimelessBoardGameRoom() {
         return;
       }
       
-      const delay = index * 60; // Stagger the animations
+      const delay = index * 10; // Stagger the animations (matches original delayBetween = 10)
       
       setTimeout(() => {
-        // Get position from the letter container (the tile), not the inner div
-        const letterRect = letterContainer.getBoundingClientRect();
+        // Get bounding rectangles - matches original implementation
+        const letterRect = letterDiv.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
         
-        // Check if letter is visible on screen
-        if (letterRect.width === 0 || letterRect.height === 0) {
-          console.log(`[animateLetters] Letter ${index}: Letter has zero size`, letterRect);
+        if (!letterRect || !targetRect) {
+          console.log(`[animateLetters] Letter ${index}: Missing rects`, { letterRect, targetRect });
           return;
         }
         
-        // Use fixed positioning - get viewport coordinates (no scroll offset needed)
-        const letterX = letterRect.left + (letterRect.width / 2);
-        const letterY = letterRect.top + (letterRect.height / 2);
+        // Get scroll offsets - matches original
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
         
-        // Target the center of the word element
-        const targetX = targetRect.left + (targetRect.width / 2);
-        const targetY = targetRect.top + (targetRect.height / 2);
-        
-        const dx = targetX - letterX;
-        const dy = targetY - letterY;
-        
-        // Log coordinates for debugging
-        console.log(`[animateLetters] Letter ${index}:`, {
-          letterRect: { left: letterRect.left, top: letterRect.top, width: letterRect.width, height: letterRect.height },
-          letterPos: { x: letterX, y: letterY },
-          targetRect: { left: targetRect.left, top: targetRect.top, width: targetRect.width, height: targetRect.height },
-          targetPos: { x: targetX, y: targetY },
-          delta: { dx, dy },
+        // Log scroll and rect info
+        console.log(`[animateLetters] Letter ${index} - Before calculation:`, {
           letterText: letterDiv.textContent?.trim(),
-          containerVisible: letterRect.width > 0 && letterRect.height > 0,
+          letterRect: {
+            left: letterRect.left,
+            top: letterRect.top,
+            right: letterRect.right,
+            bottom: letterRect.bottom,
+            width: letterRect.width,
+            height: letterRect.height
+          },
+          targetRect: {
+            left: targetRect.left,
+            top: targetRect.top,
+            right: targetRect.right,
+            bottom: targetRect.bottom,
+            width: targetRect.width,
+            height: targetRect.height
+          },
+          scroll: { scrollX, scrollY },
           viewport: { width: window.innerWidth, height: window.innerHeight }
         });
         
-        // Get font size from the inner letter div
+        // Calculate absolute positions including scroll - matches original
+        const letterX = letterRect.left + scrollX;
+        const letterY = letterRect.top + scrollY;
+        const targetX = targetRect.left + scrollX;
+        const targetY = targetRect.top + scrollY;
+        
+        // Calculate delta - matches original (dy has -30 offset)
+        const dx = targetX - letterX;
+        const dy = targetY - letterY - 30;
+        
+        // Get font sizes and calculate scale factor - matches original
         const letterFontSize = parseFloat(getComputedStyle(letterDiv).fontSize);
         const targetFontSize = parseFloat(getComputedStyle(targetElement).fontSize);
         const scaleFactor = targetFontSize / letterFontSize;
         
-        // Clone the inner letter div (the actual letter text)
-        const clone = letterDiv.cloneNode(true) as HTMLElement;
+        console.log(`[animateLetters] Letter ${index} - Calculated positions:`, {
+          letterX,
+          letterY,
+          targetX,
+          targetY,
+          dx,
+          dy,
+          letterFontSize,
+          targetFontSize,
+          scaleFactor,
+          letterContainerRect: letterContainer.getBoundingClientRect(),
+          letterDivRect: letterRect
+        });
         
-        // Use fixed positioning relative to viewport
-        clone.style.position = 'fixed';
+        // Clone the letter element - matches original
+        // Create a fresh span element instead of cloning to avoid inherited styles
+        const clone = document.createElement('span');
+        clone.textContent = letterDiv.textContent;
+        
+        // Reset all layout properties to prevent expansion - the clone should be inline size
+        clone.style.position = 'absolute';
         clone.style.left = `${letterX}px`;
         clone.style.top = `${letterY}px`;
-        clone.style.transform = 'translate(-50%, -50%)'; // Center the clone on the starting point
         clone.style.fontSize = `${letterFontSize}px`;
         clone.style.zIndex = '9999';
         clone.style.pointerEvents = 'none';
-        clone.style.opacity = '1';
-        clone.style.willChange = 'transform, opacity'; // Optimize animation
+        clone.style.opacity = '0';
+        clone.style.width = 'auto';
+        clone.style.height = 'auto';
+        clone.style.minWidth = 'auto';
+        clone.style.minHeight = 'auto';
+        clone.style.maxWidth = 'none';
+        clone.style.maxHeight = 'none';
+        clone.style.display = 'inline-block';
+        clone.style.boxSizing = 'content-box';
+        clone.style.margin = '0';
+        clone.style.padding = '0';
+        clone.style.border = 'none';
+        clone.style.lineHeight = '1';
+        clone.style.verticalAlign = 'baseline';
+        clone.style.whiteSpace = 'nowrap';
         
-        const color = getComputedStyle(letterDiv).color;
-        clone.style.color = color;
+        // Copy font family and weight from original
+        const computedStyle = getComputedStyle(letterDiv);
+        clone.style.fontFamily = computedStyle.fontFamily;
+        clone.style.fontWeight = computedStyle.fontWeight;
+        clone.style.color = computedStyle.color;
         
-        // Set the animation transform - this will be applied by the CSS animation
+        // Set the CSS custom property for transform - matches original
         clone.style.setProperty(
           '--move-transform',
           `translate(${dx}px, ${dy}px) scale(${scaleFactor})`
@@ -381,24 +590,51 @@ export default function TimelessBoardGameRoom() {
         clone.classList.add('letter-animate');
         document.body.appendChild(clone);
         
-        // Force a reflow and start animation
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            // Verify clone is in DOM and visible
-            const cloneRect = clone.getBoundingClientRect();
-            console.log(`[animateLetters] Letter ${index} clone position:`, {
-              left: clone.style.left,
-              top: clone.style.top,
-              rect: { left: cloneRect.left, top: cloneRect.top, width: cloneRect.width, height: cloneRect.height }
-            });
-            
-            void clone.offsetWidth; // Force reflow
-            clone.classList.add('start');
-          });
+        // Log after appending to DOM
+        const cloneRect = clone.getBoundingClientRect();
+        console.log(`[animateLetters] Letter ${index} - After appending clone:`, {
+          cloneStyle: {
+            position: clone.style.position,
+            left: clone.style.left,
+            top: clone.style.top,
+            fontSize: clone.style.fontSize,
+            opacity: clone.style.opacity
+          },
+          cloneRect: {
+            left: cloneRect.left,
+            top: cloneRect.top,
+            width: cloneRect.width,
+            height: cloneRect.height
+          },
+          expectedPosition: { letterX, letterY },
+          actualPosition: { left: cloneRect.left, top: cloneRect.top },
+          difference: {
+            x: cloneRect.left - letterRect.left,
+            y: cloneRect.top - letterRect.top
+          }
         });
         
-        // Remove after animation
+        // Force reflow and start animation - matches original
+        setTimeout(() => {
+          void clone.offsetWidth; // Force reflow
+          clone.classList.add('start');
+          
+          // Log after starting animation
+          const cloneRectAfter = clone.getBoundingClientRect();
+          console.log(`[animateLetters] Letter ${index} - After starting animation:`, {
+            cloneRect: {
+              left: cloneRectAfter.left,
+              top: cloneRectAfter.top,
+              width: cloneRectAfter.width,
+              height: cloneRectAfter.height
+            },
+            hasStartClass: clone.classList.contains('start')
+          });
+        }, delay);
+        
+        // Remove after animation - matches original
         clone.addEventListener('animationend', () => {
+          console.log(`[animateLetters] Letter ${index} - Animation ended`);
           clone.remove();
         });
       }, delay);
@@ -562,6 +798,12 @@ export default function TimelessBoardGameRoom() {
     // Note: Hint deactivation is now handled by onExactMatch callback
     // This ensures it deactivates as soon as a word turns green, not on submission
     
+    // Play twinkle (pop) sound and trigger board animation if word is 8+ letters
+    if (upperWord.length >= 8) {
+      playSound("pop");
+      triggerBoardAnimation();
+    }
+    
     // Add word and get updated set
     const updatedWordsFound = new Set([...wordsFound, upperWord]);
     setWordsFound(updatedWordsFound);
@@ -569,18 +811,103 @@ export default function TimelessBoardGameRoom() {
     // Update word counts
     const wordLength = upperWord.length;
     const lengthKey = wordLength >= 9 ? '9' : String(wordLength);
-    setWordCounts(prev => ({
-      ...prev,
-      [lengthKey]: (prev[lengthKey] || 0) + 1
-    }));
+    setWordCounts(prev => {
+      if (lengthKey in wordCountMax) {
+        const newCount = (prev[lengthKey] || 0) + 1;
+        const max = wordCountMax[lengthKey] || 0;
+        const percentage = max > 0 ? newCount / max : 0;
+
+        // Play twinkle (pop) sound and trigger word counter animation based on word count conditions:
+        // 1. Word length < 8 AND count >= 50%: Play pop and animate
+        // 2. Count == 100%: Play pop and animate (regardless of word length)
+        if (upperWord.length < 8 && percentage >= 0.5) {
+          // Condition: Half or more words found for words < 8
+          playSound("pop");
+          triggerWordCounterAnimation(lengthKey, percentage === 1);
+        } else if (percentage === 1) {
+          // Condition: All words of this length found (100%) - play pop and animate regardless of length
+          playSound("pop");
+          triggerWordCounterAnimation(lengthKey, true);
+        }
+
+        return { ...prev, [lengthKey]: newCount };
+      }
+      return prev;
+    });
     
     // Update total score
     totalScoreRef.current += wordScore;
-    setDisplayScore(totalScoreRef.current); // Update display score immediately when new word found
+    const newTotalScore = totalScoreRef.current;
+    setDisplayScore(newTotalScore); // Update display score immediately when new word found
     
     // Update best word
     if (wordScore > bestWordRef.current.score) {
       bestWordRef.current = { word: upperWord, score: wordScore };
+    }
+    
+    // Check if board is completed
+    const isComplete = newTotalScore >= totalPossibleScoreRef.current;
+    const currentLevel = level ? parseInt(level) : 0;
+    const isHardestLevel = currentLevel === 10;
+    
+    // Show completion effects
+    if (isComplete) {
+      if (isHardestLevel) {
+        // Shatter effect on multiple elements for hardest level - staggered timing
+        const timeDelay = 300;
+        
+        // Shatter rotate buttons first
+        setTimeout(() => {
+          shatter('rotate-buttons', 3, 10);
+          playSound('perfect');
+        }, 0);
+        
+        // Shatter word counters
+        setTimeout(() => {
+          shatter('word-counters', 8, 2);
+          playSound('perfect');
+        }, timeDelay * 2);
+        
+        // Shatter timer bar container (points bar)
+        setTimeout(() => {
+          shatter('timer-bar-container', 2, 20);
+          playSound('perfect');
+        }, timeDelay * 4);
+        
+        // Shatter board last
+        setTimeout(() => {
+          shatter('board', 10, 10);
+          playSound('perfect');
+        }, timeDelay * 8);
+        
+        // Show perfect message and arrows after board shatters
+        setTimeout(() => {
+          showPerfect('board');
+          playSound('perfect');
+          
+          // Add looping arrows around submit button for authenticated users
+          // Appears slightly after perfect text (after 500ms delay)
+          if (user) {
+            setTimeout(() => {
+              addLoopingArrows('.submit-score-button-header', 0, 60);
+            }, 500);
+          }
+        }, timeDelay * 10);
+      } else {
+        // Just show perfect message for other levels
+        setTimeout(() => {
+          showPerfect('board');
+          playSound('perfect');
+          
+          // Add looping arrows around submit button for authenticated users
+          // Appears slightly after perfect text (after 500ms delay)
+          if (user) {
+            setTimeout(() => {
+              addLoopingArrows('.submit-score-button-header', 0, 60);
+            }, 500);
+          }
+        }, 100);
+      }
     }
     
     // Update words by length for display
@@ -605,7 +932,7 @@ export default function TimelessBoardGameRoom() {
     setTimeout(() => {
       animateLettersToWord(upperWord);
     }, 100);
-  }, [boardData, wordsFound, animateLettersToWord, timelessBoardId, saveState]);
+  }, [boardData, wordsFound, wordCountMax, animateLettersToWord, timelessBoardId, saveState]);
 
   // Note: Backend will calculate scores for each level by filtering words appropriately
 
@@ -819,6 +1146,100 @@ export default function TimelessBoardGameRoom() {
           onClick={() => navigate(`/timeless-boards?board=${timelessBoardId}`)}
         >
           ← Back to Timeless Boards
+        </button>
+      </div>
+
+      {/* TEMPORARY TEST BUTTONS - Remove before production */}
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => {
+            showPerfect('board');
+            playSound('perfect');
+            // Also show arrows after perfect text
+            setTimeout(() => {
+              addLoopingArrows('.submit-score-button-header', 0, 60);
+            }, 500);
+          }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#f5ce45',
+            color: '#13132a',
+            border: '2px solid #febe38',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}
+        >
+          Test Perfect!
+        </button>
+        <button
+          onClick={() => {
+            // Test full shatter sequence with staggered timing
+            const timeDelay = 300;
+            
+            // Shatter rotate buttons first
+            setTimeout(() => {
+              shatter('rotate-buttons', 3, 10);
+              playSound('perfect');
+            }, 0);
+            
+            // Shatter word counters
+            setTimeout(() => {
+              shatter('word-counters', 8, 2);
+              playSound('perfect');
+            }, timeDelay * 2);
+            
+            // Shatter timer bar container (points bar)
+            setTimeout(() => {
+              shatter('timer-bar-container', 2, 20);
+              playSound('perfect');
+            }, timeDelay * 4);
+            
+            // Shatter board last
+            setTimeout(() => {
+              shatter('board', 10, 10);
+              playSound('perfect');
+            }, timeDelay * 8);
+            
+            // Show perfect message and arrows after board shatters
+            setTimeout(() => {
+              showPerfect('board');
+              playSound('perfect');
+              setTimeout(() => {
+                addLoopingArrows('.submit-score-button-header', 0, 60);
+              }, 500);
+            }, timeDelay * 10);
+          }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#eb5497',
+            color: 'white',
+            border: '2px solid #eb5497',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}
+        >
+          Test Shatter
+        </button>
+        <button
+          onClick={() => {
+            addLoopingArrows('.submit-score-button-header', 0, 60);
+          }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#33c15b',
+            color: 'white',
+            border: '2px solid #33c15b',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}
+        >
+          Test Arrows
         </button>
       </div>
 

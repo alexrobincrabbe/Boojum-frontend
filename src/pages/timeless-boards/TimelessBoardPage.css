@@ -371,17 +371,9 @@
   margin-bottom: 30px;
 }
 
-/* Use game room board styling */
-#timeless-board {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  position: relative;
-  border-radius: 25px;
-  padding: 0;
-  gap: 15px;
-  width: min(400px, 100%);
-  aspect-ratio: 1;
-}
+/* Board and letter styles are now in GameRoom.css */
+
+
 
 .color-explanation-banner {
   display: flex;
@@ -413,6 +405,8 @@
   overflow-y: visible;
   box-sizing: border-box;
   align-items: flex-start;
+  background-color: #13132a; /* Match GameRoom.css #word-lists */
+  font-family: "Nunito", sans-serif; /* Match GameRoom.css */
 }
 
 .daily-word-list-section {
@@ -424,12 +418,14 @@
   flex-direction: column;
 }
 
+.daily-word-list-section .word-length-header,
 .word-length-header {
-  color: #f5ce45;
+  color: #fff !important; /* White - unified with DailyBoardPage */
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 10px;
   font-family: "Darker Grotesque", sans-serif;
+  text-shadow: none !important; /* Ensure no glow */
 }
 
 .word-list-words {
@@ -447,16 +443,20 @@
   display: none;
 }
 
+/* Word styling - unified with GameRoom.css */
 .daily-word-list-section .word-list-words .word {
-  padding: 5px 10px;
-  border-radius: 4px;
+  display: flex;
+  justify-content: left;
+  width: 100%;
   cursor: pointer;
-  transition: all 0.2s;
-  display: inline-block;
+  padding: 2px 5px;
+  color: #fff; /* Default white color */
+  text-transform: uppercase; /* Words always in capitals */
+  transition: none; /* Remove transitions that might cause glow effects */
 }
 
 .daily-word-list-section .word-list-words .word.green {
-  color: #71bbe9;
+  color: rgb(81, 164, 81);
 }
 
 .daily-word-list-section .word-list-words .word.default-white {
@@ -464,7 +464,15 @@
 }
 
 .daily-word-list-section .word-list-words .word:hover {
-  background-color: rgba(113, 187, 233, 0.2);
+  background-color: transparent; /* Remove hover background */
+}
+
+/* Word score styling - unified with GameRoom.css */
+.daily-word-list-section .word-list-words .word .word-score {
+  margin-left: 5px;
+  font-size: 0.85em; /* Slightly smaller font */
+  color: #b0b0b0; /* Light grey */
+  opacity: 1;
 }
 
 .definition-popup {

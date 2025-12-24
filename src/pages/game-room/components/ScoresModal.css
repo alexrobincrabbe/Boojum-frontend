@@ -50,7 +50,7 @@
 .modal-header {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding: 15px;
   border-bottom: 1px solid #eb5497;
 }
@@ -109,7 +109,6 @@ tbody tr:last-child td:last-child {
 /* Scores Modal */
 #scores-header {
   color: #febe38;
-  background-color: #5f5687;
   font-family: 'Chango', sans-serif;
   font-weight: 400;
   font-size: 200%;

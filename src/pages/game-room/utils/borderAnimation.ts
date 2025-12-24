@@ -13,7 +13,10 @@ export function borderAnimation(element: HTMLElement | null, animation: string =
 
 // Trigger border animation on board (for 8+ letter words)
 export function triggerBoardAnimation() {
-  const board = document.getElementById('board');
+  // Try to find board by ID, supporting all board types
+  const board = document.getElementById('board') || 
+                document.getElementById('daily-board') || 
+                document.getElementById('timeless-board');
   borderAnimation(board);
 }
 

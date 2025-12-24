@@ -6,7 +6,6 @@ import { useGameWebSocket } from '../game-room/services/useGameWebSocket';
 import { GameBoard } from '../game-room/components/GameBoard';
 import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
-import { PlayersList } from '../game-room/components/PlayersList';
 import { ScoresModal } from '../game-room/components/ScoresModal';
 // WordData unused here
 import { toast } from 'react-toastify';
@@ -257,10 +256,7 @@ export default function DailyBoardGameRoom() {
             )}
           </div>
 
-          <PlayersList players={gameState.players ?? []} variant="mobile" />
-
           <div className="game-main-layout">
-            <PlayersList players={gameState.players ?? []} variant="desktop" />
 
             <div className={`board-section ${connectionState !== 'open' ? 'disconnected' : ''}`}>
               {connectionState !== 'open' && (

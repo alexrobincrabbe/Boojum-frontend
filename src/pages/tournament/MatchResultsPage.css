@@ -159,6 +159,24 @@
   margin: 20px 0;
 }
 
+/* Word styling - unified with GameRoom.css */
+.word {
+  display: flex;
+  justify-content: left;
+  width: 100%;
+  cursor: pointer;
+  padding: 2px 5px;
+  color: #fff; /* Default white color */
+  text-transform: uppercase; /* Words always in capitals */
+}
+
+.word-score {
+  margin-left: 5px;
+  font-size: 0.85em; /* Slightly smaller font */
+  color: #b0b0b0 !important; /* Light grey - override inline styles */
+  opacity: 1;
+}
+
 @media (max-width: 768px) {
   .match-results-title {
     font-size: 1.5rem;

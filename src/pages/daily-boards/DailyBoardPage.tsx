@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBoardTheme } from '../../contexts/BoardThemeContext';
 import { lobbyAPI } from '../../services/api';
-import { fetchDefinition } from '../../utils/dictionary';
-import { calculateWordScore } from '../game-room/utils/scoreCalculation';
+import { WordLists } from '../game-room/components/WordLists';
+import { toast } from 'react-toastify';
 import './DailyBoardPage.css';
 import '../game-room/GameRoom.css';
 
@@ -48,47 +48,11 @@ export default function DailyBoardPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<number | null>>(new Set()); // Empty = show all
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isAuthenticated, user } = useAuth();
   const { darkMode } = useBoardTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
-  // Definition popup state
-  const [popup, setPopup] = useState<{ word: string; definition: string } | null>(null);
-  const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const popupRef = useRef<HTMLDivElement | null>(null);
-
-  // Cleanup popup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (popupTimeoutRef.current) {
-        clearTimeout(popupTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Close popup when clicking outside of it
-  useEffect(() => {
-    if (!popup) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-        if (popupTimeoutRef.current) {
-          clearTimeout(popupTimeoutRef.current);
-        }
-        setPopup(null);
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [popup]);
 
   useEffect(() => {
     const fetchBoards = async () => {
@@ -163,84 +127,42 @@ export default function DailyBoardPage() {
   };
 
   // Toggle player in filter
-  const togglePlayerFilter = (playerId: number | null) => {
+  const togglePlayerFilter = (playerId: number | null, e?: React.MouseEvent) => {
+    // Prevent event propagation to avoid double calls
+    if (e) {
+      e.stopPropagation();
+    }
+    
+    // Clear any pending toast timeout
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    
+    const wasSelected = selectedPlayerIds.has(playerId);
+    const player = boards[currentPage]?.scores?.find((s: DailyBoardScore) => s.player_id === playerId);
+    const playerName = player?.player_display_name || 'Player';
+    
     setSelectedPlayerIds(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(playerId)) {
+      if (wasSelected) {
         newSet.delete(playerId);
       } else {
         newSet.add(playerId);
       }
       return newSet;
     });
+    
+    // Show toast message after a short delay to avoid duplicates
+    toastTimeoutRef.current = setTimeout(() => {
+      if (wasSelected) {
+        toast.info(`Removed ${playerName} from filter`);
+      } else {
+        toast.success(`Added ${playerName} to filter`);
+      }
+      toastTimeoutRef.current = null;
+    }, 0);
   };
 
-  // Get word class for color coding based on filtered players
-  // Always from current user's perspective. Selected players determine which "other players" are considered.
-  const getWordClass = (wordData: WordData, filteredPlayerIds: Set<number | null>): string => {
-    let wordClass = 'word';
-    const { players_found, sum_players_found } = wordData;
-    
-    // Always check from current user's perspective
-    const currentUserId = user?.id || null;
-    const currentUserFound = currentUserId && players_found.includes(currentUserId) ? 1 : 0;
-    
-    if (filteredPlayerIds.size === 0) {
-      // No filter: count all other players
-      if (currentUserFound === 1) {
-        // Current user found it
-        if (sum_players_found === 1) {
-          // Only current user found it
-          wordClass += ' green';
-        } else if (sum_players_found === 2) {
-          // Current user + 1 other found it
-          wordClass += ' yellow';
-        } else if (sum_players_found > 2) {
-          // Current user + 2+ others found it
-          wordClass += ' pink';
-        }
-      } else if (sum_players_found > 0) {
-        // Current user didn't find it, but others did
-        wordClass += ' blue';
-      }
-      return wordClass;
-    }
-    
-    // Filter is applied: only count selected players as "other players"
-    // Count how many selected players found it (these are the "other players" we consider)
-    const selectedPlayersFound = players_found.filter(id => filteredPlayerIds.has(id));
-    const selectedPlayersCount = selectedPlayersFound.length;
-    
-    if (currentUserFound === 1) {
-      // Current user found it
-      if (selectedPlayersCount === 0) {
-        // Current user found it, and no selected players found it
-        // This means only current user found it (from the perspective of selected players)
-        wordClass += ' green';
-      } else if (selectedPlayersCount === 1) {
-        // Current user found it, and exactly 1 selected player also found it
-        wordClass += ' yellow';
-      } else if (selectedPlayersCount >= 2) {
-        // Current user found it, and 2+ selected players also found it
-        wordClass += ' pink';
-      }
-    } else if (selectedPlayersCount > 0) {
-      // Current user didn't find it, but at least one selected player found it
-      wordClass += ' blue';
-    }
-    // If no one found it (from the perspective of current user and selected players), no additional class
-    
-    return wordClass;
-  };
-
-  // Helper function to get color priority for sorting (green=0, yellow=1, pink=2, blue=3, default=4)
-  const getColorPriority = (wordClass: string): number => {
-    if (wordClass.includes('green')) return 0;
-    if (wordClass.includes('yellow')) return 1;
-    if (wordClass.includes('pink')) return 2;
-    if (wordClass.includes('blue')) return 3;
-    return 4;
-  };
 
   // Extract boojum and snark letters from boojum array
   const getBonusLetters = (board: DailyBoard): { boojum?: string; snark?: string } => {
@@ -265,41 +187,6 @@ export default function DailyBoardPage() {
     return { boojum: boojumLetter, snark: snarkLetter };
   };
 
-  // Handle word click to show definition
-  const handleWordClick = async (e: React.MouseEvent, word: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (popupTimeoutRef.current) {
-      clearTimeout(popupTimeoutRef.current);
-    }
-
-    setPopup({
-      word,
-      definition: 'Loading',
-    });
-
-    try {
-      const definition = await fetchDefinition(word);
-      setPopup({
-        word,
-        definition,
-      });
-
-      popupTimeoutRef.current = setTimeout(() => {
-        setPopup(null);
-      }, 5000);
-    } catch {
-      setPopup({
-        word,
-        definition: '❌ Failed to load definition.',
-      });
-
-      popupTimeoutRef.current = setTimeout(() => {
-        setPopup(null);
-      }, 5000);
-    }
-  };
 
   if (loading) {
     return (
@@ -390,7 +277,7 @@ export default function DailyBoardPage() {
                     <tr
                       key={score.player_id || index}
                       className={`${score.is_current_user ? 'current-user-score' : ''} ${selectedPlayerIds.has(score.player_id) ? 'player-filter-selected' : ''}`}
-                      onClick={() => togglePlayerFilter(score.player_id)}
+                      onClick={(e) => togglePlayerFilter(score.player_id, e)}
                       style={{ cursor: 'pointer' }}
                     >
                       <td className="rank-col">{index + 1}</td>
@@ -446,10 +333,11 @@ export default function DailyBoardPage() {
           <div className="daily-board-solution">
             <h2 className="solution-title">Board Solution</h2>
             <div className="board-display-container">
-              <div 
-                id="daily-board" 
-                className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
-              >
+              <div className="board-wrapper">
+                <div 
+                  id="daily-board" 
+                  className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
+                >
                 {Array.from({ length: 16 }, (_, i) => {
                   const row = Math.floor(i / 4);
                   const col = i % 4;
@@ -476,6 +364,7 @@ export default function DailyBoardPage() {
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
             
@@ -492,8 +381,7 @@ export default function DailyBoardPage() {
                       className="filtered-player-name" 
                       style={{ color: player.player_chat_color }}
                       onClick={(e) => {
-                        e.stopPropagation();
-                        togglePlayerFilter(playerId);
+                        togglePlayerFilter(playerId, e);
                       }}
                     >
                       {player.player_display_name}
@@ -505,6 +393,7 @@ export default function DailyBoardPage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedPlayerIds(new Set());
+                    toast.info('Filter cleared - showing all players');
                   }}
                 >
                   Clear Filter
@@ -516,77 +405,42 @@ export default function DailyBoardPage() {
                 <span className="filter-label">Showing: All players</span>
               </div>
             )}
-            {/* Color coding explanation banner */}
-            <div id="color-coding-banner" className="color-coding-banner">
-              <span className="color-coding-item green-text">You found it</span>
-              <span className="color-coding-item yellow-text">You & 1 other found it</span>
-              <span className="color-coding-item pink-text">You & 2+ others found it</span>
-              <span className="color-coding-item blue-text">Others found it</span>
-            </div>
-            <div id="word-lists" className="daily-word-lists">
-              {Object.keys(currentBoard.words_by_length)
-                .sort((a, b) => {
-                  const aNum = a === '9+' ? 9 : parseInt(a);
-                  const bNum = b === '9+' ? 9 : parseInt(b);
-                  return aNum - bNum; // Sort ascending: 3, 4, 5, 6, 7, 8, 9+
-                })
-                .map((length) => {
+            {/* Word Lists - using unified component */}
+            {(() => {
+              const { boojum, snark } = getBonusLetters(currentBoard);
+              // Convert words_by_length format to match WordLists expected format
+              // Daily board format: Record<string, WordData[]>
+              // WordLists expects: Record<string, Record<string, ExtendedWordData>>
+              const wordsByLengthForComponent: Record<string, Record<string, { word: string; sum_players_found: number; players_found: (number | null)[] }>> = {};
+              
+              if (currentBoard.words_by_length) {
+                Object.keys(currentBoard.words_by_length).forEach(length => {
                   const words = currentBoard.words_by_length![length];
-                  const { boojum, snark } = getBonusLetters(currentBoard);
-                  
-                  // Sort words: first by color (green, yellow, pink, blue, default), then alphabetically
-                  const sortedWords = [...words].sort((a, b) => {
-                    const aClass = getWordClass(a, selectedPlayerIds);
-                    const bClass = getWordClass(b, selectedPlayerIds);
-                    const aPriority = getColorPriority(aClass);
-                    const bPriority = getColorPriority(bClass);
-                    if (aPriority !== bPriority) {
-                      return aPriority - bPriority;
-                    }
-                    return a.word.localeCompare(b.word);
+                  wordsByLengthForComponent[length] = {};
+                  words.forEach(wordData => {
+                    wordsByLengthForComponent[length][wordData.word] = wordData;
                   });
-                  
-                  return (
-                    <div key={length} className="daily-word-list-section">
-                      <h4 className="word-length-header">{length} Letters</h4>
-                      <div className="word-list-words">
-                        {sortedWords.map((wordData, idx) => {
-                          const wordClass = getWordClass(wordData, selectedPlayerIds);
-                          const wordScore = calculateWordScore(wordData.word, boojum, snark);
-                          return (
-                            <div
-                              key={idx}
-                              className={`word ${wordClass}`}
-                              onClick={(e) => handleWordClick(e, wordData.word)}
-                              style={{ cursor: 'pointer' }}
-                            >
-                              <span>{wordData.word}</span>
-                              <span className="word-score">({wordScore}pts)</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
+                });
+              }
+              
+              return (
+                <WordLists
+                  wordsByLength={wordsByLengthForComponent}
+                  wordsFound={new Set()} // Daily board solution shows all words, not just found ones
+                  gameStatus="finished" // Always finished for solution view
+                  hasFinalScores={true}
+                  boojum={boojum}
+                  snark={snark}
+                  currentUserId={user?.id || null}
+                  filteredPlayerIds={selectedPlayerIds}
+                  showColorBanner={true}
+                  showDefinitionBanner={true}
+                />
+              );
+            })()}
           </div>
         )}
       </div>
-      
-      {/* Definition Popup */}
-      {popup && (
-        <div 
-          ref={popupRef}
-          className="definition-popup"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{popup.word}</div>
-          <div className={popup.definition === 'Loading' ? 'loading-dots' : ''}>
-            {popup.definition}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

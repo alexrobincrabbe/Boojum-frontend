@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBoardTheme } from '../../contexts/BoardThemeContext';
 import { lobbyAPI } from '../../services/api';
-import { fetchDefinition } from '../../utils/dictionary';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
+import { WordLists } from '../game-room/components/WordLists';
 import { toast } from 'react-toastify';
 import { Loading } from '../../components/Loading';
 import './TimelessBoardPage.css';
@@ -63,51 +63,14 @@ export default function TimelessBoardPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentLevel, setCurrentLevel] = useState<number>(10); // Default to Rabbit Hole
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { darkMode } = useBoardTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
-  // Definition popup state
-  const [popup, setPopup] = useState<{ word: string; definition: string } | null>(null);
-  const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const popupRef = useRef<HTMLDivElement | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   
   // Get boards for current level
   const boards = boardsByLevel[currentLevel] || [];
-
-  // Cleanup popup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (popupTimeoutRef.current) {
-        clearTimeout(popupTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Close popup when clicking outside of it
-  useEffect(() => {
-    if (!popup) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-        if (popupTimeoutRef.current) {
-          clearTimeout(popupTimeoutRef.current);
-        }
-        setPopup(null);
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [popup]);
 
   const formatTimeRemaining = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -264,23 +227,6 @@ setBoardsByLevel({
     return { boojum: boojumLetter, snark: snarkLetter };
   };
 
-  const handleWordClick = async (word: string) => {
-    if (popupTimeoutRef.current) {
-      clearTimeout(popupTimeoutRef.current);
-    }
-    
-    try {
-      const definition = await fetchDefinition(word);
-      setPopup({ word, definition });
-      
-      // Auto-close after 5 seconds
-      popupTimeoutRef.current = setTimeout(() => {
-        setPopup(null);
-      }, 5000);
-    } catch (error) {
-      console.error('Error fetching definition:', error);
-    }
-  };
 
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;
@@ -448,100 +394,80 @@ setBoardsByLevel({
             <h2 className="solution-title">Board Solution</h2>
             {currentBoard.board_letters && (
               <div className="board-display-container">
-                <div 
-                  id="timeless-board" 
-                  className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
-                  style={{
-                    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-                    aspectRatio: '1 / 1',
-                    width: 'min(400px, 100%)',
-                  }}
-                >
-                  {Array.from({ length: 16 }, (_, i) => {
-                    const row = Math.floor(i / 4);
-                    const col = i % 4;
-                    const letter = currentBoard.board_letters?.[row]?.[col] || '';
-                    let bonusValue = 0;
-                    if (currentBoard.boojum && Array.isArray(currentBoard.boojum) && currentBoard.boojum[row]) {
-                      bonusValue = currentBoard.boojum[row][col] || 0;
-                    }
-                    const isSnark = bonusValue === 1;
-                    const isBoojum = bonusValue === 2;
-                    
-                    return (
-                      <div 
-                        key={i} 
-                        className={`letter ${darkMode ? 'dark-mode' : 'light-mode'} ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
-                      >
-                        {letter}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Word lists */}
-            {currentBoard.words_by_length && (
-              <div className="timeless-word-lists">
-                <div className="color-explanation-banner">
-                  <span className="color-green">You got it</span>
-                  <span className="color-white">You didn't get it</span>
-                </div>
-                <div className="daily-word-lists">
-                  {Object.keys(currentBoard.words_by_length)
-                    .sort((a, b) => {
-                      const aNum = a === '9+' ? 9 : parseInt(a);
-                      const bNum = b === '9+' ? 9 : parseInt(b);
-                      return aNum - bNum;
-                    })
-                    .map((length) => {
-                      const words = currentBoard.words_by_length![length];
-                      const { boojum, snark } = getBonusLetters(currentBoard);
+                <div className="board-wrapper">
+                  <div 
+                    id="timeless-board" 
+                    className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
+                  >
+                    {Array.from({ length: 16 }, (_, i) => {
+                      const row = Math.floor(i / 4);
+                      const col = i % 4;
+                      const letter = currentBoard.board_letters?.[row]?.[col] || '';
+                      let bonusValue = 0;
+                      if (currentBoard.boojum && Array.isArray(currentBoard.boojum) && currentBoard.boojum[row]) {
+                        bonusValue = currentBoard.boojum[row][col] || 0;
+                      }
+                      const isSnark = bonusValue === 1;
+                      const isBoojum = bonusValue === 2;
                       
                       return (
-                        <div key={length} className="daily-word-list-section">
-                          <h3 className="word-length-header">{length} Letter Words</h3>
-                          <div className="word-list-words">
-                            {words.map((wordData, idx) => {
-                              // Simple: green if player found it, white if not
-                              const wordClass = wordData.playerFound === 1 ? 'green' : 'default-white';
-                              const wordScore = wordData.word
-                                ? calculateWordScore(wordData.word, boojum, snark)
-                                : 0;
-                              
-                              return (
-                                <span
-                                  key={idx}
-                                  className={`word ${wordClass}`}
-                                  onClick={() => handleWordClick(wordData.word)}
-                                  style={{ cursor: 'pointer' }}
-                                >
-                                  {wordData.word} ({wordScore})
-                                </span>
-                              );
-                            })}
-                          </div>
+                        <div 
+                          key={i} 
+                          className={`letter ${darkMode ? 'dark-mode' : 'light-mode'} ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
+                          data-x={row}
+                          data-y={col}
+                          data-index={i}
+                          data-letter={letter}
+                        >
+                          <div className="letValue">{letter}</div>
                         </div>
                       );
                     })}
+                  </div>
                 </div>
               </div>
             )}
+
+            {/* Word Lists - using unified component */}
+            {currentBoard.words_by_length && (() => {
+              const { boojum, snark } = getBonusLetters(currentBoard);
+              // Convert timeless board WordData format to protocol format for WordLists
+              // Timeless format: { word, playerFound?: number, totalFound?: number }
+              // Protocol format: { score, player_found: 0|1, sum_players_found }
+              const wordsByLengthForComponent: Record<string, Record<string, { score: number; player_found: number; sum_players_found: number }>> = {};
+              
+              Object.keys(currentBoard.words_by_length).forEach(length => {
+                const words = currentBoard.words_by_length![length];
+                wordsByLengthForComponent[length] = {};
+                words.forEach(wordData => {
+                  const playerFound = wordData.playerFound || 0;
+                  const sumPlayersFound = wordData.totalFound || (playerFound ? 1 : 0);
+                  const score = calculateWordScore(wordData.word, boojum, snark);
+                  
+                  wordsByLengthForComponent[length][wordData.word] = {
+                    score,
+                    player_found: playerFound,
+                    sum_players_found: sumPlayersFound,
+                  };
+                });
+              });
+              
+              return (
+                <WordLists
+                  wordsByLength={wordsByLengthForComponent}
+                  wordsFound={new Set()} // Timeless board solution shows all words
+                  gameStatus="finished" // Always finished for solution view
+                  hasFinalScores={true}
+                  boojum={boojum}
+                  snark={snark}
+                  showColorBanner={true}
+                  showDefinitionBanner={true}
+                />
+              );
+            })()}
           </div>
         )}
       </div>
-
-      {/* Definition popup */}
-      {popup && (
-        <div className="definition-popup" ref={popupRef}>
-          <div className="definition-popup-content">
-            <h3>{popup.word}</h3>
-            <p>{popup.definition}</p>
-            <button onClick={() => setPopup(null)}>Close</button>
-          </div>
-        </div>  
-      )}
     </div>
   );
 }

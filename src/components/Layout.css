@@ -225,11 +225,11 @@
 /* Tablet and Desktop: 10% wider */
 @media (min-width: 768px) {
   .left-sidebar {
-    width: 275px;
+    width: 300px !important;
   }
   
   .right-sidebar {
-    width: 275px;
+    width: 300px !important;
   }
 }
 
@@ -291,7 +291,7 @@
     top: 70px; /* Start at top bar */
     height: calc(100vh - 70px);
     z-index: 1001; /* Above players online bar and main content */
-    width: 275px; /* 10% wider */
+    width: 300px;
   }
   
   .left-sidebar.open {
@@ -550,8 +550,8 @@
 /* Very large screens: content pushed by sidebar */
 @media (min-width: 1440px) {
   .main-content.left-open {
-    margin-left: 275px;
-    width: calc(100% - 275px);
+    margin-left: 300px;
+    width: calc(100% - 300px);
   }
   
   .main-content.left-closed {
@@ -588,8 +588,8 @@
 /* Very large screens: players online bar pushed to the right when sidebar is open */
 @media (min-width: 1440px) {
   .players-online-desktop.left-open {
-    margin-left: 275px;
-    width: calc(100% - 275px);
+    margin-left: 300px;
+    width: calc(100% - 300px);
   }
   
   .players-online-desktop.left-closed {

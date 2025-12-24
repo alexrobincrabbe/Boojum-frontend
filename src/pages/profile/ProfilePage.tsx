@@ -539,7 +539,7 @@ const AboutMeSection = ({
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) => {
   return (
-    <div>
+    <div id="who-are-you-container-outer">
       <h2 id="who-are-you-header">Who are you?</h2>
       <div id="who-are-you-container">
         <div id="who-are-you">

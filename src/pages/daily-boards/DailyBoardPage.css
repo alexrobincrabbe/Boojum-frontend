@@ -341,23 +341,7 @@
   font-family: "Monoton", cursive;
 }
 
-.board-display-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-/* Use game room board styling */
-#daily-board {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  position: relative;
-  border-radius: 25px;
-  padding: 0;
-  gap: 15px;
-  width: min(400px, 100%);
-  aspect-ratio: 1;
-}
+/* Board and letter styles are now in GameRoom.css */
 
 /* Word Lists */
 .word-list-title {
@@ -369,51 +353,55 @@
   font-family: "Monoton", cursive;
 }
 
-.daily-word-lists {
-  display: flex;
+/* Word lists - unified with GameRoom.css */
+#word-lists {
   flex-direction: row;
-  justify-content: center;
-  gap: 0;
   width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  box-sizing: border-box;
-  align-items: flex-start;
-}
-
-.daily-word-list-section {
-  /* Remove background and border */
-  padding: 15px 10px;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  margin: 0;
+  height: 500px;
+  overflow-y: scroll;
   display: flex;
-  flex-direction: column;
+  background-color: #13132a;
+  font-size: 100%;
+  justify-content: center;
+  margin: 0px;
+  font-family: "Nunito", sans-serif;
 }
 
-.word-length-header {
-  color: #f5ce45;
-  font-size: 1.2rem;
+.word-sublist {
+  margin: 10px;
+}
+
+.word-sublist strong {
+  color: #fff;
+  font-size: 120%;
   font-weight: bold;
+  display: block;
   margin-bottom: 10px;
   font-family: "Darker Grotesque", sans-serif;
+  text-shadow: none;
 }
 
-.word-list-words {
+.word-sublist-scroll {
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  gap: 8px;
-  overflow-y: visible;
-  overflow-x: visible;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  overflow: visible;
+  color: #352870;
 }
 
-.word-list-words::-webkit-scrollbar {
-  display: none;
+
+/* Word definition banner - unified with GameRoom.css */
+#word-definition-banner {
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
+#word-definition-banner.blue {
+  background-color: #352870;
+  color: white;
+}
 
 /* Player filter banner */
 .player-filter-banner {
@@ -490,39 +478,50 @@
 }
 
 .color-coding-item.pink-text {
-  color: rgb(155, 95, 155);
+  color: #eb539e;
 }
 
 .color-coding-item.blue-text {
-  color: #71bbe9;
+  color: #71bbe9; /* Blue */
 }
 
-/* Word color classes - matches GameRoom.css */
+/* Word color classes - unified with GameRoom.css */
 .word {
+  display: flex;
+  justify-content: left;
+  width: 100%;
+  cursor: pointer;
+  padding: 2px 5px;
   color: #fff; /* Default white color */
+  text-transform: uppercase; /* Words always in capitals */
 }
 
+/* Word color classes - unified with GameRoom.css */
 .word.green {
-  color: rgb(81, 164, 81);
+  color: rgb(81, 164, 81) !important;
 }
 
 .word.yellow {
-  color: #febe38;
+  color: #febe38 !important;
 }
 
 .word.pink {
-  color: rgb(155, 95, 155);
+  color: #eb539e !important;
 }
 
 .word.blue {
-  color: #71bbe9;
+  color: #71bbe9 !important; /* Blue, not glowing */
+  text-shadow: none !important; /* Remove any blue glow */
+  box-shadow: none !important; /* Remove any blue glow */
 }
 
-/* Word score styling - matches GameRoom.css */
+/* Word score styling - unified with GameRoom.css */
 .word-score {
   margin-left: 5px;
-  font-size: 0.9em;
-  opacity: 0.8;
+  font-size: 0.75em; /* Reduced font size */
+  color: #b0b0b0; /* Light grey */
+  opacity: 1;
+  text-transform: none; /* Keep "pts" lowercase, not uppercase */
 }
 
 /* Definition popup - matches GameRoom.css */

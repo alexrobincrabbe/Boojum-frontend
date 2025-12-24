@@ -459,7 +459,7 @@ export default function MatchResultsPage() {
                           }}
                         >
                           <span>{item.word}</span>
-                          <span className="word-score" style={{ color: wordColor }}>
+                          <span className="word-score">
                             ({wordScore}pts)
                           </span>
                         </div>

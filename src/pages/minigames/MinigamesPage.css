@@ -78,3 +78,8 @@
   margin: 0;
 }
 
+@media screen and (max-width: 578px) {
+  .minigames-page {
+    padding: 5px;
+  }
+}

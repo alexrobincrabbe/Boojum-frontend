@@ -37,6 +37,9 @@ const Doodledum: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingWord, setDrawingWord] = useState<string | null>(null);
   const [isSubmittingGuess, setIsSubmittingGuess] = useState(false);
+  const [isFetchingDoodledum, setIsFetchingDoodledum] = useState(false);
+  const [isSubmittingDrawing, setIsSubmittingDrawing] = useState(false);
+  const [isCancellingDrawing, setIsCancellingDrawing] = useState(false);
   const guessInputRef = useRef<HTMLInputElement>(null);
   
   // Drawing state
@@ -269,6 +272,7 @@ const Doodledum: React.FC = () => {
       return;
     }
 
+    setIsFetchingDoodledum(true);
     try {
       const data = await minigamesAPI.fetchDoodledum(difficulty);
       if (data.already_active === 'yes') {
@@ -283,6 +287,8 @@ const Doodledum: React.FC = () => {
       console.error('Failed to fetch doodledum:', error);
       const errorMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to fetch doodledum';
       toast.error(errorMessage);
+    } finally {
+      setIsFetchingDoodledum(false);
     }
   };
 
@@ -820,8 +826,12 @@ const Doodledum: React.FC = () => {
       return;
     }
     
+    setIsSubmittingDrawing(true);
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      setIsSubmittingDrawing(false);
+      return;
+    }
     const dataUrl = canvas.toDataURL('image/png');
     try {
       await minigamesAPI.uploadDrawing(dataUrl);
@@ -835,6 +845,8 @@ const Doodledum: React.FC = () => {
       console.error('Failed to upload drawing:', error);
       const errorMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to upload drawing';
       toast.error(errorMessage);
+    } finally {
+      setIsSubmittingDrawing(false);
     }
   };
 
@@ -897,6 +909,7 @@ const Doodledum: React.FC = () => {
       return;
     }
     
+    setIsCancellingDrawing(true);
     // Exit fullscreen if active
     if (isFullscreen) {
       try {
@@ -929,6 +942,7 @@ const Doodledum: React.FC = () => {
       setDrawingWord(null);
       resetCanvas();
       checkDoodledum();
+      setIsCancellingDrawing(false);
     }
   };
 
@@ -1064,11 +1078,17 @@ const Doodledum: React.FC = () => {
               <p style={{ textAlign: 'center', marginBottom: '15px' }} className="blue">
                 Choose a difficulty level to start drawing. You'll receive a word to sketch, and others will try to guess it!
               </p>
+              {isFetchingDoodledum && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+                  <img src="/images/loading.gif" alt="Loading..." style={{ width: '100px', height: '100px' }} />
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'nowrap' }}>
                 <button
                   className="draw-button green"
                   id="draw-button-easy"
                   onClick={() => handleFetchDoodledum('easy')}
+                  disabled={isFetchingDoodledum}
                 >
                   EASY
                 </button>
@@ -1076,6 +1096,7 @@ const Doodledum: React.FC = () => {
                   className="draw-button yellow"
                   id="draw-button-medium"
                   onClick={() => handleFetchDoodledum('medium')}
+                  disabled={isFetchingDoodledum}
                 >
                   MEDIUM
                 </button>
@@ -1083,6 +1104,7 @@ const Doodledum: React.FC = () => {
                   className="draw-button pink"
                   id="draw-button-hard"
                   onClick={() => handleFetchDoodledum('hard')}
+                  disabled={isFetchingDoodledum}
                 >
                   HARD
                 </button>
@@ -1220,12 +1242,40 @@ const Doodledum: React.FC = () => {
             />
           </div>
           <div id="submit-cancel-container">
-            <button className="desktop-button" id="cancelBtn" onClick={handleCancelDrawing}>Cancel</button>
-            <button className="desktop-button" id="saveBtn" onClick={handleSubmitDrawing}>Submit</button>
+            <button 
+              className="desktop-button" 
+              id="cancelBtn" 
+              onClick={handleCancelDrawing}
+              disabled={isSubmittingDrawing || isCancellingDrawing}
+            >
+              {isCancellingDrawing ? 'Cancelling...' : 'Cancel'}
+            </button>
+            <button 
+              className="desktop-button" 
+              id="saveBtn" 
+              onClick={handleSubmitDrawing}
+              disabled={isSubmittingDrawing || isCancellingDrawing}
+            >
+              {isSubmittingDrawing ? 'Submitting...' : 'Submit'}
+            </button>
           </div>
           <div id="save-button-container">
-            <button className="yellow mobile-button" id="saveBtn-mob" onClick={handleSubmitDrawing}>Submit</button>
-            <button className="yellow mobile-button" id="cancelBtn-mob" onClick={handleCancelDrawing}>Cancel</button>
+            <button 
+              className="yellow mobile-button" 
+              id="saveBtn-mob" 
+              onClick={handleSubmitDrawing}
+              disabled={isSubmittingDrawing || isCancellingDrawing}
+            >
+              {isSubmittingDrawing ? 'Submitting...' : 'Submit'}
+            </button>
+            <button 
+              className="yellow mobile-button" 
+              id="cancelBtn-mob" 
+              onClick={handleCancelDrawing}
+              disabled={isSubmittingDrawing || isCancellingDrawing}
+            >
+              {isCancellingDrawing ? 'Cancelling...' : 'Cancel'}
+            </button>
           </div>
         </div>
       )}

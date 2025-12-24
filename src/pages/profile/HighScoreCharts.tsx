@@ -126,8 +126,8 @@ const ChartComponent = ({ title, data, colors, viewMode, visibleLines, onToggleL
 
   // Reduce margins on mobile to maximize chart width - minimize all margins
   // On mobile, use minimal margins to maximize plot area
-  const chartMargins = isMobile 
-    ? { top: 5, right: 0, left: -20, bottom: 5 }
+  const chartMargins = isMobile && !isFullscreen
+    ? { top: 5, right: -80, left: -80, bottom: 5 }
     : { top: 5, right: 20, left: 0, bottom: 5 };
 
   return (
@@ -546,10 +546,16 @@ const HighScoreCharts = ({ profileUrl }: HighScoreChartsProps) => {
                     : fullscreenChart.title.includes('Unicorn')
                     ? 'unicorn'
                     : 'bestWord';
+                  // Calculate the new view mode first (before state update)
+                  const newViewMode = viewModes[chartKey] === 'points' ? 'position' : 'points';
+                  // Recalculate data with the new view mode
+                  const newData = getChartData(chartKey as 'score' | 'words' | 'bestWord' | 'unicorn', newViewMode);
+                  // Update both states
                   toggleViewMode(chartKey);
                   setFullscreenChart({
                     ...fullscreenChart,
-                    viewMode: viewModes[chartKey] === 'points' ? 'position' : 'points'
+                    viewMode: newViewMode,
+                    data: newData
                   });
                 }}
                 isFullscreen={true}

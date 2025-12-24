@@ -296,6 +296,73 @@
   animation-play-state: running;
 }
 
+/* Perfect message and shatter effects */
+.shard {
+  position: absolute;
+  overflow: hidden;
+  transition: transform 3s ease-out, opacity 3s ease-out;
+  pointer-events: none;
+}
+
+.perfect-text {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 200%;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  opacity: 1;
+  transition: opacity 3s ease-out;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+.perfect-text.yellow {
+  color: #f5ce45;
+}
+
+/* Animated arrows for submit button */
+.animated-arrow {
+  position: absolute;
+  font-size: 200%;
+  pointer-events: none;
+  font-weight: bold;
+  color: #f5ce45;
+  text-shadow: 0 0 10px rgba(245, 206, 69, 0.8);
+  z-index: 10000;
+}
+
+.arrow-left {
+  animation: arrowPulseLeft 1.5s ease-in-out infinite;
+}
+
+.arrow-right {
+  animation: arrowPulseRight 1.5s ease-in-out infinite;
+}
+
+@keyframes arrowPulseLeft {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes arrowPulseRight {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
 @keyframes fly-to-target {
   0% {
     transform: translate(0, 0) scale(1);
