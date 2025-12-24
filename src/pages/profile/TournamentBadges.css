@@ -115,7 +115,6 @@
   font-size: 1.8rem;
   font-weight: bold;
   color: #1b1835;
-  font-family: "Darker Grotesque", sans-serif;
   z-index: 2;
   position: relative;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
@@ -226,7 +225,6 @@
   font-size: 3rem;
   font-weight: bold;
   color: #1b1835;
-  font-family: "Darker Grotesque", sans-serif;
   z-index: 2;
   position: relative;
   text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
@@ -258,13 +256,11 @@
 
 .medal-detail-label {
   color: #888;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 0.95rem;
 }
 
 .medal-detail-value {
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1rem;
   font-weight: bold;
 }
@@ -284,7 +280,6 @@
   border: 2px solid #71bbe9;
   border-radius: 5px;
   text-decoration: none;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1rem;
   font-weight: bold;
   transition: all 0.3s ease;

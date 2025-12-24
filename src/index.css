@@ -1,4 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Pompiere&display=swap");
 @import "tailwindcss";
+
+/* Set Pompiere as default font for the entire site */
+html,
+body,
+#root {
+  font-family: "Pompiere", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 /* Global scrollbar styling - applied to all scrollbars on the site */
 ::-webkit-scrollbar {

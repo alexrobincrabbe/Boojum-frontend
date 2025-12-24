@@ -43,7 +43,6 @@
   font-size: 1rem;
   font-weight: bold;
   transition: all 0.3s ease;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -181,7 +180,6 @@
   font-weight: bold;
   font-size: 1rem;
   border-bottom: 2px solid #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .scores-table th.rank-col {
@@ -364,7 +362,6 @@
   font-size: 100%;
   justify-content: center;
   margin: 0px;
-  font-family: "Nunito", sans-serif;
 }
 
 .word-sublist {
@@ -377,7 +374,6 @@
   font-weight: bold;
   display: block;
   margin-bottom: 10px;
-  font-family: "Darker Grotesque", sans-serif;
   text-shadow: none;
 }
 
@@ -466,7 +462,6 @@
   display: flex;
   align-items: center;
   font-size: 90%;
-  font-family: "Nunito", sans-serif;
 }
 
 .color-coding-item.green-text {

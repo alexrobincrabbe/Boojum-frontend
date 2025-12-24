@@ -130,7 +130,6 @@
   border-radius: 5px;
   padding: 10px;
   color: #fff;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 0.9rem;
   resize: vertical;
   margin-bottom: 8px;
@@ -210,7 +209,6 @@
   text-align: center;
   color: #71bbe9;
   padding: 20px;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .doodle-comment-item {
@@ -230,7 +228,6 @@
 .doodle-comment-author {
   font-weight: bold;
   color: #f5ce45;
-  font-family: "Darker Grotesque", sans-serif;
   text-decoration: none;
   transition: opacity 0.3s ease;
 }
@@ -243,7 +240,6 @@
 .doodle-comment-date {
   color: #888;
   font-size: 0.85rem;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .doodle-comment-delete {
@@ -264,7 +260,6 @@
 
 .doodle-comment-text {
   color: #fff;
-  font-family: "Darker Grotesque", sans-serif;
   margin-bottom: 10px;
   line-height: 1.5;
 }

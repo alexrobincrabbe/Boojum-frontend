@@ -63,7 +63,6 @@
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 0.9rem;
 }
 
@@ -120,7 +119,6 @@
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -173,7 +171,6 @@
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 0.85rem;
   display: flex;
   align-items: center;
@@ -262,7 +259,6 @@
   
   .rotate-prompt-content p {
     color: #71bbe9;
-    font-family: "Darker Grotesque", sans-serif;
     font-size: 1.2rem;
     margin: 0;
   }
@@ -365,7 +361,6 @@
   padding: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 0.85rem;
   display: flex;
   align-items: center;
@@ -444,7 +439,6 @@
   text-align: center;
   padding: 40px;
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .charts-error {

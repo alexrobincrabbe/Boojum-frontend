@@ -40,7 +40,6 @@ h2 {
   text-align: center;
   padding: 40px 20px;
   color: #fff;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1.1rem;
   opacity: 0.7;
 }
@@ -255,7 +254,6 @@ h2 {
 
 #who-are-you-text {
   line-height: 1.6;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1.3rem;
   text-align: center;
   /* Define gradient as the background */
@@ -343,7 +341,6 @@ h2 {
 
 .detail-text {
   color: #fff;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .detail-text.yellow {
@@ -638,7 +635,6 @@ h2 {
   border-radius: 5px;
   padding: 10px;
   color: #fff !important;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1rem;
   line-height: 1.6;
   resize: vertical;
@@ -679,7 +675,6 @@ h2 {
   border-radius: 5px;
   padding: 5px 10px;
   color: #fff;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1rem;
   margin-top: 5px;
 }

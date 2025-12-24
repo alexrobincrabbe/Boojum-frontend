@@ -406,7 +406,7 @@
   box-sizing: border-box;
   align-items: flex-start;
   background-color: #13132a; /* Match GameRoom.css #word-lists */
-  font-family: "Nunito", sans-serif; /* Match GameRoom.css */
+ /* Match GameRoom.css */
 }
 
 .daily-word-list-section {
@@ -424,7 +424,6 @@
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 10px;
-  font-family: "Darker Grotesque", sans-serif;
   text-shadow: none !important; /* Ensure no glow */
 }
 

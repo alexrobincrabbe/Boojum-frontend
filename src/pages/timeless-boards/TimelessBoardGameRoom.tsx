@@ -54,7 +54,7 @@ const showPerfect = (elementId: string) => {
 };
 
 // Helper function to add looping arrows around submit button
-const addLoopingArrows = (selector: string, delay: number = 1000, arrowOffset: number = 60) => {
+  const addLoopingArrows = (selector: string, delay: number = 1000) => {
   const el = document.querySelector(selector);
   if (!el) {
     console.warn('[addLoopingArrows] Button element not found with selector:', selector);
@@ -889,7 +889,7 @@ export default function TimelessBoardGameRoom() {
           // Appears slightly after perfect text (after 500ms delay)
           if (user) {
             setTimeout(() => {
-              addLoopingArrows('.submit-score-button-header', 0, 60);
+              addLoopingArrows('.submit-score-button-header', 0);
             }, 500);
           }
         }, timeDelay * 10);
@@ -903,7 +903,7 @@ export default function TimelessBoardGameRoom() {
           // Appears slightly after perfect text (after 500ms delay)
           if (user) {
             setTimeout(() => {
-              addLoopingArrows('.submit-score-button-header', 0, 60);
+              addLoopingArrows('.submit-score-button-header', 0);
             }, 500);
           }
         }, 100);
@@ -1157,7 +1157,7 @@ export default function TimelessBoardGameRoom() {
             playSound('perfect');
             // Also show arrows after perfect text
             setTimeout(() => {
-              addLoopingArrows('.submit-score-button-header', 0, 60);
+              addLoopingArrows('.submit-score-button-header', 0);
             }, 500);
           }}
           style={{
@@ -1207,7 +1207,7 @@ export default function TimelessBoardGameRoom() {
               showPerfect('board');
               playSound('perfect');
               setTimeout(() => {
-                addLoopingArrows('.submit-score-button-header', 0, 60);
+                addLoopingArrows('.submit-score-button-header', 0);
               }, 500);
             }, timeDelay * 10);
           }}
@@ -1226,7 +1226,7 @@ export default function TimelessBoardGameRoom() {
         </button>
         <button
           onClick={() => {
-            addLoopingArrows('.submit-score-button-header', 0, 60);
+            addLoopingArrows('.submit-score-button-header', 0);
           }}
           style={{
             padding: '8px 16px',

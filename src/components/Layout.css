@@ -388,7 +388,20 @@
   text-decoration: none;
   transition: all 0.3s ease;
   border-left: 3px solid transparent;
-  font-family: "Darker Grotesque", sans-serif;
+}
+
+/* Left sidebar: all nav-links pink with glow */
+.left-sidebar .nav-link,
+.left-sidebar .nav-link-with-pin .nav-link {
+  color: #eb5497; /* pink */
+  text-shadow: 0 0 8px rgba(235, 84, 151, 0.6), 0 0 12px rgba(235, 84, 151, 0.4);
+}
+
+/* Right sidebar: all nav-links green with glow */
+.right-sidebar .nav-link,
+.right-sidebar .nav-link-with-pin .nav-link {
+  color: #33c15b; /* green */
+  text-shadow: 0 0 8px rgba(51, 193, 91, 0.6), 0 0 12px rgba(51, 193, 91, 0.4);
 }
 
 .nav-link:hover {
@@ -1001,6 +1014,11 @@
 .sidebar-chat-user {
   font-weight: bold;
   margin-right: 5px;
+  text-decoration: none;
+}
+
+.sidebar-chat-user:hover {
+  text-decoration: underline;
 }
 
 .sidebar-chat-content {

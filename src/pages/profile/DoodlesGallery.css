@@ -19,7 +19,6 @@
   background-color: rgba(19, 19, 42, 0.8);
   border: 2px solid #71bbe9;
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
   font-size: 1rem;
   cursor: pointer;
   border-radius: 5px;
@@ -57,7 +56,6 @@
 .doodle-word {
   text-align: center;
   font-size: 1.2rem;
-  font-family: "Darker Grotesque", sans-serif;
   color: #71bbe9;
   margin-top: 8px;
 }
@@ -66,7 +64,6 @@
 .doodles-empty-message {
   text-align: center;
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
   padding: 20px;
 }
 
@@ -140,7 +137,6 @@
 
 .doodle-album-info {
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -174,7 +170,6 @@
   max-width: 500px;
   font-size: 1.5rem;
   padding: 20px;
-  font-family: "Darker Grotesque", sans-serif;
   color: #71bbe9;
   position: relative;
 }
@@ -222,7 +217,6 @@
   text-align: center;
   padding: 20px;
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .doodle-album-spinner {
@@ -239,7 +233,6 @@
 .doodle-album-empty {
   text-align: center;
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
   padding: 40px;
 }
 

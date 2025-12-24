@@ -38,10 +38,8 @@
   border-radius: 20px;
   border: solid 2px #71bbe9;
   overflow-wrap: break-word;
-  font-family: "Darker Grotesque", serif;
   background-color: #13132a;
   padding: 40px 40px 0px;
-  font-family: Helvetica, Arial, sans-serif;
 }
 
 .view-post-text ol,
@@ -244,7 +242,6 @@
 
 .reply {
   overflow-wrap: break-word;
-  font-family: "Darker Grotesque", serif;
   font-size: 130%;
 }
 

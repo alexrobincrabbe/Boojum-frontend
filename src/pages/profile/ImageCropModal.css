@@ -92,7 +92,6 @@
   align-items: center;
   gap: 15px;
   color: #71bbe9;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .zoom-control label {
@@ -157,7 +156,6 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Darker Grotesque", sans-serif;
 }
 
 .crop-cancel-button {

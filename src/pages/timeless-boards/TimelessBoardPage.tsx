@@ -63,7 +63,7 @@ export default function TimelessBoardPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentLevel, setCurrentLevel] = useState<number>(10); // Default to Rabbit Hole
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { darkMode } = useBoardTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

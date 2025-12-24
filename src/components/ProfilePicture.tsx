@@ -67,7 +67,8 @@ export function ProfilePicture({
   };
 
   const imageUrl = getProfileImageUrl(profilePictureUrl);
-  const borderStyle = showBorder ? { border: `2px solid ${chatColor}` } : {};
+  // Always show border if chatColor is provided and showBorder is true (default)
+  const borderStyle = showBorder ? { border: `2px solid ${chatColor}`, borderRadius: '50%' } : {};
 
   const imageElement = (
     <img

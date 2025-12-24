@@ -6,7 +6,106 @@ import { Menu, X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
+import { Username } from './Username';
 import './Layout.css';
+
+// Component to convert anchor tags to React Router Links
+const ActivityDescription = ({ html, onLinkClick }: { html: string; onLinkClick: () => void }) => {
+  // Parse HTML and convert anchor tags to React Router Links
+  const parseHtml = (htmlString: string): React.ReactNode[] => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    
+    const elements: React.ReactNode[] = [];
+    let keyIndex = 0;
+    
+    const processNode = (node: Node): void => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || '';
+        if (text) {
+          elements.push(text);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        if (element.tagName === 'A') {
+          const href = element.getAttribute('href') || '';
+          const text = element.textContent || '';
+          // Check if it's an internal route (starts with /)
+          if (href.startsWith('/')) {
+            elements.push(
+              <Link key={`link-${keyIndex++}`} to={href} onClick={onLinkClick}>
+                {text}
+              </Link>
+            );
+          } else {
+            // External link, keep as anchor
+            elements.push(
+              <a key={`link-${keyIndex++}`} href={href} target="_blank" rel="noopener noreferrer">
+                {text}
+              </a>
+            );
+          }
+        } else {
+          // For other elements, process children and preserve structure
+          const childElements: React.ReactNode[] = [];
+          Array.from(element.childNodes).forEach((child) => {
+            const childKey = keyIndex++;
+            if (child.nodeType === Node.TEXT_NODE) {
+              const text = child.textContent || '';
+              if (text) {
+                childElements.push(text);
+              }
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+              const childEl = child as Element;
+              if (childEl.tagName === 'A') {
+                const href = childEl.getAttribute('href') || '';
+                const text = childEl.textContent || '';
+                if (href.startsWith('/')) {
+                  childElements.push(
+                    <Link key={`link-${childKey}`} to={href} onClick={onLinkClick}>
+                      {text}
+                    </Link>
+                  );
+                } else {
+                  childElements.push(
+                    <a key={`link-${childKey}`} href={href} target="_blank" rel="noopener noreferrer">
+                      {text}
+                    </a>
+                  );
+                }
+              } else {
+                // Recursively process nested elements
+                const nestedDiv = document.createElement('div');
+                nestedDiv.appendChild(child.cloneNode(true));
+                const nestedContent = parseHtml(nestedDiv.innerHTML);
+                childElements.push(...nestedContent);
+              }
+            }
+          });
+          // Wrap in the same element type if needed, or just add children
+          if (childElements.length > 0) {
+            elements.push(...childElements);
+          }
+        }
+      }
+    };
+    
+    // Process all nodes
+    Array.from(tempDiv.childNodes).forEach((node) => {
+      processNode(node);
+    });
+    
+    return elements.length > 0 ? elements : [htmlString];
+  };
+  
+  const parsedContent = parseHtml(html);
+  
+  return (
+    <span className="sidebar-activity-description">
+      {parsedContent}
+    </span>
+  );
+};
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,6 +116,8 @@ interface ChatMessage {
   chat_color: string;
   content: string;
   timestamp: string;
+  profile_url?: string;
+  profile_picture_url?: string | null;
 }
 
 interface Activity {
@@ -33,6 +134,7 @@ interface UserOnline {
   display_name: string;
   chat_color: string;
   profile_url: string;
+  profile_picture_url?: string | null;
   online: string;
   time_ago: string;
   playing: string;
@@ -523,16 +625,15 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="players-online-list">
             {filteredUsers.map((user) => (
               <div key={user.id} className="player-online-item">
-                <Link
-                  to={`/profile/${user.profile_url}`}
+                <Username
+                  username={user.display_name}
+                  profileUrl={user.profile_url}
+                  chatColor={user.chat_color}
                   className="player-online-name"
-                  style={{ color: user.chat_color }}
                   onClick={() => {
                     if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                   }}
-                >
-                  {user.display_name}
-                </Link>
+                />
                 <div className="player-online-status">
                   {user.online === 'yes' ? (
                     <>
@@ -572,14 +673,13 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="mobile-users-dropdown-list">
             {filteredUsers.map((user) => (
               <div key={user.id} className="player-online-item">
-                <Link
-                  to={`/profile/${user.profile_url}`}
+                <Username
+                  username={user.display_name}
+                  profileUrl={user.profile_url}
+                  chatColor={user.chat_color}
                   className="player-online-name"
-                  style={{ color: user.chat_color }}
                   onClick={() => setMobileUsersDropdownOpen(false)}
-                >
-                  {user.display_name}
-                </Link>
+                />
                 <div className="player-online-status">
                   {user.online === 'yes' ? (
                     <>
@@ -710,20 +810,21 @@ const Layout = ({ children }: LayoutProps) => {
                 {activities.map((activity, idx) => (
                   <li key={idx} className="sidebar-activity-item">
                     <strong>
-                      <Link
-                        to={`/profile/${activity.profile_url}`}
+                      <Username
+                        username={activity.username}
+                        profileUrl={activity.profile_url}
+                        chatColor={activity.chat_color}
                         className="sidebar-activity-username"
-                        style={{ color: activity.chat_color }}
                         onClick={() => {
                           if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                         }}
-                      >
-                        {activity.username}
-                      </Link>
+                      />
                     </strong>
-                    <span
-                      className="sidebar-activity-description"
-                      dangerouslySetInnerHTML={{ __html: activity.description }}
+                    <ActivityDescription 
+                      html={activity.description}
+                      onLinkClick={() => {
+                        if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                      }}
                     />
                     <br />
                     <small className="sidebar-activity-timestamp">{activity.timestamp_ago}</small>
@@ -862,9 +963,12 @@ const Layout = ({ children }: LayoutProps) => {
               // Regular chat messages
               return (
                 <div key={idx} className="sidebar-chat-message">
-                  <span className="sidebar-chat-user" style={{ color: msg.chat_color }}>
-                    {msg.user}:
-                  </span>
+                  <Username
+                    username={msg.user}
+                    profileUrl={msg.profile_url}
+                    chatColor={msg.chat_color}
+                    className="sidebar-chat-user"
+                  />
                   <span className="sidebar-chat-content">{msg.content}</span>
                   <span className="sidebar-chat-timestamp">{msg.timestamp}</span>
                 </div>
