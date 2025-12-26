@@ -331,12 +331,11 @@
 }
 
 .solution-title {
-  color: #71bbe9;
+  color: var(--color-blue);
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 20px;
   text-align: center;
-  font-family: "Monoton", cursive;
 }
 
 /* Board and letter styles are now in GameRoom.css */
@@ -355,10 +354,13 @@
 #word-lists {
   flex-direction: row;
   width: 100%;
-  height: 500px;
-  overflow-y: scroll;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: auto;
   display: flex;
-  background-color: #13132a;
+  background: none;
   font-size: 100%;
   justify-content: center;
   margin: 0px;
@@ -366,6 +368,8 @@
 
 .word-sublist {
   margin: 10px;
+  max-height: none !important;
+  height: auto !important;
 }
 
 .word-sublist strong {
@@ -380,7 +384,9 @@
 .word-sublist-scroll {
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
   color: #352870;
 }
 
@@ -392,11 +398,13 @@
   text-align: center;
   font-weight: bold;
   margin-bottom: 10px;
+  background: none;
+  border: none;
 }
 
 #word-definition-banner.blue {
-  background-color: #352870;
-  color: white;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
 }
 
 /* Player filter banner */
@@ -465,19 +473,19 @@
 }
 
 .color-coding-item.green-text {
-  color: rgb(81, 164, 81);
+  color: var(--color-green);
 }
 
 .color-coding-item.yellow-text {
-  color: #febe38;
+  color: var(--color-yellow);
 }
 
 .color-coding-item.pink-text {
-  color: #eb539e;
+  color: var(--color-pink);
 }
 
 .color-coding-item.blue-text {
-  color: #71bbe9; /* Blue */
+  color: var(--color-blue);
 }
 
 /* Word color classes - unified with GameRoom.css */
@@ -493,19 +501,19 @@
 
 /* Word color classes - unified with GameRoom.css */
 .word.green {
-  color: rgb(81, 164, 81) !important;
+  color: var(--color-green) !important;
 }
 
 .word.yellow {
-  color: #febe38 !important;
+  color: var(--color-yellow) !important;
 }
 
 .word.pink {
-  color: #eb539e !important;
+  color: var(--color-pink) !important;
 }
 
 .word.blue {
-  color: #71bbe9 !important; /* Blue, not glowing */
+  color: var(--color-blue) !important; /* Blue, not glowing */
   text-shadow: none !important; /* Remove any blue glow */
   box-shadow: none !important; /* Remove any blue glow */
 }

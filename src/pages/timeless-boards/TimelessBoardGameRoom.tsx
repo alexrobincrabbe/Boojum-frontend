@@ -60,6 +60,11 @@ const showPerfect = (elementId: string) => {
     console.warn('[addLoopingArrows] Button element not found with selector:', selector);
     return;
   }
+
+  // Clean up any existing arrows first
+  const existingArrows = document.querySelectorAll('.animated-arrow');
+  existingArrows.forEach(arrow => arrow.remove());
+
   const rect = el.getBoundingClientRect();
 
   console.log('[addLoopingArrows] Found button, creating arrows:', {
@@ -945,6 +950,18 @@ export default function TimelessBoardGameRoom() {
       return;
     }
 
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to submit your score?\n\n` +
+      `Words found: ${wordsFound.size}\n` +
+      `Score: ${displayScore} points\n\n` +
+      `Once submitted, you cannot change your score for this board.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -998,7 +1015,7 @@ export default function TimelessBoardGameRoom() {
     } finally {
       setSubmitting(false);
     }
-  }, [boardData, timelessBoardId, level, wordsFound, navigate, submitting]);
+  }, [boardData, timelessBoardId, level, wordsFound, navigate, submitting, displayScore]);
 
   const formatTime = useCallback((seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -1138,110 +1155,34 @@ export default function TimelessBoardGameRoom() {
   }
 
 
+  // Get level name and color
+  const getLevelInfo = () => {
+    const currentLevelNum = level ? parseInt(level) : 10;
+    if (currentLevelNum === 4) return { name: 'Curious', color: 'var(--color-green)' };
+    if (currentLevelNum === 7) return { name: 'Curiouser', color: 'var(--color-pink)' };
+    return { name: 'Rabbit Hole', color: 'var(--color-purple)' };
+  };
+
+  const levelInfo = getLevelInfo();
+
   return (
     <div className="timeless-game-room">
-      <div className="timeless-game-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate(`/timeless-boards?board=${timelessBoardId}`)}
-        >
-          ← Back to Timeless Boards
-        </button>
+      {/* Back button */}
+      <div className="timeless-game-back-container">
+        <div className="pagination-left-container">
+          <button 
+            className="pagination-btn" 
+            onClick={() => navigate(`/timeless-boards?board=${timelessBoardId}`)}
+            aria-label="Back to Timeless Boards"
+          >
+          </button>
+          <span className="pagination-text">Back to Timeless Boards</span>
+        </div>
       </div>
 
-      {/* TEMPORARY TEST BUTTONS - Remove before production */}
-      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
-        <button
-          onClick={() => {
-            showPerfect('board');
-            playSound('perfect');
-            // Also show arrows after perfect text
-            setTimeout(() => {
-              addLoopingArrows('.submit-score-button-header', 0);
-            }, 500);
-          }}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#f5ce45',
-            color: '#13132a',
-            border: '2px solid #febe38',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px'
-          }}
-        >
-          Test Perfect!
-        </button>
-        <button
-          onClick={() => {
-            // Test full shatter sequence with staggered timing
-            const timeDelay = 300;
-            
-            // Shatter rotate buttons first
-            setTimeout(() => {
-              shatter('rotate-buttons', 3, 10);
-              playSound('perfect');
-            }, 0);
-            
-            // Shatter word counters
-            setTimeout(() => {
-              shatter('word-counters', 8, 2);
-              playSound('perfect');
-            }, timeDelay * 2);
-            
-            // Shatter timer bar container (points bar)
-            setTimeout(() => {
-              shatter('timer-bar-container', 2, 20);
-              playSound('perfect');
-            }, timeDelay * 4);
-            
-            // Shatter board last
-            setTimeout(() => {
-              shatter('board', 10, 10);
-              playSound('perfect');
-            }, timeDelay * 8);
-            
-            // Show perfect message and arrows after board shatters
-            setTimeout(() => {
-              showPerfect('board');
-              playSound('perfect');
-              setTimeout(() => {
-                addLoopingArrows('.submit-score-button-header', 0);
-              }, 500);
-            }, timeDelay * 10);
-          }}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#eb5497',
-            color: 'white',
-            border: '2px solid #eb5497',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px'
-          }}
-        >
-          Test Shatter
-        </button>
-        <button
-          onClick={() => {
-            addLoopingArrows('.submit-score-button-header', 0);
-          }}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#33c15b',
-            color: 'white',
-            border: '2px solid #33c15b',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px'
-          }}
-        >
-          Test Arrows
-        </button>
-      </div>
+      <h1 className="timeless-game-level-title" style={{ color: levelInfo.color }}>
+        {levelInfo.name}
+      </h1>
 
       <div className="timer-controls-container">
         <button 

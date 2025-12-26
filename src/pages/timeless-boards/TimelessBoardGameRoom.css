@@ -2,6 +2,48 @@
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+}
+
+.timeless-game-back-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.pagination-left-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-text {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.pagination-btn {
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+  border-right: 30px solid var(--color-yellow);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.pagination-btn:hover {
+  border-right-color: var(--color-yellow);
+  filter: drop-shadow(0 0 8px rgba(245, 206, 69, 0.6));
+  transform: translateX(-3px);
 }
 
 .timeless-game-room.loading {
@@ -20,6 +62,19 @@
   margin-bottom: 20px;
   gap: 15px;
   width: 100%;
+}
+
+.timeless-game-level-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .timeless-game-level-title {
+    font-size: 3rem;
+  }
 }
 
 .timer-controls-container {
@@ -69,36 +124,39 @@
 
 .hint-button {
   padding: 10px 20px;
-  background-color: #1b1835; /* Match dark background of site */
+  background-color: rgba(235, 84, 151, 0.2); /* Reduced opacity - more translucent pink background */
   color: #fff;
-  border: 4px solid #eb5497; /* Increased border thickness, default pink */
+  border: 4px solid var(--color-pink);
   border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.2rem; /* Larger font size */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   white-space: nowrap;
-  transition: border-color 0.3s, opacity 0.3s;
+  transition: background-color 0.3s, border-color 0.3s, opacity 0.3s;
   min-width: 140px; /* Fixed width to prevent size changes */
   box-sizing: border-box;
   box-shadow: none; /* Ensure no default box-shadow interferes with glow animations */
   /* Don't transition box-shadow - let animations handle it */
 }
 
-/* Border colors based on state */
+/* Background colors based on state */
 .hint-button.hint-inactive {
-  border-color: #eb5497; /* Pink when not active */
+  background-color: rgba(235, 84, 151, 0.2); /* Reduced opacity - more translucent pink when not active */
+  border-color: var(--color-pink);
 }
 
 .hint-button.hint-activating {
-  border-color: #f5ce45; /* Yellow when activating */
+  background-color: rgba(235, 84, 151, 0.4); /* Reduced opacity when activating */
+  border-color: var(--color-pink);
 }
 
 .hint-button.hint-active {
-  border-color: #33c15b; /* Green when active */
+  background-color: rgba(235, 84, 151, 0.5); /* Reduced opacity when active */
+  border-color: var(--color-pink);
 }
 
 .hint-button:hover:not(:disabled) {
@@ -154,9 +212,9 @@
 
 .submit-score-button-header {
   padding: 10px 20px;
-  background-color: #f5ce45;
-  color: #1b1835;
-  border: 4px solid #eb5497;
+  background-color: var(--bg-green-20); /* Translucent green background */
+  color: var(--color-green); /* Green text */
+  border: 4px solid var(--color-green); /* Green border */
   border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
@@ -166,8 +224,8 @@
 }
 
 .submit-score-button-header:hover:not(:disabled) {
-  background-color: #eb5497;
-  color: #fff;
+  background-color: rgba(51, 193, 91, 0.3); /* Slightly more opaque green on hover */
+  color: var(--color-green);
 }
 
 .submit-score-button-header:disabled {
@@ -382,38 +440,60 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .timeless-game-level-title {
+    margin-bottom: 0;
+  }
   
   .score-display-container {
     width: 100%;
   }
 
-  /* Reorder timer controls on mobile: timer first, then clues, then submit */
+  /* Reorder timer controls on mobile: timer first, then clues and submit on same line */
   .timer-controls-container {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 15px;
+    justify-content: center;
+    gap: 10px;
   }
 
   .timer-display {
     order: 1;
     width: 100%;
+    flex-basis: 100%;
   }
 
+  /* Put hint and submit buttons on same line */
   .hint-button {
     order: 2;
-    width: 100%;
-    max-width: 300px;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(50% - 5px);
   }
 
   .submit-score-button-header {
     order: 3;
-    width: 100%;
-    max-width: 300px;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(50% - 5px);
   }
-  .timer-controls-container{
-  .timeless-game-room{
-    padding:20px 10px !important;
-  }
-}
 
+  .timeless-game-room {
+    padding: 20px 10px !important;
+  }
+
+  /* Reduce gap on game room container on mobile */
+  .game-room-container {
+    gap: 10px;
+  }
+
+  /* Add gap to word lists on mobile */
+  .word-lists-section #word-lists {
+    gap: 3px;
+  }
+
+  .word-lists-section .word-sublist {
+    margin: 3px;
+  }
 }

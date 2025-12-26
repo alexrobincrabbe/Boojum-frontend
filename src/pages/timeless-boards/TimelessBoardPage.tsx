@@ -7,6 +7,8 @@ import { calculateWordScore } from '../game-room/utils/scoreCalculation';
 import { WordLists } from '../game-room/components/WordLists';
 import { toast } from 'react-toastify';
 import { Loading } from '../../components/Loading';
+import { Username } from '../../components/Username';
+import { ProfilePicture } from '../../components/ProfilePicture';
 import './TimelessBoardPage.css';
 import '../game-room/GameRoom.css';
 
@@ -21,6 +23,7 @@ interface TimelessBoardScore {
   best_word: string | null;
   number_of_words: number;
   is_current_user: boolean;
+  which_words_found?: string[]; // Array of words found by this player
 }
 
 interface WordData {
@@ -243,6 +246,16 @@ setBoardsByLevel({
   const solutionRevealed = currentBoard.time_remaining_seconds <= 0;
   const displayTimeRemaining = timeRemaining > 0 ? timeRemaining : currentBoard.time_remaining_seconds;
 
+  // Determine timer color class based on remaining time
+  const getTimerColorClass = (seconds: number) => {
+    if (seconds < 1800) { // Less than 30 minutes
+      return 'timer-pink';
+    } else if (seconds < 7200) { // Less than 2 hours
+      return 'timer-yellow';
+    }
+    return 'timer-green'; // 2+ hours (default)
+  };
+
   return (
     <div className="timeless-board-page">
       {/* Pagination buttons at top corners */}
@@ -250,18 +263,19 @@ setBoardsByLevel({
         <div className="pagination-top-left">
           {hasPrevious && (
             <div className="pagination-left-container">
-              <button className="pagination-btn" onClick={handlePrevious}>
-                ← Previous
+              <button className="pagination-btn" onClick={handlePrevious} aria-label="Previous">
               </button>
-              <div className="see-solution-text">see solution</div>
+              <span className="pagination-text">Previous (solution)</span>
             </div>
           )}
         </div>
         <div className="pagination-top-right">
           {hasNext && (
-            <button className="pagination-btn" onClick={handleNext}>
-              Next →
-            </button>
+            <div className="pagination-right-container">
+              <span className="pagination-text">Next</span>
+              <button className="pagination-btn" onClick={handleNext} aria-label="Next">
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -270,7 +284,9 @@ setBoardsByLevel({
       <div className="timeless-board-header">
         <div className="timeless-board-header-content">
           <h1 className="timeless-board-title">{currentBoard.title}</h1>
-          <div className="timeless-board-date">{formatDate(currentBoard.date)}</div>
+          {currentPage > 0 && (
+            <div className="timeless-board-date">{formatDate(currentBoard.date)}</div>
+          )}
           <div className="timeless-board-meta">
             {currentBoard.type === 'bonus' && (
               <span className="board-type bonus">Bonus Letters</span>
@@ -278,20 +294,16 @@ setBoardsByLevel({
           </div>
           {/* Timer */}
           {!solutionRevealed && (
-            <div className="time-remaining-header">
-              <span className="time-label">Time remaining: </span>
+            <div className={`time-remaining-header ${getTimerColorClass(displayTimeRemaining)}`}>
               <span className="time-value">{formatTimeRemaining(displayTimeRemaining)}</span>
             </div>
           )}
           {/* Info text */}
           <div className="timeless-board-info">
-            <p className="yellow">
-              You can submit a score for each level of each board - Your progress is automatically saved for the 24 hour period,
-              so you're free to wander off and stretch your legs.
-              <br />
-              When the timer reaches 0, a new board will become available, at which time you'll be able to peek at the word lists from previous puzzles
-              by clicking 'Previous'.
-            </p>
+            <ul className="text-blue-glow">
+              <li>You can submit a score for each level of each board - Your progress is automatically saved for the 24 hour period, so you're free to wander off and stretch your legs.</li>
+              <li>When the timer reaches 0, a new board will become available, at which time you'll be able to peek at the word lists from previous puzzles by clicking 'Previous'.</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -305,7 +317,7 @@ setBoardsByLevel({
             {LEVELS.map((level) => (
               <button
                 key={level.value}
-                className={`level-button ${currentLevel === level.value ? 'active' : ''}`}
+                className={`level-button level-${level.value} ${currentLevel === level.value ? 'active' : ''}`}
                 onClick={() => handleLevelChange(level.value)}
               >
                 {level.name}
@@ -315,7 +327,7 @@ setBoardsByLevel({
           <div className="level-descriptions">
             {LEVELS.map((level) => (
               <div key={level.value} className={`level-description ${currentLevel === level.value ? 'active' : ''}`}>
-                <span className="level-name">{level.name}</span>: {level.description}
+                <span className={`level-name level-name-${level.value}`}>{level.name}</span>: {level.description}
               </div>
             ))}
           </div>
@@ -324,7 +336,7 @@ setBoardsByLevel({
             <div className="play-button-container">
               {isAuthenticated ? (
                 !currentBoard.played ? (
-                  <button className="play-now-btn-small" onClick={handlePlay}>
+                  <button className={`play-now-btn-small play-level-${currentLevel}`} onClick={handlePlay}>
                     Play ({LEVELS.find(l => l.value === currentLevel)?.name})
                   </button>
                 ) : (
@@ -348,7 +360,7 @@ setBoardsByLevel({
             <table className="timeless-scores-table">
               <thead>
                 <tr>
-                  <th>Player</th>
+                  <th></th>
                   <th>Score (%)</th>
                 </tr>
               </thead>
@@ -357,18 +369,18 @@ setBoardsByLevel({
                   <tr key={score.player_id || index} className={score.is_current_user ? 'current-user-score' : ''}>
                     <td>
                       <div className="player-info">
-                        {score.player_profile_picture && score.player_profile_picture !== '/images/default.png' ? (
-                          <img
-                            src={score.player_profile_picture}
-                            alt={score.player_display_name}
-                            className="player-avatar"
-                          />
-                        ) : (
-                          <div className="player-avatar-initial" style={{ backgroundColor: score.player_chat_color }}>
-                            {score.player_display_name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <span style={{ color: score.player_chat_color }}>{score.player_display_name}</span>
+                        <ProfilePicture
+                          profilePictureUrl={score.player_profile_picture}
+                          profileUrl={score.player_profile_url}
+                          chatColor={score.player_chat_color}
+                          size={30}
+                          showBorder={true}
+                        />
+                        <Username
+                          username={score.player_display_name}
+                          profileUrl={score.player_profile_url}
+                          chatColor={score.player_chat_color}
+                        />
                       </div>
                     </td>
                     <td>
@@ -391,7 +403,7 @@ setBoardsByLevel({
         {/* Solution display */}
         {solutionRevealed && (
           <div className="timeless-board-solution">
-            <h2 className="solution-title">Board Solution</h2>
+            <h2 className="solution-title">Solution</h2>
             {currentBoard.board_letters && (
               <div className="board-display-container">
                 <div className="board-wrapper">
@@ -429,38 +441,92 @@ setBoardsByLevel({
             )}
 
             {/* Word Lists - using unified component */}
-            {currentBoard.words_by_length && (() => {
+            {currentBoard.words_by_length && currentBoard.board_words && (() => {
               const { boojum, snark } = getBonusLetters(currentBoard);
-              // Convert timeless board WordData format to protocol format for WordLists
-              // Timeless format: { word, playerFound?: number, totalFound?: number }
-              // Protocol format: { score, player_found: 0|1, sum_players_found }
-              const wordsByLengthForComponent: Record<string, Record<string, { score: number; player_found: number; sum_players_found: number }>> = {};
               
+              // Get current user's score to find which words they found
+              const currentUserScore = currentBoard.scores.find(score => score.is_current_user);
+              const userWordsFound = currentUserScore?.which_words_found || [];
+              const userWordsFoundSet = new Set(userWordsFound.map((word: string) => word.toLowerCase()));
+              
+              // Debug logging
+              console.log('=== Timeless Board Word Highlighting Debug ===');
+              console.log('Current User Score:', currentUserScore);
+              console.log('User Words Found (raw):', userWordsFound);
+              console.log('User Words Found Set (lowercase):', Array.from(userWordsFoundSet));
+              console.log('Board Words Count:', currentBoard.board_words?.length);
+              console.log('Words by Length Keys:', Object.keys(currentBoard.words_by_length || {}));
+              
+              // Build a map of words from words_by_length for quick lookup
+              const wordsByLengthMap = new Map<string, WordData>();
               Object.keys(currentBoard.words_by_length).forEach(length => {
                 const words = currentBoard.words_by_length![length];
-                wordsByLengthForComponent[length] = {};
                 words.forEach(wordData => {
-                  const playerFound = wordData.playerFound || 0;
-                  const sumPlayersFound = wordData.totalFound || (playerFound ? 1 : 0);
-                  const score = calculateWordScore(wordData.word, boojum, snark);
-                  
-                  wordsByLengthForComponent[length][wordData.word] = {
-                    score,
-                    player_found: playerFound,
-                    sum_players_found: sumPlayersFound,
-                  };
+                  wordsByLengthMap.set(wordData.word.toLowerCase(), wordData);
                 });
               });
+              
+              // Convert timeless board WordData format to protocol format for WordLists
+              // Include ALL words from board_words, not just those in words_by_length
+              const wordsByLengthForComponent: Record<string, Record<string, { score: number; player_found: number; sum_players_found: number }>> = {};
+              
+              // Process all words from board_words to ensure all words are shown
+              currentBoard.board_words.forEach(word => {
+                const wordLower = word.toLowerCase();
+                const wordLength = word.length;
+                const lengthKey = wordLength >= 9 ? '9+' : String(wordLength);
+                
+                // Initialize the length category if it doesn't exist
+                if (!wordsByLengthForComponent[lengthKey]) {
+                  wordsByLengthForComponent[lengthKey] = {};
+                }
+                
+                // Get word data from words_by_length if available, otherwise create default
+                const wordData = wordsByLengthMap.get(wordLower);
+                
+                // Check if current user found this word
+                const playerFound = userWordsFoundSet.has(wordLower) ? 1 : 0;
+                // Use totalFound from wordData if available, otherwise 0 (no one found it)
+                const sumPlayersFound = wordData?.totalFound ?? 0;
+                const score = calculateWordScore(word, boojum, snark);
+                
+                wordsByLengthForComponent[lengthKey][word] = {
+                  score,
+                  player_found: playerFound,
+                  sum_players_found: sumPlayersFound,
+                };
+              });
+              
+              // Debug: Log a sample of words to check player_found values
+              const sampleWords: Array<{word: string, player_found: number}> = [];
+              Object.keys(wordsByLengthForComponent).forEach(length => {
+                const words = wordsByLengthForComponent[length];
+                Object.keys(words).slice(0, 5).forEach(word => {
+                  sampleWords.push({
+                    word,
+                    player_found: words[word].player_found
+                  });
+                });
+              });
+              console.log('Sample words with player_found:', sampleWords);
+              console.log('Words with player_found=1:', 
+                Object.values(wordsByLengthForComponent)
+                  .flatMap(words => Object.entries(words))
+                  .filter(([, data]) => data.player_found === 1)
+                  .map(([word]) => word)
+              );
+              console.log('Words Found Set passed to WordLists:', Array.from(userWordsFoundSet));
+              console.log('========================================');
               
               return (
                 <WordLists
                   wordsByLength={wordsByLengthForComponent}
-                  wordsFound={new Set()} // Timeless board solution shows all words
+                  wordsFound={userWordsFoundSet}
                   gameStatus="finished" // Always finished for solution view
                   hasFinalScores={true}
                   boojum={boojum}
                   snark={snark}
-                  showColorBanner={true}
+                  showColorBanner={false}
                   showDefinitionBanner={true}
                 />
               );

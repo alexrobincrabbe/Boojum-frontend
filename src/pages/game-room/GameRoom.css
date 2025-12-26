@@ -1066,7 +1066,7 @@
 }
 
 .chat-text .green {
-  color: rgb(81, 164, 81);
+  color: var(--color-green);
 }
 
 .chat-text .yellow {
@@ -1270,11 +1270,13 @@
   text-align: center;
   font-weight: bold;
   margin-bottom: 10px;
+  background: none;
+  border: none;
 }
 
 #word-definition-banner.blue {
-  background-color: #352870;
-  color: white;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
 }
 
 .word-lists-wrapper {
@@ -1286,10 +1288,13 @@
   min-width: 100%;
   width: fit-content !important;
   flex-direction: row;
-  height: 500px;
-  overflow-y: scroll;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: auto;
   display: flex;
-  background-color: #13132a;
+  background: none;
   font-size: 100%;
   justify-content: center;
   margin: 0px;
@@ -1305,12 +1310,16 @@
 
 .word-sublist {
   margin: 10px;
+  max-height: none !important;
+  height: auto !important;
 }
 
 .word-sublist-scroll {
   display: flex;
   flex-direction: column-reverse;
-  overflow: visible;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
   color: #352870;
 }
 
@@ -1323,19 +1332,19 @@
 }
 
 .word.green {
-  color: rgb(81, 164, 81);
+  color: var(--color-green);
 }
 
 .word.yellow {
-  color: #febe38;
+  color: var(--color-yellow);
 }
 
 .word.pink {
-  color: rgb(155, 95, 155);
+  color: var(--color-pink);
 }
 
 .word.blue {
-  color: #71bbe9;
+  color: var(--color-blue);
 }
 
 /* Color coding banner */
@@ -1346,8 +1355,8 @@
   gap: 20px;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #13132a;
-  border: 2px solid #71bbe9;
+  background: none;
+  border: none;
   border-radius: 8px;
   flex-wrap: wrap;
 }
@@ -1359,19 +1368,19 @@
 }
 
 .color-coding-item.green-text {
-  color: rgb(81, 164, 81);
+  color: var(--color-green);
 }
 
 .color-coding-item.yellow-text {
-  color: #febe38;
+  color: var(--color-yellow);
 }
 
 .color-coding-item.pink-text {
-  color: rgb(155, 95, 155);
+  color: var(--color-pink);
 }
 
 .color-coding-item.blue-text {
-  color: #71bbe9;
+  color: var(--color-blue);
 }
 
 .word-score {

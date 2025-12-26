@@ -130,6 +130,25 @@
   margin: 0 auto;
 }
 
+/* Ensure word lists have no height restrictions */
+#word-lists {
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+.word-sublist {
+  max-height: none !important;
+  height: auto !important;
+}
+
+.word-sublist-scroll {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+}
+
 /* Ensure boojum and snark borders are visible */
 #board .boojum {
   border: solid #33c15b 10px !important;
@@ -145,9 +164,10 @@
   text-align: center;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #13132a;
-  border: 2px solid #71bbe9;
-  border-radius: 8px;
+  background: none;
+  border: none;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
   font-size: 90%;
 }
 

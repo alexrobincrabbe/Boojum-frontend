@@ -13,8 +13,10 @@ import './Layout.css';
 const ActivityDescription = ({ html, onLinkClick }: { html: string; onLinkClick: () => void }) => {
   // Parse HTML and convert anchor tags to React Router Links
   const parseHtml = (htmlString: string): React.ReactNode[] => {
+    // Normalize profile URLs: convert /viewprofile/ to /profile/
+    const normalizedHtml = htmlString.replace(/\/viewprofile\//gi, '/profile/');
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlString;
+    tempDiv.innerHTML = normalizedHtml;
     
     const elements: React.ReactNode[] = [];
     let keyIndex = 0;
@@ -30,10 +32,12 @@ const ActivityDescription = ({ html, onLinkClick }: { html: string; onLinkClick:
         if (element.tagName === 'A') {
           const href = element.getAttribute('href') || '';
           const text = element.textContent || '';
+          // Normalize profile URLs
+          const normalizedHref = href.replace(/\/viewprofile\//gi, '/profile/');
           // Check if it's an internal route (starts with /)
-          if (href.startsWith('/')) {
+          if (normalizedHref.startsWith('/')) {
             elements.push(
-              <Link key={`link-${keyIndex++}`} to={href} onClick={onLinkClick}>
+              <Link key={`link-${keyIndex++}`} to={normalizedHref} onClick={onLinkClick}>
                 {text}
               </Link>
             );
@@ -60,9 +64,11 @@ const ActivityDescription = ({ html, onLinkClick }: { html: string; onLinkClick:
               if (childEl.tagName === 'A') {
                 const href = childEl.getAttribute('href') || '';
                 const text = childEl.textContent || '';
-                if (href.startsWith('/')) {
+                // Normalize profile URLs
+                const normalizedHref = href.replace(/\/viewprofile\//gi, '/profile/');
+                if (normalizedHref.startsWith('/')) {
                   childElements.push(
-                    <Link key={`link-${childKey}`} to={href} onClick={onLinkClick}>
+                    <Link key={`link-${childKey}`} to={normalizedHref} onClick={onLinkClick}>
                       {text}
                     </Link>
                   );

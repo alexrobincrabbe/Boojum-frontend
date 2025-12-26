@@ -83,7 +83,7 @@ export function ProfilePicture({
 
   if (profileUrl) {
     return (
-      <div className="profile-pic-standard" style={borderStyle}>
+      <div className="profile-pic-standard">
         <Link to={`/profile/${profileUrl}`} style={{ textDecoration: 'none' }}>
           {imageElement}
         </Link>
@@ -92,7 +92,7 @@ export function ProfilePicture({
   }
 
   return (
-    <div className="profile-pic-standard" style={borderStyle}>
+    <div className="profile-pic-standard">
       {imageElement}
     </div>
   );

@@ -27,18 +27,18 @@
   right: 0;
 }
 
-.pagination-left-container {
+.pagination-left-container,
+.pagination-right-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  align-items: center;
+  gap: 10px;
 }
 
-.see-solution-text {
-  color: #71bbe9;
-  font-size: 0.85rem;
-  font-style: italic;
-  margin-top: 5px;
+.pagination-text {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .timeless-board-header {
@@ -52,13 +52,61 @@
 }
 
 .timeless-board-title {
-  color: #f5ce45;
+  color: var(--color-pink);
   margin: 0;
   font-size: 2rem;
 }
 
+@media (max-width: 768px) {
+  /* Override Layout.css main-content padding-top on mobile */
+  .main-content {
+    padding-top: 70px !important;
+  }
+
+  .timeless-board-header {
+    margin-top: 60px;
+  }
+
+  .time-remaining-header {
+    padding: 0;
+  }
+
+  .timeless-board-info ul,
+  .timeless-board-info li {
+    font-size: 0.85rem;
+  }
+
+  .level-button {
+    padding: 5px 8px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .timeless-board-title {
+    font-size: 2.5rem;
+  }
+
+  .timeless-board-header {
+    margin-top: 80px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .timeless-board-title {
+    font-size: 3rem;
+  }
+
+  .timeless-board-header {
+    margin-top: 80px;
+  }
+}
+
 .timeless-board-date {
-  color: #71bbe9;
+  color: var(--color-yellow);
   margin: 10px 0;
   font-size: 1.2rem;
 }
@@ -68,24 +116,59 @@
 }
 
 .board-type.bonus {
-  color: #71bbe9;
+  color: var(--color-blue);
   font-style: italic;
 }
 
 .pagination-btn {
-  padding: 10px 20px;
-  background-color: #f5ce45;
-  color: #1b1835;
-  border: 2px solid #eb5497;
-  border-radius: 4px;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  background: none;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 1rem;
+  position: relative;
+  transition: all 0.3s;
 }
 
-.pagination-btn:hover {
-  background-color: #eb5497;
-  color: #fff;
+/* Previous button - left-pointing triangle */
+.pagination-top-left .pagination-btn {
+  border-right: 30px solid var(--color-yellow);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.pagination-top-left .pagination-btn::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: -16px;
+  width: 0;
+  height: 0;
+  border-right: 24px solid var(--bg-yellow-50);
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+  z-index: -1;
+}
+
+.pagination-top-left .pagination-btn:hover {
+  border-right-color: var(--color-yellow);
+  filter: drop-shadow(0 0 8px rgba(245, 206, 69, 0.6));
+  transform: translateX(-3px);
+}
+
+/* Next button - right-pointing triangle */
+.pagination-top-right .pagination-btn {
+  border-left: 30px solid var(--color-yellow);
+  border-right: none;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.pagination-top-right .pagination-btn:hover {
+  border-left-color: var(--color-yellow);
+  filter: drop-shadow(0 0 8px rgba(245, 206, 69, 0.6));
+  transform: translateX(3px);
 }
 
 .pagination-btn:disabled {
@@ -96,19 +179,17 @@
 .timeless-board-content {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 0;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .level-selector {
-  background-color: rgba(27, 24, 53, 0.8);
   padding: 20px;
-  border-radius: 8px;
 }
 
 .level-selector-title {
-  color: #71bbe9;
+  color: var(--color-blue);
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
@@ -123,25 +204,73 @@
 }
 
 .level-button {
-  padding: 10px 20px;
-  background-color: #eb5497;
-  color: #fff;
-  border: 2px solid #eb5497;
+  padding: 12px 8px;
+  border: 2px solid;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.3s;
+  width: 150px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
 }
 
-.level-button.active {
-  background-color: #71bbe9;
-  border-color: #71bbe9;
+@media (min-width: 768px) {
+  .level-button {
+    font-size: 1.2rem;
+  }
+}
+
+/* Curious (level 4) - Green */
+.level-button.level-4 {
+  background-color: var(--bg-green-20);
+  border-color: var(--color-green);
+  color: var(--color-green);
+}
+
+.level-button.level-4.active {
+  background-color: var(--bg-green-20);
+  border-color: var(--color-green);
+  color: var(--color-green);
+  box-shadow: var(--glow-green-text), 0 0 15px rgba(51, 193, 91, 0.4);
+  transform: scale(1.05);
+}
+
+/* Curiouser (level 7) - Pink */
+.level-button.level-7 {
+  background-color: var(--bg-pink-40);
+  border-color: var(--color-pink);
+  color: var(--color-pink);
+}
+
+.level-button.level-7.active {
+  background-color: var(--bg-pink-40);
+  border-color: var(--color-pink);
+  color: var(--color-pink);
+  box-shadow: var(--glow-pink-text), 0 0 15px rgba(235, 84, 151, 0.4);
+  transform: scale(1.05);
+}
+
+/* Rabbit Hole (level 10) - Purple */
+.level-button.level-10 {
+  background-color: var(--bg-purple-transparent);
+  border-color: var(--color-purple);
+  color: var(--color-purple);
+}
+
+.level-button.level-10.active {
+  background-color: var(--bg-purple-transparent);
+  border-color: var(--color-purple);
+  color: var(--color-purple);
+  box-shadow: 0 0 8px rgba(94, 76, 176, 0.6), 0 0 12px rgba(94, 76, 176, 0.4), 0 0 15px rgba(94, 76, 176, 0.3);
+  transform: scale(1.05);
 }
 
 .level-button:hover {
-  background-color: #f5ce45;
-  border-color: #f5ce45;
-  color: #1b1835;
+  opacity: 0.8;
 }
 
 .level-descriptions {
@@ -163,8 +292,20 @@
 }
 
 .level-name {
-  color: #eb5497;
   font-weight: bold;
+}
+
+/* Level name colors - only active one is visible */
+.level-description.active .level-name-4 {
+  color: var(--color-green);
+}
+
+.level-description.active .level-name-7 {
+  color: var(--color-pink);
+}
+
+.level-description.active .level-name-10 {
+  color: var(--color-purple);
 }
 
 .play-button-container {
@@ -173,90 +314,142 @@
 }
 
 .play-now-btn-small {
-  padding: 10px 25px;
-  background-color: #f5ce45;
-  color: #1b1835;
-  border: 3px solid #eb5497;
+  padding: 12px 25px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
+  transition: all 0.3s;
 }
 
-.play-now-btn-small:hover {
-  background-color: #eb5497;
-  color: #fff;
+@media (min-width: 768px) {
+  .play-now-btn-small {
+    font-size: 1.2rem;
+  }
+}
+
+/* Play button colors based on selected level */
+.play-level-4 {
+  background-color: var(--bg-green-20);
+  color: var(--color-green);
+  border: 3px solid var(--color-green);
+}
+
+.play-level-4:hover {
+  background-color: var(--bg-green-20);
+  box-shadow: var(--glow-green-text), 0 0 15px rgba(51, 193, 91, 0.4);
+}
+
+.play-level-7 {
+  background-color: var(--bg-pink-40);
+  color: var(--color-pink);
+  border: 3px solid var(--color-pink);
+}
+
+.play-level-7:hover {
+  background-color: var(--bg-pink-40);
+  box-shadow: var(--glow-pink-text), 0 0 15px rgba(235, 84, 151, 0.4);
+}
+
+.play-level-10 {
+  background-color: var(--bg-purple-transparent);
+  color: var(--color-purple);
+  border: 3px solid var(--color-purple);
+}
+
+.play-level-10:hover {
+  background-color: var(--bg-purple-transparent);
+  box-shadow: 0 0 8px rgba(94, 76, 176, 0.6), 0 0 12px rgba(94, 76, 176, 0.4), 0 0 15px rgba(94, 76, 176, 0.3);
 }
 
 .timeless-scores-container {
-  background-color: rgba(27, 24, 53, 0.8);
   padding: 20px;
-  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .timeless-scores-table {
-  width: 100%;
   border-collapse: collapse;
+  border: none;
+  margin: 0 auto;
+  width: 700px;
 }
 
 .timeless-scores-table th {
-  color: #eb5497;
+  color: var(--color-pink);
   text-align: left;
   padding: 10px;
-  border-bottom: 2px solid #eb5497;
+  border: none;
+}
+
+.timeless-scores-table th:first-child,
+.timeless-scores-table td:first-child {
+  width: 300px;
+  padding-right: 15px;
+}
+
+.timeless-scores-table th:nth-child(2),
+.timeless-scores-table td:nth-child(2) {
+  width: 400px;
+}
+
+.timeless-scores-table td:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .timeless-scores-table td {
   padding: 10px;
-  border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  border: none;
 }
 
 .player-info {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.player-avatar,
-.player-avatar-initial {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid;
+.player-info span,
+.player-info a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  display: inline-block;
 }
 
-.player-avatar-initial {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.2rem;
+.player-info .profile-pic-standard {
+  flex-shrink: 0;
 }
+
+/* ProfilePicture component handles its own borders, so no need for border styles here */
 
 .score-percentage-bar {
-  width: 100%;
+  width: 400px;
   height: 30px;
-  background-color: #eb5497;
+  background-color: var(--color-pink);
   border-radius: 4px;
-  overflow: hidden;
   position: relative;
 }
 
 .score-percentage-fill {
   height: 100%;
-  background-color: #71bbe9;
+  background-color: var(--color-blue);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #1b1835;
   font-weight: bold;
   transition: width 0.3s;
+  box-shadow: var(--glow-blue-shadow-strong);
 }
 
 .current-user-score {
-  background-color: rgba(113, 187, 233, 0.2);
+  background-color: var(--bg-blue-20);
 }
 
 .time-remaining {
@@ -268,20 +461,35 @@
 
 .time-remaining-header {
   text-align: center;
-  padding: 15px;
+  padding: 0;
   margin-top: 15px;
 }
 
 .time-label {
-  color: #f5ce45;
+  color: var(--color-yellow);
   font-weight: bold;
+  font-size: 1.5rem;
+  font-family: "Bungee Hairline", sans-serif;
 }
 
 .time-value {
-  color: #71bbe9;
-  font-size: 1.5rem;
+  color: var(--color-green); /* Default green */
+  font-size: 2rem;
   font-weight: bold;
   font-family: monospace;
+}
+
+/* Timer color states based on remaining time */
+.time-remaining-header.timer-green .time-value {
+  color: var(--color-green); /* Green - 2+ hours (default) */
+}
+
+.time-remaining-header.timer-yellow .time-value {
+  color: var(--color-yellow); /* Yellow - less than 2 hours */
+}
+
+.time-remaining-header.timer-pink .time-value {
+  color: var(--color-pink); /* Pink - less than 30 minutes */
 }
 
 .play-timelessboard-container {
@@ -293,9 +501,9 @@
 
 .play-now-btn {
   padding: 15px 40px;
-  background-color: #f5ce45;
+  background-color: var(--color-yellow);
   color: #1b1835;
-  border: 4px solid #eb5497;
+  border: 4px solid var(--color-pink);
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
@@ -304,7 +512,7 @@
 }
 
 .play-now-btn:hover {
-  background-color: #eb5497;
+  background-color: var(--color-pink);
   color: #fff;
 }
 
@@ -315,18 +523,26 @@
 .timeless-board-info {
   text-align: left;
   margin-top: 20px;
-  padding: 20px;
-  background-color: rgba(27, 24, 53, 0.8);
-  border-radius: 8px;
+}
+
+.timeless-board-info ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.timeless-board-info li {
+  margin-bottom: 10px;
+  line-height: 1.6;
 }
 
 .timeless-board-info .blue {
-  color: #71bbe9;
+  color: var(--color-blue);
   margin-bottom: 15px;
 }
 
 .timeless-board-info .yellow {
-  color: #f5ce45;
+  color: var(--color-yellow);
   margin-top: 15px;
   line-height: 1.6;
 }
@@ -343,26 +559,25 @@
 }
 
 .levels-list .pink {
-  color: #eb5497;
+  color: var(--color-pink);
   font-weight: bold;
 }
 
 .timeless-board-solution {
   margin-top: 40px;
   padding-top: 30px;
-  border-top: 2px solid #71bbe9;
+  border-top: 2px solid var(--color-blue);
   width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
 }
 
 .solution-title {
-  color: #71bbe9;
+  color: var(--color-blue);
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 20px;
   text-align: center;
-  font-family: "Monoton", cursive;
 }
 
 .board-display-container {
@@ -386,7 +601,7 @@
 }
 
 .color-explanation-banner .color-green {
-  color: #71bbe9;
+  color: var(--color-blue);
 }
 
 .timeless-word-lists {
@@ -405,7 +620,7 @@
   overflow-y: visible;
   box-sizing: border-box;
   align-items: flex-start;
-  background-color: #13132a; /* Match GameRoom.css #word-lists */
+  background: none; /* Match GameRoom.css #word-lists */
  /* Match GameRoom.css */
 }
 
@@ -455,7 +670,7 @@
 }
 
 .daily-word-list-section .word-list-words .word.green {
-  color: rgb(81, 164, 81);
+  color: var(--color-green);
 }
 
 .daily-word-list-section .word-list-words .word.default-white {
@@ -480,7 +695,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: #1b1835;
-  border: 2px solid #71bbe9;
+  border: 2px solid var(--color-blue);
   border-radius: 8px;
   padding: 20px;
   max-width: 500px;
@@ -489,7 +704,7 @@
 }
 
 .definition-popup-content h3 {
-  color: #f5ce45;
+  color: var(--color-yellow);
   margin: 0 0 10px 0;
 }
 
@@ -501,7 +716,7 @@
 
 .definition-popup-content button {
   padding: 8px 16px;
-  background-color: #71bbe9;
+  background-color: var(--color-blue);
   color: #1b1835;
   border: none;
   border-radius: 4px;
@@ -516,6 +731,30 @@
   font-size: 1.2rem;
 }
 
+/* Remove max-height and scrollbars from word lists - applied globally */
+#word-lists {
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+.word-sublist {
+  max-height: none !important;
+  height: auto !important;
+}
+
+.word-sublist-scroll {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+}
+
+.word-list-table {
+  height: auto !important;
+  max-height: none !important;
+}
+
 @media (max-width: 768px) {
   .timeless-board-pagination {
     flex-direction: column;
@@ -526,6 +765,19 @@
   .pagination-right {
     width: 100%;
     text-align: center;
+  }
+
+  .timeless-scores-table {
+    width: auto;
+  }
+
+  .timeless-scores-table th:nth-child(2),
+  .timeless-scores-table td:nth-child(2) {
+    width: 150px;
+  }
+
+  .score-percentage-bar {
+    width: 150px;
   }
 }
 
