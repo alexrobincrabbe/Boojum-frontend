@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBoardTheme } from '../../contexts/BoardThemeContext';
 import { lobbyAPI } from '../../services/api';
 import { WordLists } from '../game-room/components/WordLists';
+import { Username } from '../../components/Username';
+import { ProfilePicture } from '../../components/ProfilePicture';
 import { toast } from 'react-toastify';
 import './DailyBoardPage.css';
 import '../game-room/GameRoom.css';
@@ -209,28 +211,31 @@ export default function DailyBoardPage() {
       <div className="daily-board-container">
         {/* Pagination Controls */}
         <div className="daily-board-pagination">
-          <button
-            className="pagination-btn"
-            onClick={handlePrevious}
-            disabled={!hasPrevious}
-          >
-            ← Previous
-          </button>
+          <div className="pagination-top-left">
+            {hasPrevious && (
+              <div className="pagination-left-container">
+                <button className="pagination-btn" onClick={handlePrevious} aria-label="Previous">
+                </button>
+                <span className="pagination-text">Previous</span>
+              </div>
+            )}
+          </div>
           <div className="pagination-info">
             Board {currentPage + 1} of {boards.length}
           </div>
-          <button
-            className="pagination-btn"
-            onClick={handleNext}
-            disabled={!hasNext}
-          >
-            Next →
-          </button>
+          {hasNext && (
+            <div className="pagination-top-right">
+              <div className="pagination-right-container">
+                <span className="pagination-text">Next</span>
+                <button className="pagination-btn" onClick={handleNext} aria-label="Next">
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Board Info */}
         <div className="daily-board-header">
-          <h1 className="daily-board-title">{currentBoard.title}</h1>
           <div className="daily-board-date">{formatDate(currentBoard.date)}</div>
           <div className="daily-board-meta">
             {currentBoard.type === 'bonus' && (
@@ -251,7 +256,7 @@ export default function DailyBoardPage() {
               </button>
             ) : (
               <div className="login-prompt">
-                <em>Please log in to play the daily boards</em>
+                <em>Please <Link to="/login" style={{ color: 'var(--color-blue)', textShadow: 'var(--glow-blue-text)', textDecoration: 'none' }}>log in</Link> to play the Everyday Boards</em>
               </div>
             )}
           </div>
@@ -259,14 +264,15 @@ export default function DailyBoardPage() {
 
         {/* High Scores Table */}
         <div className="daily-board-scores-section">
+          <h1 className="daily-board-title">{currentBoard.title}</h1>
           <h2 className="scores-title">High Scores</h2>
           {currentBoard.scores.length > 0 ? (
             <div className="scores-table-container">
               <table className="scores-table">
                 <thead>
                   <tr>
-                    <th className="rank-col">Rank</th>
-                    <th className="player-col">Player</th>
+                    <th className="rank-col"></th>
+                    <th className="player-col"></th>
                     <th className="score-col">Score</th>
                     <th className="word-col">Best Word</th>
                     <th className="words-col">Words</th>
@@ -283,39 +289,32 @@ export default function DailyBoardPage() {
                       <td className="rank-col">{index + 1}</td>
                       <td className="player-col">
                         <div className="player-info">
-                          {score.player_profile_picture && 
-                           !score.player_profile_picture.includes('placeholder') && 
-                           !score.player_profile_picture.includes('default.png') ? (
-                            <img
-                              src={score.player_profile_picture}
-                              alt={score.player_display_name}
-                              className="player-avatar"
-                            />
-                          ) : (
-                            <div className="player-avatar-placeholder">
-                              {score.player_display_name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          <span
-                            className="player-name"
-                            style={{ color: score.player_chat_color }}
-                          >
-                            {score.player_display_name}
-                          </span>
+                          <ProfilePicture
+                            profilePictureUrl={score.player_profile_picture}
+                            chatColor={score.player_chat_color}
+                            size={40}
+                            showBorder={true}
+                          />
+                          <Username
+                            username={score.player_display_name}
+                            chatColor={score.player_chat_color}
+                          />
                         </div>
                       </td>
-                      <td className="score-col">{score.score} pts</td>
+                      <td className="score-col">{score.score} <span className="score-pts">pts</span></td>
                       <td className="word-col">
-                        {score.best_word ? (
-                          <>
-                            {score.best_word}{' '}
+                        <div className="best-word-container">
+                          {score.best_word ? (
+                            <span className="best-word-text">{score.best_word}</span>
+                          ) : (
+                            <span className="hidden-word">*****</span>
+                          )}
+                          {score.best_word_score != null && score.best_word_score !== '' && (
                             <span className="word-score">
-                              ({score.best_word_score}pts)
+                              {score.best_word_score}<span className="word-score-pts">pts</span>
                             </span>
-                          </>
-                        ) : (
-                          <span className="hidden-word">*****</span>
-                        )}
+                          )}
+                        </div>
                       </td>
                       <td className="words-col">{score.number_of_words}</td>
                     </tr>
@@ -403,6 +402,7 @@ export default function DailyBoardPage() {
             {selectedPlayerIds.size === 0 && (
               <div className="player-filter-banner">
                 <span className="filter-label">Showing: All players</span>
+                <span className="filter-hint">select players to add filters</span>
               </div>
             )}
             {/* Word Lists - using unified component */}

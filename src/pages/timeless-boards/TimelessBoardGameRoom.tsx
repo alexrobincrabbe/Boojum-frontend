@@ -1238,31 +1238,33 @@ export default function TimelessBoardGameRoom() {
       </h1>
 
       <div className="timer-controls-container">
-        <button 
-          className={`hint-button ${
-            hintActive ? 'hint-active' : 
-            hintLoading ? 'hint-activating' : 
-            'hint-inactive'
-          } ${hintGlowInitial ? 'hint-glow-initial' : ''} ${hintActiveGlow ? 'hint-active-glow' : ''}`}
-          id="hints"
-          onClick={handleHintClick}
-          disabled={hintsRemaining <= 0 || hintActive || hintLoading}
-        >
-          {hintLoading ? (
-            <>
-              <span>Activating</span>
-            </>
-          ) : hintActive ? (
-            <>
-              <span>Active</span>
-            </>
-          ) : (
-            <>
-              <span>Clues:</span>
-              <span className="hints-remaining">{hintsRemaining}</span>
-            </>
-          )}
-        </button>
+        {user && (
+          <button 
+            className={`hint-button ${
+              hintActive ? 'hint-active' : 
+              hintLoading ? 'hint-activating' : 
+              'hint-inactive'
+            } ${hintGlowInitial ? 'hint-glow-initial' : ''} ${hintActiveGlow ? 'hint-active-glow' : ''}`}
+            id="hints"
+            onClick={handleHintClick}
+            disabled={hintsRemaining <= 0 || hintActive || hintLoading}
+          >
+            {hintLoading ? (
+              <>
+                <span>Activating</span>
+              </>
+            ) : hintActive ? (
+              <>
+                <span>Active</span>
+              </>
+            ) : (
+              <>
+                <span>Clues:</span>
+                <span className="hints-remaining">{hintsRemaining}</span>
+              </>
+            )}
+          </button>
+        )}
         <div className="timer-display">
           <span className="timer-label">Time remaining:</span>
           <span 
@@ -1275,7 +1277,7 @@ export default function TimelessBoardGameRoom() {
             {formatTime(timeRemaining)}
           </span>
         </div>
-        {showSubmitButton && (
+        {user && showSubmitButton && (
           <button
             className="submit-score-button-header"
             onClick={handleSubmitScore}
@@ -1305,11 +1307,18 @@ export default function TimelessBoardGameRoom() {
         <>
           <div className="game-room-container">
             <div className="game-board-section">
-              <WordCounters 
-                wordCounts={wordCounts}
-                wordCountMax={wordCountMax}
-                gameStatus="playing"
-              />
+              <div className="word-counters-wrapper">
+                <WordCounters 
+                  wordCounts={wordCounts}
+                  wordCountMax={wordCountMax}
+                  gameStatus="playing"
+                />
+                {!user && (
+                  <div className="guest-clues-message">
+                    Log in to get clues!
+                  </div>
+                )}
+              </div>
               <GameBoard
                 gameState={{
                   roomId: `timeless_${timelessBoardId}`,

@@ -9,6 +9,7 @@ import { WordLists } from '../game-room/components/WordLists';
 import { ScoresModal } from '../game-room/components/ScoresModal';
 // WordData unused here
 import { toast } from 'react-toastify';
+import { lobbyAPI } from '../../services/api';
 import '../game-room/GameRoom.css';
 
 export default function DailyBoardGameRoom() {
@@ -24,6 +25,7 @@ export default function DailyBoardGameRoom() {
   const [showStartButton, setShowStartButton] = useState(true);
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [boardTitle, setBoardTitle] = useState<string>('Daily Board');
 
   useEffect(() => {
     if (!isGuest) {
@@ -44,6 +46,26 @@ export default function DailyBoardGameRoom() {
     localStorage.setItem('guest_name', name);
     setGuestName(name);
   }, [isGuest]);
+
+  // Fetch board title
+  useEffect(() => {
+    const fetchBoardTitle = async () => {
+      if (!dailyBoardId) return;
+      
+      try {
+        const data = await lobbyAPI.getDailyBoards();
+        const boardsData = data.boards || [];
+        const board = boardsData.find((b: { id: number }) => b.id === parseInt(dailyBoardId, 10));
+        if (board?.title) {
+          setBoardTitle(board.title);
+        }
+      } catch (error) {
+        console.error('Error fetching board title:', error);
+      }
+    };
+
+    fetchBoardTitle();
+  }, [dailyBoardId]);
 
   // (Optional) this helps you avoid connecting before guestName exists
   const guestReady = !isGuest || !!guestName;
@@ -228,32 +250,25 @@ export default function DailyBoardGameRoom() {
       {gameState && (
         <div className="game-content">
           <div className="game-header">
-            <h1 style={{ color: '#71bbe9' }}>Daily Board</h1>
             {showBackButton && (
-              <button 
-                className="back-button"
-                onClick={() => {
-                  // Navigate to daily boards page with board ID to show the correct board
-                  if (dailyBoardId) {
-                    navigate(`/daily-boards?board=${dailyBoardId}`);
-                  } else {
-                    navigate('/daily-boards');
-                  }
-                }}
-                style={{
-                  marginLeft: '20px',
-                  padding: '8px 16px',
-                  backgroundColor: '#71bbe9',
-                  color: '#1b1835',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                }}
-              >
-                ← Back to Daily Boards
-              </button>
+              <div className="pagination-left-container">
+                <button 
+                  className="pagination-btn"
+                  onClick={() => {
+                    // Navigate to daily boards page with board ID to show the correct board
+                    if (dailyBoardId) {
+                      navigate(`/daily-boards?board=${dailyBoardId}`);
+                    } else {
+                      navigate('/daily-boards');
+                    }
+                  }}
+                  aria-label="Back to Everyday Boards"
+                >
+                </button>
+                <span className="pagination-text">Back to Everyday Boards</span>
+              </div>
             )}
+            <h1 className="daily-board-game-title">{boardTitle}</h1>
           </div>
 
           <div className="game-main-layout">

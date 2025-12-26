@@ -233,6 +233,37 @@
   cursor: not-allowed;
 }
 
+.word-counters-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.guest-clues-message {
+  position: absolute;
+  top: calc(100% + 25px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+  text-align: center;
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .guest-clues-message {
+    font-size: 0.9rem;
+    padding: 8px 15px;
+  }
+}
+
 .back-button {
   padding: 10px 20px;
   background-color: #71bbe9;
@@ -297,6 +328,7 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  position: relative;
 }
 
 .word-lists-section {

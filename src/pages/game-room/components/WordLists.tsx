@@ -323,7 +323,10 @@ export function WordLists({
 
           return (
             <div key={length} className="word-sublist" id={`word-length-${length}`}>
-              <strong>{length === '9+' ? '9+' : length} - letters</strong>
+              <strong className="word-sublist-header">
+                <span className="word-sublist-number">{length === '9+' ? '9+' : length} -</span>
+                <span className="word-sublist-label">letters</span>
+              </strong>
               <div 
                 className="word-sublist-scroll"
                 style={isFinished || isWaitingWithFinalScores ? { flexDirection: 'column' } : undefined}

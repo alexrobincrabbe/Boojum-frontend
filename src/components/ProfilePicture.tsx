@@ -67,8 +67,6 @@ export function ProfilePicture({
   };
 
   const imageUrl = getProfileImageUrl(profilePictureUrl);
-  // Always show border if chatColor is provided and showBorder is true (default)
-  const borderStyle = showBorder ? { border: `2px solid ${chatColor}`, borderRadius: '50%' } : {};
 
   const imageElement = (
     <img
@@ -77,14 +75,31 @@ export function ProfilePicture({
       className={`rounded-circle ${className}`}
       width={size}
       height={size}
-      style={borderStyle}
+      style={{ borderRadius: '50%', display: 'block' }}
     />
   );
 
+  const wrapperStyle = showBorder ? { 
+    border: `2px solid ${chatColor}`, 
+    borderRadius: '50%' as const, 
+    display: 'inline-block' as const,
+    width: `${size}px`,
+    height: `${size}px`,
+    overflow: 'hidden' as const,
+    boxSizing: 'border-box' as const,
+    transition: 'transform 0.3s ease'
+  } : { 
+    display: 'inline-block' as const,
+    width: `${size}px`,
+    height: `${size}px`,
+    overflow: 'hidden' as const,
+    transition: 'transform 0.3s ease'
+  };
+
   if (profileUrl) {
     return (
-      <div className="profile-pic-standard">
-        <Link to={`/profile/${profileUrl}`} style={{ textDecoration: 'none' }}>
+      <div className="profile-pic-standard" style={wrapperStyle}>
+        <Link to={`/profile/${profileUrl}`} style={{ textDecoration: 'none', display: 'block' }}>
           {imageElement}
         </Link>
       </div>
@@ -92,7 +107,7 @@ export function ProfilePicture({
   }
 
   return (
-    <div className="profile-pic-standard">
+    <div className="profile-pic-standard" style={wrapperStyle}>
       {imageElement}
     </div>
   );

@@ -20,8 +20,9 @@
   --bg-yellow-10: rgba(245, 206, 69, 0.1);
   --bg-yellow-50: rgba(245, 206, 69, 0.5);
   --bg-green-20: rgba(51, 193, 91, 0.2);
-  --bg-pink-60: rgba(235, 84, 151, 0.6);
+  --bg-pink-20: rgba(235, 84, 151, 0.2);
   --bg-pink-40: rgba(235, 84, 151, 0.4);
+  --bg-pink-60: rgba(235, 84, 151, 0.6);
   
   /* Glow effects for blue */
   --glow-blue-text: 0 0 4px rgba(113, 187, 233, 0.5), 0 0 8px rgba(113, 187, 233, 0.3), 0 0 12px rgba(113, 187, 233, 0.2);

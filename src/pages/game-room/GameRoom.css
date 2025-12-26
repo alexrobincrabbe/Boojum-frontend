@@ -155,15 +155,30 @@
 
 .game-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 20px;
   padding: 16px;
   border-radius: 8px;
 }
 
-.game-header h1 {
+.game-header h1:not(.daily-board-game-title) {
   margin: 0;
   font-size: 0.8rem;
+}
+
+.daily-board-game-title {
+  color: var(--color-green);
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .daily-board-game-title {
+    font-size: 3rem;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -171,8 +186,12 @@
         margin: 0px !important;
         font-size: 0.5rem !important;
       }
-  .game-header h1 {
+  .game-header h1:not(.daily-board-game-title) {
     font-size: 1.1rem;
+  }
+  
+  .daily-board-game-title {
+    font-size: 2rem;
   }
 }
 
@@ -243,21 +262,70 @@
 
 .rounded-circle {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: 30px;
-  width: 30px;
   border-radius: 50%;
-  border: 2px solid;
-  object-fit: cover;
+  /* Border is now handled by ProfilePicture component wrapper */
 }
 
-.rounded-circle:hover,
-.rounded-circle:active {
+.profile-pic-standard:hover {
   transform: scale(1.1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
+.rounded-circle:hover,
+.rounded-circle:active {
+  transform: none; /* Remove transform from image, handled by parent */
+}
+
 .guest-user {
   opacity: 0.7;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background-color: #71bbe9;
+  color: #1b1835;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.back-button:hover {
+  background-color: #f5ce45;
+}
+
+.pagination-left-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-text {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.pagination-btn {
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+  border-right: 30px solid var(--color-yellow);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.pagination-btn:hover {
+  border-right-color: var(--color-yellow);
+  filter: drop-shadow(0 0 8px rgba(245, 206, 69, 0.6));
+  transform: translateX(-3px);
 }
 
 .game-board {
@@ -1282,6 +1350,8 @@
 .word-lists-wrapper {
   width: 100%;
   overflow-x: auto;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 #word-lists {
@@ -1305,13 +1375,36 @@
   height: 170px;
   display: flex;
   flex-direction: row;
-  margin: 10px;
+  margin: 10px 10px 0 10px;
 }
 
 .word-sublist {
-  margin: 10px;
+  margin: 10px 10px 0 10px;
   max-height: none !important;
   height: auto !important;
+}
+
+.word-sublist-header {
+  display: inline-block;
+}
+
+.word-sublist-number,
+.word-sublist-label {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .word-sublist-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .word-sublist-number,
+  .word-sublist-label {
+    display: block;
+    line-height: 1.2;
+  }
 }
 
 .word-sublist-scroll {

@@ -191,10 +191,7 @@ setBoardsByLevel({
   };
 
   const handlePlay = () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+    // Guests can play timeless boards
     if (currentBoard?.id && currentBoard.time_remaining_seconds > 0) {
       navigate(`/timeless-boards/play/${currentBoard.id}/${currentLevel}`);
     } else {
@@ -331,24 +328,20 @@ setBoardsByLevel({
               </div>
             ))}
           </div>
-          {/* Play button */}
+          {/* Play button - available for guests too */}
           {!solutionRevealed && (
             <div className="play-button-container">
-              {isAuthenticated ? (
-                !currentBoard.played ? (
-                  <button className={`play-now-btn-small play-level-${currentLevel}`} onClick={handlePlay}>
-                    Play ({LEVELS.find(l => l.value === currentLevel)?.name})
-                  </button>
-                ) : (
-                  <div className="already-played">
-                    <em className="yellow">
-                      You have played this board on level -{' '}
-                      <span className="pink">{LEVELS.find(l => l.value === currentLevel)?.name}</span>.
-                    </em>
-                  </div>
-                )
+              {isAuthenticated && currentBoard.played ? (
+                <div className="already-played">
+                  <em className="yellow">
+                    You have played this board on level -{' '}
+                    <span className="pink">{LEVELS.find(l => l.value === currentLevel)?.name}</span>.
+                  </em>
+                </div>
               ) : (
-                <em className="yellow">Please log in to play the timeless boards</em>
+                <button className={`play-now-btn-small play-level-${currentLevel}`} onClick={handlePlay}>
+                  Play ({LEVELS.find(l => l.value === currentLevel)?.name})
+                </button>
               )}
             </div>
           )}

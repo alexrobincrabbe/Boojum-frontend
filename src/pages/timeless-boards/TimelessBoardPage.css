@@ -410,7 +410,6 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
-  overflow: hidden;
 }
 
 .player-info span,
