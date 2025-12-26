@@ -1076,7 +1076,10 @@ const Doodledum: React.FC = () => {
           {isAuthenticated ? (
             <>
               <p style={{ textAlign: 'center', marginBottom: '15px' }} className="blue">
-                Choose a difficulty level to start drawing. You'll receive a word to sketch, and others will try to guess it!
+                Choose a difficulty level to start drawing. You'll be given a word to sketch and others will try to guess what it is!
+              </p>
+              <p style={{ textAlign: 'center', marginBottom: '15px', fontSize: '0.9em' }} className="yellow">
+                Press cancel if you don't like the given word
               </p>
               {isFetchingDoodledum && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
@@ -1349,7 +1352,7 @@ const Doodledum: React.FC = () => {
                     </div>
                   ) : (
                     <div>
-                      <span style={{ color: item.chat_color }}>{item.user}</span>{' '}
+                      <span style={{ color: item.chat_color }}>{item.user}</span> guessed{' '}
                       <span className="blue" style={{ textTransform: 'uppercase' }}>{item.guess}</span>
                       {item.correct ? (
                         <span className="green" style={{ fontWeight: 'bold' }}> ✓ CORRECT!</span>

@@ -95,7 +95,6 @@
 }
 
 .doodle-fullscreen-word {
-  font-family: "Monoton", cursive;
   font-size: 1.5rem;
   color: #71bbe9;
   text-align: center;
@@ -110,7 +109,6 @@
 }
 
 .doodle-comments-title {
-  font-family: "Monoton", cursive;
   color: #f5ce45;
   font-size: 1.3rem;
   margin: 0 0 15px 0;

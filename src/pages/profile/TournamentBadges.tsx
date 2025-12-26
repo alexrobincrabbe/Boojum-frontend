@@ -139,7 +139,7 @@ const TournamentBadges = ({ tournamentWins }: TournamentBadgesProps) => {
                       }}
                     >
                       <Star 
-                        size={56} 
+                        size={42} 
                         className="medal-tier-star" 
                         style={{ fill: tierColor, stroke: '#000', strokeWidth: 1.5 }}
                       />

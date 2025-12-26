@@ -23,13 +23,15 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
   const [suggestions, setSuggestions] = useState<{ id: number; display_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [filterOnlinePlaymatesOnly, setFilterOnlinePlaymatesOnly] = useState(false);
+  const [filterOnlinePlaymatesOnly, setFilterOnlinePlaymatesOnly] = useState<boolean | null>(null); // Start as null, load from bundle
 
   useEffect(() => {
     const initFromBundle = () => {
       if (bundle) {
         setBuddies(bundle.buddies || []);
-        setFilterOnlinePlaymatesOnly(bundle.filter_online_playmates_only || false);
+        if (typeof bundle.filter_online_playmates_only !== 'undefined') {
+          setFilterOnlinePlaymatesOnly(bundle.filter_online_playmates_only);
+        }
         setLoading(false);
         return true;
       }
@@ -42,6 +44,11 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
       try {
         const data = await dashboardAPI.getDashboardData();
         setBuddies(data.buddies || []);
+        if (typeof data.filter_online_playmates_only !== 'undefined') {
+          setFilterOnlinePlaymatesOnly(data.filter_online_playmates_only);
+        } else {
+          setFilterOnlinePlaymatesOnly(false); // Default to false if not in response
+        }
       } catch (error: any) {
         // Silently handle 401 errors (unauthorized) - user shouldn't see this tab anyway
         if (error.response?.status === 401) {
@@ -113,6 +120,7 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
   };
 
   const handleFilterToggle = async (checked: boolean) => {
+    if (filterOnlinePlaymatesOnly === null) return; // Don't allow toggling while loading
     try {
       await dashboardAPI.updatePlaymatesFilter(checked);
       setFilterOnlinePlaymatesOnly(checked);
@@ -135,11 +143,12 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
       <div className="playmates-content">
         <div className="playmates-section">
           <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: 'rgba(19, 19, 42, 0.5)', borderRadius: '8px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', userSelect: 'none' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: filterOnlinePlaymatesOnly !== null ? 'pointer' : 'default', userSelect: 'none', opacity: filterOnlinePlaymatesOnly === null ? 0.6 : 1 }}>
               <input
                 type="checkbox"
-                checked={filterOnlinePlaymatesOnly}
+                checked={filterOnlinePlaymatesOnly ?? false}
                 onChange={(e) => handleFilterToggle(e.target.checked)}
+                disabled={filterOnlinePlaymatesOnly === null}
                 style={{ display: 'none' }}
               />
               <span
@@ -168,7 +177,7 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
                 />
               </span>
               <span style={{ color: '#fff', fontSize: '0.9rem' }}>
-                Filter online users to show only playmates
+                {filterOnlinePlaymatesOnly === null ? 'Loading...' : 'Filter online users to show only playmates'}
               </span>
             </label>
           </div>

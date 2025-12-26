@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
-import { Menu, X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
+import { Menu, X, Bell, BarChart3, Pin, PinOff, Speech } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
@@ -172,6 +172,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatPollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rightSidebarRef = useRef<HTMLElement>(null);
 
   // Activities state
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -287,7 +288,9 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     const loadUsersOnline = async () => {
       try {
-        const data = await lobbyAPI.getUsersOnline();
+        // Pass filter preference to backend
+        const filterParam = isAuthenticated && showPlaymatesOnly ? 'true' : 'false';
+        const data = await lobbyAPI.getUsersOnline(filterParam);
         setUsersOnline(data.users || []);
         setOnlineCount(data.online_count || 0);
       } catch (error: any) {
@@ -319,7 +322,7 @@ const Layout = ({ children }: LayoutProps) => {
       clearInterval(userInterval);
       clearInterval(countInterval);
     };
-  }, []);
+  }, [isAuthenticated, showPlaymatesOnly]);
 
   // Load playmates list and filter preference once for authenticated users (for filtering online list)
   useEffect(() => {
@@ -340,6 +343,10 @@ const Layout = ({ children }: LayoutProps) => {
       }
     };
     loadPlaymates();
+    
+    // Reload playmates and filter preference periodically to sync with dashboard changes
+    const interval = setInterval(loadPlaymates, 5000); // Every 5 seconds
+    return () => clearInterval(interval);
   }, [isAuthenticated]);
 
   // Load poll data
@@ -447,6 +454,16 @@ const Layout = ({ children }: LayoutProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
+  // Scroll right sidebar to top when it opens
+  useEffect(() => {
+    if (rightSidebarOpen && rightSidebarRef.current) {
+      // Small delay to ensure the sidebar is rendered
+      setTimeout(() => {
+        rightSidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
+  }, [rightSidebarOpen]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !isAuthenticated) return;
@@ -523,9 +540,9 @@ const Layout = ({ children }: LayoutProps) => {
     navigate('/login');
   };
 
-  const filteredUsers = showPlaymatesOnly
-    ? usersOnline.filter((u) => playmateIds.has(u.id))
-    : usersOnline;
+  // Backend already filters and sorts correctly based on filter_playmates_only parameter
+  // Just use the users returned from the backend (already limited to 20)
+  const filteredUsers = usersOnline;
 
   return (
     <div className="layout-container">
@@ -586,25 +603,20 @@ const Layout = ({ children }: LayoutProps) => {
             onClick={handleRightSidebarToggle}
             aria-label="Toggle profile menu"
           >
-            {isAuthenticated ? (
-              profilePictureUrl ? (
-                <img
-                  src={profilePictureUrl}
-                  alt="Profile"
-                  className="profile-button-image"
-                />
-              ) : (
-                <div className="profile-button-placeholder">
-                  {user?.username.charAt(0).toUpperCase()}
-                </div>
-              )
+            {isAuthenticated && profilePictureUrl ? (
+              <img
+                src={profilePictureUrl}
+                alt="Profile"
+                className="profile-button-image"
+              />
             ) : (
               <img
                 src="/images/default.png"
-                alt="Guest"
+                alt={isAuthenticated ? "Profile" : "Guest"}
                 className="profile-button-image"
               />
             )}
+            <img src="/images/chat.png" alt="Chat" className="chat-badge" />
           </button>
         </div>
       </nav>
@@ -614,7 +626,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="players-online-container">
           <div className="players-online-count-label">
             <div>
-              Online: <span className="players-online-count-number">{onlineCount}</span>
+              <span>Online:</span> <span className="players-online-count-number">{onlineCount}</span>
             </div>
             {guestsOnline > 0 && (
               <div>
@@ -778,6 +790,27 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
           </div>
           <div className="nav-section">
+            {leftSidebarOpen && <div className="nav-section-title">More</div>}
+            <Link
+              to="/leaderboards"
+              className={`nav-link ${location.pathname.startsWith('/leaderboards') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>High Scores</span>}
+            </Link>
+            <Link
+              to="/forum"
+              className={`nav-link ${location.pathname.startsWith('/forum') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>Forum</span>}
+            </Link>
+          </div>
+          <div className="nav-section">
             {leftSidebarOpen && <div className="nav-section-title">Tournament</div>}
             <Link
               to="/tournament"
@@ -801,41 +834,6 @@ const Layout = ({ children }: LayoutProps) => {
             )}
           </div>
         </nav>
-        {/* Activities Feed */}
-        <div className="sidebar-activities">
-          <h3 className="sidebar-section-title">Activities</h3>
-          <div className="sidebar-activities-feed">
-            {activities.length > 0 ? (
-              <ul className="sidebar-activities-list">
-                {activities.map((activity, idx) => (
-                  <li key={idx} className="sidebar-activity-item">
-                    <strong>
-                      <Username
-                        username={activity.username}
-                        profileUrl={activity.profile_url}
-                        chatColor={activity.chat_color}
-                        className="sidebar-activity-username"
-                        onClick={() => {
-                          if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                        }}
-                      />
-                    </strong>
-                    <ActivityDescription 
-                      html={activity.description}
-                      onLinkClick={() => {
-                        if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                      }}
-                    />
-                    <br />
-                    <small className="sidebar-activity-timestamp">{activity.timestamp_ago}</small>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="sidebar-no-activities">No recent activities</p>
-            )}
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -844,10 +842,13 @@ const Layout = ({ children }: LayoutProps) => {
       </main>
 
       {/* Right Sidebar */}
-      <aside className={`right-sidebar ${rightSidebarOpen ? 'open' : 'closed'} ${rightSidebarPinned ? 'pinned' : ''}`}>
+      <aside 
+        ref={rightSidebarRef}
+        className={`right-sidebar ${rightSidebarOpen ? 'open' : 'closed'} ${rightSidebarPinned ? 'pinned' : ''}`}
+      >
         <nav className="sidebar-nav">
-          {/* Dashboard link - visible to all users (guests and authenticated) */}
-          <div className="nav-link-with-pin">
+          {/* Dashboard, Profile, and Login/Logout links */}
+          <div className="nav-links-grid">
             <Link
               to="/dashboard"
               className={`nav-link ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
@@ -857,6 +858,41 @@ const Layout = ({ children }: LayoutProps) => {
             >
               <span>Dashboard</span>
             </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to={`/profile/${user?.username.toLowerCase()}`}
+                  className={`nav-link ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
+                  onClick={() => {
+                    if (!rightSidebarPinned) setRightSidebarOpen(false);
+                  }}
+                >
+                  <span>Profile</span>
+                </Link>
+                <button
+                  className="nav-link logout-link"
+                  onClick={handleLogout}
+                >
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="nav-link"
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
+              >
+                <span>Login</span>
+              </Link>
+            )}
+          </div>
+        </nav>
+        {/* Lobby Chat */}
+        <div className="sidebar-chat">
+          <div className="sidebar-chat-header">
+            <h3 className="sidebar-section-title">Lobby Chat</h3>
             {isTabletOrDesktop && (
               <button
                 className="sidebar-pin-button-inline"
@@ -875,78 +911,6 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
             )}
           </div>
-          
-          {isAuthenticated ? (
-            <>
-              <Link
-                to={`/profile/${user?.username.toLowerCase()}`}
-                className={`nav-link ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!rightSidebarPinned) setRightSidebarOpen(false);
-                }}
-              >
-                <span>Profile</span>
-              </Link>
-              <Link
-                to="/leaderboards"
-                className={`nav-link ${location.pathname.startsWith('/leaderboards') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!rightSidebarPinned) setRightSidebarOpen(false);
-                }}
-              >
-                <span>High Scores</span>
-              </Link>
-              <Link
-                to="/forum"
-                className={`nav-link ${location.pathname.startsWith('/forum') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!rightSidebarPinned) setRightSidebarOpen(false);
-                }}
-              >
-                <span>Forum</span>
-              </Link>
-              <button
-                className="nav-link logout-link"
-                onClick={handleLogout}
-              >
-                <span>Logout</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/leaderboards"
-                className={`nav-link ${location.pathname.startsWith('/leaderboards') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!rightSidebarPinned) setRightSidebarOpen(false);
-                }}
-              >
-                <span>High Scores</span>
-              </Link>
-              <Link
-                to="/forum"
-                className={`nav-link ${location.pathname.startsWith('/forum') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!rightSidebarPinned) setRightSidebarOpen(false);
-                }}
-              >
-                <span>Forum</span>
-              </Link>
-              <Link
-                to="/login"
-                className="nav-link"
-                onClick={() => {
-                  if (!rightSidebarPinned) setRightSidebarOpen(false);
-                }}
-              >
-                <span>Login</span>
-              </Link>
-            </>
-          )}
-        </nav>
-        {/* Lobby Chat */}
-        <div className="sidebar-chat">
-          <h3 className="sidebar-section-title">Lobby Chat</h3>
           <div className="sidebar-chat-messages" id="sidebar-messages">
             {chatMessages.map((msg, idx) => {
               // Special handling for TheHerald messages
@@ -991,6 +955,41 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
             )}
           </form>
+        </div>
+        {/* Activities Feed */}
+        <div className="sidebar-activities">
+          <h3 className="sidebar-section-title">Activities</h3>
+          <div className="sidebar-activities-feed">
+            {activities.length > 0 ? (
+              <ul className="sidebar-activities-list">
+                {activities.map((activity, idx) => (
+                  <li key={idx} className="sidebar-activity-item">
+                    <strong>
+                      <Username
+                        username={activity.username}
+                        profileUrl={activity.profile_url}
+                        chatColor={activity.chat_color}
+                        className="sidebar-activity-username"
+                        onClick={() => {
+                          if (!isDesktop && !rightSidebarPinned) setRightSidebarOpen(false);
+                        }}
+                      />
+                    </strong>
+                    <ActivityDescription 
+                      html={activity.description}
+                      onLinkClick={() => {
+                        if (!isDesktop && !rightSidebarPinned) setRightSidebarOpen(false);
+                      }}
+                    />
+                    <br />
+                    <small className="sidebar-activity-timestamp">{activity.timestamp_ago}</small>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="sidebar-no-activities">No recent activities</p>
+            )}
+          </div>
         </div>
       </aside>
 

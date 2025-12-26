@@ -84,6 +84,13 @@ const LobbyPage = () => {
     return '';
   };
 
+  const getGameTypeForLeaderboard = (room: Room): string => {
+    if (room.one_shot) return 'one_shot';
+    if (room.bonus) return 'bonus';
+    if (room.timer === 180) return 'long_game';
+    return 'normal';
+  };
+
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;
   }
@@ -103,29 +110,42 @@ const LobbyPage = () => {
           <div className="lobby-section rooms-section">
             <div className="rooms-list">
               {rooms.map((room) => (
-                <Link
-                  key={room.room_id}
-                  to={`/rooms/guest/${room.room_slug}/`}
-                  className="room-link"
-                >
-                  <div className="room-card" style={{ borderColor: room.color }}>
-                    <h2 className="room-title" style={{ color: room.color }}>
-                      {room.room_name}
-                      <span className="room-playing">
-                        <strong>Playing:</strong> {roomUsers[room.room_slug] || 0}
-                      </span>
-                    </h2>
-                    <div className="room-details">
-                      {(() => {
-                        const roomType = getRoomType(room);
-                        return roomType === 'Bonus Letters' || roomType === 'One Word' ? (
-                          <span className="room-rules">{roomType}</span>
-                        ) : null;
-                      })()}
-                      <span className="duration">{room.timer} seconds</span>
+                <div key={room.room_id} className="room-card-wrapper">
+                  <Link
+                    to={`/rooms/guest/${room.room_slug}/`}
+                    className="room-link"
+                  >
+                    <div className="room-card" style={{ borderColor: room.color }}>
+                      <h2 className="room-title" style={{ color: room.color }}>
+                        {room.room_name}
+                        <span className="room-playing">
+                          <strong>Playing:</strong>{' '}
+                          <span 
+                            className={`room-user-count ${(roomUsers[room.room_slug] || 0) === 0 ? 'zero' : 'greater-than-zero'}`}
+                          >
+                            {roomUsers[room.room_slug] || 0}
+                          </span>
+                        </span>
+                      </h2>
+                      <div className="room-details">
+                        {(() => {
+                          const roomType = getRoomType(room);
+                          return roomType === 'Bonus Letters' || roomType === 'One Word' ? (
+                            <span className="room-rules">{roomType}</span>
+                          ) : null;
+                        })()}
+                        <span className="duration">{room.timer} seconds</span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                  <Link
+                    to={`/leaderboards?gameType=${getGameTypeForLeaderboard(room)}&period=weekly`}
+                    className="room-highscores-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    High Scores
+                  </Link>
+                </div>
               ))}
             </div>
           </div>

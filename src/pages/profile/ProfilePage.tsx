@@ -51,6 +51,7 @@ interface Profile {
   about_me: string | null;
   join_date_formatted: string | null;
   display_name: string;
+  chat_color: string;
   name: string | null;
   age: string | null;
   country: string | null;
@@ -319,19 +320,20 @@ const ProfilePage = () => {
       case 'content':
         return (
           <div key="content" className="row profile-content-row">
-            {/* Left Column - About Me */}
-            <div id="about-me-col" className="col-12 col-md-4 about-me-col">
-              <AboutMeSection 
-                aboutMe={isEditMode ? formData.about_me : profile.about_me}
+            {/* Left Column - Personal Details */}
+            <div className="col-12 col-md-4 personal-details-col">
+              <PersonalDetailsSection 
+                profile={profile}
+                formData={formData}
                 isEditMode={isEditMode}
                 onChange={handleInputChange}
               />
             </div>
 
-            {/* Center Column - Game Details */}
+            {/* Center Column - Game Stats */}
             <div className="col-12 col-md-4 game-details-col">
               <div id="game-details-container">
-                <h2>Game Details</h2>
+                <h2>Game Stats</h2>
                 <div id="game-details">
                   <NormalGameStats 
                     gameStats={profile.game_stats}
@@ -354,11 +356,10 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Right Column - Personal Details */}
-            <div className="col-12 col-md-4 personal-details-col">
-              <PersonalDetailsSection 
-                profile={profile}
-                formData={formData}
+            {/* Right Column - About Me */}
+            <div id="about-me-col" className="col-12 col-md-4 about-me-col">
+              <AboutMeSection 
+                aboutMe={isEditMode ? formData.about_me : profile.about_me}
                 isEditMode={isEditMode}
                 onChange={handleInputChange}
               />
@@ -444,8 +445,16 @@ const ProfilePage = () => {
       <div className="row">
         <div className="col">
           <div id="profile-name-container">
-            <h1 id="profile-name">
-              {profile.display_name}'s &nbsp;&nbsp;Little &nbsp;&nbsp;Corner
+            <h1 
+              id="profile-name"
+              style={{ 
+                color: profile.chat_color || '#f5ce45',
+                textShadow: profile.chat_color === '#71bbe9' || profile.chat_color === 'rgb(113, 187, 233)'
+                  ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
+                  : 'none'
+              }}
+            >
+              {profile.display_name}
             </h1>
           </div>
         </div>
@@ -460,6 +469,7 @@ const ProfilePage = () => {
               isOwnProfile={isOwnProfile}
               isEditMode={isEditMode}
               onFileChange={handleFileChange}
+              chatColor={profile.chat_color}
             />
             {showCropModal && imageToCrop && (
               <ImageCropModal
@@ -468,10 +478,6 @@ const ProfilePage = () => {
                 onCropComplete={handleCropComplete}
               />
             )}
-            <div id="date-joined">
-              <span className="label">Joined: </span>
-              {profile.join_date_formatted || 'N/A'}
-            </div>
           </div>
         </div>
       </div>
@@ -498,7 +504,7 @@ const ProfilePage = () => {
                   const sectionContent = renderSection(sectionId);
                   if (!sectionContent) return null;
                   const title = sectionId === 'content' 
-                    ? 'About Me, Game Details & Personal Details'
+                    ? 'About Me, Game Stats & Personal Details'
                     : sectionId === 'doodles'
                     ? 'Doodles Album'
                     : sectionId === 'charts'
@@ -540,7 +546,7 @@ const AboutMeSection = ({
 }) => {
   return (
     <div id="who-are-you-container-outer">
-      <h2 id="who-are-you-header">Who are you?</h2>
+      <h2 id="who-are-you-header">Tell us more</h2>
       <div id="who-are-you-container">
         <div id="who-are-you">
           {isEditMode ? (
@@ -570,17 +576,27 @@ const ProfilePicture = ({
   profilePictureUrl, 
   isOwnProfile,
   isEditMode,
-  onFileChange
+  onFileChange,
+  chatColor
 }: { 
   profilePictureUrl: string | null;
   isOwnProfile: boolean;
   isEditMode: boolean;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  chatColor?: string;
 }) => {
   const hasPlaceholder = !profilePictureUrl || profilePictureUrl.includes('placeholder');
+  const borderColor = chatColor || '#71bbe9';
+  const boxShadow = `0 0 20px ${borderColor}`;
   
   return (
-    <div id="profile-pic">
+    <div 
+      id="profile-pic"
+      style={{
+        border: `5px solid ${borderColor}`,
+        boxShadow: boxShadow
+      }}
+    >
       {hasPlaceholder ? (
         <div className="profile-pic-default">
           <div className="default-avatar">👤</div>
@@ -630,10 +646,13 @@ const NormalGameStats = ({
           <span className="label">High Score:</span> {gameScores?.high_score || 0}
         </div>
         <div>
-          <span className="label">Best Word:</span> {gameScores?.best_word || 'N/A'}
+          <span className="label">Most Words:</span> {gameScores?.most_words || 0}
         </div>
         <div>
-          <span className="label">Most Words:</span> {gameScores?.most_words || 0}
+          <span className="label">Best Word:</span> {gameScores?.best_word || 'N/A'} 
+          {gameScores?.best_word && gameScores?.best_word_score && (
+            <> (<strong className="yellow">{gameScores.best_word_score}</strong>pts)</>
+          )}
         </div>
       </div>
     </div>
@@ -661,10 +680,13 @@ const BonusGameStats = ({
           <span className="label">High Score:</span> {gameScores?.high_score || 0}
         </div>
         <div>
-          <span className="label">Best Word:</span> {gameScores?.best_word || 'N/A'}
+          <span className="label">Most Words:</span> {gameScores?.most_words || 0}
         </div>
         <div>
-          <span className="label">Most Words:</span> {gameScores?.most_words || 0}
+          <span className="label">Best Word:</span> {gameScores?.best_word || 'N/A'} 
+          {gameScores?.best_word && gameScores?.best_word_score && (
+            <> (<strong className="yellow">{gameScores.best_word_score}</strong>pts)</>
+          )}
         </div>
       </div>
     </div>
@@ -692,10 +714,13 @@ const LongGameStats = ({
           <span className="label">High Score:</span> {gameScores?.high_score || 0}
         </div>
         <div>
-          <span className="label">Best Word:</span> {gameScores?.best_word || 'N/A'}
+          <span className="label">Most Words:</span> {gameScores?.most_words || 0}
         </div>
         <div>
-          <span className="label">Most Words:</span> {gameScores?.most_words || 0}
+          <span className="label">Best Word:</span> {gameScores?.best_word || 'N/A'} 
+          {gameScores?.best_word && gameScores?.best_word_score && (
+            <> (<strong className="yellow">{gameScores.best_word_score}</strong>pts)</>
+          )}
         </div>
       </div>
     </div>
@@ -723,16 +748,16 @@ const UnicornGameStats = ({
         </div>
         {normalScores && (
           <div>
-            <span className="label">Normal:</span> {normalScores.best_word} 
+            <span className="label green">Normal:</span> {normalScores.best_word} 
             (<strong className="yellow">{normalScores.best_word_score}</strong>pts) 
-            in <strong className="blue">{normalScores.time}s</strong>
+            in <strong className="blue"> {normalScores.time}s</strong>
           </div>
         )}
         {bonusScores && (
           <div>
             <span className="label">Bonus:</span> {bonusScores.best_word} 
             (<strong className="yellow">{bonusScores.best_word_score}</strong>pts) 
-            in <strong className="blue">{bonusScores.time}s</strong>
+            in <strong className="blue"> {bonusScores.time}s</strong>
           </div>
         )}
       </div>
@@ -762,7 +787,11 @@ const PersonalDetailsSection = ({
 }) => {
   return (
     <div id="tell-us-more-container">
-      <h2 id="tell-us-more-header">Tell us more</h2>
+      <h2 id="tell-us-more-header">Who are you?</h2>
+      <div id="date-joined">
+        <span className="label">Joined: </span>
+        {profile.join_date_formatted || 'N/A'}
+      </div>
       <div id="tell-us-more">
         <div id="pt-1">
           <div className="personal-details">
@@ -846,7 +875,7 @@ const PersonalDetailsSection = ({
             )}
           </div>
           <div className="personal-details">
-            <span className="blue">Fave quote:</span> 
+            <span className="blue">Favourite quote:</span> 
             {isEditMode ? (
               <input
                 type="text"

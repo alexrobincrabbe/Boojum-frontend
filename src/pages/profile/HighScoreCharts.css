@@ -45,7 +45,6 @@
 
 .charts-header h2 {
   color: #f5ce45;
-  font-family: "Monoton", cursive;
   margin: 0;
   font-size: 1.5rem;
 }
@@ -99,6 +98,89 @@
   flex-direction: column;
 }
 
+/* Position buttons absolutely in normal view (not in fullscreen) */
+.high-score-charts-container .chart-container .fullscreen-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  padding: 6px;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.high-score-charts-container .chart-container .view-toggle-slider {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #71bbe9;
+}
+
+.view-toggle-slider span:not(.slider-toggle):not(.slider-thumb) {
+  transition: opacity 0.3s ease;
+  font-weight: 500;
+  color: #71bbe9;
+}
+
+.view-toggle-slider span:not(.slider-toggle):not(.slider-thumb).active {
+  opacity: 1;
+  font-weight: bold;
+}
+
+.view-toggle-slider span:not(.slider-toggle):not(.slider-thumb):not(.active) {
+  opacity: 0.5;
+}
+
+.slider-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: rgba(113, 187, 233, 0.3);
+  border-radius: 12px;
+  border: 2px solid #71bbe9;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.slider-thumb {
+  width: 18px;
+  height: 18px;
+  background-color: #71bbe9;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.slider-toggle.slider-left .slider-thumb {
+  transform: translateX(0);
+}
+
+.slider-toggle.slider-right .slider-thumb {
+  transform: translateX(20px);
+}
+
+.view-toggle-slider:hover:not(:disabled) .slider-toggle {
+  background-color: rgba(113, 187, 233, 0.4);
+}
+
+.view-toggle-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .chart-container:hover {
   border-color: #71bbe9;
   box-shadow: 0 0 15px rgba(113, 187, 233, 0.3);
@@ -107,9 +189,8 @@
 .line-filters {
   display: flex;
   gap: 8px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .line-filter-button {
@@ -144,14 +225,37 @@
 
 .chart-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 15px;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: relative;
+  flex-direction: column;
+}
+
+/* In normal view, show title above filters */
+.high-score-charts-container .chart-container .chart-header h3 {
+  order: 1;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* In normal view, center the filters */
+.high-score-charts-container .chart-container .chart-header .line-filters {
+  justify-content: center;
+  width: 100%;
+  order: 2;
+}
+
+/* Hide chart-controls in normal view since buttons are absolute */
+.high-score-charts-container .chart-container .chart-header .chart-controls {
+  display: none;
 }
 
 .chart-container h3 {
   color: #71bbe9;
-  font-family: "Monoton", cursive;
   margin: 0;
   font-size: 1.2rem;
 }
@@ -252,7 +356,6 @@
   
   .rotate-prompt-content h3 {
     color: #f5ce45;
-    font-family: "Monoton", cursive;
     font-size: 1.8rem;
     margin: 0 0 15px 0;
   }
@@ -294,22 +397,114 @@
     padding: 5px;
   }
   
+  /* Put header and filters on same line on mobile fullscreen */
+  .fullscreen-chart-container .chart-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Use flexbox for header layout on mobile fullscreen - all on ONE LINE */
   .fullscreen-chart-container .chart-container .chart-header {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
     margin-bottom: 5px;
+    gap: 8px;
+    min-width: 0;
+    flex-direction: row;
+    position: relative;
+    justify-content: space-between;
   }
   
   .fullscreen-chart-container .chart-container .chart-header h3 {
     font-size: 1rem;
+    flex-shrink: 1;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    order: 0;
+    text-align: left;
+    display: block;
+    flex: 0 0 auto;
   }
   
-  .fullscreen-chart-container .chart-container .line-filters {
-    margin-bottom: 5px;
+  .fullscreen-chart-container .chart-container .chart-header .line-filters {
+    flex-shrink: 0;
+    margin: 0;
     gap: 4px;
+    display: flex;
+    flex-wrap: nowrap;
+    order: 1;
+    justify-content: center;
+    flex: 1 1 auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
   
-  .fullscreen-chart-container .chart-container .line-filter-button {
+  .fullscreen-chart-container .chart-container .chart-header .line-filter-button {
     font-size: 0.7rem;
     padding: 2px 6px;
+  }
+  
+  .fullscreen-chart-container .chart-container .chart-header .chart-controls {
+    display: none; /* Hide old controls */
+  }
+  
+  /* Position X button absolutely at top right */
+  .fullscreen-chart-container .chart-container .close-fullscreen-button-inline {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    padding: 6px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    flex-shrink: 0;
+    flex: 0 0 auto;
+  }
+  
+  .fullscreen-chart-container .chart-container .close-fullscreen-button-inline svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Make chart container relative so absolute positioning works for slider over chart */
+  .fullscreen-chart-container .chart-container {
+    position: relative;
+  }
+  
+  /* Position slider absolutely in FRONT of chart SVG at top left on mobile fullscreen */
+  .fullscreen-chart-container .chart-container .view-toggle-slider {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    z-index: 1000; /* High z-index to be in front of chart SVG */
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #71bbe9;
+  }
+  
+  /* Ensure chart area has relative positioning for absolute children */
+  .fullscreen-chart-container .chart-container .recharts-responsive-container {
+    position: relative;
+  }
+  
+  /* Make sure chart SVG is behind the slider */
+  .fullscreen-chart-container .chart-container .recharts-wrapper {
+    z-index: 1;
   }
   
   .fullscreen-chart-container .chart-container .recharts-responsive-container {
@@ -317,6 +512,13 @@
     min-height: 0;
     width: 100% !important;
     height: 100% !important;
+  }
+  
+  /* Reduce title font size if needed to fit */
+  @media (max-width: 767px) and (orientation: landscape) {
+    .fullscreen-chart-container .chart-container .chart-header h3 {
+      font-size: clamp(0.65rem, 2vw, 1rem);
+    }
   }
   
   .fullscreen-chart-container .chart-container .recharts-wrapper {
@@ -410,6 +612,41 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
+}
+
+/* Tablet/Desktop fullscreen: Position X button at top right */
+@media (min-width: 768px) {
+  .fullscreen-chart-container .chart-container .close-fullscreen-button-inline {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    padding: 6px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    max-height: 32px !important;
+    flex-shrink: 0;
+  }
+  
+  .fullscreen-chart-container .chart-container .close-fullscreen-button-inline svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Ensure slider labels are on the sides (horizontal layout) */
+  .fullscreen-chart-container .chart-container .view-toggle-slider {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .fullscreen-chart-container .chart-container .view-toggle-slider span:not(.slider-toggle):not(.slider-thumb) {
+    color: #71bbe9;
+  }
 }
 
 .fullscreen-chart-container .chart-container:hover {
@@ -480,6 +717,27 @@
   .high-score-charts-container {
     padding: 15px 10px;
     width: 100%;
+  }
+  
+  /* Hide filter buttons and slider on mobile in normal view */
+  .high-score-charts-container .chart-container .view-toggle-slider {
+    display: none;
+  }
+  
+  .high-score-charts-container .chart-container .chart-header .line-filters {
+    display: none;
+  }
+  
+  /* Show them in fullscreen mode on mobile */
+  .fullscreen-chart-container .chart-container .chart-header .line-filters {
+    display: flex;
+  }
+  
+  .fullscreen-chart-container .chart-container .chart-header .chart-controls {
+    display: flex;
+  }
+  
+  .high-score-charts-container {
     max-width: 100%;
     box-sizing: border-box;
   }

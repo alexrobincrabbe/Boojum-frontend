@@ -24,91 +24,44 @@
 }
 
 .lobby-section {
-  background-color: rgba(19, 19, 42, 0.5);
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 10px;
 }
 
 .lobby-section-title {
-  color: #71bbe9;
+  color: var(--color-blue);
   margin-bottom: 15px;
   font-size: 1.5rem;
   font-family: "Monoton", cursive;
+  text-shadow: var(--glow-blue-text);
 }
 
-/* Users Online */
-.users-online-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.user-online-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 8px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 5px;
-}
-
-.user-online-name {
-  font-size: 1rem;
-  font-weight: bold;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.user-online-name:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
-
-.user-online-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.online-dot {
-  background-color: #33c15b;
-}
-
-.offline-dot {
-  background-color: #888;
-}
-
-.status-text {
-  color: #fff;
-}
-
-.playing-text {
-  color: #33c15b;
-}
-
-.online-text {
-  color: #71bbe9;
-}
-
-.offline-text {
-  color: #888;
-}
 
 /* Word of the Day */
 .wotd-section h3 {
-  color: #71bbe9;
+  color: var(--color-blue);
   font-size: 1.8rem;
   margin-bottom: 10px;
-  text-shadow: 0 0 10px #71bbe9, 0 0 20px #71bbe9, 0 0 30px #71bbe9;
+  text-shadow: var(--glow-blue-text);
+}
+
+.duration {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+}
+
+.poll-discussion-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--color-blue);
+  text-decoration: none;
+  text-shadow: var(--glow-blue-text);
+}
+
+.duration {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
 }
 
 .wotd-section p {
@@ -119,7 +72,7 @@
 
 /* Rooms */
 .rooms-title {
-  color: #f5ce45;
+  color: var(--color-yellow);
   font-size: 2rem;
   margin-bottom: 20px;
   text-align: center;
@@ -138,6 +91,10 @@
   }
 }
 
+.room-card-wrapper {
+  position: relative;
+}
+
 .room-link {
   text-decoration: none;
   color: inherit;
@@ -146,7 +103,7 @@
 .room-card {
   border: 2px solid;
   border-radius: 10px;
-  padding: 20px;
+  padding: 10px 20px;
   background-color: rgba(19, 19, 42, 0.8);
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
@@ -154,22 +111,65 @@
 
 .room-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(113, 187, 233, 0.5);
+  box-shadow: 0 5px 15px var(--bg-blue-50);
+}
+
+.room-highscores-link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: var(--color-blue);
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  text-shadow: var(--glow-blue-text);
+  z-index: 10;
+}
+
+.room-highscores-link:hover {
+  background-color: var(--bg-blue-20);
+  text-decoration: underline;
 }
 
 .room-title {
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  font-weight: bold;
 }
 
 .room-playing {
   font-size: 0.9rem;
   font-weight: normal;
+}
+
+.room-user-count {
+  font-weight: bold;
+}
+
+.room-user-count.zero {
+  color: var(--color-yellow); /* yellow */
+}
+
+.room-user-count.greater-than-zero {
+  color: var(--color-green); /* green */
+}
+
+/* Increase size on tablets and desktop */
+@media (min-width: 768px) {
+  .room-playing {
+    font-size: 1.2rem;
+  }
+  
+  .room-user-count {
+    font-size: 1.2rem;
+  }
 }
 
 .room-details {
@@ -185,7 +185,8 @@
 }
 
 .duration {
-  color: #71bbe9;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
 }
 
 /* Chat */
@@ -208,7 +209,7 @@
 .chat-message {
   margin-bottom: 10px;
   padding: 5px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.4;
 }
 
@@ -237,7 +238,7 @@
   width: 100%;
   padding: 10px;
   background-color: rgba(19, 19, 42, 0.8);
-  border: 2px solid #71bbe9;
+  border: 2px solid var(--color-blue);
   border-radius: 5px;
   color: #fff;
   font-family: inherit;
@@ -246,8 +247,8 @@
 
 .chat-input:focus {
   outline: none;
-  border-color: #f5ce45;
-  box-shadow: 0 0 10px rgba(245, 206, 69, 0.5);
+  border-color: var(--color-yellow);
+  box-shadow: var(--glow-yellow-shadow);
 }
 
 .chat-input:disabled {
@@ -257,12 +258,13 @@
 
 .chat-send-button {
   padding: 10px 20px;
-  background-color: #71bbe9;
+  background-color: var(--color-blue);
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 1rem;
   transition: background-color 0.2s;
 }
 
@@ -272,7 +274,7 @@
 
 /* Poll */
 .poll-question {
-  color: #f5ce45;
+  color: var(--color-yellow);
   font-size: 1.2rem;
   margin-bottom: 15px;
   font-weight: bold;
@@ -293,7 +295,7 @@
 .poll-option-button {
   padding: 10px;
   background-color: rgba(19, 19, 42, 0.8);
-  border: 2px solid #71bbe9;
+  border: 2px solid var(--color-blue);
   border-radius: 5px;
   color: #fff;
   cursor: pointer;
@@ -302,8 +304,8 @@
 }
 
 .poll-option-button:hover:not(:disabled) {
-  border-color: #f5ce45;
-  background-color: rgba(245, 206, 69, 0.1);
+  border-color: var(--color-yellow);
+  background-color: var(--bg-yellow-10);
 }
 
 .poll-option-button:disabled {
@@ -312,8 +314,8 @@
 }
 
 .poll-option-button.voted {
-  border-color: #33c15b;
-  background-color: rgba(51, 193, 91, 0.2);
+  border-color: var(--color-green);
+  background-color: var(--bg-green-20);
 }
 
 .poll-bar-container {
@@ -326,7 +328,7 @@
 
 .poll-bar {
   height: 100%;
-  background-color: #71bbe9;
+  background-color: var(--color-blue);
   transition: width 0.3s;
 }
 
@@ -349,7 +351,7 @@
 .poll-discussion-link {
   display: inline-block;
   margin-top: 10px;
-  color: #71bbe9;
+  color: var(--color-blue);
   text-decoration: none;
 }
 
@@ -375,7 +377,7 @@
   display: block;
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  border-bottom: 1px solid var(--bg-blue-30);
   width: 100%;
 }
 

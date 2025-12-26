@@ -6,7 +6,6 @@
 
 .doodles-gallery-title {
   text-align: center;
-  font-family: "Monoton", cursive;
   font-size: 2rem;
   margin-bottom: 20px;
   color: #71bbe9;
@@ -104,7 +103,6 @@
 }
 
 .doodle-album-title {
-  font-family: "Monoton", cursive;
   font-size: 1.8rem;
   color: #71bbe9;
   margin: 0;

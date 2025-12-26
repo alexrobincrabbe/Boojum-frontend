@@ -8,7 +8,6 @@
 
 .tournament-badges-title {
   color: #f5ce45;
-  font-family: "Monoton", cursive;
   margin: 0 0 30px 0;
   font-size: 1.5rem;
   display: flex;
@@ -40,13 +39,13 @@
   position: relative;
   display: inline-block;
   cursor: pointer;
-  height: 60px;
+  height: 45px;
   vertical-align: top;
 }
 
 .badge-stack:not(.expanded) {
-  width: calc(60px + 8px * var(--stack-size, 0));
-  min-width: 60px;
+  width: calc(45px + 8px * var(--stack-size, 0));
+  min-width: 45px;
   padding-left: calc(8px * var(--stack-size, 0));
 }
 
@@ -56,7 +55,7 @@
   gap: 10px;
   width: auto;
   height: auto;
-  min-width: 60px;
+  min-width: 45px;
 }
 
 .badge-stack:not(.expanded) .tournament-medal {
@@ -71,8 +70,8 @@
 
 
 .tournament-medal {
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   border: none;
   display: flex;
@@ -112,7 +111,7 @@
 
 
 .medal-position {
-  font-size: 1.8rem;
+  font-size: 1.05rem;
   font-weight: bold;
   color: #1b1835;
   z-index: 2;
@@ -128,6 +127,8 @@
   z-index: 1;
   opacity: 0.6;
   filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000);
+  width: 42px;
+  height: 42px;
 }
 
 .medal-tier-star-large {
@@ -232,7 +233,6 @@
 
 .medal-detail-title {
   color: #71bbe9;
-  font-family: "Monoton", cursive;
   font-size: 1.5rem;
   margin: 0;
   text-align: center;
@@ -306,12 +306,17 @@
   }
   
   .tournament-medal {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
   }
   
   .medal-position {
-    font-size: 1.5rem;
+    font-size: 0.96rem;
+  }
+  
+  .medal-tier-star {
+    width: 37px;
+    height: 37px;
   }
   
   .medal-detail-modal {
@@ -333,8 +338,8 @@
   }
   
   .badge-stack {
-    min-width: 50px;
-    height: 50px;
+    min-width: 40px;
+    height: 40px;
   }
   
 }

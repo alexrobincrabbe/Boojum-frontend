@@ -76,7 +76,7 @@ const DashboardPage = () => {
               />
             )}
             {isAuthenticated && activeTab === 'notifications' && (
-              <NotificationsTab />
+              <NotificationsTab bundle={bundle?.notifications} />
             )}
             {isAuthenticated && activeTab === 'account' && (
               <AccountTab bundle={bundle?.account} />

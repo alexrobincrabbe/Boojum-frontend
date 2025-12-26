@@ -134,16 +134,55 @@ const ChartComponent = ({ title, data, colors, viewMode, visibleLines, onToggleL
     <div className="chart-container" ref={containerRef}>
       <div className="chart-header">
         <h3>{title}</h3>
-        <div className="chart-controls">
+        <div className="line-filters">
+          {lines.map(line => {
+            const displayName = getDisplayName(line, isUnicorn);
+            return (
+              <button
+                key={line}
+                className={`line-filter-button ${visibleLines[line] ? 'active' : 'inactive'}`}
+                onClick={() => onToggleLine(line)}
+                disabled={isLoading}
+                style={{ 
+                  borderColor: colors[line],
+                  color: visibleLines[line] ? colors[line] : '#888',
+                  backgroundColor: visibleLines[line] ? `${colors[line]}20` : 'transparent'
+                }}
+                title={`${visibleLines[line] ? 'Hide' : 'Show'} ${displayName}`}
+              >
+                {displayName}
+              </button>
+            );
+          })}
+        </div>
+        {!isFullscreen && (
           <button 
-            className="view-toggle-button"
+            className="view-toggle-slider"
             onClick={onToggleView}
             disabled={isLoading}
             title={`Switch to ${viewMode === 'points' ? 'Position' : 'Points'}`}
           >
-            {viewMode === 'points' ? 'Position' : 'Points'}
+            <span className={viewMode === 'points' ? 'active' : ''}>Points</span>
+            <span className={`slider-toggle ${viewMode === 'position' ? 'slider-right' : 'slider-left'}`}>
+              <span className="slider-thumb"></span>
+            </span>
+            <span className={viewMode === 'position' ? 'active' : ''}>Position</span>
           </button>
-          {isFullscreen && onCloseFullscreen ? (
+        )}
+        {isFullscreen && onCloseFullscreen && (
+          <>
+            <button 
+              className="view-toggle-slider"
+              onClick={onToggleView}
+              disabled={isLoading}
+              title={`Switch to ${viewMode === 'points' ? 'Position' : 'Points'}`}
+            >
+              <span className={viewMode === 'points' ? 'active' : ''}>Points</span>
+              <span className={`slider-toggle ${viewMode === 'position' ? 'slider-right' : 'slider-left'}`}>
+                <span className="slider-thumb"></span>
+              </span>
+              <span className={viewMode === 'position' ? 'active' : ''}>Position</span>
+            </button>
             <button 
               className="close-fullscreen-button-inline"
               onClick={onCloseFullscreen}
@@ -152,38 +191,18 @@ const ChartComponent = ({ title, data, colors, viewMode, visibleLines, onToggleL
             >
               <X size={18} />
             </button>
-          ) : (
-            <button 
-              className="fullscreen-button"
-              onClick={onFullscreen}
-              disabled={isLoading}
-              title="View fullscreen"
-            >
-              <Maximize2 size={18} />
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="line-filters">
-        {lines.map(line => {
-          const displayName = getDisplayName(line, isUnicorn);
-          return (
-            <button
-              key={line}
-              className={`line-filter-button ${visibleLines[line] ? 'active' : 'inactive'}`}
-              onClick={() => onToggleLine(line)}
-              disabled={isLoading}
-              style={{ 
-                borderColor: colors[line],
-                color: visibleLines[line] ? colors[line] : '#888',
-                backgroundColor: visibleLines[line] ? `${colors[line]}20` : 'transparent'
-              }}
-              title={`${visibleLines[line] ? 'Hide' : 'Show'} ${displayName}`}
-            >
-              {displayName}
-            </button>
-          );
-        })}
+          </>
+        )}
+        {!isFullscreen && (
+          <button 
+            className="fullscreen-button"
+            onClick={onFullscreen}
+            disabled={isLoading}
+            title="View fullscreen"
+          >
+            <Maximize2 size={18} />
+          </button>
+        )}
       </div>
       <ResponsiveContainer 
         width={typeof containerWidth === 'number' && containerWidth > 0 ? containerWidth : "100%"} 
@@ -358,7 +377,7 @@ const HighScoreCharts = ({ profileUrl }: HighScoreChartsProps) => {
   };
 
   const unicornColors = {
-    'Normal': '#f5ce45', // yellow
+    'Normal': '#33c15b', // green
     'Bonus': '#eb5497', // pink
   };
 
@@ -463,35 +482,35 @@ const HighScoreCharts = ({ profileUrl }: HighScoreChartsProps) => {
             isLoading={loading}
           />
           <ChartComponent
-            title="Number of Words"
+            title="No. of Words"
             data={wordsData}
             colors={colors}
             viewMode={viewModes.words}
             visibleLines={visibleLines.words}
             onToggleLine={(line) => toggleLine('words', line)}
-            onFullscreen={() => openFullscreen('Number of Words', wordsData, colors, period, viewModes.words)}
+            onFullscreen={() => openFullscreen('No. of Words', wordsData, colors, period, viewModes.words)}
             onToggleView={() => toggleViewMode('words')}
             isLoading={loading}
           />
           <ChartComponent
-            title="Best Word Score"
+            title="Best Word"
             data={bestWordData}
             colors={colors}
             viewMode={viewModes.bestWord}
             visibleLines={visibleLines.bestWord}
             onToggleLine={(line) => toggleLine('bestWord', line)}
-            onFullscreen={() => openFullscreen('Best Word Score', bestWordData, colors, period, viewModes.bestWord)}
+            onFullscreen={() => openFullscreen('Best Word', bestWordData, colors, period, viewModes.bestWord)}
             onToggleView={() => toggleViewMode('bestWord')}
             isLoading={loading}
           />
           <ChartComponent
-            title="Unicorn Best Word Score"
+            title="Unicorn Score"
             data={unicornData}
             colors={unicornColors}
             viewMode={viewModes.unicorn}
             visibleLines={visibleLines.unicorn}
             onToggleLine={(line) => toggleLine('unicorn', line)}
-            onFullscreen={() => openFullscreen('Unicorn Best Word Score', unicornData, unicornColors, period, viewModes.unicorn)}
+            onFullscreen={() => openFullscreen('Unicorn Score', unicornData, unicornColors, period, viewModes.unicorn)}
             onToggleView={() => toggleViewMode('unicorn')}
             isLoading={loading}
           />

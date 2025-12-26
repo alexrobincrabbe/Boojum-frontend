@@ -1,13 +1,153 @@
-@import url("https://fonts.googleapis.com/css2?family=Pompiere&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap");
 @import "tailwindcss";
 
-/* Set Pompiere as default font for the entire site */
+/* Site Color Scheme - CSS Variables */
+:root {
+  --color-purple: rgb(94, 76, 176);
+  --color-yellow: rgb(245, 206, 69);
+  --color-pink: rgb(235, 84, 151);
+  --color-green: rgb(51, 193, 91);
+  --color-blue: rgb(113, 187, 233);
+  
+  /* Transparent backgrounds */
+  --bg-blue-10: rgba(113, 187, 233, 0.1);
+  --bg-blue-20: rgba(113, 187, 233, 0.2);
+  --bg-blue-30: rgba(113, 187, 233, 0.3);
+  --bg-blue-35: rgba(113, 187, 233, 0.35);
+  --bg-blue-50: rgba(113, 187, 233, 0.5);
+  --bg-blue-80: rgba(113, 187, 233, 0.8);
+  --bg-yellow-10: rgba(245, 206, 69, 0.1);
+  --bg-yellow-50: rgba(245, 206, 69, 0.5);
+  --bg-green-20: rgba(51, 193, 91, 0.2);
+  --bg-pink-60: rgba(235, 84, 151, 0.6);
+  --bg-pink-40: rgba(235, 84, 151, 0.4);
+  
+  /* Glow effects for blue */
+  --glow-blue-text: 0 0 4px rgba(113, 187, 233, 0.5), 0 0 8px rgba(113, 187, 233, 0.3), 0 0 12px rgba(113, 187, 233, 0.2);
+  --glow-blue-border: 0 0 8px rgba(113, 187, 233, 0.6), 0 0 12px rgba(113, 187, 233, 0.4);
+  --glow-blue-shadow: 0 2px 10px rgba(113, 187, 233, 0.3);
+  --glow-blue-shadow-strong: 0 4px 20px rgba(113, 187, 233, 0.5);
+  
+  /* Glow effects for pink */
+  --glow-pink-text: 0 0 8px rgba(235, 84, 151, 0.6), 0 0 12px rgba(235, 84, 151, 0.4);
+  
+  /* Glow effects for green */
+  --glow-green-text: 0 0 8px rgba(51, 193, 91, 0.6), 0 0 12px rgba(51, 193, 91, 0.4);
+  
+  /* Glow effects for yellow */
+  --glow-yellow-text: 0 0 8px rgba(245, 206, 69, 0.6), 0 0 12px rgba(245, 206, 69, 0.4);
+  --glow-yellow-shadow: 0 0 10px rgba(245, 206, 69, 0.5);
+}
+
+/* Set Quicksand as default font for the entire site */
 html,
 body,
 #root {
-  font-family: "Pompiere", sans-serif;
+  font-family: "Quicksand", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Set Bungee Hairline for all headers */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Bungee Hairline", sans-serif;
+}
+
+/* Text Color Classes */
+.text-purple {
+  color: var(--color-purple);
+}
+
+.text-yellow {
+  color: var(--color-yellow);
+}
+
+.text-pink {
+  color: var(--color-pink);
+}
+
+.text-green {
+  color: var(--color-green);
+}
+
+.text-blue {
+  color: var(--color-blue);
+}
+
+/* Glowing Blue Text */
+.text-blue-glow {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+}
+
+/* Border Color Classes */
+.border-purple {
+  border-color: var(--color-purple);
+}
+
+.border-yellow {
+  border-color: var(--color-yellow);
+}
+
+.border-pink {
+  border-color: var(--color-pink);
+}
+
+.border-green {
+  border-color: var(--color-green);
+}
+
+.border-blue {
+  border-color: var(--color-blue);
+}
+
+/* Glowing Blue Border */
+.border-blue-glow {
+  border-color: var(--color-blue);
+  box-shadow: var(--glow-blue-border);
+}
+
+/* Background Color Classes */
+.bg-purple {
+  background-color: var(--color-purple);
+}
+
+.bg-yellow {
+  background-color: var(--color-yellow);
+}
+
+.bg-pink {
+  background-color: var(--color-pink);
+}
+
+.bg-green {
+  background-color: var(--color-green);
+}
+
+.bg-blue {
+  background-color: var(--color-blue);
+}
+
+/* Background with opacity variants */
+.bg-purple-transparent {
+  background-color: rgba(94, 76, 176, 0.1);
+}
+
+.bg-yellow-transparent {
+  background-color: rgba(245, 206, 69, 0.1);
+}
+
+.bg-pink-transparent {
+  background-color: rgba(235, 84, 151, 0.1);
+}
+
+.bg-green-transparent {
+  background-color: rgba(51, 193, 91, 0.1);
+}
+
+.bg-blue-transparent {
+  background-color: rgba(113, 187, 233, 0.1);
 }
 
 /* Global scrollbar styling - applied to all scrollbars on the site */
@@ -21,12 +161,12 @@ body,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #71bbe9;
+  background: var(--color-blue);
   border-radius: 2px;
 }
 
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #71bbe9 rgba(0, 0, 0, 0.2);
+  scrollbar-color: var(--color-blue) rgba(0, 0, 0, 0.2);
 }

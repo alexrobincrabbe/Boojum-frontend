@@ -1,6 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&");
-@import url("https://fonts.googleapis.com/css2?family=Italianno&family=League+Script&family=Major+Mono+Display&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Monoton&display=swap");
 
 .profile-container {
   background-color: #1b1835;
@@ -12,11 +9,12 @@
 
 h1,
 h2 {
-  font-family: "Monoton", cursive;
+  font-weight: bold;
 }
 
 h2 {
   color: #eb539e;
+  font-weight: bold;
 }
 
 /* Profile Name */
@@ -33,6 +31,7 @@ h2 {
   text-align: center;
   color: #f5ce45;
   font-size: 2.5rem;
+  font-weight: bold;
 }
 
 /* Empty Section Message */
@@ -123,7 +122,6 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: "Major Mono Display", monospace;
   font-weight: 300;
   border: 5px solid #71bbe9;
   box-shadow: 0 0 10px #71bbe9;
@@ -134,7 +132,6 @@ h2 {
 
 #game-details-container h2 {
   font-size: 1.8rem;
-  font-family: "Major Mono Display", monospace;
   font-weight: bold;
   margin-bottom: 15px;
   color: #eb539e;
@@ -144,6 +141,7 @@ h2 {
   margin-bottom: 0;
   margin-top: 15px;
   font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .game-scores-container {
@@ -170,6 +168,7 @@ h2 {
   text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146),
     2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146);
   color: rgb(113, 187, 233);
+  font-family: "Bungee Hairline", sans-serif;
 }
 
 .yellow {
@@ -195,9 +194,9 @@ h2 {
 }
 
 #date-joined {
-  font-family: "Major Mono Display", monospace;
   color: #f5ce45;
   margin: 10px 0;
+  text-align: center;
 }
 
 #date-joined .label {
@@ -208,6 +207,16 @@ h2 {
 }
 
 /* About Me Section */
+#who-are-you-container-outer {
+  padding: 20px 0;
+}
+
+@media (min-width: 768px) {
+  #who-are-you-container-outer {
+    padding: 40px 0;
+  }
+}
+
 #who-are-you-container {
   background-color: transparent;
   border: none;
@@ -285,6 +294,7 @@ h2 {
   margin-bottom: 15px;
   text-align: center;
   font-size: 2rem;
+  font-weight: bold;
 }
 
 /* Personal Details */
@@ -325,6 +335,7 @@ h2 {
   margin: 0 0 20px 0;
   text-align: center;
   font-size: 2rem;
+  font-weight: bold;
 }
 
 .personal-details {
@@ -710,6 +721,7 @@ h2 {
   color: #f5ce45;
   background: #33c15b;
   opacity: 0.7;
+  text-align: center;
   cursor: pointer;
   transition: opacity 0.3s;
   text-decoration: none;

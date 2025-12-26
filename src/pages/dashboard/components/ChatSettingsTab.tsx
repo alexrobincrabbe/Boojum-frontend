@@ -17,16 +17,16 @@ interface ChatSettingsTabProps {
 }
 
 const ChatSettingsTab = ({ bundle }: ChatSettingsTabProps) => {
-  const [chatColor, setChatColor] = useState('#E38614');
+  const [chatColor, setChatColor] = useState<string | null>(null); // Start as null, load from bundle
   const [chatColorChoices, setChatColorChoices] = useState<ChatColorChoice[]>([]);
   const [loading, setLoading] = useState(true);
   const isInitialMount = useRef(true);
-  const initialChatColor = useRef('#E38614');
+  const initialChatColor = useRef<string | null>(null);
 
   useEffect(() => {
     const initFromBundle = () => {
-      if (bundle) {
-        const fetchedColor = bundle.chat_color || '#E38614';
+      if (bundle && bundle.chat_color) {
+        const fetchedColor = bundle.chat_color;
         setChatColor(fetchedColor);
         initialChatColor.current = fetchedColor;
         setChatColorChoices(bundle.chat_color_choices || []);
@@ -66,7 +66,7 @@ const ChatSettingsTab = ({ bundle }: ChatSettingsTabProps) => {
 
   // Auto-save when chat color changes (skip initial mount)
   useEffect(() => {
-    if (isInitialMount.current || chatColor === initialChatColor.current) {
+    if (isInitialMount.current || chatColor === null || chatColor === initialChatColor.current) {
       return;
     }
     
@@ -114,6 +114,7 @@ const ChatSettingsTab = ({ bundle }: ChatSettingsTabProps) => {
                 className={`chat-color-item ${chatColor === choice.value ? 'selected' : ''}`}
                 onClick={() => handleColorSelect(choice.value)}
                 style={{ color: choice.value }}
+                disabled={chatColor === null}
               >
                 {choice.label}
               </button>

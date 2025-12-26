@@ -16,10 +16,10 @@ interface GameSettingsTabProps {
 }
 
 const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSettingsTabProps) => {
-  const [profanityFilter, setProfanityFilter] = useState(true); // Default to true
+  const [profanityFilter, setProfanityFilter] = useState<boolean | null>(null); // Start as null, load from bundle
   const [loading, setLoading] = useState(true);
   const isInitialMount = useRef(true);
-  const initialProfanityFilter = useRef(true); // Default to true
+  const initialProfanityFilter = useRef<boolean | null>(null);
   const suppressToast = useRef(true); // avoid toasts on initial mount/remount
   
   const { darkMode, colorsOff, toggleDarkMode, toggleColors } = useBoardTheme();
@@ -40,7 +40,7 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
   useEffect(() => {
     const initFromBundle = () => {
       if (bundle && typeof bundle.profanity_filter !== 'undefined') {
-        const fetchedFilter = bundle.profanity_filter ?? true;
+        const fetchedFilter = bundle.profanity_filter;
         setProfanityFilter(fetchedFilter);
         initialProfanityFilter.current = fetchedFilter;
         localStorage.setItem('profanityFilter', fetchedFilter.toString());
@@ -57,6 +57,7 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
 
     if (initFromBundle()) return;
 
+    // If bundle is null/undefined, wait a bit for it to load, then fetch directly
     const fetchData = async () => {
       try {
         // Only fetch profanity filter if user is authenticated
@@ -94,7 +95,7 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
 
   // Auto-save when profanity filter changes (skip initial mount)
   useEffect(() => {
-    if (isInitialMount.current || profanityFilter === initialProfanityFilter.current) {
+    if (isInitialMount.current || profanityFilter === null || profanityFilter === initialProfanityFilter.current) {
       return;
     }
     
@@ -153,8 +154,9 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
               <input
                 type="checkbox"
                 id="profanity-filter"
-                checked={profanityFilter}
+                checked={profanityFilter ?? true}
                 onChange={(e) => setProfanityFilter(e.target.checked)}
+                disabled={profanityFilter === null}
               />
               <span className="slider"></span>
             </label>

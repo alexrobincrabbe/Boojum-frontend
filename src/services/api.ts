@@ -234,8 +234,10 @@ export const lobbyAPI = {
     const response = await api.get('/lobby/chat/rooms/');
     return response.data;
   },
-  getUsersOnline: async () => {
-    const response = await api.get('/lobby/chat/users-online/');
+  getUsersOnline: async (filterPlaymatesOnly: string = 'false') => {
+    const response = await api.get('/lobby/chat/users-online/', {
+      params: { filter_playmates_only: filterPlaymatesOnly },
+    });
     return response.data;
   },
   getNoUsersOnline: async () => {
