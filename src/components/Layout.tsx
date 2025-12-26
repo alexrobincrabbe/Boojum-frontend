@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
-import { Menu, X, Bell, BarChart3, Pin, PinOff, Speech } from 'lucide-react';
+import { Menu, X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
@@ -185,7 +185,6 @@ const Layout = ({ children }: LayoutProps) => {
   const [guestsOnline, setGuestsOnline] = useState(0);
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
   const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
-  const [playmateIds, setPlaymateIds] = useState<Set<number>>(new Set());
   
   // Poll state
   const [poll, setPoll] = useState<Poll | null>(null);
@@ -328,14 +327,11 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     const loadPlaymates = async () => {
       if (!isAuthenticated) {
-        setPlaymateIds(new Set());
         setShowPlaymatesOnly(false);
         return;
       }
       try {
         const bundle = await dashboardAPI.getDashboardBundle();
-        const ids = new Set<number>((bundle.playmates?.buddies || []).map((b: any) => b.id));
-        setPlaymateIds(ids);
         // Load filter preference from backend
         setShowPlaymatesOnly(bundle.playmates?.filter_online_playmates_only || false);
       } catch (error) {
