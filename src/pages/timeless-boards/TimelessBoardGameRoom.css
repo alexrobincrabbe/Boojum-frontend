@@ -382,13 +382,13 @@
 
 /* Animated arrows for submit button */
 .animated-arrow {
-  position: absolute;
-  font-size: 200%;
+  position: fixed;
   pointer-events: none;
-  font-weight: bold;
-  color: #f5ce45;
-  text-shadow: 0 0 10px rgba(245, 206, 69, 0.8);
   z-index: 10000;
+  /* Arrow shape is created with CSS borders, not text */
+  width: 0;
+  height: 0;
+  border-style: solid;
 }
 
 .arrow-left {

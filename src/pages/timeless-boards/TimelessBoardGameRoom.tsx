@@ -65,42 +65,86 @@ const showPerfect = (elementId: string) => {
   const existingArrows = document.querySelectorAll('.animated-arrow');
   existingArrows.forEach(arrow => arrow.remove());
 
-  const rect = el.getBoundingClientRect();
+  // Use a more reliable positioning method for iPad with fixed positioning
+  const updateArrowPositions = () => {
+    const rect = el.getBoundingClientRect();
+    // For fixed positioning, use viewport coordinates directly (getBoundingClientRect)
+    // No need to add scroll offsets
 
-  console.log('[addLoopingArrows] Found button, creating arrows:', {
-    selector,
-    rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
-  });
+    document.querySelectorAll('.animated-arrow').forEach((arrowElement) => {
+      const arrow = arrowElement as HTMLElement;
+      const side = arrow.classList.contains('arrow-left') ? 'left' : 'right';
+      
+      // Vertical centering - use viewport coordinates for fixed positioning
+      const top = rect.top + rect.height / 2;
+      
+      // Horizontal position - adjust for arrow size
+      let left: number;
+      if (side === 'left') {
+        left = rect.left - 40; // Space for arrow pointing right
+      } else {
+        left = rect.right + 10; // Space for arrow pointing left
+      }
+      
+      arrow.style.top = `${top}px`;
+      arrow.style.left = `${left}px`;
+    });
+  };
 
   setTimeout(() => {
     ['left', 'right'].forEach((side) => {
       const a = document.createElement('div');
       a.classList.add('animated-arrow', `arrow-${side}`);
-      // ← for right label, → for left label (pointing toward center)
-      a.textContent = side === 'left' ? '🡺' : '🡸';
+      a.setAttribute('aria-hidden', 'true'); // Hide from screen readers
 
-      // Vertical centering
-      const top = window.scrollY + rect.top + rect.height / 2;
-      a.style.top = `${top}px`;
-
-      // Horizontal position: further out by arrowOffset
-      let left: number;
-      if (side === 'left') {
-        left = window.scrollX + rect.left - 34;
-      } else {
-        left = window.scrollX + rect.right;
-      }
-      a.style.left = `${left}px`;
-
-      // Set additional required styles
-      a.style.position = 'absolute';
+      // Create arrow using CSS borders (more reliable than Unicode on iPad)
+      // Empty div that will be styled with CSS borders to form an arrow shape
+      a.style.position = 'fixed'; // Use fixed positioning for better iPad support
       a.style.zIndex = '10000';
-      a.style.color = '#f5ce45';
-      a.style.textShadow = '0 0 10px rgba(245, 206, 69, 0.8)';
+      a.style.pointerEvents = 'none';
+      a.style.width = '0';
+      a.style.height = '0';
+      a.style.borderStyle = 'solid';
+      
+      // Yellow arrow color
+      const arrowColor = '#f5ce45';
+      const arrowSize = 20;
+      
+      if (side === 'left') {
+        // Right-pointing arrow (placed on left side, pointing toward button)
+        a.style.borderWidth = `${arrowSize}px 0 ${arrowSize}px ${arrowSize * 1.5}px`;
+        a.style.borderColor = `transparent transparent transparent ${arrowColor}`;
+      } else {
+        // Left-pointing arrow (placed on right side, pointing toward button)
+        a.style.borderWidth = `${arrowSize}px ${arrowSize * 1.5}px ${arrowSize}px 0`;
+        a.style.borderColor = `transparent ${arrowColor} transparent transparent`;
+      }
+      
+      // Add glow effect using box-shadow
+      a.style.filter = 'drop-shadow(0 0 8px rgba(245, 206, 69, 0.8))';
 
-      console.log(`[addLoopingArrows] Creating ${side} arrow at:`, { top, left });
       document.body.appendChild(a);
     });
+    
+    // Set initial positions
+    updateArrowPositions();
+    
+    // Update positions on scroll/resize for iPad viewport changes
+    const handleUpdate = () => {
+      const buttonRect = el.getBoundingClientRect();
+      if (buttonRect.width > 0 && buttonRect.height > 0) {
+        updateArrowPositions();
+      }
+    };
+    
+    window.addEventListener('scroll', handleUpdate, { passive: true });
+    window.addEventListener('resize', handleUpdate, { passive: true });
+    
+    // Store handlers for cleanup
+    (el as any).__arrowUpdateHandlers = (el as any).__arrowUpdateHandlers || [];
+    (el as any).__arrowUpdateHandlers.push(handleUpdate);
+    
+    console.log('[addLoopingArrows] Created arrows with fixed positioning');
   }, delay);
 };
 
@@ -406,6 +450,15 @@ export default function TimelessBoardGameRoom() {
 
     return () => clearInterval(interval);
   }, [boardData, timeRemaining]);
+
+  // Cleanup arrows when component unmounts or navigates away
+  useEffect(() => {
+    return () => {
+      // Remove all animated arrows when component unmounts
+      const existingArrows = document.querySelectorAll('.animated-arrow');
+      existingArrows.forEach(arrow => arrow.remove());
+    };
+  }, []);
 
   // Animate score bar counting up on page load
   const animateScoreOnLoad = useCallback(() => {
@@ -1231,6 +1284,21 @@ export default function TimelessBoardGameRoom() {
             {submitting ? 'Submitting...' : 'Submit Score'}
           </button>
         )}
+        {/* Test button for arrows - temporary */}
+        <button
+          onClick={() => addLoopingArrows('.submit-score-button-header', 0)}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: 'rgba(113, 187, 233, 0.2)',
+            border: '2px solid var(--color-blue)',
+            color: 'var(--color-blue)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '1rem'
+          }}
+        >
+          Test Arrows
+        </button>
       </div>
 
       {boardData && (
