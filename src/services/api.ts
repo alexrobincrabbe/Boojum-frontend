@@ -385,6 +385,10 @@ export const forumAPI = {
     const response = await api.post('/forum/mark-all-read/');
     return response.data;
   },
+  getUnreadCount: async () => {
+    const response = await api.get('/forum/unread-count/');
+    return response.data;
+  },
   uploadImage: async (imageFile: File) => {
     const formData = new FormData();
     formData.append('image', imageFile);

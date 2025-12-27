@@ -5,41 +5,42 @@
   padding: 20px;
 }
 
-#back-button {
+.back-to-forum-link {
   font-size: 130%;
-  width: fit-content;
-  border-radius: 5px;
-  padding: 5px 15px;
+  color: #f5ce45;
+  text-decoration: none;
   margin-left: 10px;
   margin-bottom: 20px;
-  border: outset 3px #33c15b;
-  background-color: transparent;
-  color: white;
-  cursor: pointer;
+  display: inline-block;
 }
 
-#back-button:hover {
-  box-shadow: 0px 0px 20px #33c15b;
+.back-to-forum-link:hover {
+  text-decoration: underline;
 }
 
 .view-post-title {
-  display: inline-block;
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;
   background-color: transparent;
-  font-size: 90%;
-  color: #eb5497;
-  border: 2px solid #71bbe9 !important;
-  border-radius: 10px;
+  font-size: 2em;
+  font-weight: bold;
+  color: #71bbe9;
+  text-shadow: var(--glow-blue-text);
 }
 
 .view-post-text {
   border-radius: 20px;
-  border: solid 2px #71bbe9;
   overflow-wrap: break-word;
   background-color: #13132a;
   padding: 40px 40px 0px;
+  color: #71bbe9;
+}
+
+.view-post-text p,
+.ql-editor p,
+.reply-content p {
+  color: #71bbe9;
 }
 
 .view-post-text ol,
@@ -54,18 +55,23 @@
 .view-post-text h2,
 .ql-editor h2,
 .reply-content h2 {
-  color: #33c15b;
-  font-size: 140%;
+  color: #eb5497;
+  font-size: 1.4em;
+  font-weight: normal;
   text-decoration: none;
   text-align: left;
+  font-family: inherit;
 }
 
 .view-post-text h3,
 .ql-editor h3,
 .reply-content h3 {
-  color: #eb5497;
+  color: #6f4099;
+  font-size: 1.2em;
+  font-weight: normal;
   text-decoration: none;
-  font-size: 1.17em;
+  text-align: left;
+  font-family: inherit;
 }
 
 .view-post-text a,
@@ -125,7 +131,7 @@
 }
 
 #replies {
-  padding: 0 40px;
+  padding: 0;
 }
 
 #reply-btn-wrapper {
@@ -137,28 +143,37 @@
   display: none;
 }
 
+.post-replies-separator {
+  width: 100%;
+  height: 4px;
+  background-color: #71bbe9;
+  margin: 30px 0;
+  border-radius: 2px;
+}
+
 #reply-btn {
   border-radius: 5px;
-  border: outset 3px #33c15b;
-  background-color: transparent;
+  border: 2px solid #33c15b;
+  background-color: rgba(51, 193, 91, 0.2);
   margin-bottom: 10px;
-  color: white;
+  color: #33c15b;
   cursor: pointer;
-  padding: 5px 15px;
+  padding: 8px 20px;
+  font-size: 1.1em;
 }
 
 #reply-btn:hover {
-  background-color: rgb(65, 129, 65);
+  background-color: rgba(51, 193, 91, 0.3);
 }
 
 .reply-button:hover {
-  border: solid #f5ce45 2px;
+  border: 2px solid #33c15b;
   color: #33c15b;
 }
 
 .reply-button:active {
-  box-shadow: 0 0 10px #33c15b;
-  color: white;
+  background-color: rgba(51, 193, 91, 0.4);
+  color: #33c15b;
 }
 
 #submit-reply-btn-wrapper {
@@ -174,10 +189,25 @@
 
 #submit-reply-btn,
 #submit-post-btn,
-.edit-button,
 .save-edit-button,
-#edit-post-btn,
 #save-post-btn {
+  border-radius: 5px;
+  border: 2px solid #33c15b;
+  background-color: rgba(51, 193, 91, 0.2);
+  color: #33c15b;
+  cursor: pointer;
+  padding: 8px 20px;
+  font-size: 1.1em;
+}
+
+#submit-reply-btn:hover,
+#submit-post-btn:hover,
+.save-edit-button:hover,
+#save-post-btn:hover {
+  background-color: rgba(51, 193, 91, 0.3);
+}
+
+.edit-button {
   border-radius: 5px;
   border: outset 3px #33c15b;
   color: white;
@@ -186,13 +216,22 @@
   padding: 5px 15px;
 }
 
-#submit-reply-btn:hover,
-#submit-post-btn:hover,
-.edit-button:hover,
-.save-edit-button:hover,
-#edit-post-btn:hover,
-#save-post-btn:hover {
+.edit-button:hover {
   background-color: rgb(19, 66, 33);
+}
+
+#edit-post-btn {
+  border-radius: 5px;
+  border: 2px solid #33c15b;
+  background-color: rgba(51, 193, 91, 0.2);
+  color: #33c15b;
+  cursor: pointer;
+  padding: 8px 20px;
+  font-size: 1.1em;
+}
+
+#edit-post-btn:hover {
+  background-color: rgba(51, 193, 91, 0.3);
 }
 
 #cancel-post-btn {
@@ -201,9 +240,25 @@
 
 #cancel-reply-btn,
 #cancel-post-btn,
-.delete-button,
 .cancel-edit-button,
 #cancel-post-edit-btn {
+  border-radius: 5px;
+  border: 2px solid #eb5497;
+  background-color: rgba(235, 84, 151, 0.2);
+  color: #eb5497;
+  cursor: pointer;
+  padding: 8px 20px;
+  font-size: 1.1em;
+}
+
+#cancel-reply-btn:hover,
+#cancel-post-btn:hover,
+.cancel-edit-button:hover,
+#cancel-post-edit-btn:hover {
+  background-color: rgba(235, 84, 151, 0.3);
+}
+
+.delete-button {
   border-radius: 5px;
   color: white;
   border: outset 3px #eb5497;
@@ -212,11 +267,7 @@
   padding: 5px 15px;
 }
 
-#cancel-reply-btn:hover,
-#cancel-post-btn:hover,
-.delete-button:hover,
-.cancel-edit-button:hover,
-#cancel-post-edit-btn:hover {
+.delete-button:hover {
   background-color: #652341;
 }
 
@@ -313,7 +364,7 @@ hr {
 
 @media screen and (max-width: 578px) {
   .view-post-title {
-    font-size: 75%;
+    font-size: 1.5em;
   }
 
   #edit-post-title {
@@ -322,15 +373,10 @@ hr {
 
   .view-post-text {
     scrollbar-gutter: stable;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 20px;
+    padding: 10px 20px;
   }
 
-  #post-view {
-    margin-right: 20px;
-    margin-left: 20px;
-  }
+
 
   .ql-editor {
     padding-left: 20px !important;

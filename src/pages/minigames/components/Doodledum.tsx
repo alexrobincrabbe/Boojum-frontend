@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { minigamesAPI, authAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
@@ -38,6 +39,7 @@ const COLORS = [
 
 const Doodledum: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [activeDoodledum, setActiveDoodledum] = useState<{
     drawer?: string;
@@ -46,7 +48,7 @@ const Doodledum: React.FC = () => {
     word?: string;
     is_current_user_drawing?: boolean;
   } | null>(null);
-  const [guessLetters, setGuessLetters] = useState<string[]>(new Array(12).fill(''));
+  const [guessLetters, setGuessLetters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingWord, setDrawingWord] = useState<string | null>(null);
@@ -76,15 +78,24 @@ const Doodledum: React.FC = () => {
   useEffect(() => {
     loadFeed();
     checkDoodledum();
-    
-    const interval = setInterval(() => {
-      loadFeed();
-      checkDoodledum();
-    }, 5000);
-
-    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle doodle_id query parameter to open comments for a specific doodle
+  useEffect(() => {
+    const doodleIdParam = searchParams.get('doodle_id');
+    if (doodleIdParam && !isLoadingDoodle && !selectedDoodle) {
+      const doodleId = parseInt(doodleIdParam, 10);
+      if (!isNaN(doodleId)) {
+        openDoodleById(doodleId);
+        // Remove the query parameter from URL after opening
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('doodle_id');
+        setSearchParams(newSearchParams, { replace: true });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Reset lastPos when tool, brush size, or color changes to prevent drawing from old position
   useEffect(() => {
@@ -179,12 +190,34 @@ const Doodledum: React.FC = () => {
   // Global mouse down/up/move listeners to track mouse button state and position
   // Note: Touch events are handled by pointer events on the canvas, so we only need global mouse listeners
   useEffect(() => {
+    const isInteractiveElement = (target: EventTarget | null): boolean => {
+      if (!target || !(target instanceof Element)) return false;
+      const tagName = target.tagName.toLowerCase();
+      // Check if it's a form element
+      const isFormElement = tagName === 'input' || tagName === 'textarea' || tagName === 'button' || tagName === 'select';
+      if (isFormElement) return true;
+      // Check if it's within a form element or clickable element
+      const isWithinInteractive = target.closest('a, button, input, textarea, select, [role="button"], [onclick], form, label');
+      if (isWithinInteractive) return true;
+      // Check if it's the canvas or within the drawing widget (these should allow preventDefault)
+      const isCanvas = target.closest('#drawCanvas, #widget, #canvas-wrapper');
+      if (isCanvas) return false;
+      // For other elements, check if they have contentEditable
+      if ((target as HTMLElement).contentEditable === 'true') return true;
+      return false;
+    };
+
     const handleGlobalMouseDown = (e: MouseEvent) => {
+      // Don't interfere with interactive elements
+      if (isInteractiveElement(e.target)) {
+        return;
+      }
+      
       // Track mouse button down globally (mouse only)
       if (e.button === 0) { // Left mouse button
         isMousePointer.current = true;
         mouseButtonDown.current = true;
-        // Prevent default drag behavior
+        // Prevent default drag behavior only if not on an interactive element
         e.preventDefault();
         // Initialize lastPos if not set (for clicks outside canvas)
         if (!lastPos.current) {
@@ -203,9 +236,14 @@ const Doodledum: React.FC = () => {
     };
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
+      // Don't interfere with interactive elements
+      if (isInteractiveElement(e.target)) {
+        return;
+      }
+      
       // Track mouse position globally when button is down (for clicks outside canvas) - mouse only
       if (mouseButtonDown.current && !drawing.current) {
-        // Prevent default drag behavior
+        // Prevent default drag behavior only if not on an interactive element
         e.preventDefault();
         const canvas = canvasRef.current;
         if (canvas) {
@@ -272,9 +310,18 @@ const Doodledum: React.FC = () => {
           setIsDrawing(false);
           setDrawingWord(null);
         }
-      } else if (data.is_drawn === 'yes' || data.is_doodledum === 'no') {
+      } else if (data.is_drawn === 'yes') {
+        // When a doodle is drawn and waiting to be guessed, set up input boxes based on word length
+        if (data.word) {
+          const wordLength = data.word.length;
+          setGuessLetters(new Array(wordLength).fill(''));
+        }
         setIsDrawing(false);
         setDrawingWord(null);
+      } else if (data.is_doodledum === 'no') {
+        setIsDrawing(false);
+        setDrawingWord(null);
+        setGuessLetters([]);
       }
     } catch (error) {
       console.error('Failed to check doodledum:', error);
@@ -991,6 +1038,32 @@ const Doodledum: React.FC = () => {
     setGuessLetters(newLetters);
   };
 
+  const openDoodleById = async (doodleId: number) => {
+    if (isLoadingDoodle) {
+      return;
+    }
+    
+    setIsLoadingDoodle(true);
+    toast.info('Opening comments...');
+    
+    try {
+      const doodleData = await authAPI.getDoodle(doodleId);
+      setSelectedDoodle({
+        id: doodleData.id,
+        word: doodleData.word,
+        image_url: doodleData.image_url,
+        public: doodleData.public,
+        created_at: doodleData.created_at,
+        user: doodleData.user,
+      });
+    } catch (error) {
+      console.error('Failed to load doodle:', error);
+      toast.error('Failed to load doodle');
+    } finally {
+      setIsLoadingDoodle(false);
+    }
+  };
+
   const handleDoodleClick = async (item: FeedItem) => {
     if (!item.is_doodle || !item.doodle_url || isLoadingDoodle) {
       if (isLoadingDoodle) {
@@ -1039,14 +1112,23 @@ const Doodledum: React.FC = () => {
       return;
     }
 
+    // Check if all letters have been entered
+    const allLettersFilled = guessLetters.every(letter => letter.trim() !== '');
+    if (!allLettersFilled) {
+      toast.error('Please enter all letters before submitting');
+      return;
+    }
+
     setIsSubmittingGuess(true);
     try {
       await minigamesAPI.makeDoodledumGuess(guessString);
-      setGuessLetters(new Array(12).fill(''));
+      // Reset based on current word length if available, otherwise clear
+      const wordLength = activeDoodledum?.word?.length || 0;
+      setGuessLetters(wordLength > 0 ? new Array(wordLength).fill('') : []);
       toast.success('Guess submitted!');
       await Promise.all([loadFeed(), checkDoodledum()]);
       // Only focus first input if not loading a doodle modal
-      if (!isLoadingDoodle) {
+      if (!isLoadingDoodle && wordLength > 0) {
         setTimeout(() => {
           const firstInput = document.getElementById('doodle-guess-input-0') as HTMLInputElement | null;
           firstInput?.focus();
@@ -1154,8 +1236,8 @@ const Doodledum: React.FC = () => {
                 alt="Submit"
                 onClick={handleGuess}
                 style={{ 
-                  cursor: isSubmittingGuess ? 'not-allowed' : 'pointer',
-                  opacity: isSubmittingGuess ? 0.5 : 1
+                  cursor: (isSubmittingGuess || !guessLetters.every(letter => letter.trim() !== '')) ? 'not-allowed' : 'pointer',
+                  opacity: (isSubmittingGuess || !guessLetters.every(letter => letter.trim() !== '')) ? 0.5 : 1
                 }}
               />
             </div>

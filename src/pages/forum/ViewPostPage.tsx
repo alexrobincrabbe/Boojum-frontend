@@ -5,6 +5,7 @@ import { forumAPI } from '../../services/api';
 import { toast } from 'react-toastify';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import { Loading } from '../../components/Loading';
 import './ViewPostPage.css';
 
 interface Reply {
@@ -61,19 +62,39 @@ const ViewPostPage = () => {
   useEffect(() => {
     if (slug) {
       loadPost();
+    } else {
+      // If no slug, set error
+      setError('Invalid post URL');
+      setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const loadPost = async () => {
-    if (!slug) return;
+    if (!slug) {
+      setError('Invalid post URL');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
+    setPost(null);
     try {
       const data = await forumAPI.getPost(slug);
-      setPost(data);
+      if (data) {
+        setPost(data);
+        setError(null);
+      } else {
+        setError('Post not found');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load post');
       console.error('Failed to load post:', err);
+      if (err.response?.status === 404) {
+        setError('Post not found');
+      } else {
+        setError(err.response?.data?.error || 'Failed to load post');
+      }
+      setPost(null);
     } finally {
       setLoading(false);
     }
@@ -276,7 +297,7 @@ const ViewPostPage = () => {
   };
 
   if (loading) {
-    return <div className="loading-state">Loading post...</div>;
+    return <Loading minHeight="calc(100vh - 70px)" />;
   }
 
   if (error || !post) {
@@ -286,17 +307,15 @@ const ViewPostPage = () => {
   return (
     <div className="view-post-page">
       <div className="container" style={{ paddingLeft: 0, paddingRight: 0, minHeight: 'calc(100vh - 220px)' }}>
-        <Link to="/forum">
-          <button id="back-button" className="yellow-button">
-            ← Back to Forum
-          </button>
+        <Link to="/forum" className="back-to-forum-link">
+          ← Back to Forum
         </Link>
 
         {/* Post View */}
         {!isEditingPost && (
           <div id="post-view">
-            <h2 style={{ marginBottom: 0 }}>
-              <span id="post-title" className="view-post-title blue">{post.title}</span>
+            <h2 id="post-title" className="view-post-title">
+              {post.title}
             </h2>
             <div style={{ overflow: 'hidden', borderRadius: '20px', marginBottom: '20px' }}>
               <div className="view-post-text" style={{ position: 'relative', maxHeight: '450px', overflowY: 'auto' }}>
@@ -330,15 +349,18 @@ const ViewPostPage = () => {
             />
             <div ref={postQuillContainerRef} id="edit-post-quill"></div>
             <div style={{ position: 'absolute', right: '25px', bottom: '10px', display: 'flex', justifyContent: 'right' }}>
-              <button style={{ marginRight: '20px' }} id="cancel-post-edit-btn" className="yellow-button" onClick={handleCancelEditPost}>
+              <button style={{ marginRight: '20px' }} id="cancel-post-edit-btn" onClick={handleCancelEditPost}>
                 Cancel
               </button>
-              <button id="save-post-btn" className="yellow-button" onClick={handleSavePost}>
+              <button id="save-post-btn" onClick={handleSavePost}>
                 Save
               </button>
             </div>
           </div>
         )}
+
+        {/* Separator between post and replies */}
+        <div className="post-replies-separator"></div>
 
         {/* Reply Button */}
         {isAuthenticated && !isReplying && (
@@ -354,10 +376,10 @@ const ViewPostPage = () => {
           <div id="reply-form">
             <div ref={replyQuillContainerRef} id="reply-quill"></div>
             <div id="submit-reply-btn-wrapper">
-              <button id="cancel-reply-btn" className="yellow-button" onClick={handleCancelReply}>
+              <button id="cancel-reply-btn" onClick={handleCancelReply}>
                 Cancel
               </button>
-              <button id="submit-reply-btn" className="yellow-button" onClick={handleSubmitReply}>
+              <button id="submit-reply-btn" onClick={handleSubmitReply}>
                 Submit Reply
               </button>
             </div>

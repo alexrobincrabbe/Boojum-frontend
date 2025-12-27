@@ -13,6 +13,13 @@ interface ForumPost {
   is_unread: boolean;
   number_of_replies: number;
   latest_reply_ago: string;
+  latest_reply_author: {
+    id: number;
+    username: string;
+    display_name: string;
+    profile_url: string;
+    chat_color: string;
+  } | null;
   author: {
     id: number;
     username: string;
@@ -120,19 +127,17 @@ const ForumPage = () => {
                   <Link
                     key={post.id}
                     to={`/forum/${post.slug}`}
-                    style={{ display: 'block', width: '100%', textDecoration: 'none' }}
+                    style={{ display: 'block', width: 'fit-content', textDecoration: 'none' }}
                   >
                     <div className="post-container">
-                      <div className="post-title green">
-                        <span className="post-title green">
-                          {post.pinned && (
-                            <span className="star pink-background purple">
-                              pin
-                            </span>
-                          )}
-                          {post.title}
-                        </span>
-                      </div>
+                      <h2 className="post-title" style={{ color: post.author.chat_color }}>
+                        {post.pinned && (
+                          <span className="star pink-background purple">
+                            pin
+                          </span>
+                        )}
+                        {post.title}
+                      </h2>
                       <div className="post-details">
                         <span style={{ fontWeight: 'bold', fontSize: '110%' }}>
                           <span style={{ color: post.author.chat_color }}>
@@ -143,9 +148,18 @@ const ForumPage = () => {
                           <span className="blue">replies:</span>&nbsp;
                           <span className="green">{post.number_of_replies}&nbsp;</span>
                         </span>
-                        <span className="pink">
-                          {post.latest_reply_ago}
-                        </span>
+                        {post.latest_reply_author ? (
+                          <span>
+                            <span className="blue">latest:</span>&nbsp;
+                            <span style={{ color: post.latest_reply_author.chat_color }}>
+                              {post.latest_reply_author.display_name}
+                            </span>
+                            &nbsp;
+                            <span className="pink">{post.latest_reply_ago}</span>
+                          </span>
+                        ) : (
+                          <span className="pink">{post.latest_reply_ago}</span>
+                        )}
                       </div>
                       {post.is_unread ? (
                         <span className="green-background unread"></span>

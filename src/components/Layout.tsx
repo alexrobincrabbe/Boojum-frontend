@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
+import { authAPI, lobbyAPI, dashboardAPI, forumAPI } from '../services/api';
 import { X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
@@ -188,6 +188,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [onlineCount, setOnlineCount] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadForumPosts, setUnreadForumPosts] = useState(0);
   const [guestsOnline, setGuestsOnline] = useState(0);
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
   const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
@@ -328,6 +329,29 @@ const Layout = ({ children }: LayoutProps) => {
       clearInterval(countInterval);
     };
   }, [isAuthenticated, showPlaymatesOnly]);
+
+  // Load unread forum posts count
+  useEffect(() => {
+    const loadUnreadForumPosts = async () => {
+      if (!isAuthenticated) {
+        setUnreadForumPosts(0);
+        return;
+      }
+      try {
+        const data = await forumAPI.getUnreadCount();
+        setUnreadForumPosts(data.unread_count || 0);
+      } catch (error: any) {
+        // Silently handle errors
+        if (error?.response?.status !== 404) {
+          console.error('Error loading unread forum posts:', error);
+        }
+      }
+    };
+
+    loadUnreadForumPosts();
+    const interval = setInterval(loadUnreadForumPosts, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   // Load playmates list and filter preference once for authenticated users (for filtering online list)
   useEffect(() => {
@@ -809,11 +833,27 @@ const Layout = ({ children }: LayoutProps) => {
             <Link
               to="/forum"
               className={`nav-link ${location.pathname.startsWith('/forum') ? 'active' : ''}`}
-              onClick={() => {
+              onClick={async () => {
                 if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                // Refresh unread count when navigating to forum
+                if (isAuthenticated) {
+                  try {
+                    const data = await forumAPI.getUnreadCount();
+                    setUnreadForumPosts(data.unread_count || 0);
+                  } catch (error) {
+                    // Silently handle errors
+                  }
+                }
               }}
             >
-              {leftSidebarOpen && <span>Forum</span>}
+              {leftSidebarOpen && (
+                <span style={{ position: 'relative' }}>
+                  Forum
+                  {unreadForumPosts > 0 && (
+                    <span className="forum-badge">{unreadForumPosts}</span>
+                  )}
+                </span>
+              )}
             </Link>
           </div>
           <div className="nav-section">
