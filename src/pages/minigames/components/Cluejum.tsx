@@ -29,7 +29,7 @@ interface CluejumProps {
   } | null;
 }
 
-const typeText = async (el: HTMLElement, text: string, delay = 35): Promise<void> => {
+const typeText = async (el: HTMLElement, text: string, delay = 70): Promise<void> => {
   el.innerHTML = "";
   for (const ch of text) {
     // eslint-disable-next-line no-await-in-loop
@@ -42,7 +42,7 @@ const addGlow = (el: HTMLElement | null, color: "green" | "pink") => {
   if (!el) return;
   el.style.animation = "none";
   void el.offsetWidth; // force reflow
-  el.style.animation = `${color}TextGlowFade 1s ease-out forwards`;
+  el.style.animation = `${color}TextGlowFade 2s ease-out forwards`;
 };
 
 const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
@@ -59,13 +59,11 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
   // Stage 2 state
   const [s2Attempts, setS2Attempts] = useState(0);
   const [s2Status, setS2Status] = useState<StageStatus>("playing");
-  const [s2Selection, setS2Selection] = useState<number | null>(null); // last picked
   const [s2WrongSelections, setS2WrongSelections] = useState<Set<number>>(new Set());
 
   // Stage 3 state
   const [s3Attempts, setS3Attempts] = useState(0);
   const [s3Status, setS3Status] = useState<StageStatus>("playing");
-  const [s3Selection, setS3Selection] = useState<number | null>(null); // last picked
   const [s3WrongSelections, setS3WrongSelections] = useState<Set<number>>(new Set());
 
   const [showNext, setShowNext] = useState(false);
@@ -102,12 +100,18 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
     if (first) setTimeout(() => first.focus(), 0);
   }, [stage, s1Status]);
 
+  // Track if typing is in progress to prevent double triggers
+  const typingInProgress = useRef(false);
+
   // Type current clue for stage 1
   useEffect(() => {
     if (!wordClue) return;
     if (stage !== 1 || s1Status !== "playing") return;
     const currentEl = clueRefs.current[s1ClueStep - 1];
     if (!currentEl) return;
+    
+    // Prevent double triggers - if typing is already in progress, don't start again
+    if (typingInProgress.current) return;
 
     // ensure previous clues are populated (no typing)
     clueRefs.current.forEach((el, idx) => {
@@ -117,8 +121,14 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       }
     });
 
+    // Only type if the element is empty (prevent re-typing)
+    if (currentEl.textContent?.trim()) return;
+
+    typingInProgress.current = true;
     currentEl.textContent = "";
-    typeText(currentEl, getClue(wordClue, s1ClueStep), 35);
+    typeText(currentEl, getClue(wordClue, s1ClueStep), 70).then(() => {
+      typingInProgress.current = false;
+    });
   }, [stage, s1ClueStep, s1Status, wordClue]);
 
   // Glow for status
@@ -130,9 +140,12 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
     if (status !== "playing") addGlow(statusRef.current, status === "correct" ? "green" : "pink");
   }, [stage, s1Status, s2Status, s3Status]);
 
-  // Glow for end message
+  // Type end message when game is over
   useEffect(() => {
-    if (gameOver) addGlow(endRef.current, "green");
+    if (gameOver && endRef.current) {
+      endRef.current.innerHTML = ""; // Clear any existing content
+      typeText(endRef.current, "There will be more Cluejums tomorrow", 70);
+    }
   }, [gameOver]);
 
   if (!wordClue || !definition || !synonym) {
@@ -162,7 +175,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       setShowNext(true);
       saveStage(1);
       setScore(1, attempt);
-      if (messageRef.current) typeText(messageRef.current, getSuccessMessage(1, attempt), 30);
+      if (messageRef.current) typeText(messageRef.current, getSuccessMessage(1, attempt), 70);
       return;
     }
 
@@ -171,6 +184,16 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       setShowNext(true);
       saveStage(1);
       setScore(1, 4);
+      if (messageRef.current) {
+        const text = "The correct answer was: ";
+        typeText(messageRef.current, text, 70).then(() => {
+          const span = document.createElement("span");
+          span.className = "pink";
+          span.style.marginLeft = "5px";
+          span.innerText = wordClue.word.toUpperCase();
+          messageRef.current?.appendChild(span);
+        });
+      }
       return;
     }
 
@@ -208,7 +231,6 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
   /* ---------- Stage 2 logic ---------- */
   const handleStage2Choice = (idx: number) => {
     if (stage !== 2 || s2Status !== "playing") return;
-    setS2Selection(idx);
     const attempt = s2Attempts + 1;
     const correct = idx + 1 === definition.answer;
 
@@ -217,15 +239,31 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       setShowNext(true);
       saveStage(2);
       setScore(2, attempt);
-      if (messageRef.current) typeText(messageRef.current, getSuccessMessage(2, attempt), 30);
+      if (messageRef.current) typeText(messageRef.current, getSuccessMessage(2, attempt), 70);
       return;
     }
 
     if (attempt >= 3) {
       setS2Status("failed");
+      setS2WrongSelections((prev) => {
+        const next = new Set(prev);
+        next.add(idx);
+        return next;
+      });
       setShowNext(true);
       saveStage(2);
       setScore(2, 4);
+      if (messageRef.current) {
+        const text = "The correct answer was: ";
+        const correctWord = definition.definitions[definition.answer - 1] || definition.word;
+        typeText(messageRef.current, text, 70).then(() => {
+          const span = document.createElement("span");
+          span.className = "pink";
+          span.style.marginLeft = "5px";
+          span.innerText = correctWord.toUpperCase();
+          messageRef.current?.appendChild(span);
+        });
+      }
       return;
     }
 
@@ -240,16 +278,16 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
   /* ---------- Stage 3 logic ---------- */
   const handleStage3Choice = (idx: number) => {
     if (stage !== 3 || s3Status !== "playing") return;
-    setS3Selection(idx);
     const attempt = s3Attempts + 1;
     const correct = idx + 1 === synonym.answer;
 
     if (correct) {
       setS3Status("correct");
+      setShowNext(false); // Explicitly hide continue button for stage 3
       setGameOver(true);
       saveStage(3);
       setScore(3, attempt);
-      if (messageRef.current) typeText(messageRef.current, getSuccessMessage(3, attempt), 30);
+      if (messageRef.current) typeText(messageRef.current, getSuccessMessage(3, attempt), 70);
       // Attempt to submit achievement
       const s1Score = Number(localStorage.getItem(`cluejumScore-${today}-1`)) || attempt;
       const s2Score = Number(localStorage.getItem(`cluejumScore-${today}-2`)) || attempt;
@@ -259,13 +297,19 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
 
     if (attempt >= 3) {
       setS3Status("failed");
+      setS3WrongSelections((prev) => {
+        const next = new Set(prev);
+        next.add(idx);
+        return next;
+      });
+      setShowNext(false); // Explicitly hide continue button for stage 3
       setGameOver(true);
       saveStage(3);
       setScore(3, 4);
       if (messageRef.current) {
-        const text = "The correct word was: ";
+        const text = "The correct answer was: ";
         const correctWord = synonym.synonyms[synonym.answer - 1] || synonym.word;
-        typeText(messageRef.current, text, 30).then(() => {
+        typeText(messageRef.current, text, 70).then(() => {
           const span = document.createElement("span");
           span.className = "pink";
           span.style.marginLeft = "5px";
@@ -312,9 +356,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
             fontWeight: "bold",
             marginTop: 32,
           }}
-        >
-          More challenges tomorrow!
-        </div>
+        />
       </div>
     );
   }
@@ -342,16 +384,21 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
                 <div className="word-clue-guess-container">
                   <div className="word-clue-guess">
                     {wordClue.word.split("").map((_, i) => {
-                      const match =
-                        (s1Status !== "playing" || !isActive) &&
-                        isLetterMatch(wordClue.word, guessString, i);
+                      const isResolved = s1Status !== "playing" || !isActive;
+                      const match = isResolved && isLetterMatch(wordClue.word, guessString, i);
+                      const wrong = isResolved && guessString[i] && !match;
+                      const className = match 
+                        ? "letter-input letter-match" 
+                        : wrong 
+                        ? "letter-input letter-wrong" 
+                        : "letter-input";
                       return (
                         <input
                           key={`${stepIdx}-${i}`}
                           id={`input-1-${stepIdx}-${i}`}
                           type="text"
                           maxLength={1}
-                          className={match ? "letter-input letter-match" : "letter-input"}
+                          className={className}
                           value={guessString[i] || ""}
                           disabled={!isActive}
                           onChange={(e) => {
@@ -408,9 +455,8 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
             <div className="word-clue-guess">
               {definition.definitions.map((opt, idx) => {
                 const correctIdx = definition.answer - 1;
-                const resolved = s2Status !== "playing";
-                const isCorrectPick = (resolved || s2Selection === idx) && idx === correctIdx;
-                const isWrongPick = idx !== correctIdx && s2WrongSelections.has(idx);
+                const isCorrectPick = s2Status === "correct" && idx === correctIdx;
+                const isWrongPick = s2WrongSelections.has(idx);
                 return (
                   <div
                     key={idx}
@@ -420,7 +466,6 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
                     onClick={() => handleStage2Choice(idx)}
                     style={{
                       cursor: s2Status === "playing" ? "pointer" : "default",
-                      opacity: s2Status === "playing" ? 1 : 0.6,
                     }}
                   >
                     {opt}
@@ -442,9 +487,8 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
             <div className="word-clue-guess">
               {synonym.synonyms.map((opt, idx) => {
                 const correctIdx = synonym.answer - 1;
-                const resolved = s3Status !== "playing";
-                const isCorrectPick = (resolved || s3Selection === idx) && idx === correctIdx;
-                const isWrongPick = idx !== correctIdx && s3WrongSelections.has(idx);
+                const isCorrectPick = s3Status === "correct" && idx === correctIdx;
+                const isWrongPick = s3WrongSelections.has(idx);
                 return (
                   <div
                     key={idx}
@@ -454,7 +498,6 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
                     onClick={() => handleStage3Choice(idx)}
                     style={{
                       cursor: s3Status === "playing" ? "pointer" : "default",
-                      opacity: s3Status === "playing" ? 1 : 0.6,
                     }}
                   >
                     {opt}
@@ -494,7 +537,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       <div
         ref={messageRef}
         className="blue"
-        style={{ textAlign: "center", marginTop: 12, minHeight: 28 }}
+        style={{ textAlign: "center", marginTop: 12, minHeight: 28, fontSize: "1.2em" }}
       />
 
       {/* Next button */}
@@ -520,9 +563,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
             fontWeight: "bold",
             marginTop: 32,
           }}
-        >
-          More challenges tomorrow!
-        </div>
+        />
       )}
       </>
     </div>

@@ -15,6 +15,15 @@
   margin: 20px 0;
 }
 
+#doodledum-guess {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
 #draw-button-container {
   display: flex;
   flex-direction: column;
@@ -73,14 +82,29 @@
   transform: none;
 }
 
-.doodle-guess-input {
-  padding: 10px;
-  font-size: 1.2em;
-  background-color: transparent;
-  border: 2px solid #71bbe9;
+.letter-input {
+  width: 42px;
+  height: 42px;
+  margin: 0 2px;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  border: none;
+  border-bottom: 2px solid #71bbe9;
+  border-radius: 0;
+  background: transparent;
   color: white;
-  border-radius: 5px;
-  min-width: 200px;
+  text-transform: uppercase;
+}
+
+.enter-button {
+  width: 42px;
+  height: 42px;
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 #feed-container-container {
@@ -525,6 +549,20 @@
   }
   #fixedPalette {
     grid-template-columns: repeat(7, 1fr);
+  }
+  .letter-input {
+    width: 20px;
+    height: 20px;
+    font-size: 0.9em;
+    margin: 0 1px;
+  }
+  .enter-button {
+    width: 20px;
+    height: 20px;
+    left: calc(100% + 4px);
+  }
+  #doodledum-guess {
+    gap: 2px;
   }
 }
 

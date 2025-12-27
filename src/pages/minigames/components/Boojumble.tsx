@@ -20,10 +20,8 @@ interface BoojumbleProps {
 const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
   const [selectedLevel, setSelectedLevel] = useState<number>(3);
   const [letters, setLetters] = useState<{ [key: number]: string[][] }>({});
-  const [trackWordsFound, setTrackWordsFound] = useState<string[]>([]);
   const boardRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const dragInitialized = useRef<{ [key: number]: boolean }>({});
-  const hasLoadedSavedState = useRef(false);
 
   // Initialize letters for all boojumbles
   useEffect(() => {
@@ -34,9 +32,8 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       let hasChanges = false;
       
       boojumbles.forEach(boojumble => {
-        // Check if saved state exists for this board first
-        const boardDate = boojumble.date || new Date().toISOString().split('T')[0];
-        const storedLetters = localStorage.getItem(`minigames-${boardDate}`);
+        // Check if saved state exists for this board first (use board id for unique identification)
+        const storedLetters = localStorage.getItem(`minigames-${boojumble.id}`);
         
         // If saved state exists, use it; otherwise use scrambled data
         if (storedLetters && !newLetters[boojumble.N]) {
@@ -107,25 +104,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     });
   }, [boojumbles]);
 
-  // Load saved words found state from localStorage
-  useEffect(() => {
-    if (boojumbles.length === 0 || hasLoadedSavedState.current) return;
-    
-    // Use the board's date for the selected level
-    const currentBoojumble = boojumbles.find(b => b.N === selectedLevel);
-    const boardDate = currentBoojumble?.date || new Date().toISOString().split('T')[0];
-    const storedWordsFound = localStorage.getItem(`minigames-words-${boardDate}`);
-    
-    if (storedWordsFound) {
-      try {
-        setTrackWordsFound(JSON.parse(storedWordsFound));
-      } catch (e) {
-        console.error('Failed to parse stored words found:', e);
-      }
-    }
-    
-    hasLoadedSavedState.current = true;
-  }, [boojumbles.length, selectedLevel]);
+  // Note: Words found are loaded directly from localStorage when needed in checkAndInit
 
   // Initialize drag and drop for the selected board (using original implementation)
   useEffect(() => {
@@ -317,15 +296,15 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
         }
       });
       
-      // Track newly found words for shimmer effect
-      const boardDate = currentBoojumble?.date || new Date().toISOString().split('T')[0];
-      const storedWordsFoundKey = `minigames-words-found-${boardDate}`;
+      // Track newly found words for shimmer effect (use board id for unique identification)
+      if (!currentBoojumble) return;
+      const storedWordsFoundKey = `minigames-words-${currentBoojumble.id}`;
       const previouslyFoundWordsStr = localStorage.getItem(storedWordsFoundKey);
       const previouslyFoundWords: string[] = previouslyFoundWordsStr ? JSON.parse(previouslyFoundWordsStr) : [];
       const newlyFoundWords: string[] = [];
       const tilesToShimmer = new Set<HTMLElement>();
       console.log('Previously found words:', previouslyFoundWords);
-      console.log('Board date:', boardDate);
+      console.log('Board id:', currentBoojumble.id);
 
       // Track which tiles should be green (correct position) vs yellow (valid word, wrong position)
       const correctTiles = new Set<HTMLElement>();
@@ -709,9 +688,9 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
   }, [selectedLevel]); // Only depend on selectedLevel
 
   const storeBoojumbleState = (lettersToStore: string[][], N: number) => {
-    // Use the board's date, not the current date, since there's a new board every day
+    // Use the board's id for unique identification
     const currentBoojumble = boojumbles.find(b => b.N === N);
-    const boardDate = currentBoojumble?.date || new Date().toISOString().split('T')[0];
+    if (!currentBoojumble) return;
     
     const flatLetters: string[] = [];
     lettersToStore.forEach(row => {
@@ -719,8 +698,8 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
         row.forEach(letter => flatLetters.push(letter));
       }
     });
-    localStorage.setItem(`minigames-${boardDate}`, JSON.stringify(flatLetters));
-    localStorage.setItem(`minigames-words-${boardDate}`, JSON.stringify(trackWordsFound));
+    localStorage.setItem(`minigames-${currentBoojumble.id}`, JSON.stringify(flatLetters));
+    // Note: words found are saved separately in checkAndInit function when words are checked
   };
 
   const checkWords = (currentLetters: string[][], N: number) => {

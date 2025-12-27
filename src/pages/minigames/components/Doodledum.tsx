@@ -32,7 +32,7 @@ const Doodledum: React.FC = () => {
     word?: string;
     is_current_user_drawing?: boolean;
   } | null>(null);
-  const [guess, setGuess] = useState('');
+  const [guessLetters, setGuessLetters] = useState<string[]>(new Array(12).fill(''));
   const [loading, setLoading] = useState(true);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingWord, setDrawingWord] = useState<string | null>(null);
@@ -40,7 +40,6 @@ const Doodledum: React.FC = () => {
   const [isFetchingDoodledum, setIsFetchingDoodledum] = useState(false);
   const [isSubmittingDrawing, setIsSubmittingDrawing] = useState(false);
   const [isCancellingDrawing, setIsCancellingDrawing] = useState(false);
-  const guessInputRef = useRef<HTMLInputElement>(null);
   
   // Drawing state
   const [tool, setTool] = useState<'draw' | 'eraser' | 'fill'>('draw');
@@ -946,9 +945,38 @@ const Doodledum: React.FC = () => {
     }
   };
 
+  const handleGuessLetterChange = (index: number, value: string) => {
+    if (isSubmittingGuess) return;
+    const newLetters = [...guessLetters];
+    newLetters[index] = value.toUpperCase();
+    setGuessLetters(newLetters);
+    
+    // Auto-focus next input if a letter was entered
+    if (value && index < guessLetters.length - 1) {
+      const nextInput = document.getElementById(`doodle-guess-input-${index + 1}`) as HTMLInputElement | null;
+      nextInput?.focus();
+    }
+  };
+
+  const handleGuessBackspace = (index: number) => {
+    if (isSubmittingGuess) return;
+    const newLetters = [...guessLetters];
+    if (newLetters[index]) {
+      // If current input has a letter, clear it
+      newLetters[index] = '';
+    } else if (index > 0) {
+      // If current input is empty, move to previous and clear it
+      newLetters[index - 1] = '';
+      const prevInput = document.getElementById(`doodle-guess-input-${index - 1}`) as HTMLInputElement | null;
+      prevInput?.focus();
+    }
+    setGuessLetters(newLetters);
+  };
+
   const handleGuess = async () => {
-    if (!guess.trim() || isSubmittingGuess) {
-      if (!guess.trim()) {
+    const guessString = guessLetters.join('').trim();
+    if (!guessString || isSubmittingGuess) {
+      if (!guessString) {
         toast.error('Please enter a guess');
       }
       return;
@@ -956,22 +984,21 @@ const Doodledum: React.FC = () => {
 
     setIsSubmittingGuess(true);
     try {
-      await minigamesAPI.makeDoodledumGuess(guess.trim());
-      setGuess('');
+      await minigamesAPI.makeDoodledumGuess(guessString);
+      setGuessLetters(new Array(12).fill(''));
       toast.success('Guess submitted!');
       await Promise.all([loadFeed(), checkDoodledum()]);
+      // Focus first input after submission
+      setTimeout(() => {
+        const firstInput = document.getElementById('doodle-guess-input-0') as HTMLInputElement | null;
+        firstInput?.focus();
+      }, 100);
     } catch (error: unknown) {
       console.error('Failed to submit guess:', error);
       const errorMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to submit guess';
       toast.error(errorMessage);
     } finally {
       setIsSubmittingGuess(false);
-      // Re-focus the input after submission completes
-      setTimeout(() => {
-        if (guessInputRef.current) {
-          guessInputRef.current.focus();
-        }
-      }, 100);
     }
   };
 
@@ -1034,39 +1061,45 @@ const Doodledum: React.FC = () => {
         
         return (
           <div id="guess-button-container">
-            <div id="doodledum-guess">
-              <input
-                ref={guessInputRef}
-                type="text"
-                value={guess}
-                onChange={(e) => {
-                  if (!isSubmittingGuess) {
-                    setGuess(e.target.value);
-                  }
+            <div id="doodledum-guess" className="word-clue-guess">
+              {guessLetters.map((letter, i) => (
+                <input
+                  key={i}
+                  id={`doodle-guess-input-${i}`}
+                  type="text"
+                  maxLength={1}
+                  className="letter-input"
+                  value={letter}
+                  disabled={isSubmittingGuess}
+                  onChange={(e) => {
+                    handleGuessLetterChange(i, e.target.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Backspace') {
+                      e.preventDefault();
+                      handleGuessBackspace(i);
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    if (e.key === 'Enter' && !isSubmittingGuess) {
+                      handleGuess();
+                    }
+                  }}
+                  autoFocus={i === 0}
+                />
+              ))}
+              <img
+                id="submit-doodledum"
+                className="enter-button"
+                src="/images/enter-button.svg"
+                alt="Submit"
+                onClick={handleGuess}
+                style={{ 
+                  cursor: isSubmittingGuess ? 'not-allowed' : 'pointer',
+                  opacity: isSubmittingGuess ? 0.5 : 1
                 }}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !isSubmittingGuess) {
-                    handleGuess();
-                  }
-                }}
-                placeholder={isSubmittingGuess ? "Submitting..." : "Enter your guess"}
-                className="doodle-guess-input"
-                autoFocus
-                disabled={isSubmittingGuess}
               />
             </div>
-            <img
-              id="submit-doodledum"
-              className="enter-button"
-              src="/images/enter-button.svg"
-              alt="Submit"
-              onClick={handleGuess}
-              style={{ 
-                cursor: isSubmittingGuess ? 'not-allowed' : 'pointer', 
-                marginLeft: '10px',
-                opacity: isSubmittingGuess ? 0.5 : 1
-              }}
-            />
           </div>
         );
       })()}

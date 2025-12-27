@@ -2,7 +2,7 @@
   min-height: 100vh;
   background-color: #13132a;
   color: white;
-  padding: 20px 0;
+  padding: 0 0 20px;
 }
 
 .minigames-tabs {
@@ -15,7 +15,7 @@
 
 .minigame-tab {
   flex: 1;
-  padding: 15px 20px;
+  padding: 0 20px 15px;
   font-size: 140%;
   font-weight: bold;
   border: none;

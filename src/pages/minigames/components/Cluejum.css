@@ -8,6 +8,8 @@
   text-align: center;
   min-height: 50px;
   margin-bottom: 12px;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
 }
 
 .word-clue-guess-container {
@@ -22,6 +24,15 @@
   justify-content: center;
   align-items: center;
   gap: 8px;
+  position: relative;
+}
+
+/* For stage 2 and 3 option containers - make all options same width */
+.word-clue-guess-container:has(.word-clue-option) .word-clue-guess {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 700px;
 }
 
 .letter-input {
@@ -45,29 +56,65 @@
 }
 
 .letter-input.letter-match {
-  background-color: rgb(73, 156, 127);
-  border-color: rgb(73, 156, 127);
+  background-color: var(--color-green);
+  border-color: var(--color-green);
+  color: white;
+}
+
+.letter-input.letter-wrong {
+  background-color: var(--color-pink);
+  border-color: var(--color-pink);
   color: white;
 }
 
 .enter-button {
   width: 42px;
   height: 42px;
-  margin-left: 6px;
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 .word-clue-option {
-  min-width: 240px;
-  border: 2px solid #71bbe9;
-  border-radius: 10px;
+  width: 100%;
+  border-radius: 25px;
   padding: 12px 14px;
-  margin: 8px;
+  margin: 8px 0;
   text-align: center;
   background: rgba(0, 0, 0, 0.25);
   color: white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease,
     background-color 0.12s ease;
+  box-sizing: border-box;
+  border: 2px solid var(--color-pink); /* Default, will be overridden by specific classes */
+}
+
+/* Color order: pink, yellow, green, blue, yellow, purple */
+.word-clue-option:nth-child(1) {
+  border-color: var(--color-pink);
+}
+
+.word-clue-option:nth-child(2) {
+  border-color: var(--color-yellow);
+}
+
+.word-clue-option:nth-child(3) {
+  border-color: var(--color-green);
+}
+
+.word-clue-option:nth-child(4) {
+  border-color: var(--color-blue);
+}
+
+.word-clue-option:nth-child(5) {
+  border-color: var(--color-yellow);
+}
+
+.word-clue-option:nth-child(6) {
+  border-color: var(--color-purple);
 }
 
 .word-clue-option:hover {
@@ -76,13 +123,13 @@
 }
 
 .option-correct {
-  background: rgba(51, 193, 91, 0.35);
+  background: rgba(51, 193, 91);
   border-color: #33c15b;
   color: #e6ffe6;
 }
 
 .option-wrong {
-  background: rgba(235, 84, 151, 0.35);
+  background: rgba(235, 84, 151);
   border-color: #eb5497;
   color: #ffe6f1;
 }
@@ -100,20 +147,24 @@
 }
 
 @keyframes greenTextGlowFade {
-  0% {
-    text-shadow: 0 0 10px rgba(51, 193, 91, 0.8);
+  from {
+    text-shadow: 1px 1px 50px #33c15b, -1px -1px 50px #33c15b,
+      1px -1px 50px #33c15b, -1px 1px 50px #33c15b;
   }
-  100% {
-    text-shadow: 0 0 0 rgba(51, 193, 91, 0);
+  to {
+    text-shadow: 0px 0px 0px #33c15b, 0px 0px 0px #33c15b, 0px 0px 0px #33c15b,
+      0px 0px 0px #33c15b;
   }
 }
 
 @keyframes pinkTextGlowFade {
-  0% {
-    text-shadow: 0 0 10px rgba(235, 84, 151, 0.8);
+  from {
+    text-shadow: 1px 1px 50px #eb5497, -1px -1px 50px #eb5497,
+      1px -1px 50px #eb5497, -1px 1px 50px #eb5497;
   }
-  100% {
-    text-shadow: 0 0 0 rgba(235, 84, 151, 0);
+  to {
+    text-shadow: 0px 0px 0px #eb5497, 0px 0px 0px #eb5497, 0px 0px 0px #eb5497,
+      0px 0px 0px #eb5497;
   }
 }
 
