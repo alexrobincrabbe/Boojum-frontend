@@ -55,6 +55,7 @@ export async function loadSounds() {
       bloop8: '/sounds/bloop8.mp3',
       bloop9: '/sounds/bloop9.mp3',
       perfect: '/sounds/perfect.mp3',
+      boojumble: '/sounds/boojumble.mp3',
     };
 
     const loadPromises = Object.entries(soundPaths).map(async ([name, path]) => {

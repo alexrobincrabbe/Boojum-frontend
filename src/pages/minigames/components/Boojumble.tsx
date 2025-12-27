@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
+import { playSound } from '../../../utils/sounds';
 import './Boojumble.css';
 
 interface BoojumbleData {
@@ -33,8 +34,33 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       let hasChanges = false;
       
       boojumbles.forEach(boojumble => {
-        // Always reinitialize if we have scrambled data, even if letters already exist
-        if (boojumble.scrambled) {
+        // Check if saved state exists for this board first
+        const boardDate = boojumble.date || new Date().toISOString().split('T')[0];
+        const storedLetters = localStorage.getItem(`minigames-${boardDate}`);
+        
+        // If saved state exists, use it; otherwise use scrambled data
+        if (storedLetters && !newLetters[boojumble.N]) {
+          try {
+            const savedLetters = JSON.parse(storedLetters);
+            if (Array.isArray(savedLetters) && savedLetters.length === boojumble.N * boojumble.N) {
+              const savedGrid: string[][] = [];
+              for (let i = 0; i < boojumble.N; i++) {
+                savedGrid.push([]);
+                for (let j = 0; j < boojumble.N; j++) {
+                  const idx = i * boojumble.N + j;
+                  savedGrid[i].push(savedLetters[idx] || '');
+                }
+              }
+              newLetters[boojumble.N] = savedGrid;
+              hasChanges = true;
+            }
+          } catch (e) {
+            console.error('Failed to parse stored letters:', e);
+          }
+        }
+        
+        // Only use scrambled data if no saved state exists and no letters for this board
+        if (!newLetters[boojumble.N] && boojumble.scrambled) {
           let scrambled = boojumble.scrambled;
        
           
@@ -81,10 +107,9 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     });
   }, [boojumbles]);
 
-  // Load saved state from localStorage - but only once after letters are initialized
+  // Load saved words found state from localStorage
   useEffect(() => {
-    // Only load from localStorage once, after letters are initialized
-    if (boojumbles.length === 0 || Object.keys(letters).length === 0 || hasLoadedSavedState.current) return;
+    if (boojumbles.length === 0 || hasLoadedSavedState.current) return;
     
     // Use the board's date for the selected level
     const currentBoojumble = boojumbles.find(b => b.N === selectedLevel);
@@ -99,42 +124,8 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
     }
     
-    // Load saved letters only if they exist and have content
-    const storedLetters = localStorage.getItem(`minigames-${boardDate}`);
-    if (storedLetters) {
-      try {
-        const savedLetters = JSON.parse(storedLetters);
-        // Only apply saved state if it matches a board size and has actual letters
-        const lettersToUpdate: { [key: number]: string[][] } = {};
-        Object.keys(letters).forEach(NStr => {
-          const N = Number(NStr);
-          if (Array.isArray(savedLetters) && savedLetters.length === N * N) {
-            // Check if saved letters have actual content (not all empty)
-            const hasLetters = savedLetters.some((l: string) => l && l.trim() !== '');
-            if (hasLetters) {
-              const savedGrid: string[][] = [];
-              for (let i = 0; i < N; i++) {
-                savedGrid.push([]);
-                for (let j = 0; j < N; j++) {
-                  const idx = i * N + j;
-                  savedGrid[i].push(savedLetters[idx] || '');
-                }
-              }
-              lettersToUpdate[N] = savedGrid;
-            }
-          }
-        });
-        
-        if (Object.keys(lettersToUpdate).length > 0) {
-          setLetters(prev => ({ ...prev, ...lettersToUpdate }));
-        }
-      } catch (e) {
-        console.error('Failed to parse stored letters:', e);
-      }
-    }
-    
     hasLoadedSavedState.current = true;
-  }, [boojumbles.length]); // Only depend on boojumbles.length, not letters
+  }, [boojumbles.length, selectedLevel]);
 
   // Initialize drag and drop for the selected board (using original implementation)
   useEffect(() => {
@@ -181,18 +172,32 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     const onPointerDown = (event: MouseEvent | TouchEvent) => {
       const { clientX, clientY, pageX, pageY } = getClientXY(event);
       const target = event.target as HTMLElement;
-      const letterElement = target.closest('.letter') as HTMLElement;
+      // Find the boojumble-letter element - could be clicked directly or on a child
+      let letterElement = target.closest('.boojumble-letter') as HTMLElement;
+      // If we clicked on a child element, make sure we get the parent letter element
+      if (!letterElement && target.parentElement) {
+        letterElement = target.parentElement.closest('.boojumble-letter') as HTMLElement;
+      }
       if (!letterElement || !currentBoard.contains(letterElement)) return;
       
       event.preventDefault();
+      event.stopPropagation();
       
       draggedElement = letterElement;
+      // Add dragging class immediately to prevent default active styles
+      letterElement.classList.add('dragging');
+      
       const rect = letterElement.getBoundingClientRect();
       // Calculate offset from the element's top-left corner to the click point
       startX = clientX - rect.left;
       startY = clientY - rect.top;
       width = rect.width;
       height = rect.height;
+      
+      // Ensure square aspect ratio (use the larger dimension)
+      const size = Math.max(width, height);
+      width = size;
+      height = size;
 
       // Insert placeholder at the same position (before the element)
       placeholderElement = document.createElement('div');
@@ -205,6 +210,10 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       letterElement.style.position = 'absolute';
       letterElement.style.width = `${width}px`;
       letterElement.style.height = `${height}px`;
+      letterElement.style.minWidth = `${width}px`;
+      letterElement.style.minHeight = `${height}px`;
+      letterElement.style.maxWidth = `${width}px`;
+      letterElement.style.maxHeight = `${height}px`;
       letterElement.style.zIndex = '1000';
       letterElement.style.left = `${rect.left + window.scrollX}px`;
       letterElement.style.top = `${rect.top + window.scrollY}px`;
@@ -227,8 +236,10 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       let bestMatch: HTMLElement | null = null;
       const rectDragged = draggedElement.getBoundingClientRect();
 
-      currentBoard.querySelectorAll('.letter').forEach((item) => {
+      currentBoard.querySelectorAll('.boojumble-letter').forEach((item) => {
         if (item === draggedElement) return;
+        // Skip placeholder elements
+        if ((item as HTMLElement).classList.contains('placeholder')) return;
         const rectItem = item.getBoundingClientRect();
         const overlapWidth = Math.max(
           0,
@@ -263,7 +274,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       if (!currentBoojumble || !currentBoojumble.rows || !currentBoojumble.cols) return;
 
       // Read current grid words from DOM
-      const letterTiles = Array.from(currentBoard.querySelectorAll('.letter') as NodeListOf<HTMLElement>);
+      const letterTiles = Array.from(currentBoard.querySelectorAll('.boojumble-letter') as NodeListOf<HTMLElement>);
       const rowWords: string[] = [];
       const colWords: string[] = [];
 
@@ -302,18 +313,45 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       letterTiles.forEach(tile => {
         const letterChild = tile.querySelector('.letter-child');
         if (letterChild) {
-          letterChild.classList.remove('match-present', 'match-correct');
+          letterChild.classList.remove('match-present', 'match-correct', 'shimmer');
         }
       });
+      
+      // Track newly found words for shimmer effect
+      const boardDate = currentBoojumble?.date || new Date().toISOString().split('T')[0];
+      const storedWordsFoundKey = `minigames-words-found-${boardDate}`;
+      const previouslyFoundWordsStr = localStorage.getItem(storedWordsFoundKey);
+      const previouslyFoundWords: string[] = previouslyFoundWordsStr ? JSON.parse(previouslyFoundWordsStr) : [];
+      const newlyFoundWords: string[] = [];
+      const tilesToShimmer = new Set<HTMLElement>();
+      console.log('Previously found words:', previouslyFoundWords);
+      console.log('Board date:', boardDate);
 
       // Track which tiles should be green (correct position) vs yellow (valid word, wrong position)
       const correctTiles = new Set<HTMLElement>();
       const presentTiles = new Set<HTMLElement>();
+      // Track tiles to shimmer with their order for staggered animation (only correct matches)
+      const tilesToShimmerOrdered: Array<{ tile: HTMLElement; delay: number }> = [];
 
       // Check rows against solution rows: green if word is in correct row position
       rowWords.forEach((word, rowIndex) => {
         const matchIndex = rows.indexOf(word);
-        if (matchIndex !== -1 && matchIndex === rowIndex) {
+        if (matchIndex !== -1 && matchIndex === rowIndex && word) {
+          // Check if this is a newly found word
+          if (!previouslyFoundWords.includes(word)) {
+            newlyFoundWords.push(word);
+            // Add shimmer to all letters in this row with staggered delays
+            for (let col = 0; col < selectedLevel; col++) {
+              const tile = letterTiles[rowIndex * selectedLevel + col] as HTMLElement;
+              if (tile) {
+                const letterChild = tile.querySelector('.letter-child') as HTMLElement;
+                if (letterChild) {
+                  tilesToShimmer.add(letterChild);
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: col * 60 }); // 60ms delay between each letter
+                }
+              }
+            }
+          }
           // Word is in the correct row position - green
           for (let col = 0; col < selectedLevel; col++) {
             const tile = letterTiles[rowIndex * selectedLevel + col] as HTMLElement;
@@ -324,6 +362,17 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
               }
             }
           }
+        } else if (matchIndex !== -1 && word) {
+          // Yellow/partial match - Row word matches a row solution but at different index
+          for (let col = 0; col < selectedLevel; col++) {
+            const tile = letterTiles[rowIndex * selectedLevel + col] as HTMLElement;
+            if (tile) {
+              const letterChild = tile.querySelector('.letter-child') as HTMLElement;
+              if (letterChild && !correctTiles.has(letterChild)) {
+                presentTiles.add(letterChild);
+              }
+            }
+          }
         }
       });
 
@@ -331,7 +380,22 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       // (e.g., if word should be in first column, it's green if it's in first row)
       rowWords.forEach((word, rowIndex) => {
         const matchIndex = cols.indexOf(word);
-        if (matchIndex !== -1 && matchIndex === rowIndex) {
+        if (matchIndex !== -1 && matchIndex === rowIndex && word) {
+          // Check if this is a newly found word
+          if (!previouslyFoundWords.includes(word)) {
+            newlyFoundWords.push(word);
+            // Add shimmer to all letters in this row with staggered delays
+            for (let col = 0; col < selectedLevel; col++) {
+              const tile = letterTiles[rowIndex * selectedLevel + col] as HTMLElement;
+              if (tile) {
+                const letterChild = tile.querySelector('.letter-child') as HTMLElement;
+                if (letterChild) {
+                  tilesToShimmer.add(letterChild);
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: col * 60 }); // 60ms delay between each letter
+                }
+              }
+            }
+          }
           // Row word matches a column solution at the same index - green (correct position, swapped orientation)
           for (let col = 0; col < selectedLevel; col++) {
             const tile = letterTiles[rowIndex * selectedLevel + col] as HTMLElement;
@@ -342,7 +406,8 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
               }
             }
           }
-        } else if (matchIndex !== -1) {
+        } else if (matchIndex !== -1 && word) {
+          // Yellow/partial match - no shimmer for these, only for correct matches
           // Row word matches a column solution but at different index - yellow (valid word but wrong position)
           for (let col = 0; col < selectedLevel; col++) {
             const tile = letterTiles[rowIndex * selectedLevel + col] as HTMLElement;
@@ -359,7 +424,22 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       // Check columns against solution columns: green if word is in correct column position
       colWords.forEach((word, colIndex) => {
         const matchIndex = cols.indexOf(word);
-        if (matchIndex !== -1 && matchIndex === colIndex) {
+        if (matchIndex !== -1 && matchIndex === colIndex && word) {
+          // Check if this is a newly found word
+          if (!previouslyFoundWords.includes(word)) {
+            newlyFoundWords.push(word);
+            // Add shimmer to all letters in this column with staggered delays
+            for (let row = 0; row < selectedLevel; row++) {
+              const tile = letterTiles[row * selectedLevel + colIndex] as HTMLElement;
+              if (tile) {
+                const letterChild = tile.querySelector('.letter-child') as HTMLElement;
+                if (letterChild) {
+                  tilesToShimmer.add(letterChild);
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: row * 60 }); // 60ms delay between each letter
+                }
+              }
+            }
+          }
           // Word is in the correct column position - green
           for (let row = 0; row < selectedLevel; row++) {
             const tile = letterTiles[row * selectedLevel + colIndex] as HTMLElement;
@@ -370,6 +450,17 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
               }
             }
           }
+        } else if (matchIndex !== -1 && word) {
+          // Yellow/partial match - Column word matches a column solution but at different index
+          for (let row = 0; row < selectedLevel; row++) {
+            const tile = letterTiles[row * selectedLevel + colIndex] as HTMLElement;
+            if (tile) {
+              const letterChild = tile.querySelector('.letter-child') as HTMLElement;
+              if (letterChild && !correctTiles.has(letterChild)) {
+                presentTiles.add(letterChild);
+              }
+            }
+          }
         }
       });
 
@@ -377,7 +468,22 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       // (e.g., if word should be in first row, it's green if it's in first column)
       colWords.forEach((word, colIndex) => {
         const matchIndex = rows.indexOf(word);
-        if (matchIndex !== -1 && matchIndex === colIndex) {
+        if (matchIndex !== -1 && matchIndex === colIndex && word) {
+          // Check if this is a newly found word
+          if (!previouslyFoundWords.includes(word)) {
+            newlyFoundWords.push(word);
+            // Add shimmer to all letters in this column with staggered delays
+            for (let row = 0; row < selectedLevel; row++) {
+              const tile = letterTiles[row * selectedLevel + colIndex] as HTMLElement;
+              if (tile) {
+                const letterChild = tile.querySelector('.letter-child') as HTMLElement;
+                if (letterChild) {
+                  tilesToShimmer.add(letterChild);
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: row * 60 }); // 60ms delay between each letter
+                }
+              }
+            }
+          }
           // Column word matches a row solution at the same index - green (correct position, swapped orientation)
           for (let row = 0; row < selectedLevel; row++) {
             const tile = letterTiles[row * selectedLevel + colIndex] as HTMLElement;
@@ -388,7 +494,8 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
               }
             }
           }
-        } else if (matchIndex !== -1) {
+        } else if (matchIndex !== -1 && word) {
+          // Yellow/partial match - no shimmer for these, only for correct matches
           // Column word matches a row solution but at different index - yellow (valid word but wrong position)
           for (let row = 0; row < selectedLevel; row++) {
             const tile = letterTiles[row * selectedLevel + colIndex] as HTMLElement;
@@ -412,6 +519,31 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
           tile.classList.add('match-present');
         }
       });
+      
+      // Apply shimmer animation to newly found words (only correct matches)
+      if (newlyFoundWords.length > 0 && tilesToShimmerOrdered.length > 0) {
+        console.log('Applying shimmer to', newlyFoundWords.length, 'newly found words');
+        console.log('Tiles to shimmer:', tilesToShimmerOrdered.length);
+        // Play sound effect when shimmer animation triggers
+        playSound('boojumble');
+        // Apply staggered animation with delays
+        tilesToShimmerOrdered.forEach(({ tile, delay }) => {
+          setTimeout(() => {
+            tile.classList.add('shimmer');
+            console.log('Added shimmer class to tile', tile);
+            // Force reflow to ensure animation starts
+            tile.offsetHeight;
+            // Remove shimmer class after animation completes (0.6s)
+            setTimeout(() => {
+              tile.classList.remove('shimmer');
+            }, 600);
+          }, delay);
+        });
+        
+        // Update localStorage with newly found words
+        const allFoundWords = [...new Set([...previouslyFoundWords, ...newlyFoundWords])];
+        localStorage.setItem(storedWordsFoundKey, JSON.stringify(allFoundWords));
+      }
 
       // Check if solved
       const solved = rowWords.every((word, idx) => word === rows[idx]) ||
@@ -461,11 +593,20 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       // Perform swap or snap-back
       if (overlapTarget && overlapTarget !== draggedElement && overlapTarget !== placeholderElement) {
         // Swap: put dragged element where overlapTarget is, and overlapTarget where placeholder is
+        // Save references BEFORE any DOM manipulation
         const placeholderNextSibling = placeholderElement.nextSibling;
-        // First, insert dragged element before overlapTarget
-        currentBoard.insertBefore(draggedElement, overlapTarget);
-        // Then, insert overlapTarget where placeholder is (which is where dragged element originally was)
+        const overlapTargetNextSibling = overlapTarget.nextSibling;
+        
+        // Always move overlapTarget to placeholder position first
+        // Then move draggedElement to where overlapTarget was
         currentBoard.insertBefore(overlapTarget, placeholderNextSibling);
+        // Now insert draggedElement where overlapTarget was (use the saved nextSibling)
+        if (overlapTargetNextSibling && overlapTargetNextSibling.parentNode === currentBoard) {
+          currentBoard.insertBefore(draggedElement, overlapTargetNextSibling);
+        } else {
+          // If nextSibling doesn't exist or was removed, append to end
+          currentBoard.appendChild(draggedElement);
+        }
       } else {
         // Snap back: put dragged element back where placeholder is
         placeholderElement.replaceWith(draggedElement);
@@ -477,12 +618,17 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
 
       // Cleanup styles
+      draggedElement.classList.remove('dragging');
       draggedElement.style.position = '';
       draggedElement.style.zIndex = '';
       draggedElement.style.left = '';
       draggedElement.style.top = '';
       draggedElement.style.width = '';
       draggedElement.style.height = '';
+      draggedElement.style.minWidth = '';
+      draggedElement.style.minHeight = '';
+      draggedElement.style.maxWidth = '';
+      draggedElement.style.maxHeight = '';
       
       if (overlapTarget) {
         overlapTarget.querySelector('.letter-child')?.classList.remove('highlight');
@@ -492,31 +638,36 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       highlightRowsAndColumns();
       
       // Save game state after each swap
-      const letterElements = Array.from(currentBoard.querySelectorAll('.letter .letValue'));
-      const flatLetters: string[] = [];
-      letterElements.forEach(el => {
-        const text = el.textContent?.trim() || '';
-        flatLetters.push(text);
-      });
-
-      if (flatLetters.length === selectedLevel * selectedLevel) {
-        const reconstructed: string[][] = [];
-        for (let i = 0; i < selectedLevel; i++) {
-          reconstructed.push([]);
-          for (let j = 0; j < selectedLevel; j++) {
-            const idx = i * selectedLevel + j;
-            reconstructed[i].push(flatLetters[idx] || '');
+      // Read letters in DOM order (which reflects current positions after swaps)
+      const letterTiles = Array.from(currentBoard.querySelectorAll('.boojumble-letter') as NodeListOf<HTMLElement>);
+      const reconstructed: string[][] = [];
+      
+      // Build grid from tiles in DOM order (they're already in the correct visual order)
+      for (let i = 0; i < selectedLevel; i++) {
+        reconstructed.push([]);
+        for (let j = 0; j < selectedLevel; j++) {
+          const idx = i * selectedLevel + j;
+          const tile = letterTiles[idx];
+          if (tile) {
+            const letterValue = tile.querySelector('.letValue');
+            const text = letterValue?.textContent?.trim() || '';
+            reconstructed[i].push(text);
+          } else {
+            reconstructed[i].push('');
           }
         }
-        storeBoojumbleState(reconstructed, selectedLevel);
       }
+
+      // Only save to localStorage - don't update React state here to avoid re-rendering conflicts
+      // The DOM is the source of truth during gameplay, React state is only for initial render
+      storeBoojumbleState(reconstructed, selectedLevel);
 
       draggedElement = placeholderElement = overlapTarget = null;
     };
 
     // Wait for letter elements to be in the DOM (they might not be ready yet)
     const checkAndInit = () => {
-      const hasLetters = currentBoard.querySelectorAll('.letter').length > 0;
+      const hasLetters = currentBoard.querySelectorAll('.boojumble-letter').length > 0;
       if (!hasLetters) {
         // Retry after a short delay
         setTimeout(checkAndInit, 50);
@@ -528,6 +679,9 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       
       currentBoard.addEventListener('pointerdown', onPointerDown);
       currentBoard.addEventListener('touchstart', onPointerDown as any, { passive: false });
+      
+      // Apply highlighting classes on page load
+      highlightRowsAndColumns();
     };
     
     // Start checking for letters and initializing
@@ -646,7 +800,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
                         // Use position-based key that doesn't change when letters swap
                         // This prevents React from re-rendering and resetting positions
                         cells.push(
-                          <div key={`pos-${rowIdx}-${colIdx}`} className="letter" data-row={rowIdx} data-col={colIdx}>
+                          <div key={`pos-${rowIdx}-${colIdx}`} className="boojumble-letter" data-row={rowIdx} data-col={colIdx}>
                             <div className="letter-child">
                               <div className="letValue">{letter || ''}</div>
                             </div>

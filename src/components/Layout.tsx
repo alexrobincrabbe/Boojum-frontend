@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, lobbyAPI, dashboardAPI } from '../services/api';
-import { Menu, X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
+import { X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
@@ -552,11 +552,15 @@ const Layout = ({ children }: LayoutProps) => {
       <nav className="top-bar">
         <div className="top-bar-left">
           <button
-            className="burger-button"
+            className={`burger-button ${leftSidebarOpen ? 'active' : ''}`}
             onClick={handleLeftSidebarToggle}
             aria-label="Toggle sidebar"
           >
-            <Menu size={24} />
+            <div className="custom-burger-icon">
+              <span className="burger-line burger-line-pink"></span>
+              <span className="burger-line burger-line-yellow"></span>
+              <span className="burger-line burger-line-green"></span>
+            </div>
           </button>
         </div>
         <div className="top-bar-right">

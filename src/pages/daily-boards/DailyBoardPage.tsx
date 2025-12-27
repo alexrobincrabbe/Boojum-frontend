@@ -310,8 +310,8 @@ export default function DailyBoardPage() {
                             <span className="hidden-word">*****</span>
                           )}
                           {score.best_word_score != null && score.best_word_score !== '' && (
-                            <span className="word-score">
-                              {score.best_word_score}<span className="word-score-pts">pts</span>
+                            <span className="best-word-score">
+                              {score.best_word_score}<span className="best-word-score-pts">pts</span>
                             </span>
                           )}
                         </div>

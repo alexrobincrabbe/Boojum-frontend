@@ -21,7 +21,9 @@
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
   width: 100%;
+  margin: 0 auto;
 }
 
 #boojumbles .board-container.board-3 {
@@ -30,10 +32,12 @@
 
 #boojumbles .board-container.board-4 {
   min-width: 400px;
+  max-width: 400px;
 }
 
 #boojumbles .board-container.board-5 {
-  min-width: 500px;
+  min-width: 400px;
+  max-width: 400px;
 }
 
 #boojumbles .board {
@@ -53,7 +57,7 @@
   min-height: 300px !important;
   min-width: 300px !important;
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
   aspect-ratio: 1;
   visibility: visible !important;
   opacity: 1 !important;
@@ -63,6 +67,7 @@
 #boojumbles .board-container.board-3 .board {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  gap: 20px !important; /* Increased spacing for 3x3 board */
 }
 
 #boojumbles .board-container.board-4 .board {
@@ -75,7 +80,7 @@
   grid-template-rows: repeat(5, minmax(0, 1fr)) !important;
 }
 
-#boojumbles .letter {
+#boojumbles .boojumble-letter {
   position: relative;
   background-color: transparent;
   border: none;
@@ -85,12 +90,45 @@
   min-width: 50px;
   visibility: visible !important;
   opacity: 1 !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#boojumbles .boojumble-letter:active .letter-child,
+#boojumbles .boojumble-letter:focus .letter-child,
+#boojumbles .boojumble-letter:active.dragging .letter-child,
+#boojumbles .boojumble-letter:focus.dragging .letter-child {
+  background: #7195e9 !important;
+  box-shadow: 0 0 2px black !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #262659 !important;
+}
+
+#boojumbles .boojumble-letter:active .letter-child .letValue,
+#boojumbles .boojumble-letter:focus .letter-child .letValue,
+#boojumbles .boojumble-letter:active.dragging .letter-child .letValue,
+#boojumbles .boojumble-letter:focus.dragging .letter-child .letValue {
+  font-weight: bold !important;
+  font-size: 2.5em !important;
+}
+
+#boojumbles .boojumble-letter:active .letValue,
+#boojumbles .boojumble-letter:focus .letValue,
+#boojumbles .boojumble-letter:active.dragging .letValue,
+#boojumbles .boojumble-letter:focus.dragging .letValue {
+  color: #262659 !important;
+  font-size: 2.5em !important;
+  font-weight: bold !important;
 }
 
 #boojumbles .letter-child {
   background: #7195e9 !important;
   box-shadow: 0 0 2px black;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   cursor: move;
   height: 100%;
   width: 100%;
@@ -103,6 +141,114 @@
   border-radius: 50% !important;
   visibility: visible !important;
   opacity: 1 !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#boojumbles .letter-child:active {
+  background: #7195e9 !important;
+  box-shadow: 0 0 2px black !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#boojumbles .letter-child:active .letValue {
+  font-weight: bold !important;
+  font-size: 2.5em !important;
+}
+
+#boojumbles .letValue:active {
+  color: #262659 !important;
+  font-size: 2.5em !important;
+  font-weight: bold !important;
+}
+
+#boojumbles .boojumble-letter:active .letter-child .letValue,
+#boojumbles .boojumble-letter:focus .letter-child .letValue {
+  font-weight: bold !important;
+}
+
+/* Global rules for when element is moved to body */
+.boojumble-letter.dragging {
+  aspect-ratio: 1 !important;
+}
+
+.boojumble-letter.dragging .letter-child {
+  transform: scale(1.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 2px black !important;
+  background: #7195e9 !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #262659 !important;
+  aspect-ratio: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.boojumble-letter.dragging .letValue {
+    font-weight: bold;
+  color: #262659 !important;
+  font-size: 2.5em !important;
+}
+
+.boojumble-letter.dragging:active .letter-child,
+.boojumble-letter.dragging:focus .letter-child {
+  transform: scale(1.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 2px black !important;
+  background: #7195e9 !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.boojumble-letter.dragging:active .letValue,
+.boojumble-letter.dragging:focus .letValue {
+  color: #262659 !important;
+  font-size: 2.5em !important;
+  font-weight: bold !important;
+}
+
+/* Scoped rules (these also apply within #boojumbles) */
+#boojumbles .boojumble-letter.dragging {
+  aspect-ratio: 1 !important;
+}
+
+#boojumbles .boojumble-letter.dragging .letter-child {
+  transform: scale(1.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 2px black !important;
+  background: #7195e9 !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #262659 !important;
+  aspect-ratio: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#boojumbles .boojumble-letter.dragging .letValue {
+  color: #262659 !important;
+  font-size: 2.5em !important;
+  font-weight: bold !important;
+}
+
+#boojumbles .boojumble-letter.dragging:active .letter-child,
+#boojumbles .boojumble-letter.dragging:focus .letter-child {
+  transform: scale(1.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 2px black !important;
+  background: #7195e9 !important;
+  border-radius: 50% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#boojumbles .boojumble-letter.dragging:active .letValue,
+#boojumbles .boojumble-letter.dragging:focus .letValue {
+  color: #262659 !important;
+  font-size: 2.5em !important;
+  font-weight: bold !important;
 }
 
 #boojumbles .letter-child.match-present {
@@ -115,11 +261,62 @@
   box-shadow: 0 0 10px black !important;
 }
 
+#boojumbles .letter-child.match-correct.shimmer {
+  background-color: rgb(73, 156, 127) !important;
+  /* box-shadow will be controlled by animation */
+  /* match-correct box-shadow is overridden by animation */
+}
+
+#boojumbles .letter-child.highlight {
+  background-color: rgba(71, 95, 149, 1) !important;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6) !important;
+}
+
 #boojumbles .letValue {
   color: #262659;
-  font-size: 1.5em;
-  font-weight: bold;
+  font-size: 2.5em;
+  font-weight: bold !important;
 }
+
+/* Pulsating blue glow animation for first-time correct word finds */
+@keyframes pulsatingGlow {
+  0% {
+    filter: drop-shadow(0 0 15px rgba(113, 187, 233, 1)) 
+            drop-shadow(0 0 30px rgba(113, 187, 233, 0.9))
+            drop-shadow(0 0 45px rgba(113, 187, 233, 0.8));
+    transform: scale(1);
+    outline: 3px solid rgba(113, 187, 233, 1);
+    outline-offset: 3px;
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(113, 187, 233, 1)) 
+            drop-shadow(0 0 50px rgba(113, 187, 233, 1))
+            drop-shadow(0 0 75px rgba(113, 187, 233, 1))
+            drop-shadow(0 0 100px rgba(113, 187, 233, 0.9));
+    transform: scale(1.1);
+    outline: 4px solid rgba(113, 187, 233, 1);
+    outline-offset: 4px;
+  }
+  100% {
+    filter: drop-shadow(0 0 15px rgba(113, 187, 233, 1)) 
+            drop-shadow(0 0 30px rgba(113, 187, 233, 0.9))
+            drop-shadow(0 0 45px rgba(113, 187, 233, 0.8));
+    transform: scale(1);
+    outline: 3px solid rgba(113, 187, 233, 1);
+    outline-offset: 3px;
+  }
+}
+
+
+
+#boojumbles .letter-child.shimmer.match-correct {
+  animation: pulsatingGlow 0.2s ease-in-out !important;
+  background-color: rgb(73, 156, 127) !important;
+  /* Don't override box-shadow here - let the filter and outline handle the glow */
+  will-change: filter, transform, outline;
+}
+
+
 
 .boojumble-buttons {
   display: flex;

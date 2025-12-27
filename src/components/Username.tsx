@@ -15,7 +15,7 @@ export function Username({
   className = '',
   onClick,
 }: UsernameProps) {
-  const style = { color: chatColor };
+  const style = { color: chatColor, width:'120px', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' };
   
   if (profileUrl) {
     return (

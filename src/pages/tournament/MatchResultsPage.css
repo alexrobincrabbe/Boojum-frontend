@@ -63,11 +63,6 @@
   padding: 20px;
 }
 
-.player-name {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-  text-align: center;
-}
 
 .player-stats {
   display: flex;

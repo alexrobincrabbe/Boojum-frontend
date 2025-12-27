@@ -367,7 +367,7 @@
   margin: 0 auto;
 }
 
-.word-score {
+.best-word-score {
   position: absolute;
   top: 120%;
   left: 50%;
@@ -377,7 +377,7 @@
   white-space: nowrap;
 }
 
-.word-score-pts {
+.best-word-score-pts {
   color: #b0b0b0;
 }
 

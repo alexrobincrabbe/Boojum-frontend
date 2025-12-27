@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { leaderboardsAPI } from '../../services/api';
 import { ProfilePicture } from '../../components/ProfilePicture';
+import { Username } from '../../components/Username';
 import { Loading } from '../../components/Loading';
 import './LeaderboardsPage.css';
 
@@ -41,7 +42,7 @@ type AllLeaderboardsData = {
 const LeaderboardsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [gameType, setGameType] = useState(searchParams.get('gameType') || 'normal');
-  const [period, setPeriod] = useState(searchParams.get('period') || 'all-time');
+  const [period, setPeriod] = useState(searchParams.get('period') || 'weekly');
   const [allData, setAllData] = useState<AllLeaderboardsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,18 +82,31 @@ const LeaderboardsPage = () => {
   // Get current data from allData
   const data: LeaderboardData | null = allData?.[gameType]?.[period] || null;
 
+  // Get the color for the selected game mode
+  const getGameModeColor = (mode: string): string => {
+    switch (mode) {
+      case 'normal':
+        return 'var(--color-yellow)';
+      case 'long_game':
+        return 'var(--color-purple)';
+      case 'bonus':
+        return 'var(--color-pink)';
+      case 'one_shot':
+        return 'var(--color-green)';
+      default:
+        return 'var(--color-yellow)';
+    }
+  };
+
   const getRankClass = (rank: number): string => {
-    if (rank === 1) return 'bw-rank label';
-    if (rank === 2) return 'bw-rank label';
-    if (rank === 3) return 'bw-rank label green';
+    if (rank === 1) return 'bw-rank label rank-1';
+    if (rank === 2) return 'bw-rank label rank-2';
+    if (rank === 3) return 'bw-rank label rank-3';
     return 'bw-rank label';
   };
 
-  const getRankStyle = (rank: number): React.CSSProperties => {
-    if (rank === 1) return { fontWeight: 'bold' };
-    if (rank === 2) return { fontWeight: 'bold', color: 'white' };
-    if (rank === 3) return { fontWeight: 'bold' };
-    return {};
+  const getRankStyle = (_rank: number): React.CSSProperties => {
+    return { fontWeight: 'bold' };
   };
 
   const renderOneShotTables = () => {
@@ -103,7 +117,7 @@ const LeaderboardsPage = () => {
         <div className="col-lg-6">
           <div className="table-container">
             <h5 className="blue">Normal</h5>
-            <div className="leaderboard_table_container">
+            <div className="leaderboard_table_container yellow-border">
               <table className="leaderboard_table">
                 <tbody>
                   {data.one_shot_list_normal.map((score) => (
@@ -122,28 +136,15 @@ const LeaderboardsPage = () => {
                         />
                       </td>
                       <td className="player-name">
-                        {score.profile_url ? (
-                          <Link
-                            to={`/profile/${score.profile_url}`}
-                            style={{
-                              color: score.chat_color === '#71bbe9' 
-                                ? '#71bbe9' 
-                                : score.chat_color,
-                              textShadow: score.chat_color === '#71bbe9'
-                                ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
-                                : 'none',
-                              textDecoration: 'none'
-                            }}
-                          >
-                            {score.display_name}
-                          </Link>
-                        ) : (
-                          <span style={{ color: score.chat_color }}>{score.display_name}</span>
-                        )}
+                        <Username
+                          username={score.display_name}
+                          profileUrl={score.profile_url}
+                          chatColor={score.chat_color}
+                        />
                       </td>
                       <td className={`word ${score.unicorn ? 'pink' : ''}`}>
-                        {score.best_word} <br />
-                        (<span className="yellow">{score.best_word_score}pts</span>)
+                        <span className="best-word">{score.best_word}</span>
+                        <span className="leaderboard-best-word-score">{score.best_word_score}pts</span>
                       </td>
                       <td>
                         <span className="one-shot-time blue">{score.time}s</span>
@@ -158,7 +159,7 @@ const LeaderboardsPage = () => {
         <div className="col-lg-6">
           <div className="table-container">
             <h5 className="blue">Bonus</h5>
-            <div className="leaderboard_table_container yellow-border">
+            <div className="leaderboard_table_container pink-border">
               <table className="leaderboard_table">
                 <tbody>
                   {data.one_shot_list_bonus.map((score) => (
@@ -177,28 +178,15 @@ const LeaderboardsPage = () => {
                         />
                       </td>
                       <td className="player-name">
-                        {score.profile_url ? (
-                          <Link
-                            to={`/profile/${score.profile_url}`}
-                            style={{
-                              color: score.chat_color === '#71bbe9' 
-                                ? '#71bbe9' 
-                                : score.chat_color,
-                              textShadow: score.chat_color === '#71bbe9'
-                                ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
-                                : 'none',
-                              textDecoration: 'none'
-                            }}
-                          >
-                            {score.display_name}
-                          </Link>
-                        ) : (
-                          <span style={{ color: score.chat_color }}>{score.display_name}</span>
-                        )}
+                        <Username
+                          username={score.display_name}
+                          profileUrl={score.profile_url}
+                          chatColor={score.chat_color}
+                        />
                       </td>
                       <td className={`word ${score.unicorn ? 'pink' : ''}`}>
-                        {score.best_word} <br />
-                        (<span className="yellow">{score.best_word_score}pts</span>)
+                        <span className="best-word">{score.best_word}</span>
+                        <span className="leaderboard-best-word-score">{score.best_word_score}pts</span>
                       </td>
                       <td>
                         <span className="one-shot-time blue">{score.time}s</span>
@@ -241,24 +229,11 @@ const LeaderboardsPage = () => {
                         />
                       </td>
                       <td className="player-name">
-                        {score.profile_url ? (
-                          <Link
-                            to={`/profile/${score.profile_url}`}
-                            style={{
-                              color: score.chat_color === '#71bbe9' 
-                                ? '#71bbe9' 
-                                : score.chat_color,
-                              textShadow: score.chat_color === '#71bbe9'
-                                ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
-                                : 'none',
-                              textDecoration: 'none'
-                            }}
-                          >
-                            {score.display_name}
-                          </Link>
-                        ) : (
-                          <span style={{ color: score.chat_color }}>{score.display_name}</span>
-                        )}
+                        <Username
+                          username={score.display_name}
+                          profileUrl={score.profile_url}
+                          chatColor={score.chat_color}
+                        />
                       </td>
                       <td className="number">{score.high_score}</td>
                     </tr>
@@ -290,29 +265,15 @@ const LeaderboardsPage = () => {
                         />
                       </td>
                       <td className="player-name">
-                        {score.profile_url ? (
-                          <Link
-                            to={`/profile/${score.profile_url}`}
-                            style={{
-                              color: score.chat_color === '#71bbe9' 
-                                ? '#71bbe9' 
-                                : score.chat_color,
-                              textShadow: score.chat_color === '#71bbe9'
-                                ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
-                                : 'none',
-                              textDecoration: 'none'
-                            }}
-                          >
-                            {score.display_name}
-                          </Link>
-                        ) : (
-                          <span style={{ color: score.chat_color }}>{score.display_name}</span>
-                        )}
+                        <Username
+                          username={score.display_name}
+                          profileUrl={score.profile_url}
+                          chatColor={score.chat_color}
+                        />
                       </td>
                       <td>
                         <span className="best-word">{score.best_word}</span>
-                        <br />
-                        (<span className="yellow">{score.best_word_score}pts</span>)
+                        <span className="leaderboard-best-word-score">{score.best_word_score}pts</span>
                       </td>
                     </tr>
                   ))}
@@ -343,24 +304,11 @@ const LeaderboardsPage = () => {
                         />
                       </td>
                       <td className="player-name">
-                        {score.profile_url ? (
-                          <Link
-                            to={`/profile/${score.profile_url}`}
-                            style={{
-                              color: score.chat_color === '#71bbe9' 
-                                ? '#71bbe9' 
-                                : score.chat_color,
-                              textShadow: score.chat_color === '#71bbe9'
-                                ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
-                                : 'none',
-                              textDecoration: 'none'
-                            }}
-                          >
-                            {score.display_name}
-                          </Link>
-                        ) : (
-                          <span style={{ color: score.chat_color }}>{score.display_name}</span>
-                        )}
+                        <Username
+                          username={score.display_name}
+                          profileUrl={score.profile_url}
+                          chatColor={score.chat_color}
+                        />
                       </td>
                       <td className="number">{score.most_words}</td>
                     </tr>
@@ -383,6 +331,7 @@ const LeaderboardsPage = () => {
             className="green-border"
             value={gameType}
             onChange={handleGameTypeChange}
+            style={{ color: getGameModeColor(gameType) }}
           >
             <option value="normal">LookingGlass</option>
             <option value="long_game">Forever</option>
