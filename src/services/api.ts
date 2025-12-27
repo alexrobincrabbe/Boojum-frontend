@@ -112,6 +112,14 @@ export const authAPI = {
     const response = await api.post(`/doodles/${doodleId}/set-public/`, { public: isPublic });
     return response.data;
   },
+  getDoodle: async (doodleId: number) => {
+    const response = await api.get(`/doodles/${doodleId}/`);
+    return response.data;
+  },
+  getDoodleByUrl: async (imageUrl: string) => {
+    const response = await api.get(`/doodles/by-url/`, { params: { image_url: imageUrl } });
+    return response.data;
+  },
   getDoodleComments: async (doodleId: number) => {
     const response = await api.get(`/doodles/${doodleId}/comments/`);
     return response.data;

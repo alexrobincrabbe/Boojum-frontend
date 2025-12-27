@@ -67,7 +67,7 @@ const NotificationDropdown = ({ isOpen, onClose, unreadCount, onNotificationsRea
 
   const renderNotificationMessage = (notification: Notification) => {
     // For comment/reply notifications, extract username and display with color
-    if (notification.notification_type === 'doodle_comment' || notification.notification_type === 'doodle_reply') {
+    if (notification.notification_type === 'doodle_comment' || notification.notification_type === 'doodle_reply' || notification.notification_type === 'doodle_solved') {
       if (notification.commenter_username) {
         const messageParts = notification.message.split(notification.commenter_username);
         const beforeUsername = messageParts[0];

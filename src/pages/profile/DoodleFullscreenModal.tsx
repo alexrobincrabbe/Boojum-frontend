@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { authAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -46,6 +47,7 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
   const [submitting, setSubmitting] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     loadComments();
@@ -59,6 +61,16 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
       commentsEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [comments]);
+
+  // Focus comment input when modal opens (after a short delay to ensure modal is rendered)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (commentInputRef.current && currentUser) {
+        commentInputRef.current.focus();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [currentUser, doodle.id]);
 
   const loadComments = async () => {
     try {
@@ -173,7 +185,7 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
     return isOwner;
   };
 
-  return (
+  const modalContent = (
     <div className="doodle-fullscreen-overlay" onClick={onClose}>
       <div className="doodle-fullscreen-modal" onClick={(e) => e.stopPropagation()}>
         <button className="doodle-fullscreen-close" onClick={onClose}>
@@ -196,12 +208,14 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
             {currentUser && (
               <div className="doodle-comment-form">
                 <textarea
+                  ref={commentInputRef}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment (max 200 characters)..."
                   maxLength={200}
                   rows={3}
                   className="doodle-comment-input"
+                  autoFocus
                 />
                 <div className="doodle-comment-actions">
                   <span className="doodle-comment-char-count">
@@ -360,6 +374,9 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
       </div>
     </div>
   );
+
+  // Render modal using portal to ensure it appears above all other elements
+  return createPortal(modalContent, document.body);
 };
 
 export default DoodleFullscreenModal;

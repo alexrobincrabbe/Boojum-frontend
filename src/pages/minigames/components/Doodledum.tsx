@@ -1,18 +1,32 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { minigamesAPI } from '../../../services/api';
+import { minigamesAPI, authAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { Loading } from '../../../components/Loading';
+import DoodleFullscreenModal from '../../profile/DoodleFullscreenModal';
 import './Doodledum.css';
 
 interface FeedItem {
   is_doodle: boolean;
   doodle_url: string | null;
+  doodle_id?: number;
   guess: string | null;
   correct: boolean;
   created_at: string;
   user: string;
   chat_color: string;
+}
+
+interface DoodleForModal {
+  id: number;
+  word: string;
+  image_url: string;
+  public: boolean;
+  created_at: string | null;
+  user?: {
+    id: number;
+    username: string;
+  };
 }
 
 const COLORS = [
@@ -40,6 +54,8 @@ const Doodledum: React.FC = () => {
   const [isFetchingDoodledum, setIsFetchingDoodledum] = useState(false);
   const [isSubmittingDrawing, setIsSubmittingDrawing] = useState(false);
   const [isCancellingDrawing, setIsCancellingDrawing] = useState(false);
+  const [selectedDoodle, setSelectedDoodle] = useState<DoodleForModal | null>(null);
+  const [isLoadingDoodle, setIsLoadingDoodle] = useState(false);
   
   // Drawing state
   const [tool, setTool] = useState<'draw' | 'eraser' | 'fill'>('draw');
@@ -951,15 +967,15 @@ const Doodledum: React.FC = () => {
     newLetters[index] = value.toUpperCase();
     setGuessLetters(newLetters);
     
-    // Auto-focus next input if a letter was entered
-    if (value && index < guessLetters.length - 1) {
+    // Auto-focus next input if a letter was entered (but not if loading a doodle)
+    if (value && index < guessLetters.length - 1 && !isLoadingDoodle) {
       const nextInput = document.getElementById(`doodle-guess-input-${index + 1}`) as HTMLInputElement | null;
       nextInput?.focus();
     }
   };
 
   const handleGuessBackspace = (index: number) => {
-    if (isSubmittingGuess) return;
+    if (isSubmittingGuess || isLoadingDoodle) return;
     const newLetters = [...guessLetters];
     if (newLetters[index]) {
       // If current input has a letter, clear it
@@ -968,9 +984,50 @@ const Doodledum: React.FC = () => {
       // If current input is empty, move to previous and clear it
       newLetters[index - 1] = '';
       const prevInput = document.getElementById(`doodle-guess-input-${index - 1}`) as HTMLInputElement | null;
-      prevInput?.focus();
+      if (!isLoadingDoodle) {
+        prevInput?.focus();
+      }
     }
     setGuessLetters(newLetters);
+  };
+
+  const handleDoodleClick = async (item: FeedItem) => {
+    if (!item.is_doodle || !item.doodle_url || isLoadingDoodle) {
+      if (isLoadingDoodle) {
+        toast.info('Loading comments...');
+      }
+      return;
+    }
+    
+    setIsLoadingDoodle(true);
+    toast.info('Opening comments...');
+    
+    try {
+      let doodleData;
+      
+      // If we have doodle_id, use it directly
+      if (item.doodle_id) {
+        doodleData = await authAPI.getDoodle(item.doodle_id);
+      } else {
+        // If no doodle_id, try to find doodle by image URL
+        console.log('No doodle_id available, trying to find doodle by URL...', item.doodle_url);
+        doodleData = await authAPI.getDoodleByUrl(item.doodle_url);
+      }
+      
+      setSelectedDoodle({
+        id: doodleData.id,
+        word: doodleData.word,
+        image_url: doodleData.image_url,
+        public: doodleData.public,
+        created_at: doodleData.created_at,
+        user: doodleData.user,
+      });
+    } catch (error) {
+      console.error('Failed to load doodle:', error);
+      toast.error('Failed to load doodle');
+    } finally {
+      setIsLoadingDoodle(false);
+    }
   };
 
   const handleGuess = async () => {
@@ -988,11 +1045,13 @@ const Doodledum: React.FC = () => {
       setGuessLetters(new Array(12).fill(''));
       toast.success('Guess submitted!');
       await Promise.all([loadFeed(), checkDoodledum()]);
-      // Focus first input after submission
-      setTimeout(() => {
-        const firstInput = document.getElementById('doodle-guess-input-0') as HTMLInputElement | null;
-        firstInput?.focus();
-      }, 100);
+      // Only focus first input if not loading a doodle modal
+      if (!isLoadingDoodle) {
+        setTimeout(() => {
+          const firstInput = document.getElementById('doodle-guess-input-0') as HTMLInputElement | null;
+          firstInput?.focus();
+        }, 100);
+      }
     } catch (error: unknown) {
       console.error('Failed to submit guess:', error);
       const errorMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to submit guess';
@@ -1070,7 +1129,7 @@ const Doodledum: React.FC = () => {
                   maxLength={1}
                   className="letter-input"
                   value={letter}
-                  disabled={isSubmittingGuess}
+                  disabled={isSubmittingGuess || isLoadingDoodle}
                   onChange={(e) => {
                     handleGuessLetterChange(i, e.target.value);
                   }}
@@ -1085,7 +1144,7 @@ const Doodledum: React.FC = () => {
                       handleGuess();
                     }
                   }}
-                  autoFocus={i === 0}
+                  autoFocus={i === 0 && !isLoadingDoodle}
                 />
               ))}
               <img
@@ -1379,7 +1438,17 @@ const Doodledum: React.FC = () => {
                         return <>{message.prefix}{message.suffix}</>;
                       })()}
                       {item.doodle_url && (
-                        <img src={item.doodle_url} alt="Doodle" className="doodle-image" />
+                        <img 
+                          src={item.doodle_url} 
+                          alt="Doodle" 
+                          className="doodle-image" 
+                          style={{ 
+                            cursor: isLoadingDoodle ? 'wait' : 'pointer',
+                            opacity: isLoadingDoodle ? 0.6 : 1,
+                            pointerEvents: isLoadingDoodle ? 'none' : 'auto'
+                          }}
+                          onClick={() => handleDoodleClick(item)}
+                        />
                       )}
                       <span className="feed-time"> {formatTimeAgo(item.created_at)}</span>
                     </div>
@@ -1401,6 +1470,18 @@ const Doodledum: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {selectedDoodle && (
+        <DoodleFullscreenModal
+          doodle={selectedDoodle}
+          onClose={() => {
+            // Clear loading state first to re-enable inputs immediately
+            setIsLoadingDoodle(false);
+            // Then close the modal
+            setSelectedDoodle(null);
+          }}
+        />
+      )}
     </div>
   );
 };

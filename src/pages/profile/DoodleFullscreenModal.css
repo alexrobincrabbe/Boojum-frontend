@@ -5,13 +5,14 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.9);
-  z-index: 10010 !important; /* Above top bar (1003), sidebars (1001-1002), and all other elements */
+  z-index: 99999 !important; /* Very high z-index to appear above all layout elements including topbar and sidebars */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   overflow-y: auto;
   isolation: isolate; /* Create new stacking context */
+  pointer-events: auto;
 }
 
 .doodle-fullscreen-modal {
@@ -27,7 +28,8 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  z-index: 10011 !important; /* Ensure modal is above overlay */
+  z-index: 100000 !important; /* Ensure modal is above overlay */
+  pointer-events: auto;
 }
 
 .doodle-fullscreen-close {
@@ -58,6 +60,7 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  pointer-events: auto;
 }
 
 .doodle-fullscreen-image-container {
@@ -131,6 +134,9 @@
   font-size: 0.9rem;
   resize: vertical;
   margin-bottom: 8px;
+  pointer-events: auto;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .doodle-comment-input:focus,
