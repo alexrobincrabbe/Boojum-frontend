@@ -162,7 +162,7 @@ const LobbyPage = () => {
                     <h3>Custom Rooms</h3>
                   </div>
                   {customRooms.map((room) => (
-                    <div key={room.room_id} className="room-card-wrapper">
+                    <div key={room.room_id} className="room-card-wrapper custom-room-wrapper">
                       <Link
                         to={`/rooms/guest/${room.room_slug}/`}
                         className="room-link"
@@ -188,6 +188,11 @@ const LobbyPage = () => {
                             })()}
                             <span className="duration">{room.timer} seconds</span>
                           </div>
+                          {room.description && (
+                            <div className="custom-room-description">
+                              {room.description}
+                            </div>
+                          )}
                         </div>
                       </Link>
                       <div className="custom-room-info">
@@ -199,11 +204,6 @@ const LobbyPage = () => {
                         {room.visibility && (
                           <div className="custom-room-visibility">
                             <strong>Visibility:</strong> {room.visibility === 'public' ? 'Public' : 'Playmates Only'}
-                          </div>
-                        )}
-                        {room.description && (
-                          <div className="custom-room-description">
-                            {room.description}
                           </div>
                         )}
                       </div>

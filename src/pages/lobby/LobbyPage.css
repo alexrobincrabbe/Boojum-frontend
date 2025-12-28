@@ -109,6 +109,11 @@
   cursor: pointer;
 }
 
+/* Add bottom padding for custom rooms to make space for custom-room-info */
+.custom-room-wrapper .room-card {
+  padding-bottom: 60px;
+}
+
 .room-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px var(--bg-blue-50);
@@ -473,6 +478,7 @@
   font-size: 0.85rem;
   color: #fff;
   z-index: 10;
+  pointer-events: none; /* Allow clicks to pass through to room card */
 }
 
 .custom-room-owner,
@@ -488,13 +494,15 @@
 }
 
 .custom-room-description {
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: 15px;
+  padding-top: 15px;
   border-top: 1px solid rgba(94, 76, 176, 0.3);
   color: #ccc;
   font-style: italic;
-  line-height: 1.3;
-  font-size: 0.8rem;
+  line-height: 1.4;
+  font-size: 0.85rem;
+  text-align: left;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
