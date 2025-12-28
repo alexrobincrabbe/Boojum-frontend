@@ -48,9 +48,13 @@ const PremiumTab = () => {
   const loadPremiumStatus = async () => {
     try {
       const status = await premiumAPI.getPremiumStatus();
+      console.log('Premium status response:', status);
       setPremiumStatus(status.is_premium);
       if (status.subscription) {
+        console.log('Subscription info:', status.subscription);
         setSubscriptionInfo(status.subscription);
+      } else {
+        console.log('No subscription info in response');
       }
     } catch (error) {
       console.error('Error loading premium status:', error);
@@ -153,7 +157,7 @@ const PremiumTab = () => {
             <div className="premium-active-message">
               <p>Thank you for being a premium member! 🎉</p>
               
-              {subscriptionInfo && subscriptionInfo.current_period_end && (
+              {subscriptionInfo && subscriptionInfo.current_period_end ? (
                 <div className="subscription-details">
                   {subscriptionInfo.cancel_at_period_end ? (
                     <p className="subscription-warning">
@@ -174,6 +178,12 @@ const PremiumTab = () => {
                       })}</strong>
                     </p>
                   )}
+                </div>
+              ) : (
+                <div className="subscription-details">
+                  <p className="subscription-info">
+                    Subscription details are being loaded...
+                  </p>
                 </div>
               )}
               
