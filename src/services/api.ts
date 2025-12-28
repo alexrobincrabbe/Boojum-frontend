@@ -278,6 +278,26 @@ export const premiumAPI = {
     const response = await api.post('/premium/portal/');
     return response.data;
   },
+  getCustomRoom: async () => {
+    const response = await api.get('/custom-room/');
+    return response.data;
+  },
+  createOrUpdateCustomRoom: async (roomData: {
+    name: string;
+    timer: number;
+    intermission: number;
+    bonus: boolean;
+    one_shot: boolean;
+    word_level: number;
+    language: string;
+    use_special_boards: boolean;
+    visibility: string;
+    color: string;
+    description?: string;
+  }) => {
+    const response = await api.post('/custom-room/create-or-update/', roomData);
+    return response.data;
+  },
 };
 
 export const lobbyAPI = {

@@ -443,4 +443,68 @@
   }
 }
 
+/* Custom Rooms Header */
+.custom-rooms-header {
+  grid-column: 1 / -1; /* Span all columns */
+  margin-top: 30px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #5e4cb0;
+}
+
+.custom-rooms-header h3 {
+  color: #5e4cb0;
+  font-size: 1.5em;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(94, 76, 176, 0.5);
+}
+
+/* Custom Room Info */
+.custom-room-info {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 10px 15px;
+  background-color: rgba(19, 19, 42, 0.9);
+  border-radius: 5px;
+  border: 1px solid rgba(94, 76, 176, 0.3);
+  min-width: 200px;
+  max-width: 300px;
+  font-size: 0.85rem;
+  color: #fff;
+  z-index: 10;
+}
+
+.custom-room-owner,
+.custom-room-visibility {
+  margin-bottom: 6px;
+  color: #aaa;
+}
+
+.custom-room-owner strong,
+.custom-room-visibility strong {
+  color: #71bbe9;
+  margin-right: 5px;
+}
+
+.custom-room-description {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(94, 76, 176, 0.3);
+  color: #ccc;
+  font-style: italic;
+  line-height: 1.3;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .custom-room-info {
+    position: static;
+    margin-top: 10px;
+    width: 100%;
+    min-width: auto;
+    max-width: 100%;
+  }
+}
+
 

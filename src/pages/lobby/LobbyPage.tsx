@@ -17,6 +17,10 @@ interface Room {
   visible: boolean;
   one_shot: boolean;
   color: string;
+  custom?: boolean;
+  created_by?: string;
+  created_by_username?: string;
+  visibility?: string;
 }
 
 interface WordOfTheDay {
@@ -26,7 +30,8 @@ interface WordOfTheDay {
 }
 
 const LobbyPage = () => {
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [adminRooms, setAdminRooms] = useState<Room[]>([]);
+  const [customRooms, setCustomRooms] = useState<Room[]>([]);
   const [wordOfTheDay, setWordOfTheDay] = useState<WordOfTheDay | null>(null);
   const [roomUsers, setRoomUsers] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -37,7 +42,8 @@ const LobbyPage = () => {
     const loadLobbyData = async () => {
       try {
         const data = await lobbyAPI.getLobbyData();
-        setRooms(data.rooms || []);
+        setAdminRooms(data.admin_rooms || []);
+        setCustomRooms(data.custom_rooms || []);
         setWordOfTheDay(data.word_of_the_day || null);
       } catch (error: any) {
         toast.error('Failed to load lobby data');
@@ -109,7 +115,8 @@ const LobbyPage = () => {
 
           <div className="lobby-section rooms-section">
             <div className="rooms-list">
-              {rooms.map((room) => (
+              {/* Admin-created rooms */}
+              {adminRooms.map((room) => (
                 <div key={room.room_id} className="room-card-wrapper">
                   <Link
                     to={`/rooms/guest/${room.room_slug}/`}
@@ -147,6 +154,63 @@ const LobbyPage = () => {
                   </Link>
                 </div>
               ))}
+              
+              {/* Custom rooms section */}
+              {customRooms.length > 0 && (
+                <>
+                  <div className="custom-rooms-header">
+                    <h3>Custom Rooms</h3>
+                  </div>
+                  {customRooms.map((room) => (
+                    <div key={room.room_id} className="room-card-wrapper">
+                      <Link
+                        to={`/rooms/guest/${room.room_slug}/`}
+                        className="room-link"
+                      >
+                        <div className="room-card" style={{ borderColor: room.color }}>
+                          <h2 className="room-title" style={{ color: room.color }}>
+                            {room.room_name}
+                            <span className="room-playing">
+                              <strong>Playing:</strong>{' '}
+                              <span 
+                                className={`room-user-count ${(roomUsers[room.room_slug] || 0) === 0 ? 'zero' : 'greater-than-zero'}`}
+                              >
+                                {roomUsers[room.room_slug] || 0}
+                              </span>
+                            </span>
+                          </h2>
+                          <div className="room-details">
+                            {(() => {
+                              const roomType = getRoomType(room);
+                              return roomType === 'Bonus Letters' || roomType === 'One Word' ? (
+                                <span className="room-rules">{roomType}</span>
+                              ) : null;
+                            })()}
+                            <span className="duration">{room.timer} seconds</span>
+                          </div>
+                        </div>
+                      </Link>
+                      <div className="custom-room-info">
+                        {room.created_by && (
+                          <div className="custom-room-owner">
+                            <strong>Owner:</strong> {room.created_by}
+                          </div>
+                        )}
+                        {room.visibility && (
+                          <div className="custom-room-visibility">
+                            <strong>Visibility:</strong> {room.visibility === 'public' ? 'Public' : 'Playmates Only'}
+                          </div>
+                        )}
+                        {room.description && (
+                          <div className="custom-room-description">
+                            {room.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         </div>
