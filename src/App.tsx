@@ -22,8 +22,12 @@ import LobbyPage from "./pages/lobby/LobbyPage";
 import GameRoom from "./pages/game-room/GameRoom";
 import DailyBoardPage from "./pages/daily-boards/DailyBoardPage";
 import DailyBoardGameRoom from "./pages/daily-boards/DailyBoardGameRoom";
+import DailyBoardsArchivePage from "./pages/daily-boards/DailyBoardsArchivePage";
+import DailyBoardArchiveDetailPage from "./pages/daily-boards/DailyBoardArchiveDetailPage";
 import TimelessBoardPage from "./pages/timeless-boards/TimelessBoardPage";
 import TimelessBoardGameRoom from "./pages/timeless-boards/TimelessBoardGameRoom";
+import TimelessBoardsArchivePage from "./pages/timeless-boards/TimelessBoardsArchivePage";
+import TimelessBoardArchiveDetailPage from "./pages/timeless-boards/TimelessBoardArchiveDetailPage";
 import SavedBoardGameRoom from "./pages/saved-boards/SavedBoardGameRoom";
 import LeaderboardsPage from "./pages/leaderboards/LeaderboardsPage";
 import ForumPage from "./pages/forum/ForumPage";
@@ -123,10 +127,20 @@ function App() {
                 path="/daily-boards/play/:dailyBoardId"
                 element={<DailyBoardGameRoom />}
               />
+              <Route path="/daily-boards/archive" element={<DailyBoardsArchivePage />} />
+              <Route
+                path="/daily-boards/archive/:boardId"
+                element={<DailyBoardArchiveDetailPage />}
+              />
               <Route path="/timeless-boards" element={<TimelessBoardPage />} />
               <Route
                 path="/timeless-boards/play/:timelessBoardId/:level"
                 element={<TimelessBoardGameRoom />}
+              />
+              <Route path="/timeless-boards/archive" element={<TimelessBoardsArchivePage />} />
+              <Route
+                path="/timeless-boards/archive/:boardId/:level"
+                element={<TimelessBoardArchiveDetailPage />}
               />
               <Route
                 path="/saved-boards/play/:boardId"

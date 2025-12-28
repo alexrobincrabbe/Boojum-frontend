@@ -5,6 +5,174 @@
   position: relative;
 }
 
+/* Archive list styles */
+.archive-boards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.archive-board-item {
+  background: rgba(19, 19, 42, 0.8);
+  border: 2px solid var(--color-blue);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.archive-board-item:hover {
+  background: rgba(19, 19, 42, 0.95);
+  border-color: var(--color-yellow);
+  transform: translateX(5px);
+}
+
+.archive-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.archive-board-title {
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.archive-board-date {
+  color: var(--color-green);
+  text-shadow: var(--glow-green-text);
+  font-size: 1rem;
+}
+
+.archive-board-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.archive-board-stat {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.stat-label {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+}
+
+.stat-value {
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+  font-weight: bold;
+}
+
+.stat-value.played {
+  color: var(--color-green);
+  text-shadow: var(--glow-green-text);
+}
+
+.stat-value.not-played {
+  color: var(--color-pink);
+  text-shadow: var(--glow-pink-text);
+}
+
+.board-type-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.board-type-badge.bonus {
+  background: rgba(113, 187, 233, 0.2);
+  border: 1px solid var(--color-blue);
+  color: var(--color-blue);
+}
+
+.archive-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+}
+
+.pagination-jump-shortcuts {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pagination-jump-btn {
+  padding: 6px 12px;
+  background: rgba(19, 19, 42, 0.8);
+  border: 1px solid var(--color-blue);
+  border-radius: 6px;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.pagination-jump-btn:hover:not(:disabled) {
+  background: rgba(113, 187, 233, 0.2);
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+}
+
+.pagination-jump-btn.active {
+  background: rgba(113, 187, 233, 0.3);
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+  font-weight: bold;
+}
+
+.pagination-jump-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.pagination-prev::before {
+  content: '←';
+  margin-right: 5px;
+}
+
+.pagination-btn.pagination-next::after {
+  content: '→';
+  margin-left: 5px;
+}
+
+.archive-level-info {
+  text-align: center;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  margin-bottom: 10px;
+}
+
+.archive-level-hint {
+  text-align: center;
+  color: var(--color-green);
+  text-shadow: var(--glow-green-text);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
 .timeless-board-top-pagination {
   display: flex;
   justify-content: space-between;

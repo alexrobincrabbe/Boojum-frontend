@@ -6,6 +6,7 @@ interface User {
   username: string;
   email: string;
   is_superuser?: boolean;
+  is_premium?: boolean;
 }
 
 interface GoogleRegistrationData {

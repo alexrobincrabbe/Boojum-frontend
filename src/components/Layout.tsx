@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, lobbyAPI, dashboardAPI, forumAPI } from '../services/api';
 import { X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
@@ -171,6 +171,7 @@ const Layout = ({ children }: LayoutProps) => {
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // Chat state
@@ -819,6 +820,40 @@ const Layout = ({ children }: LayoutProps) => {
               </Link>
             </div>
           </div>
+          {isAuthenticated && user?.is_premium && (
+            <div className="nav-section">
+              {leftSidebarOpen && <div className="nav-section-title">Premium</div>}
+              <div className="nav-links-grid">
+                <Link
+                  to="/daily-boards/archive"
+                  className={`nav-link ${location.pathname.startsWith('/daily-boards/archive') ? 'active' : ''}`}
+                  onClick={() => {
+                    if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                  }}
+                >
+                  {leftSidebarOpen && <span>Daily Board Archive</span>}
+                </Link>
+            <Link
+              to="/timeless-boards/archive?level=10"
+              className={`nav-link ${location.pathname.startsWith('/timeless-boards/archive') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>Timeless Board Archive</span>}
+            </Link>
+            <Link
+              to="/minigames?archive=true"
+              className={`nav-link ${searchParams.get('archive') === 'true' ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>Minigames Archive</span>}
+            </Link>
+              </div>
+            </div>
+          )}
           <div className="nav-section">
             {leftSidebarOpen && <div className="nav-section-title">More</div>}
             <Link

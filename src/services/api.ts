@@ -331,6 +331,16 @@ export const lobbyAPI = {
     const response = await api.get('/daily-boards/');
     return response.data;
   },
+  getDailyBoardsArchive: async (page: number = 1, perPage: number = 20) => {
+    const response = await api.get('/daily-boards/archive/', {
+      params: { page, per_page: perPage },
+    });
+    return response.data;
+  },
+  getDailyBoardArchiveDetail: async (boardId: number) => {
+    const response = await api.get(`/daily-boards/archive/${boardId}/`);
+    return response.data;
+  },
   getTimelessBoards: async (level: number = 10) => {
     const response = await api.get(`/timeless-boards/`, { params: { level } });
     return response.data;
@@ -357,6 +367,16 @@ export const lobbyAPI = {
   },
   useTimelessHint: async (timelessBoardId: number) => {
     const response = await api.post(`/timeless-boards/hint/${timelessBoardId}/`);
+    return response.data;
+  },
+  getTimelessBoardsArchive: async (level: number = 10, page: number = 1, perPage: number = 20) => {
+    const response = await api.get('/timeless-boards/archive/', {
+      params: { level, page, per_page: perPage },
+    });
+    return response.data;
+  },
+  getTimelessBoardArchiveDetail: async (boardId: number, level: number) => {
+    const response = await api.get(`/timeless-boards/archive/${boardId}/${level}/`);
     return response.data;
   },
   
@@ -505,6 +525,13 @@ export const forumAPI = {
 
 
 export const minigamesAPI = {
+  getMinigamesArchive: async (date?: string) => {
+    const url = date 
+      ? `/minigames/archive/?date=${date}`
+      : '/minigames/archive/';
+    const response = await api.get(url);
+    return response.data;
+  },
   getMinigamesData: async () => {
     const response = await api.get('/minigames/');
     return response.data;
