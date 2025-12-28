@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { premiumAPI } from '../../../services/api';
 import './PremiumTab.css';
 
 const PremiumTab = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [premiumStatus, setPremiumStatus] = useState(false);
   const [donationAmount, setDonationAmount] = useState(5);
@@ -11,15 +13,45 @@ const PremiumTab = () => {
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load premium status
-    const loadPremiumStatus = async () => {
-      try {
-        const status = await premiumAPI.getPremiumStatus();
-        setPremiumStatus(status.is_premium);
-      } catch (error) {
-        console.error('Error loading premium status:', error);
-      }
-    };
+    // Check for success/cancelled parameters from Stripe redirect
+    const premiumParam = searchParams.get('premium');
+    const donationParam = searchParams.get('donation');
+    
+    if (premiumParam === 'success') {
+      setSuccess('🎉 Your premium subscription is now active! Thank you for subscribing.');
+      // Remove the parameter from URL
+      searchParams.delete('premium');
+      setSearchParams(searchParams, { replace: true });
+      // Refresh premium status
+      loadPremiumStatus();
+    } else if (premiumParam === 'cancelled') {
+      setError('Subscription was cancelled. No charges were made.');
+      searchParams.delete('premium');
+      setSearchParams(searchParams, { replace: true });
+    }
+    
+    if (donationParam === 'success') {
+      setSuccess('Thank you for your donation! Your support helps us keep Boojum Games running.');
+      searchParams.delete('donation');
+      setSearchParams(searchParams, { replace: true });
+    } else if (donationParam === 'cancelled') {
+      setError('Donation was cancelled. No charges were made.');
+      searchParams.delete('donation');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const loadPremiumStatus = async () => {
+    try {
+      const status = await premiumAPI.getPremiumStatus();
+      setPremiumStatus(status.is_premium);
+    } catch (error) {
+      console.error('Error loading premium status:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Load premium status on mount
     loadPremiumStatus();
   }, []);
 
@@ -61,6 +93,21 @@ const PremiumTab = () => {
     }
   };
 
+  const handleManageSubscription = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const { portal_url } = await premiumAPI.createCustomerPortal();
+      // Redirect to Stripe Customer Portal
+      window.location.href = portal_url;
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to load subscription management. Please try again.');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="premium-tab">
       <div className="premium-content">
@@ -98,6 +145,13 @@ const PremiumTab = () => {
           {premiumStatus && (
             <div className="premium-active-message">
               <p>Thank you for being a premium member! 🎉</p>
+              <button
+                className="premium-button manage-subscription-button"
+                onClick={handleManageSubscription}
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Manage Subscription'}
+              </button>
             </div>
           )}
         </div>

@@ -85,6 +85,12 @@ const DashboardPage = () => {
       }
     };
     
+    // Check URL parameters to open premium tab
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'premium') {
+      setActiveTab('premium');
+    }
+    
     loadBundle();
     refreshUserInfo();
   }, [isAuthenticated]);

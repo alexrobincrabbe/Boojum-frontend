@@ -100,6 +100,22 @@
   font-size: 1.1rem;
 }
 
+.premium-active-message p {
+  margin-bottom: 20px;
+}
+
+.manage-subscription-button {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  margin-top: 10px;
+}
+
+.manage-subscription-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
 .premium-button {
   padding: 12px 30px;
   font-size: 1.1rem;

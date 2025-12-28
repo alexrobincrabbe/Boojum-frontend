@@ -274,6 +274,10 @@ export const premiumAPI = {
     const response = await api.post('/premium/donate/', { amount });
     return response.data;
   },
+  createCustomerPortal: async () => {
+    const response = await api.post('/premium/portal/');
+    return response.data;
+  },
 };
 
 export const lobbyAPI = {
