@@ -84,6 +84,46 @@ export const authAPI = {
     return response.data;
   },
 
+  getGoogleClientId: async () => {
+    const response = await api.get('/google/client-id/');
+    return response.data.client_id;
+  },
+
+  googleLogin: async (accessToken: string) => {
+    const response = await api.post('/google/login/', { access_token: accessToken });
+    return response.data;
+  },
+
+  googleCompleteRegistration: async (username: string, email: string, googleId: string, accessToken: string) => {
+    const response = await api.post('/google/complete-registration/', {
+      username,
+      email,
+      google_id: googleId,
+      access_token: accessToken,
+    });
+    return response.data;
+  },
+
+  verifyEmail: async (key: string) => {
+    const response = await api.get('/verify-email/', { params: { key } });
+    return response.data;
+  },
+
+  requestPasswordReset: async (email: string) => {
+    const response = await api.post('/password-reset/request/', { email });
+    return response.data;
+  },
+
+  resetPassword: async (uidb64: string, token: string, newPassword: string, newPassword2: string) => {
+    const response = await api.post('/password-reset/confirm/', {
+      uidb64,
+      token,
+      new_password: newPassword,
+      new_password2: newPassword2,
+    });
+    return response.data;
+  },
+
   getProfile: async (profileUrl: string) => {
     const response = await api.get(`/profile/${profileUrl}/`);
     return response.data;
@@ -217,6 +257,21 @@ export const dashboardAPI = {
     const response = await api.post('/dashboard/remove-buddy/', {
       buddy_id: buddyId,
     });
+    return response.data;
+  },
+};
+
+export const premiumAPI = {
+  getPremiumStatus: async () => {
+    const response = await api.get('/premium/status/');
+    return response.data;
+  },
+  createSubscriptionCheckout: async () => {
+    const response = await api.post('/premium/subscribe/');
+    return response.data;
+  },
+  createDonationCheckout: async (amount: number) => {
+    const response = await api.post('/premium/donate/', { amount });
     return response.data;
   },
 };

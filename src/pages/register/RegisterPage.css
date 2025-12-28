@@ -1,4 +1,4 @@
-.login-page {
+.register-page {
   min-height: calc(100vh - 80px);
   display: flex;
   justify-content: center;
@@ -7,7 +7,7 @@
   background: #13132a;
 }
 
-.login-card {
+.register-card {
   background: #1b1835;
   border: 1px solid #71bbe9;
   border-radius: 12px;
@@ -17,7 +17,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
-.login-title {
+.register-title {
   margin: 0;
   color: #f5ce45;
   text-align: center;
@@ -25,25 +25,25 @@
   letter-spacing: 0.5px;
 }
 
-.login-subtitle {
+.register-subtitle {
   margin: 6px 0 20px;
   color: #d2d2f5;
   text-align: center;
   font-size: 0.95rem;
 }
 
-.login-form {
+.register-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.login-label {
+.register-label {
   color: #d2d2f5;
   font-size: 0.95rem;
 }
 
-.login-input {
+.register-input {
   background: #0e0d1d;
   border: 1px solid #71bbe9;
   border-radius: 8px;
@@ -53,11 +53,11 @@
   outline: none;
 }
 
-.login-input:focus {
+.register-input:focus {
   box-shadow: 0 0 0 2px rgba(113, 187, 233, 0.35);
 }
 
-.login-button {
+.register-button {
   margin-top: 4px;
   background: #33c15b;
   color: #0e0d1d;
@@ -70,17 +70,17 @@
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-.login-button:disabled {
+.register-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.login-button:hover:not(:disabled) {
+.register-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(51, 193, 91, 0.35);
 }
 
-.login-error {
+.register-error {
   background: rgba(235, 84, 151, 0.1);
   border: 1px solid #eb5497;
   color: #ffe6f1;
@@ -89,19 +89,19 @@
   font-size: 0.95rem;
 }
 
-.login-footer {
+.register-footer {
   text-align: center;
   margin-top: 8px;
   color: #d2d2f5;
   font-size: 0.95rem;
 }
 
-.login-link {
+.register-link {
   color: #eb5497;
   font-weight: 600;
 }
 
-.login-link:hover {
+.register-link:hover {
   text-decoration: underline;
 }
 
@@ -149,11 +149,5 @@
 
 .google-divider span {
   padding: 0 12px;
-}
-
-.forgot-password-link {
-  display: block;
-  text-align: center;
-  margin-bottom: 8px;
 }
 

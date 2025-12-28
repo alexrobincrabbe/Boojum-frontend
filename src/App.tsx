@@ -11,6 +11,11 @@ import { BoardThemeProvider } from "./contexts/BoardThemeContext";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/login/LoginPage";
 import RegisterPage from "./pages/register/RegisterPage";
+import GoogleUsernamePageWrapper from "./pages/google-username/GoogleUsernamePageWrapper";
+import VerifyEmailSentPage from "./pages/verify-email-sent/VerifyEmailSentPage";
+import ForgotPasswordPage from "./pages/forgot-password/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/reset-password/ResetPasswordPage";
+import VerifyEmailPage from "./pages/verify-email/VerifyEmailPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import LobbyPage from "./pages/lobby/LobbyPage";
@@ -105,6 +110,11 @@ function App() {
             <Route element={<LayoutWrapper />}>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/google-username" element={<GoogleUsernamePageWrapper />} />
+              <Route path="/verify-email-sent" element={<VerifyEmailSentPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/profile/:profileUrl" element={<ProfilePage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/lobby" element={<LobbyPage />} />
