@@ -201,9 +201,9 @@ export const dashboardAPI = {
     });
     return response.data;
   },
-  searchUsers: async (query: string) => {
+  searchUsers: async (query: string, includeBuddies: boolean = false) => {
     const response = await api.get('/dashboard/search-users/', {
-      params: { q: query },
+      params: { q: query, include_buddies: includeBuddies },
     });
     return response.data;
   },
@@ -298,6 +298,49 @@ export const lobbyAPI = {
   },
   useTimelessHint: async (timelessBoardId: number) => {
     const response = await api.post(`/timeless-boards/hint/${timelessBoardId}/`);
+    return response.data;
+  },
+  
+  // Saved boards endpoints
+  saveBoard: async (boardData: {
+    board_letters: string[][];
+    board_words: string[];
+    bonus_letters: number[][];
+    room_slug: string;
+    score: number;
+    timer: number;
+    one_shot: boolean;
+    best_word?: string;
+    best_word_score?: number;
+    number_of_words_found?: number;
+    time?: number;
+  }) => {
+    const response = await api.post('/saved-boards/save/', boardData);
+    return response.data;
+  },
+  
+  getSavedBoards: async () => {
+    const response = await api.get('/saved-boards/');
+    return response.data;
+  },
+  
+  deleteSavedBoard: async (boardId: number) => {
+    const response = await api.delete(`/saved-boards/${boardId}/`);
+    return response.data;
+  },
+  
+  shareSavedBoard: async (boardId: number, username: string) => {
+    const response = await api.post(`/saved-boards/${boardId}/share/`, { username });
+    return response.data;
+  },
+  
+  getSavedBoardGame: async (boardId: number) => {
+    const response = await api.get(`/saved-boards/${boardId}/game/`);
+    return response.data;
+  },
+
+  getSavedBoardScores: async (boardId: number) => {
+    const response = await api.get(`/saved-boards/${boardId}/scores/`);
     return response.data;
   },
 };

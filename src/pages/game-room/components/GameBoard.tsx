@@ -22,6 +22,9 @@ interface GameBoardProps {
   wordsFound: Set<string>;
   boardWords?: string[];
   onShowScores?: () => void;
+  onSaveBoard?: () => void; // Callback to save the board
+  remainingSaves?: number; // Number of saves remaining (0-10)
+  isSavingBoard?: boolean; // Whether the board is currently being saved
   oneShotSubmitted?: boolean; // Disable input if word already submitted in one-shot mode
   onOneShotConfirmed?: (word: string) => void; // Callback when one-shot word is confirmed
   colorsOffOverride?: boolean; // Override global colorsOff setting (for timeless boards)
@@ -42,6 +45,9 @@ export function GameBoard({
   wordsFound,
   boardWords,
   onShowScores,
+  onSaveBoard,
+  remainingSaves,
+  isSavingBoard = false,
   oneShotSubmitted = false,
   onOneShotConfirmed,
   colorsOffOverride,
@@ -449,6 +455,24 @@ export function GameBoard({
             onCancel={handleCancel}
             boardRef={boardRef}
           />
+          
+          {/* Save Board button - shown at bottom of board for authenticated users */}
+          {gameState?.finalScores &&
+            (gameState?.gameStatus === "finished" ||
+              gameState?.gameStatus === "waiting") &&
+            onSaveBoard && remainingSaves !== undefined && (
+              <button
+                id="save-board-button"
+                className="save-board-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSaveBoard();
+                }}
+                disabled={remainingSaves === 0 || isSavingBoard}
+              >
+                {isSavingBoard ? 'Saving...' : `Save board (${remainingSaves})`}
+              </button>
+            )}
         </div>
 
         {/* Display current word when typing with keyboard - always reserve space */}

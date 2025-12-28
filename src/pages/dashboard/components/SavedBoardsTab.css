@@ -1,0 +1,416 @@
+.saved-boards-tab {
+  padding: 20px;
+}
+
+.saved-boards-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.saves-progress-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 300px;
+}
+
+.saves-progress-bar {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid #71bbe9;
+}
+
+.saves-progress-used {
+  background-color: #33c15b; /* Green */
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.saves-progress-remaining {
+  background-color: #eb5497; /* Pink */
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.saves-progress-text {
+  color: #f5ce45;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.no-saved-boards {
+  text-align: center;
+  padding: 60px 20px;
+  color: #fff;
+}
+
+.no-saved-boards p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.saved-boards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.saved-board-card {
+  background-color: rgba(19, 19, 42, 0.9);
+  border: 2px solid #71bbe9;
+  border-radius: 15px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.saved-board-card:hover {
+  border-color: #f5ce45;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(113, 187, 233, 0.3);
+}
+
+.saved-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.board-info {
+  flex: 1;
+}
+
+.board-room-name {
+  color: #71bbe9;
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+}
+
+.board-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.board-meta span {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.board-score {
+  color: #33c15b;
+}
+
+.board-timer {
+  color: #f5ce45;
+}
+
+.board-oneshot {
+  color: #eb5497;
+  font-weight: bold;
+}
+
+.board-date {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.board-actions {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.play-board-btn,
+.view-scores-btn,
+.share-board-btn,
+.delete-board-btn {
+  padding: 8px 16px;
+  border: 2px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.play-board-btn {
+  background-color: #33c15b;
+  border-color: #33c15b;
+  color: #1b1835;
+}
+
+.play-board-btn:hover {
+  background-color: #2aa84a;
+  border-color: #2aa84a;
+}
+
+.view-scores-btn {
+  background-color: #f5ce45;
+  border-color: #f5ce45;
+  color: #1b1835;
+}
+
+.view-scores-btn:hover {
+  background-color: #febe38;
+  border-color: #febe38;
+}
+
+.share-board-btn {
+  background-color: #71bbe9;
+  border-color: #71bbe9;
+  color: #1b1835;
+}
+
+.share-board-btn:hover {
+  background-color: #5aa8d4;
+  border-color: #5aa8d4;
+}
+
+.delete-board-btn {
+  background-color: #eb5497;
+  border-color: #eb5497;
+  color: #fff;
+}
+
+.delete-board-btn:hover {
+  background-color: #d43d7f;
+  border-color: #d43d7f;
+}
+
+.board-preview-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.board-wrapper {
+  position: relative;
+  border-radius: 25px;
+  padding: 0;
+  overflow: visible;
+  display: inline-block;
+}
+
+.board-preview-container .board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  border-radius: 25px;
+  padding: 8px;
+  gap: 6px;
+  width: 200px;
+  aspect-ratio: 1;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.board-preview-container .letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Make letters round */
+  font-size: 0.9rem;
+  font-weight: bold;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.board-preview-container .letValue {
+  font-size: 1.1rem;
+}
+
+/* Boojum (green border) */
+.board-preview-container .letter.boojum {
+  border: solid #33c15b 3px;
+  box-sizing: border-box;
+}
+
+/* Snark (yellow border) */
+.board-preview-container .letter.snark {
+  border: solid #febe38 3px;
+  box-sizing: border-box;
+}
+
+.share-menu {
+  margin-top: 15px;
+  padding: 15px;
+  border-top: 1px solid #71bbe9;
+}
+
+.share-menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.share-menu-option,
+.share-menu-cancel {
+  padding: 10px;
+  border: 2px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.share-menu-option {
+  background-color: #71bbe9;
+  border-color: #71bbe9;
+  color: #1b1835;
+}
+
+.share-menu-option:hover:not(:disabled) {
+  background-color: #5aa8d4;
+  border-color: #5aa8d4;
+}
+
+.share-menu-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.share-menu-cancel {
+  background-color: #808080;
+  border-color: #808080;
+  color: #fff;
+}
+
+.share-menu-cancel:hover {
+  background-color: #6b6b6b;
+  border-color: #6b6b6b;
+}
+
+.share-board-form {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #71bbe9;
+}
+
+.share-username-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  background-color: #1b1835;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.share-username-input:focus {
+  outline: none;
+  border-color: #f5ce45;
+}
+
+.share-suggestions {
+  background-color: #1b1835;
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.share-suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+  color: #fff;
+  border-bottom: 1px solid #71bbe9;
+  transition: background-color 0.2s ease;
+}
+
+.share-suggestion-item:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+}
+
+.share-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.share-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.share-submit-btn,
+.share-cancel-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.share-submit-btn {
+  background-color: #33c15b;
+  border-color: #33c15b;
+  color: #1b1835;
+}
+
+.share-submit-btn:hover:not(:disabled) {
+  background-color: #2aa84a;
+  border-color: #2aa84a;
+}
+
+.share-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.share-cancel-btn {
+  background-color: #eb5497;
+  border-color: #eb5497;
+  color: #fff;
+}
+
+.share-cancel-btn:hover {
+  background-color: #d43d7f;
+  border-color: #d43d7f;
+}
+
+@media (max-width: 768px) {
+  .saved-boards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-board-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .board-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .play-board-btn,
+  .view-scores-btn,
+  .share-board-btn,
+  .delete-board-btn {
+    flex: 1;
+  }
+}
+

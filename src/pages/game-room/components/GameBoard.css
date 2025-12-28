@@ -31,6 +31,52 @@
   transform: scale(0.95);
 }
 
+.save-board-button {
+  position: absolute;
+  bottom: -55px; /* Position at bottom of the board, below the board itself */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  padding: 10px 20px;
+  font-size: 110%;
+  font-family: "Chango", sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  border: 3px solid #71bbe9;
+  background-color: rgba(113, 187, 233, 0.2); /* Translucent blue background */
+  color: #71bbe9; /* Blue text */
+  border-radius: 10px;
+  min-width: 200px;
+  height:45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(113, 187, 233, 0.6), 0 0 30px rgba(113, 187, 233, 0.4); /* Glowing blue effect */
+  white-space: nowrap;
+}
+
+.save-board-button:hover:not(:disabled) {
+  background-color: rgba(113, 187, 233, 0.3);
+  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8), 0 0 40px rgba(113, 187, 233, 0.6);
+  transform: translateX(-50%) scale(1.05);
+}
+
+.save-board-button:active:not(:disabled) {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.save-board-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: 0 0 10px rgba(113, 187, 233, 0.3), 0 0 20px rgba(113, 187, 233, 0.2);
+}
+
+.remaining-saves-text {
+  font-size: 75%;
+  margin-top: 2px;
+}
+
 .board-svg-overlay {
   pointer-events: none;
 }

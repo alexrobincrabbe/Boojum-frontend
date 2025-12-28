@@ -19,6 +19,7 @@ import DailyBoardPage from "./pages/daily-boards/DailyBoardPage";
 import DailyBoardGameRoom from "./pages/daily-boards/DailyBoardGameRoom";
 import TimelessBoardPage from "./pages/timeless-boards/TimelessBoardPage";
 import TimelessBoardGameRoom from "./pages/timeless-boards/TimelessBoardGameRoom";
+import SavedBoardGameRoom from "./pages/saved-boards/SavedBoardGameRoom";
 import LeaderboardsPage from "./pages/leaderboards/LeaderboardsPage";
 import ForumPage from "./pages/forum/ForumPage";
 import ViewPostPage from "./pages/forum/ViewPostPage";
@@ -116,6 +117,10 @@ function App() {
               <Route
                 path="/timeless-boards/play/:timelessBoardId/:level"
                 element={<TimelessBoardGameRoom />}
+              />
+              <Route
+                path="/saved-boards/play/:boardId"
+                element={<SavedBoardGameRoom />}
               />
               <Route path="/leaderboards" element={<LeaderboardsPage />} />
               <Route path="/forum/new-post" element={<NewPostPage />} />

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useWordTracking } from "./services/useWordTracking";
@@ -22,6 +22,8 @@ import {
   useWordSubmitWithConfirmation,
   useOneShotConfirmed,
 } from "./hooks/useWordSubmitWithConfirmation";
+import { lobbyAPI } from "../../services/api";
+import { toast } from "react-toastify";
 import "./GameRoom.css";
 
 export default function GameRoom() {
@@ -99,6 +101,86 @@ export default function GameRoom() {
     sendJson
   );
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
+  const [remainingSaves, setRemainingSaves] = useState<number>(10);
+  const [isSavingBoard, setIsSavingBoard] = useState(false);
+
+  // Fetch remaining saves count
+  useEffect(() => {
+    if (user && gameState?.finalScores) {
+      const fetchRemainingSaves = async () => {
+        try {
+          const data = await lobbyAPI.getSavedBoards();
+          setRemainingSaves(data.remaining_saves || 10);
+        } catch (error) {
+          console.error('Error fetching remaining saves:', error);
+        }
+      };
+      fetchRemainingSaves();
+    }
+  }, [user, gameState?.finalScores]);
+
+  const handleSaveBoard = useCallback(async () => {
+    if (!gameState || !user || !roomId || isSavingBoard) return;
+    
+    const currentPlayerId = gameState.currentPlayerId;
+    if (!currentPlayerId || !gameState.finalScores) {
+      toast.error('Unable to save board - game not finished');
+      return;
+    }
+
+    const playerScore = gameState.finalScores[currentPlayerId];
+    if (!playerScore) {
+      toast.error('Unable to save board - score not found');
+      return;
+    }
+
+    if (!gameState.board || !gameState.boardWords || !gameState.boojumBonus) {
+      toast.error('Unable to save board - board data missing');
+      return;
+    }
+
+    setIsSavingBoard(true);
+
+    // Get timer from room API to ensure we get the correct game timer (not intermission timer)
+    // timerState.initialTimer might be intermission (10s) instead of game_time (e.g., 20s)
+    let timer = 90; // default
+    try {
+      const lobbyData = await lobbyAPI.getLobbyData();
+      const room = lobbyData.rooms?.find((r: any) => r.room_slug === roomId);
+      if (room?.timer) {
+        timer = room.timer;
+      }
+    } catch (error) {
+      console.error('Error fetching room timer:', error);
+      // Fallback to timerState if API fails
+      timer = timerState?.initialTimer || 90;
+    }
+    const oneShot = gameState.oneShot || false;
+
+    try {
+      const response = await lobbyAPI.saveBoard({
+        board_letters: gameState.board,
+        board_words: gameState.boardWords,
+        bonus_letters: gameState.boojumBonus,
+        room_slug: roomId, // roomId is the room slug
+        score: typeof playerScore.final_score === 'number' ? playerScore.final_score : 0,
+        timer: timer,
+        one_shot: oneShot,
+        best_word: playerScore.best_word?.word || '',
+        best_word_score: playerScore.best_word?.score || 0,
+        number_of_words_found: typeof playerScore.number_of_words_found === 'number' ? playerScore.number_of_words_found : 0,
+        time: typeof playerScore.time === 'number' ? playerScore.time : 0,
+      });
+      
+      toast.success('Board saved successfully!');
+      setRemainingSaves(response.remaining_saves || 0);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Failed to save board';
+      toast.error(errorMessage);
+    } finally {
+      setIsSavingBoard(false);
+    }
+  }, [gameState, user, roomId, timerState, isSavingBoard]);
 
   useGameScoreSubmission(
     gameState,
@@ -182,6 +264,9 @@ export default function GameRoom() {
                 wordsFound={wordsFound}
                 boardWords={gameState.boardWords as string[] | undefined}
                 onShowScores={() => setIsScoresModalOpen(true)}
+                onSaveBoard={!isGuest ? handleSaveBoard : undefined}
+                remainingSaves={!isGuest ? remainingSaves : undefined}
+                isSavingBoard={!isGuest ? isSavingBoard : false}
                 oneShotSubmitted={oneShotSubmitted}
                 onOneShotConfirmed={handleOneShotConfirmed}
               />
