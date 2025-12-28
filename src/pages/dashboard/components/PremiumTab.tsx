@@ -7,6 +7,10 @@ const PremiumTab = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [premiumStatus, setPremiumStatus] = useState(false);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{
+    current_period_end: string | null;
+    cancel_at_period_end: boolean;
+  } | null>(null);
   const [donationAmount, setDonationAmount] = useState(5);
   const [customAmount, setCustomAmount] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +49,9 @@ const PremiumTab = () => {
     try {
       const status = await premiumAPI.getPremiumStatus();
       setPremiumStatus(status.is_premium);
+      if (status.subscription) {
+        setSubscriptionInfo(status.subscription);
+      }
     } catch (error) {
       console.error('Error loading premium status:', error);
     }
@@ -145,6 +152,31 @@ const PremiumTab = () => {
           {premiumStatus && (
             <div className="premium-active-message">
               <p>Thank you for being a premium member! 🎉</p>
+              
+              {subscriptionInfo && subscriptionInfo.current_period_end && (
+                <div className="subscription-details">
+                  {subscriptionInfo.cancel_at_period_end ? (
+                    <p className="subscription-warning">
+                      ⚠️ Your subscription will expire on{' '}
+                      <strong>{new Date(subscriptionInfo.current_period_end).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</strong>
+                    </p>
+                  ) : (
+                    <p className="subscription-info">
+                      Your subscription renews on{' '}
+                      <strong>{new Date(subscriptionInfo.current_period_end).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</strong>
+                    </p>
+                  )}
+                </div>
+              )}
+              
               <button
                 className="premium-button manage-subscription-button"
                 onClick={handleManageSubscription}
