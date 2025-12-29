@@ -92,6 +92,7 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  width: 100px;
 }
 
 .timer-label {

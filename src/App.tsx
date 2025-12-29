@@ -41,6 +41,9 @@ import TestTournamentPage from "./pages/tournament/TestTournamentPage";
 import TournamentArchivesPage from "./pages/tournament/TournamentArchivesPage";
 import MatchResultsPage from "./pages/tournament/MatchResultsPage";
 import TournamentGameRoom from "./pages/tournament/TournamentGameRoom";
+import TeamTournamentPage from "./pages/tournament/TeamTournamentPage";
+import TeamTournamentGameRoom from "./pages/tournament/TeamTournamentGameRoom";
+import TeamMatchResultsPage from "./pages/tournament/TeamMatchResultsPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react"
@@ -161,6 +164,10 @@ function App() {
               <Route path="/tournament/archives" element={<TournamentArchivesPage />} />
               <Route path="/tournament/match/:matchId" element={<MatchResultsPage />} />
               <Route path="/tournament/play/:matchId" element={<TournamentGameRoom />} />
+              <Route path="/team-tournament" element={<TeamTournamentPage />} />
+              <Route path="/team-tournament/test" element={<TeamTournamentPage tournamentType="test" />} />
+              <Route path="/team-tournament/match/:matchId" element={<TeamMatchResultsPage />} />
+              <Route path="/team-tournament/play/:matchId" element={<TeamTournamentGameRoom />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />
             </Route>

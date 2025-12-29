@@ -488,6 +488,22 @@ export const tournamentAPI = {
   },
 };
 
+export const teamTournamentAPI = {
+  getTeamTournamentData: async (type: 'active' | 'test' = 'active') => {
+    const url = type === 'test' ? '/team-tournament/test_tournament/' : '/team-tournament/';
+    const response = await api.get(url);
+    return response.data;
+  },
+  getTeamMatchDetails: async (matchId: number) => {
+    const response = await api.get(`/team-tournament/details/${matchId}/`);
+    return response.data;
+  },
+  getTeamMatchInfo: async (matchId: number) => {
+    const response = await api.get(`/team-tournament/match/${matchId}/info/`);
+    return response.data;
+  },
+};
+
 export const leaderboardsAPI = {
   getLeaderboards: async (gameType: string, period: string) => {
     const response = await api.get(`/leaderboards/${gameType}/${period}/`);

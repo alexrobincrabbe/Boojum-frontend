@@ -1,0 +1,160 @@
+.team-word-lists {
+  margin: 20px 0;
+  width: 100%;
+}
+
+/* Color coding banner */
+.team-word-lists #color-coding-banner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: rgba(19, 19, 42, 0.5);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.team-word-lists .color-coding-item {
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.team-word-lists .color-coding-item.green-text {
+  color: #33c15b;
+}
+
+.team-word-lists .color-coding-item.yellow-text {
+  color: #f5ce45;
+}
+
+.team-word-lists .color-coding-item.pink-text {
+  color: #ff5596;
+}
+
+.team-word-lists .color-coding-item.white-text {
+  color: #fff;
+}
+
+.team-word-lists .color-coding-item.blue-text {
+  color: #71bbe9;
+}
+
+/* Use same word styling as GameRoom.css */
+.team-word-lists .word {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  padding: 2px 5px;
+  color: #fff; /* Default white color */
+  text-transform: uppercase; /* Words always in capitals */
+}
+
+.team-word-lists .word-score {
+  margin-left: 5px;
+  font-size: 0.85em;
+  color: #b0b0b0;
+  opacity: 1;
+}
+
+.team-word-lists .word.green {
+  color: var(--color-green);
+}
+
+.team-word-lists .word.yellow {
+  color: var(--color-yellow);
+}
+
+.team-word-lists .word.pink {
+  color: var(--color-pink);
+}
+
+.team-word-lists .word.blue {
+  color: var(--color-blue);
+}
+
+/* Word list styling - matching GameRoom.css exactly */
+.team-word-lists .word-lists-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.team-word-lists #word-lists {
+  min-width: 100%;
+  width: fit-content !important;
+  flex-direction: row;
+  height: auto !important;
+  max-height: none !important;
+  display: flex;
+  gap: 0;
+}
+
+.team-word-lists .word-sublist {
+  margin: 10px 10px 0 10px;
+  max-height: none !important;
+  height: auto !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-word-lists .word-sublist-header {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #f5ce45;
+  font-size: 1rem;
+}
+
+.team-word-lists .word-sublist-number,
+.team-word-lists .word-sublist-label {
+  display: inline;
+}
+
+.team-word-lists .word-sublist-count {
+  display: inline;
+  margin-left: 5px;
+  color: #8b8b8b;
+  font-size: 0.9em;
+}
+
+.team-word-lists .word-sublist-scroll {
+  max-height: 170px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.word-definition-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1a1a1a;
+  border: 2px solid #ffbe86;
+  border-radius: 8px;
+  padding: 20px;
+  z-index: 1000;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.popup-word {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #ffbe86;
+  margin-bottom: 10px;
+}
+
+.popup-definition {
+  color: #fff;
+  line-height: 1.5;
+}
+
