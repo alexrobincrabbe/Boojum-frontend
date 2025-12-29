@@ -11,6 +11,8 @@ interface UseKeyboardInputParams {
   onTracePathUpdate?: (tracePath: boolean[]) => void;
   onTileColorsUpdate?: (exactMatch: boolean, partialMatch: boolean, alreadyFound: boolean) => void;
   onRecordKeyboardWord?: (word: string, tracePath: boolean[]) => void;
+  colorsOffOverride?: boolean; // Override global colorsOff setting (for timeless boards)
+  onExactMatch?: (word: string) => void; // Callback when letters turn green (exact match found)
 }
 
 export function useKeyboardInput({
@@ -22,12 +24,17 @@ export function useKeyboardInput({
   onTracePathUpdate,
   onTileColorsUpdate,
   onRecordKeyboardWord,
+  colorsOffOverride,
+  onExactMatch,
 }: UseKeyboardInputParams) {
-  const { darkMode, colorsOff } = useBoardTheme();
+  const { darkMode, colorsOff: colorsOffFromContext } = useBoardTheme();
+  // Use override if provided, otherwise use context value
+  const colorsOff = colorsOffOverride !== undefined ? colorsOffOverride : colorsOffFromContext;
   const [currentWord, setCurrentWord] = useState('');
   const [tracePath, setTracePath] = useState<boolean[]>(Array(16).fill(false));
   const currentWordRef = useRef('');
   const boardRef = useRef(board);
+  const lastExactMatchRef = useRef<string>(''); // Track last exact match word, matching swipe implementation
 
   // Keep refs in sync
   useEffect(() => {
@@ -83,12 +90,27 @@ export function useKeyboardInput({
   // Update tile colors based on match status
   const updateTileColors = useCallback((word: string, tracePathArray: boolean[]) => {
     // Filter out found words from available words - only check against words not yet found
-    // This matches the logic in useBoardSwipe.ts
-    const availableWords = boardWords ? boardWords.filter(w => !wordsFound?.has(w.toLowerCase())) : [];
+    // This matches the logic in useBoardSwipe.ts exactly
+    const availableWords = boardWords ? boardWords.filter(
+      (w) => !wordsFound?.has(w.toLowerCase()) && !wordsFound?.has(w.toUpperCase())
+    ) : [];
     
     const exactMatch = checkMatch(word, availableWords);
     const partialMatch = checkPartialMatch(word, availableWords);
-    const alreadyFound = checkAlreadyFound(word);
+
+    // Call onExactMatch when letters turn green - matching swipe implementation exactly
+    if (exactMatch && onExactMatch && word && word !== lastExactMatchRef.current) {
+      const upper = word.toUpperCase();
+      if (!wordsFound?.has(upper) && !wordsFound?.has(upper.toLowerCase())) {
+        lastExactMatchRef.current = word;
+        onExactMatch(word);
+      }
+    }
+
+    // Reset lastExactMatchRef if exactMatch becomes false for the current word
+    if (!exactMatch && lastExactMatchRef.current === word) {
+      lastExactMatchRef.current = '';
+    }
 
     // Apply tile colors directly to DOM elements
     if (board && board.length > 0) {
@@ -105,18 +127,13 @@ export function useKeyboardInput({
           let tileClass: string;
           const modeSuffix = darkMode ? 'dark' : 'light';
           
+          // Match the exact logic from useBoardSwipe.ts
           if (colorsOff) {
-            // Grey mode - only show grey for no-match and partial-match, green for exact match
-            if (exactMatch && !alreadyFound) {
-              tileClass = `tile-match-${modeSuffix}`; // Green still shown
-            } else if (partialMatch) {
-              tileClass = `tile-no-match-grey-${modeSuffix}`;
-            } else {
-              tileClass = `tile-no-match-grey-${modeSuffix}`;
-            }
+            // Grey mode - green for exact match, grey for no match
+            tileClass = exactMatch ? `tile-match-${modeSuffix}` : `tile-no-match-grey-${modeSuffix}`;
           } else {
-            // Color mode - show pink/yellow/green
-            if (exactMatch && !alreadyFound) {
+            // Color mode - green for exact match, yellow for partial, pink for no match
+            if (exactMatch) {
               tileClass = `tile-match-${modeSuffix}`;
             } else if (partialMatch) {
               tileClass = `tile-partial-match-${modeSuffix}`;
@@ -130,9 +147,18 @@ export function useKeyboardInput({
     }
 
     if (onTileColorsUpdate) {
+      const alreadyFound = checkAlreadyFound(word);
       onTileColorsUpdate(exactMatch, partialMatch, alreadyFound);
     }
-  }, [board, boardWords, wordsFound, checkMatch, checkPartialMatch, checkAlreadyFound, onTileColorsUpdate]);
+  }, [board, boardWords, wordsFound, checkMatch, checkPartialMatch, checkAlreadyFound, onTileColorsUpdate, colorsOff, darkMode, onExactMatch]);
+
+  // Re-apply tile colors when colorsOff changes (e.g., when clue is activated/deactivated)
+  useEffect(() => {
+    if (currentWord && tracePath.some(v => v)) {
+      // Re-apply colors with the new colorsOff value
+      updateTileColors(currentWord, tracePath);
+    }
+  }, [colorsOff, darkMode, currentWord, tracePath, updateTileColors]);
 
   // Search board recursively to find valid paths
   const searchBoard = useCallback((word: string) => {
@@ -294,6 +320,9 @@ export function useKeyboardInput({
     setCurrentWord('');
     const emptyTracePath = Array(16).fill(false);
     setTracePath(emptyTracePath);
+    
+    // Reset lastExactMatchRef when word is cleared - matching swipe implementation
+    lastExactMatchRef.current = '';
     
     // Clear tile colors
     if (board && board.length > 0) {

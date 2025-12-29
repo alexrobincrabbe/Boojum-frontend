@@ -114,8 +114,7 @@
   padding: 10px;
   background-color: rgba(19, 19, 42, 0.95);
   border-radius: 8px;
-  border: 2px solid #71bbe9;
-  margin-bottom: 16px;
+      margin-bottom: 16px;
 }
 
 .user-list-mobile {
@@ -182,12 +181,18 @@
 }
 
 @media screen and (max-width: 768px) {
+    .game-header{
+        padding:0px;
+    }
+    .game-content {
+  padding-top: 0px;
+}
     .word-sublist {
         margin: 0px !important;
         font-size: 0.5rem !important;
       }
   .game-header h1:not(.daily-board-game-title) {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
   }
   
   .daily-board-game-title {
@@ -353,6 +358,7 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  position: relative;
 }
 
 /* Rotate Buttons - matches game_board.css */
@@ -908,8 +914,9 @@
 
 @media screen and (max-width: 768px) {
   #guess {
-    width: 70vw;
-    font-size: 175%;
+    display: none;
+    height: 0;
+    min-height: 0;
   }
 }
 
@@ -990,6 +997,15 @@
     box-sizing: border-box;
   }
 
+  /* On mobile, show word counters normally above board */
+  .board-wrapper .word-counters-container {
+    position: static;
+    display: flex;
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
+
   .game-room {
     padding: 10px;
   }
@@ -1028,20 +1044,6 @@
   #daily-board .letValue,
   #timeless-board .letValue {
     font-size: 4.2vw;
-  }
-
-  #word-counters {
-    width: 35vw;
-    min-height: 54px;
-    height: 54px;
-  }
-
-  #word-counters-container {
-    height: 70px;
-  }
-
-  .word-counters-container {
-    height: 70px;
   }
 }
 
@@ -1086,6 +1088,46 @@
 
 .chat-mobile {
   width: 100%;
+  margin: 16px 0;
+}
+
+.chat-mobile-toggle {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: rgba(19, 19, 42, 0.95);
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  color: #71bbe9;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.chat-mobile-toggle:hover {
+  background-color: rgba(113, 187, 233, 0.1);
+  box-shadow: 0 0 10px rgba(113, 187, 233, 0.3);
+}
+
+.chat-toggle-text {
+  flex: 1;
+  text-align: center;
+}
+
+.chat-toggle-icon {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.chat-mobile .game-chat-section {
+  margin-top: 8px;
+  height: 350px;
+  max-height: 50vh;
 }
 
 .game-chat-section {
@@ -1100,14 +1142,14 @@
 }
 
 .chat-messages {
-  max-height: 300px;
   overflow-y: auto;
   padding: 12px;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 6px;
   margin-bottom: 12px;
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
+  box-sizing: border-box;
 }
 
 .chat-message {
@@ -1264,26 +1306,63 @@
     flex-direction: row;
     align-items: stretch;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .players-section-desktop {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 400px;
+    flex-shrink: 0;
+  }
+
+  .game-header {
+    max-width: 165px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .chat-desktop {
-    justify-content: center;
-    align-items: center;
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
     max-width: 400px;
+    min-height: 0;
     margin-bottom: 20px;
+    align-self: stretch;
+    padding-top: 20px;
+    padding-left: 100px;
+    box-sizing: border-box;
   }
 
   .chat-desktop .game-chat-section {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
+    width: 100%;
+    box-sizing: border-box;
     height: 100%;
   }
 
   .chat-desktop .chat-messages {
+    flex: 1 1 0;
+    min-height: 0;
     max-height: none;
+    overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+    overflow-anchor: none;
+  }
+
+  .chat-desktop .chat-input-form {
+    flex-shrink: 0;
   }
 
   .chat-mobile {
@@ -1316,6 +1395,14 @@
 
   .chat-mobile {
     display: block;
+  }
+
+  .color-coding-banner {
+    gap: 5px !important;
+  }
+
+  .color-coding-item {
+    font-size: 45% !important;
   }
 }
 
@@ -1459,6 +1546,7 @@
   font-size: 90%;
 }
 
+
 .color-coding-item.green-text {
   color: var(--color-green);
 }
@@ -1540,6 +1628,161 @@
 .board-section.disconnected {
   opacity: 0.5;
   pointer-events: none;
+}
+
+/* Make board-wrapper relative for absolute positioning */
+.board-wrapper {
+  position: relative;
+}
+
+/* Tablet layout: word counters to the left, vertically */
+@media screen and (min-width: 769px) and (max-width: 1199px) {
+  .board-section {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* Position word counters absolutely inside board-wrapper */
+  .board-wrapper .word-counters-container {
+    position: absolute;
+    left: -100px;
+    top: 0;
+    /* Match #board height exactly: min(35vw, calc(100vh - 200px)) with aspect-ratio 1 */
+    height: min(35vw, calc(100vh - 200px));
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 10;
+  }
+
+  #word-counters-container {
+    height: 100%;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  #word-counters {
+    width: auto;
+    min-width: 80px;
+    /* Match #board height exactly */
+    height: 100%;
+    min-height: min(35vw, calc(100vh - 200px));
+    flex-direction: column;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border: none;
+    background-color: transparent;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .wordCount-element {
+    margin: 1px 0;
+    padding: 0;
+    flex-shrink: 1;
+  }
+
+  .word-counter-title {
+    margin-bottom: 1px;
+    font-size: 65%;
+  }
+}
+
+/* Desktop layout: word counters to the left, vertically */
+@media screen and (min-width: 1200px) {
+  .board-section {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* Position word counters absolutely inside board-wrapper */
+  .board-wrapper .word-counters-container {
+    position: absolute;
+    left: -100px;
+    top: 0;
+    /* Match #board height exactly: 400px on desktop */
+    height: 400px;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 10;
+  }
+
+  #word-counters-container {
+    height: 100%;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  #word-counters {
+    width: auto;
+    min-width: 80px;
+    /* Match #board height exactly */
+    height: 100%;
+    min-height: 400px;
+    flex-direction: column;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border: none;
+    background-color: transparent;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .wordCount-element {
+    margin: 1px 0;
+    padding: 0;
+    flex-shrink: 1;
+  }
+
+.word-counter-title {
+  margin-bottom: 1px;
+  font-size: 65%;
+}
+}
+
+/* Guest clues message - positioned above rotate buttons */
+.guest-clues-message {
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+  text-align: center;
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+  width: max-content;
+}
+
+@media (max-width: 768px) {
+  .guest-clues-message {
+    font-size: 0.9rem;
+    padding: 8px 15px;
+  }
 }
 
 /* Start Game Button Overlay */
@@ -1674,6 +1917,11 @@
 
   .players-section-desktop {
     display: block;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    max-width: 400px;
+    flex-shrink: 0;
   }
 }
 

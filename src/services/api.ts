@@ -84,6 +84,11 @@ export const authAPI = {
     return response.data;
   },
 
+  updateUserActivity: async (location: string) => {
+    const response = await api.post('/user/activity/', { location });
+    return response.data;
+  },
+
   getGoogleClientId: async () => {
     const response = await api.get('/google/client-id/');
     return response.data.client_id;

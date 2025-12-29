@@ -7,7 +7,6 @@ import type { GameState } from "../../ws/protocol";
 import type { OutboundMessage } from "../../ws/protocol";
 import { useChatWebSocket } from "./services/useChatWebSocket";
 import { GameBoard } from "./components/GameBoard";
-import { WordCounters } from "./components/WordCounters";
 import { WordLists } from "./components/WordLists";
 import { PlayersList } from "./components/PlayersList";
 import { Chat } from "./components/Chat";
@@ -102,6 +101,7 @@ export default function GameRoom() {
   );
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
   const [remainingSaves, setRemainingSaves] = useState<number>(10);
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
   const [isSavingBoard, setIsSavingBoard] = useState(false);
 
   // Fetch remaining saves count
@@ -247,14 +247,6 @@ export default function GameRoom() {
                   </div>
                 </div>
               )}
-              <div className="word-counters-container">
-                <WordCounters
-                  wordCounts={wordCounts}
-                  wordCountMax={wordCountMax}
-                  gameStatus={gameState.gameStatus}
-                />
-              </div>
-
               <GameBoard
                 gameState={gameState}
                 hasBoardBeenShown={hasBoardBeenShown}
@@ -269,6 +261,8 @@ export default function GameRoom() {
                 isSavingBoard={!isGuest ? isSavingBoard : false}
                 oneShotSubmitted={oneShotSubmitted}
                 onOneShotConfirmed={handleOneShotConfirmed}
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
               />
             </div>
 
@@ -282,6 +276,25 @@ export default function GameRoom() {
             </div>
           </div>
 
+          <div className="chat-mobile">
+            <button
+              className="chat-mobile-toggle"
+              onClick={() => setIsChatExpanded(!isChatExpanded)}
+              aria-label={isChatExpanded ? "Collapse chat" : "Expand chat"}
+            >
+              <span className="chat-toggle-text">Chat</span>
+              <span className="chat-toggle-icon">{isChatExpanded ? "▲" : "▼"}</span>
+            </button>
+            {isChatExpanded && (
+              <Chat
+                messages={chatMessages}
+                connectionState={chatConnectionState}
+                onSendMessage={sendChatMessage}
+                onReconnect={reconnectChat}
+              />
+            )}
+          </div>
+
           <WordLists
             wordsByLength={gameState.wordsByLength || wordsByLength}
             wordsFound={wordsFound}
@@ -290,15 +303,6 @@ export default function GameRoom() {
             boojum={gameState.boojum}
             snark={gameState.snark}
           />
-
-          <div className="chat-mobile">
-            <Chat
-              messages={chatMessages}
-              connectionState={chatConnectionState}
-              onSendMessage={sendChatMessage}
-              onReconnect={reconnectChat}
-            />
-          </div>
         </div>
       )}
 

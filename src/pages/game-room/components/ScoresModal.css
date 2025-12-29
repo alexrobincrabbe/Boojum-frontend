@@ -225,8 +225,13 @@ tbody tr:last-child td:last-child {
   object-fit: cover;
 }
 
-.best-word {
+#scores .best-word,
+#scores td.best-word {
   text-align: center;
+  display: table-cell !important; /* Override leaderboards CSS that sets display: block */
+  width: auto !important; /* Override width: 100% from leaderboards */
+  margin-bottom: 0 !important; /* Remove margin that breaks table layout */
+  text-transform: none; /* Don't uppercase in scores modal */
 }
 
 .yellow-button {

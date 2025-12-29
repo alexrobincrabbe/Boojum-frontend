@@ -381,12 +381,8 @@ export function useGameWebSocket({
                 case 'FINAL_SCORES': {
                     // Final scores are handled by the parent component
                     // We just pass them through via onGameStateChange
-                    const receiveTime = performance.now();
-                    const receiveTimestamp = new Date().toISOString();
-                    console.log(`[Frontend] [TIMESTAMP] Received FINAL_SCORES at ${receiveTimestamp} (${receiveTime.toFixed(3)}ms)`);
                     setGameState((prev) => {
                         if (!prev) return prev;
-                        const updateTime = performance.now();
                         const updated = {
                             ...prev,
                             gameStatus: 'finished' as const,
@@ -394,7 +390,6 @@ export function useGameWebSocket({
                             totalPoints: message.totalPoints,
                             wordsByLength: message.wordsByLength,
                         };
-                        console.log(`[Frontend] [TIMESTAMP] Updated gameState with finalScores at ${new Date().toISOString()} (${updateTime.toFixed(3)}ms, ${(updateTime - receiveTime).toFixed(3)}ms after receive)`);
                         onGameStateChange?.(updated);
                         return updated;
                     });
@@ -407,7 +402,7 @@ export function useGameWebSocket({
                 }
 
                 default: {
-                    console.warn('Unknown message type:', message);
+                    // Unknown message type, ignore
                 }
             }
         },

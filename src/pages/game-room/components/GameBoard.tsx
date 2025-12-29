@@ -3,6 +3,7 @@ import type { GameState } from "../../../ws/protocol";
 import { useBoardSwipe } from "../../../hooks/useBoardSwipe";
 import { useKeyboardInput } from "../../../hooks/useKeyboardInput";
 import { ConfirmationDialog } from "./ConfirmationDialog";
+import { WordCounters } from "./WordCounters";
 import "./GameBoard.css";
 
 interface GameBoardProps {
@@ -33,6 +34,9 @@ interface GameBoardProps {
   onRecordSwipeWord?: (word: string) => void; // Recording callback for swipe word finalized
   onRecordKeyboardWord?: (word: string, tracePath: boolean[]) => void; // Recording callback for keyboard
   onRecordBoardRotation?: (rotation: number) => void; // Recording callback for board rotation
+  wordCounts?: Record<string, number>; // Word counts for word counters
+  wordCountMax?: Record<string, number>; // Max word counts for word counters
+  showGuestCluesMessage?: boolean; // Show "Log in to get clues!" message
 }
 
 export function GameBoard({
@@ -56,6 +60,9 @@ export function GameBoard({
   onRecordSwipeWord,
   onRecordKeyboardWord,
   onRecordBoardRotation,
+  wordCounts,
+  wordCountMax,
+  showGuestCluesMessage = false,
 }: GameBoardProps) {
   const [boardRotation, setBoardRotation] = useState(0);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -130,6 +137,8 @@ export function GameBoard({
       wordsFound,
       onWordSubmit: oneShotSubmitted ? () => {} : handleWordSubmitWrapper, // Disable if one-shot submitted
       onRecordKeyboardWord, // Pass recording callback
+      colorsOffOverride, // Pass colors override for timeless boards
+      onExactMatch, // Pass exact match callback for clue deactivation
     });
 
 
@@ -149,6 +158,12 @@ export function GameBoard({
       </div>
 
       <div className="board-container">
+        {/* Guest clues message - positioned above rotate buttons */}
+        {showGuestCluesMessage && (
+          <div className="guest-clues-message">
+            Log in to get clues!
+          </div>
+        )}
         {/* Rotate Buttons and Timer Bar */}
         <div id="rotate-buttons">
           <button
@@ -258,6 +273,15 @@ export function GameBoard({
 
         {/* Board with rounded square wrapper */}
         <div className="board-wrapper">
+          {wordCounts && wordCountMax && (
+            <div className="word-counters-container">
+              <WordCounters
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
+                gameStatus={gameState.gameStatus}
+              />
+            </div>
+          )}
           <div
             ref={boardRef}
             id="board"

@@ -80,7 +80,7 @@
 .timer-controls-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 20px;
   width: 100%;
   margin: 10px 0;
@@ -92,7 +92,6 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  flex: 1;
 }
 
 .timer-label {
@@ -238,9 +237,14 @@
   width: 100%;
 }
 
+/* Guest clues message - positioned above rotate buttons */
+.board-container {
+  position: relative;
+}
+
 .guest-clues-message {
   position: absolute;
-  top: calc(100% + 25px);
+  top: -45px;
   left: 50%;
   transform: translateX(-50%);
   padding: 10px 20px;
@@ -255,6 +259,7 @@
   z-index: 100;
   pointer-events: none;
   white-space: nowrap;
+  width: max-content;
 }
 
 @media (max-width: 768px) {
@@ -329,6 +334,144 @@
   align-items: center;
   gap: 20px;
   position: relative;
+}
+
+/* Make board-wrapper relative for absolute positioning */
+.board-wrapper {
+  position: relative;
+}
+
+/* Tablet layout: word counters to the left, vertically */
+@media screen and (min-width: 769px) and (max-width: 1199px) {
+  .game-board-section {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* Position word counters absolutely inside board-wrapper */
+  .board-wrapper .word-counters-container {
+    position: absolute;
+    left: -100px;
+    top: 0;
+    /* Match #board height exactly: min(35vw, calc(100vh - 200px)) with aspect-ratio 1 */
+    height: min(35vw, calc(100vh - 200px));
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 10;
+  }
+
+  #word-counters-container {
+    height: 100%;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  #word-counters {
+    width: auto;
+    min-width: 80px;
+    /* Match #board height exactly */
+    height: 100%;
+    min-height: min(35vw, calc(100vh - 200px));
+    flex-direction: column;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border: none;
+    background-color: transparent;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .wordCount-element {
+    margin: 1px 0;
+    padding: 0;
+    flex-shrink: 1;
+  }
+
+  .word-counter-title {
+    margin-bottom: 1px;
+    font-size: 65%;
+  }
+}
+
+/* Desktop layout: word counters to the left, vertically */
+@media screen and (min-width: 1200px) {
+  .game-board-section {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* Position word counters absolutely inside board-wrapper */
+  .board-wrapper .word-counters-container {
+    position: absolute;
+    left: -100px;
+    top: 0;
+    /* Match #board height exactly: 400px on desktop */
+    height: 400px;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    z-index: 10;
+  }
+
+  #word-counters-container {
+    height: 100%;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  #word-counters {
+    width: auto;
+    min-width: 80px;
+    /* Match #board height exactly */
+    height: 100%;
+    min-height: 400px;
+    flex-direction: column;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border: none;
+    background-color: transparent;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .wordCount-element {
+    margin: 1px 0;
+    padding: 0;
+    flex-shrink: 1;
+  }
+
+  .word-counter-title {
+    margin-bottom: 1px;
+    font-size: 65%;
+  }
+}
+
+@media (max-width: 768px) {
+  /* On mobile, show word counters normally above board */
+  .board-wrapper .word-counters-container {
+    position: static;
+    display: flex;
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
 }
 
 .word-lists-section {

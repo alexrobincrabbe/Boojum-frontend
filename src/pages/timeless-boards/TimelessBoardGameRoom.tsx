@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { GameBoard } from '../game-room/components/GameBoard';
-import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
 import { lobbyAPI } from '../../services/api';
@@ -240,6 +239,7 @@ export default function TimelessBoardGameRoom() {
   const [boardData, setBoardData] = useState<TimelessBoardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [isArchived, setIsArchived] = useState<boolean>(false); // Track if board is archived
   const [showSubmitButton, setShowSubmitButton] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hintsRemaining, setHintsRemaining] = useState<number>(0);
@@ -365,6 +365,9 @@ export default function TimelessBoardGameRoom() {
         setLoading(true);
         const data = await lobbyAPI.getTimelessBoardGame(parseInt(timelessBoardId), parseInt(level));
         setBoardData(data);
+        // Check if board is archived (time_remaining_seconds >= 3153600000 means unlimited/archived)
+        const archived = data.time_remaining_seconds >= 3153600000;
+        setIsArchived(archived);
         setTimeRemaining(data.time_remaining_seconds);
         setHintsRemaining(data.hints_remaining || 0);
         
@@ -433,9 +436,9 @@ export default function TimelessBoardGameRoom() {
     fetchBoardData();
   }, [timelessBoardId, level, navigate]);
 
-  // Timer countdown
+  // Timer countdown - skip for archived boards
   useEffect(() => {
-    if (!boardData || timeRemaining <= 0) return;
+    if (!boardData || timeRemaining <= 0 || isArchived) return;
 
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -449,7 +452,7 @@ export default function TimelessBoardGameRoom() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [boardData, timeRemaining]);
+  }, [boardData, timeRemaining, isArchived]);
 
   // Cleanup arrows when component unmounts or navigates away
   useEffect(() => {
@@ -1265,60 +1268,35 @@ export default function TimelessBoardGameRoom() {
             )}
           </button>
         )}
-        <div className="timer-display">
-          <span className="timer-label">Time remaining:</span>
-          <span 
-            className={`timer-value ${
-              timeRemaining < 1800 ? 'timer-pink' : 
-              timeRemaining < 7200 ? 'timer-yellow' : 
-              'timer-green'
-            }`}
-          >
-            {formatTime(timeRemaining)}
-          </span>
-        </div>
+        {!isArchived && (
+          <div className="timer-display">
+            <span className="timer-label">Time remaining:</span>
+            <span 
+              className={`timer-value ${
+                timeRemaining < 1800 ? 'timer-pink' : 
+                timeRemaining < 7200 ? 'timer-yellow' : 
+                'timer-green'
+              }`}
+            >
+              {formatTime(timeRemaining)}
+            </span>
+          </div>
+        )}
         {user && showSubmitButton && (
           <button
             className="submit-score-button-header"
             onClick={handleSubmitScore}
-            disabled={submitting || timeRemaining <= 0}
+            disabled={submitting || (!isArchived && timeRemaining <= 0)}
           >
             {submitting ? 'Submitting...' : 'Submit Score'}
           </button>
         )}
-        {/* Test button for arrows - temporary */}
-        <button
-          onClick={() => addLoopingArrows('.submit-score-button-header', 0)}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: 'rgba(113, 187, 233, 0.2)',
-            border: '2px solid var(--color-blue)',
-            color: 'var(--color-blue)',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1rem'
-          }}
-        >
-          Test Arrows
-        </button>
       </div>
 
       {boardData && (
         <>
           <div className="game-room-container">
             <div className="game-board-section">
-              <div className="word-counters-wrapper">
-                <WordCounters 
-                  wordCounts={wordCounts}
-                  wordCountMax={wordCountMax}
-                  gameStatus="playing"
-                />
-                {!user && (
-                  <div className="guest-clues-message">
-                    Log in to get clues!
-                  </div>
-                )}
-              </div>
               <GameBoard
                 gameState={{
                   roomId: `timeless_${timelessBoardId}`,
@@ -1341,6 +1319,9 @@ export default function TimelessBoardGameRoom() {
                 boardWords={boardData.board_words}
                 colorsOffOverride={colorsOff}
                 onExactMatch={handleExactMatch}
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
+                showGuestCluesMessage={!user}
               />
             </div>
 
@@ -1355,7 +1336,7 @@ export default function TimelessBoardGameRoom() {
             </div>
           </div>
 
-          {timeRemaining <= 0 && (
+          {!isArchived && timeRemaining <= 0 && (
             <div className="timer-expired-message">
               Time has expired. You can no longer submit your score.
             </div>

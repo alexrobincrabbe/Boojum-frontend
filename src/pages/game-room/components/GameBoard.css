@@ -33,7 +33,7 @@
 
 .save-board-button {
   position: absolute;
-  bottom: -55px; /* Position at bottom of the board, below the board itself */
+  top: 10px; /* Position at top of the board, inside with 10px gap */
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
@@ -89,7 +89,7 @@
     position: absolute;
     bottom: 10px;
     right: 10px;
-    display: flex;
+    display: none; /* Hidden but functionality remains intact */
     align-items: center;
     gap: 8px;
     user-select: none;

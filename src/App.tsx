@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { BoardThemeProvider } from "./contexts/BoardThemeContext";
 import Layout from "./components/Layout";
+import { useRouteActivityTracking } from "./hooks/useRouteActivityTracking";
 import LoginPage from "./pages/login/LoginPage";
 import RegisterPage from "./pages/register/RegisterPage";
 import GoogleUsernamePageWrapper from "./pages/google-username/GoogleUsernamePageWrapper";
@@ -98,6 +99,9 @@ const HomePage = () => {
 };
 
 const LayoutWrapper = () => {
+  // Track route changes for online status
+  useRouteActivityTracking();
+  
   return (
     <Layout>
       <Outlet />
