@@ -1213,11 +1213,16 @@ export default function TimelessBoardGameRoom() {
 
   // Onboarding steps for Timeless Board - must be called before any early returns
   const timelessSteps = useMemo(() => {
-    const steps = [
+    const steps: Array<{
+      target: string;
+      content: string;
+      placement: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end' | 'center' | 'auto';
+      disableScrolling: boolean;
+    }> = [
       {
         target: '#board',
         content: 'Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).',
-        placement: 'center' as const,
+        placement: 'center',
         disableScrolling: false,
       },
     ];
@@ -1227,7 +1232,7 @@ export default function TimelessBoardGameRoom() {
       steps.push({
         target: '[data-onboarding="hint-button"]',
         content: 'Use the Clues button to reveal which words are on the board. When active, valid words will turn green as you find them. You have a limited number of clues per board.',
-        placement: 'bottom' as const,
+        placement: 'bottom',
         disableScrolling: false,
       });
     }
@@ -1237,7 +1242,7 @@ export default function TimelessBoardGameRoom() {
       steps.push({
         target: '[data-onboarding="submit-button"]',
         content: 'Click "Submit Score" when you\'re done finding words. Once submitted, you cannot change your score for this board.',
-        placement: 'bottom' as const,
+        placement: 'bottom',
         disableScrolling: false,
       });
     }
@@ -1246,7 +1251,7 @@ export default function TimelessBoardGameRoom() {
     steps.push({
       target: '[data-onboarding="rotate-buttons"]',
       content: 'Use the rotate buttons to turn the board 90 degrees clockwise or counter-clockwise. This can help you see words from different angles!',
-      placement: 'top' as const,
+      placement: 'top',
       disableScrolling: false,
     });
 
@@ -1255,7 +1260,7 @@ export default function TimelessBoardGameRoom() {
       steps.push({
         target: '[data-onboarding="timer"]',
         content: 'The timer shows how much time you have left to find words and submit your score. Once time expires, you can no longer submit.',
-        placement: 'bottom' as const,
+        placement: 'bottom',
         disableScrolling: false,
       });
     }
@@ -1265,7 +1270,7 @@ export default function TimelessBoardGameRoom() {
       steps.push({
         target: '[data-onboarding="word-counters"]',
         content: 'The word counters show how many words you\'ve found for each length (3, 4, 5, 6, 7, 8, 9+ letters). Green means you\'ve found all words of that length, yellow means you\'re halfway there!',
-        placement: 'right' as const,
+        placement: 'right',
         disableScrolling: false,
       });
     }
@@ -1274,7 +1279,7 @@ export default function TimelessBoardGameRoom() {
     steps.push({
       target: '[data-onboarding="word-lists"]',
       content: 'The word lists show all the words you\'ve found, organized by length. Click on any word to see its definition. Words are sorted alphabetically within each length group.',
-      placement: 'left' as const,
+      placement: 'left',
       disableScrolling: false,
     });
 
