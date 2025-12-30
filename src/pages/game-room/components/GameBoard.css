@@ -21,7 +21,10 @@
   line-height: 1.2;
   display: block;
 }
-
+.board-wrapper{
+    border:none !important;
+    background-color: none !important;
+}
 .show-scores-button:hover {
   background-color: #f5ce45;
   transform: scale(1.05);

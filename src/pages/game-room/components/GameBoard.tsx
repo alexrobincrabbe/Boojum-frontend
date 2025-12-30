@@ -165,7 +165,7 @@ export function GameBoard({
           </div>
         )}
         {/* Rotate Buttons and Timer Bar */}
-        <div id="rotate-buttons">
+        <div id="rotate-buttons" data-onboarding="rotate-buttons">
           <button
             id="anti-clockwise-button"
             className="rotate-button"
@@ -274,7 +274,7 @@ export function GameBoard({
         {/* Board with rounded square wrapper */}
         <div className="board-wrapper">
           {wordCounts && wordCountMax && (
-            <div className="word-counters-container">
+            <div className="word-counters-container" data-onboarding="word-counters">
               <WordCounters
                 wordCounts={wordCounts}
                 wordCountMax={wordCountMax}

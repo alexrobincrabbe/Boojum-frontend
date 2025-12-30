@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { GameBoard } from '../game-room/components/GameBoard';
@@ -8,6 +8,7 @@ import { lobbyAPI } from '../../services/api';
 import { toast } from 'react-toastify';
 import { playBloop, playSound } from '../../utils/sounds';
 import { triggerBoardAnimation, triggerWordCounterAnimation } from '../game-room/utils/borderAnimation';
+import { usePageOnboarding } from '../../hooks/usePageOnboarding';
 
 // Helper function to show "Perfect!" message
 const showPerfect = (elementId: string) => {
@@ -1200,6 +1201,95 @@ export default function TimelessBoardGameRoom() {
   // Calculate bonus letters for rendering
   const bonusLetters = boardData ? getBonusLetters(boardData.boojum, boardData.board_letters) : { boojum: '', snark: '' };
 
+  // Get level name and color
+  const getLevelInfo = () => {
+    const currentLevelNum = level ? parseInt(level) : 10;
+    if (currentLevelNum === 4) return { name: 'Curious', color: 'var(--color-green)' };
+    if (currentLevelNum === 7) return { name: 'Curiouser', color: 'var(--color-pink)' };
+    return { name: 'Rabbit Hole', color: 'var(--color-purple)' };
+  };
+
+  const levelInfo = getLevelInfo();
+
+  // Onboarding steps for Timeless Board - must be called before any early returns
+  const timelessSteps = useMemo(() => {
+    const steps = [
+      {
+        target: '#board',
+        content: 'Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).',
+        placement: 'center' as const,
+        disableScrolling: false,
+      },
+    ];
+
+    // Add hint button step if user is authenticated
+    if (user) {
+      steps.push({
+        target: '[data-onboarding="hint-button"]',
+        content: 'Use the Clues button to reveal which words are on the board. When active, valid words will turn green as you find them. You have a limited number of clues per board.',
+        placement: 'bottom' as const,
+        disableScrolling: false,
+      });
+    }
+
+    // Add submit button step if user is authenticated and button is shown
+    if (user && showSubmitButton) {
+      steps.push({
+        target: '[data-onboarding="submit-button"]',
+        content: 'Click "Submit Score" when you\'re done finding words. Once submitted, you cannot change your score for this board.',
+        placement: 'bottom' as const,
+        disableScrolling: false,
+      });
+    }
+
+    // Add rotate buttons step
+    steps.push({
+      target: '[data-onboarding="rotate-buttons"]',
+      content: 'Use the rotate buttons to turn the board 90 degrees clockwise or counter-clockwise. This can help you see words from different angles!',
+      placement: 'top' as const,
+      disableScrolling: false,
+    });
+
+    // Add timer step if not archived
+    if (!isArchived) {
+      steps.push({
+        target: '[data-onboarding="timer"]',
+        content: 'The timer shows how much time you have left to find words and submit your score. Once time expires, you can no longer submit.',
+        placement: 'bottom' as const,
+        disableScrolling: false,
+      });
+    }
+
+    // Add word counters step
+    if (wordCounts && wordCountMax) {
+      steps.push({
+        target: '[data-onboarding="word-counters"]',
+        content: 'The word counters show how many words you\'ve found for each length (3, 4, 5, 6, 7, 8, 9+ letters). Green means you\'ve found all words of that length, yellow means you\'re halfway there!',
+        placement: 'right' as const,
+        disableScrolling: false,
+      });
+    }
+
+    // Add word lists step
+    steps.push({
+      target: '[data-onboarding="word-lists"]',
+      content: 'The word lists show all the words you\'ve found, organized by length. Click on any word to see its definition. Words are sorted alphabetically within each length group.',
+      placement: 'left' as const,
+      disableScrolling: false,
+    });
+
+    return steps;
+  }, [user, showSubmitButton, isArchived, wordCounts, wordCountMax]);
+
+  // Auto-start onboarding when board is loaded
+  const autoStart = !loading && boardData !== null;
+
+  const { JoyrideComponent } = usePageOnboarding({
+    steps: timelessSteps,
+    pageKey: 'timeless-board',
+    autoStart,
+  });
+
   if (loading) {
     return (
       <div className="timeless-game-room loading">
@@ -1215,17 +1305,6 @@ export default function TimelessBoardGameRoom() {
       </div>
     );
   }
-
-
-  // Get level name and color
-  const getLevelInfo = () => {
-    const currentLevelNum = level ? parseInt(level) : 10;
-    if (currentLevelNum === 4) return { name: 'Curious', color: 'var(--color-green)' };
-    if (currentLevelNum === 7) return { name: 'Curiouser', color: 'var(--color-pink)' };
-    return { name: 'Rabbit Hole', color: 'var(--color-purple)' };
-  };
-
-  const levelInfo = getLevelInfo();
 
   return (
     <div className="timeless-game-room">
@@ -1254,6 +1333,7 @@ export default function TimelessBoardGameRoom() {
               'hint-inactive'
             } ${hintGlowInitial ? 'hint-glow-initial' : ''} ${hintActiveGlow ? 'hint-active-glow' : ''}`}
             id="hints"
+            data-onboarding="hint-button"
             onClick={handleHintClick}
             disabled={hintsRemaining <= 0 || hintActive || hintLoading}
           >
@@ -1274,7 +1354,7 @@ export default function TimelessBoardGameRoom() {
           </button>
         )}
         {!isArchived && (
-          <div className="timer-display">
+          <div className="timer-display" data-onboarding="timer">
             <span className="timer-label">Time remaining:</span>
             <span 
               className={`timer-value ${
@@ -1290,6 +1370,7 @@ export default function TimelessBoardGameRoom() {
         {user && showSubmitButton && (
           <button
             className="submit-score-button-header"
+            data-onboarding="submit-button"
             onClick={handleSubmitScore}
             disabled={submitting || (!isArchived && timeRemaining <= 0)}
           >
@@ -1330,7 +1411,7 @@ export default function TimelessBoardGameRoom() {
               />
             </div>
 
-            <div className="word-lists-section">
+            <div className="word-lists-section" data-onboarding="word-lists">
               <WordLists
                 wordsByLength={wordsByLength}
                 wordsFound={wordsFound}
@@ -1348,6 +1429,7 @@ export default function TimelessBoardGameRoom() {
           )}
         </>
       )}
+      {JoyrideComponent}
     </div>
   );
 }
