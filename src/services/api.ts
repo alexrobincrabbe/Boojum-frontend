@@ -618,8 +618,11 @@ export const adminAPI = {
     const response = await api.post('/admin/create-custom-gameboards/', { boards });
     return response.data;
   },
-  checkCustomBoardDefinitions: async (boardIds: number[]) => {
-    const response = await api.post('/admin/check-custom-board-definitions/', { board_ids: boardIds });
+  checkCustomBoardDefinitions: async (boardIds: number[], fetchDefinitions: boolean = false) => {
+    const response = await api.post('/admin/check-custom-board-definitions/', { 
+      board_ids: boardIds,
+      fetch_definitions: fetchDefinitions
+    });
     return response.data;
   },
   createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[]) => {

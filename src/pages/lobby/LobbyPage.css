@@ -5,6 +5,11 @@
   background-image: linear-gradient(transparent, 50%, black);
 }
 
+/* Hide react-joyride spotlight */
+.react-joyride_spotlight {
+  display: none !important;
+}
+
 .lobby-row {
   display: flex;
   gap: 20px;

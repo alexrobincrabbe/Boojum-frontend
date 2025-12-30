@@ -1,9 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useOnboarding } from '../contexts/OnboardingContext';
 import { authAPI, lobbyAPI, dashboardAPI, forumAPI } from '../services/api';
 import { X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
+import Joyride from 'react-joyride';
+
+// Define types locally since they're not directly exported from react-joyride
+interface Step {
+  target: string | HTMLElement;
+  content: React.ReactNode;
+  title?: React.ReactNode;
+  placement?: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end' | 'center' | 'auto';
+  disableBeacon?: boolean;
+  disableScrolling?: boolean;
+  [key: string]: any;
+}
+
+interface CallBackProps {
+  action: string;
+  controlled: boolean;
+  index: number;
+  lifecycle: string;
+  origin: string | null;
+  size: number;
+  status: string;
+  step: Step;
+  type: string;
+}
+
+const STATUS = {
+  IDLE: 'idle',
+  READY: 'ready',
+  WAITING: 'waiting',
+  RUNNING: 'running',
+  PAUSED: 'paused',
+  SKIPPED: 'skipped',
+  FINISHED: 'finished',
+  ERROR: 'error',
+} as const;
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
 import { Username } from './Username';
@@ -169,7 +205,16 @@ const Layout = ({ children }: LayoutProps) => {
   const [rightSidebarPinned, setRightSidebarPinned] = useState(false);
   const [isTabletOrDesktop, setIsTabletOrDesktop] = useState(window.innerWidth >= 768);
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
+  const { run, setRun } = useOnboarding();
+  const [stepIndex, setStepIndex] = useState(0);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+
+  // Reset step index when tour starts
+  useEffect(() => {
+    if (run && stepIndex === 0) {
+      setStepIndex(0);
+    }
+  }, [run]);
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -652,6 +697,135 @@ const Layout = ({ children }: LayoutProps) => {
   // Just use the users returned from the backend (already limited to 20)
   const filteredUsers = usersOnline;
 
+  // Onboarding steps
+  const baseSteps: Step[] = [
+    {
+      target: 'body',
+      content: 'Welcome to Boojum Games! Let\'s take a quick tour to help you get started.',
+      placement: 'center',
+      disableBeacon: true,
+    },
+    {
+      target: '[data-onboarding="navigation-menu"]',
+      content: 'This is the main navigation menu. Click here to access all games, challenges, and features.',
+      placement: 'right',
+    },
+    {
+      target: '[data-onboarding="live-games"]',
+      content: 'Live Games shows all active game rooms where you can join other players in real-time games.',
+      placement: 'right',
+      disableScrolling: false,
+    },
+    {
+      target: '[data-onboarding="daily-challenges"]',
+      content: 'Daily Challenges include Mini-Games, Doodledum, Everyday Board, and Timeless Board. These are updated daily or can be played anytime!',
+      placement: 'right',
+      disableScrolling: false,
+    },
+    {
+      target: '[data-onboarding="tournament"]',
+      content: 'Participate in biweekly tournaments and team tournaments to compete with other players and climb the leaderboards!',
+      placement: 'right',
+      disableScrolling: false,
+    },
+  ];
+
+  const notificationStep: Step = {
+    target: '[data-onboarding="notifications"]',
+    content: 'Check your notifications here to stay updated on game activity and messages.',
+    placement: 'bottom',
+    disableScrolling: false,
+  };
+
+  const remainingSteps: Step[] = [
+    {
+      target: '[data-onboarding="profile-menu"]',
+      content: 'Click here to open the right sidebar where you can access your dashboard, profile, and chat with other players.',
+      placement: 'left',
+      disableScrolling: false,
+    },
+    {
+      target: '[data-onboarding="lobby-chat"]',
+      content: 'This is the lobby chat where you can communicate with other players. You need to be logged in to send messages.',
+      placement: 'left',
+      disableScrolling: false,
+    },
+    {
+      target: '[data-onboarding="dashboard-link"]',
+      content: 'Visit your dashboard to manage your account settings, saved boards, and preferences.',
+      placement: 'left',
+      disableScrolling: false,
+    },
+  ];
+
+  const steps: Step[] = isAuthenticated 
+    ? [...baseSteps, notificationStep, ...remainingSteps]
+    : [...baseSteps, ...remainingSteps];
+
+  // Handle Joyride callback
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { status, type, index, action } = data;
+    
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      setRun(false);
+      setStepIndex(0);
+    } else if (type === 'step:after') {
+      // Open left sidebar after navigation menu step (step 1)
+      if (index === 1 && !leftSidebarOpen) {
+        setLeftSidebarOpen(true);
+        // Wait for sidebar to render before showing next steps
+        setTimeout(() => {
+          setStepIndex(index + 1);
+        }, 300);
+        return;
+      }
+      
+      // Keep left sidebar open for live games, daily challenges, and tournament steps (2, 3, 4)
+      if (index >= 2 && index <= 4 && !leftSidebarOpen) {
+        setLeftSidebarOpen(true);
+      }
+      
+      // Close left sidebar and open right sidebar after profile menu step
+      // For authenticated: profile menu is step 6 (index 6), for guests it's step 5 (index 5)
+      // After adding live games, daily challenges, and tournament steps
+      const profileMenuStepIndex = isAuthenticated ? 6 : 5;
+      if (index === profileMenuStepIndex) {
+        if (leftSidebarOpen) {
+          setLeftSidebarOpen(false);
+        }
+        if (!rightSidebarOpen) {
+          setRightSidebarOpen(true);
+        }
+        // Wait for sidebar to render, then advance to next step
+        setTimeout(() => {
+          setStepIndex(index + 1);
+        }, 600);
+        return; // Don't advance immediately
+      }
+      
+      // For other steps, advance normally
+      setStepIndex(index + 1);
+    } else if (type === 'step:before') {
+      // Ensure left sidebar is open for steps 2-4 (live games, daily challenges, tournament)
+      if (index >= 2 && index <= 4 && !leftSidebarOpen) {
+        setLeftSidebarOpen(true);
+      }
+      
+      // Close left sidebar before showing profile menu step
+      // For authenticated: profile menu is step 6 (index 6), for guests it's step 5 (index 5)
+      const profileMenuStepIndex = isAuthenticated ? 6 : 5;
+      if (index === profileMenuStepIndex && leftSidebarOpen) {
+        setLeftSidebarOpen(false);
+      }
+    } else if (action === 'prev') {
+      // Handle back button - update step index
+      setStepIndex(index);
+    } else if (action === 'next' || action === 'start') {
+      // Handle next/start - advance step index
+      setStepIndex(index + 1);
+    }
+  };
+
   return (
     <div className="layout-container">
       {/* Top Bar */}
@@ -661,6 +835,7 @@ const Layout = ({ children }: LayoutProps) => {
             className={`burger-button ${leftSidebarOpen ? 'active' : ''}`}
             onClick={handleLeftSidebarToggle}
             aria-label="Toggle sidebar"
+            data-onboarding="navigation-menu"
           >
             <div className="custom-burger-icon">
               <span className="burger-line burger-line-pink"></span>
@@ -696,6 +871,7 @@ const Layout = ({ children }: LayoutProps) => {
                 className="notification-button"
                 onClick={handleNotificationClick}
                 aria-label="Notifications"
+                data-onboarding="notifications"
               >
                 <Bell size={24} />
                 {unreadNotifications > 0 && (
@@ -714,6 +890,7 @@ const Layout = ({ children }: LayoutProps) => {
             className="profile-picture-button-top"
             onClick={handleRightSidebarToggle}
             aria-label="Toggle profile menu"
+            data-onboarding="profile-menu"
           >
             {isAuthenticated && profilePictureUrl ? (
               <img
@@ -840,6 +1017,7 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => {
                   if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                 }}
+                data-onboarding="live-games"
               >
                 {leftSidebarOpen && <span>Live Games</span>}
               </Link>
@@ -862,7 +1040,7 @@ const Layout = ({ children }: LayoutProps) => {
               )}
             </div>
           </div>
-          <div className="nav-section">
+          <div className="nav-section" data-onboarding="daily-challenges">
             {leftSidebarOpen && <div className="nav-section-title">Daily Challenges</div>}
             <div className="nav-links-grid">
               <Link
@@ -985,7 +1163,7 @@ const Layout = ({ children }: LayoutProps) => {
               </Link>
             )}
           </div>
-          <div className="nav-section">
+          <div className="nav-section" data-onboarding="tournament">
             {leftSidebarOpen && <div className="nav-section-title">Tournament</div>}
             <Link
               to="/tournament"
@@ -1028,6 +1206,7 @@ const Layout = ({ children }: LayoutProps) => {
               onClick={() => {
                 if (!rightSidebarPinned) setRightSidebarOpen(false);
               }}
+              data-onboarding="dashboard-link"
             >
               <span>Dashboard</span>
             </Link>
@@ -1063,7 +1242,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
         </nav>
         {/* Lobby Chat */}
-        <div className="sidebar-chat">
+        <div className="sidebar-chat" data-onboarding="lobby-chat">
           <div className="sidebar-chat-header">
             <h3 className="sidebar-section-title">Lobby Chat</h3>
             {isTabletOrDesktop && (
@@ -1190,6 +1369,49 @@ const Layout = ({ children }: LayoutProps) => {
         onClose={() => setPollModalOpen(false)}
         onVote={handlePollVote}
         isAuthenticated={isAuthenticated}
+      />
+
+      {/* Onboarding Tour */}
+      <Joyride
+        steps={steps}
+        run={run}
+        stepIndex={stepIndex}
+        continuous
+        showProgress
+        showSkipButton
+        callback={handleJoyrideCallback}
+        scrollDuration={600}
+        scrollOffset={20}
+        scrollToFirstStep={false}
+        styles={{
+          options: {
+            primaryColor: '#fbbf24', // yellow-400
+            zIndex: 10000,
+          },
+          tooltip: {
+            borderRadius: 8,
+          },
+          buttonNext: {
+            backgroundColor: '#fbbf24',
+            color: '#000',
+            fontSize: '14px',
+            padding: '8px 16px',
+          },
+          buttonBack: {
+            color: '#fbbf24',
+            marginRight: '10px',
+          },
+          buttonSkip: {
+            color: '#9ca3af',
+          },
+        }}
+        locale={{
+          back: 'Back',
+          close: 'Close',
+          last: 'Finish',
+          next: 'Next',
+          skip: 'Skip tour',
+        }}
       />
     </div>
   );

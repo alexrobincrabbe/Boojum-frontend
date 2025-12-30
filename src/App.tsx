@@ -8,6 +8,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { BoardThemeProvider } from "./contexts/BoardThemeContext";
+import { OnboardingProvider } from "./contexts/OnboardingContext";
 import Layout from "./components/Layout";
 import { useRouteActivityTracking } from "./hooks/useRouteActivityTracking";
 import LoginPage from "./pages/login/LoginPage";
@@ -118,8 +119,9 @@ const LayoutWrapper = () => {
 function App() {
   return (
     <AuthProvider>
-      <BoardThemeProvider>
-        <Router>
+      <OnboardingProvider>
+        <BoardThemeProvider>
+          <Router>
           <Routes>
             <Route element={<LayoutWrapper />}>
               <Route path="/login" element={<LoginPage />} />
@@ -193,7 +195,8 @@ function App() {
           style={{ top: "80px" }}
           toastClassName="custom-toast"
         />
-      </BoardThemeProvider>
+        </BoardThemeProvider>
+      </OnboardingProvider>
     </AuthProvider>
   );
 }

@@ -25,12 +25,27 @@ const CreateCustomGameboardPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [createdBoardIds, setCreatedBoardIds] = useState<number[]>([]);
+  const [checkProgress, setCheckProgress] = useState<{
+    stage: 'idle' | 'checking' | 'fetching' | 'updating' | 'complete';
+    message: string;
+    progress: number; // 0-100
+  }>({
+    stage: 'idle',
+    message: '',
+    progress: 0,
+  });
   const [checkResults, setCheckResults] = useState<{
     total_words: number;
     found_words: string[];
     missing_words: string[];
     found_count: number;
     missing_count: number;
+    definitions_created?: number;
+    definitions_updated?: number;
+    definitions_failed?: number;
+    created_words?: string[];
+    updated_words?: string[];
+    failed_words?: string[];
   } | null>(null);
 
   function createEmptyBoard(): Board {
@@ -527,9 +542,9 @@ const CreateCustomGameboardPage = () => {
       setCreatedBoardIds(allBoardIds);
       toast.success(`Successfully created ${allBoardIds.length} board(s)!`);
       
-      // Automatically check for missing definitions
+      // Automatically check and fetch missing definitions
       if (allBoardIds.length > 0) {
-        await handleCheckDefinitions(allBoardIds);
+        await handleCheckDefinitions(allBoardIds, true); // true = fetch definitions
       }
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to create boards');
@@ -538,7 +553,7 @@ const CreateCustomGameboardPage = () => {
     }
   };
 
-  const handleCheckDefinitions = async (boardIds?: number[]) => {
+  const handleCheckDefinitions = async (boardIds?: number[], fetchDefinitions: boolean = false) => {
     const idsToCheck = boardIds || createdBoardIds;
     if (idsToCheck.length === 0) {
       toast.error('No boards to check. Please create boards first.');
@@ -546,19 +561,83 @@ const CreateCustomGameboardPage = () => {
     }
 
     setIsChecking(true);
+    setCheckProgress({
+      stage: 'checking',
+      message: 'Checking for missing definitions...',
+      progress: 10,
+    });
+    
     try {
-      const response = await adminAPI.checkCustomBoardDefinitions(idsToCheck);
+      // First, check for missing definitions
+      setCheckProgress({
+        stage: 'checking',
+        message: 'Checking for missing definitions...',
+        progress: 20,
+      });
+      
+      const response = await adminAPI.checkCustomBoardDefinitions(idsToCheck, fetchDefinitions);
+      
+      if (fetchDefinitions && response.missing_count > 0) {
+        // Estimate progress: checking (20%), fetching (60%), updating (20%)
+        setCheckProgress({
+          stage: 'fetching',
+          message: `Fetching definitions from OpenAI for ${response.missing_count} words...`,
+          progress: 30,
+        });
+      }
+      
       setCheckResults(response);
       
-      if (response.missing_count > 0) {
-        toast.warning(`Found ${response.missing_count} words with missing definitions`);
+      if (fetchDefinitions) {
+        // Show results of definition fetching
+        const created = response.definitions_created || 0;
+        const updated = response.definitions_updated || 0;
+        const failed = response.definitions_failed || 0;
+        
+        setCheckProgress({
+          stage: 'complete',
+          message: 'Definition check complete!',
+          progress: 100,
+        });
+        
+        if (created > 0 || updated > 0) {
+          toast.success(`Successfully ${created > 0 ? `created ${created} new` : ''}${created > 0 && updated > 0 ? ' and ' : ''}${updated > 0 ? `updated ${updated} existing` : ''} definition(s)${failed > 0 ? `. ${failed} failed.` : '.'}`);
+        } else if (failed > 0) {
+          toast.warning(`Failed to fetch definitions for ${failed} word(s)`);
+        } else {
+          toast.info('No definitions needed to be fetched.');
+        }
       } else {
-        toast.success('All words have definitions!');
+        // Just checking, not fetching
+        setCheckProgress({
+          stage: 'complete',
+          message: 'Definition check complete!',
+          progress: 100,
+        });
+        
+        if (response.missing_count > 0) {
+          toast.warning(`Found ${response.missing_count} words with missing definitions`);
+        } else {
+          toast.success('All words have definitions!');
+        }
       }
     } catch (error: any) {
+      setCheckProgress({
+        stage: 'idle',
+        message: '',
+        progress: 0,
+      });
       toast.error(error.response?.data?.error || 'Failed to check definitions');
     } finally {
       setIsChecking(false);
+      // Clear progress after a delay
+      setTimeout(() => {
+        setCheckProgress({
+          stage: 'idle',
+          message: '',
+          progress: 0,
+        });
+      }, 3000);
     }
   };
 
@@ -759,17 +838,22 @@ const CreateCustomGameboardPage = () => {
               {isSubmitting ? 'Creating...' : 'Create Gameboards'}
             </button>
 
-            {createdBoardIds.length > 0 && (
-              <button
-                className="check-btn"
-                onClick={() => handleCheckDefinitions()}
-                disabled={isChecking}
-              >
-                {isChecking ? 'Checking...' : 'Check Missing Definitions'}
-              </button>
-            )}
           </div>
         </div>
+
+        {(isChecking || checkProgress.stage !== 'idle') && (
+          <div className="progress-container">
+            <div className="progress-bar-wrapper">
+              <div className="progress-bar">
+                <div 
+                  className="progress-bar-fill" 
+                  style={{ width: `${checkProgress.progress}%` }}
+                />
+              </div>
+              <p className="progress-message">{checkProgress.message}</p>
+            </div>
+          </div>
+        )}
 
         {checkResults && (
           <div className="check-results">
@@ -786,16 +870,86 @@ const CreateCustomGameboardPage = () => {
                   {checkResults.found_count}
                 </span>
               </div>
-              <div className="result-item">
-                <span className="result-label">Missing:</span>
-                <span className="result-value warning">
-                  <AlertCircle size={16} />
-                  {checkResults.missing_count}
-                </span>
-              </div>
+              {checkResults.definitions_created !== undefined && (
+                <div className="result-item">
+                  <span className="result-label">Created:</span>
+                  <span className="result-value success">
+                    <CheckCircle size={16} />
+                    {checkResults.definitions_created}
+                  </span>
+                </div>
+              )}
+              {checkResults.definitions_updated !== undefined && (
+                <div className="result-item">
+                  <span className="result-label">Updated:</span>
+                  <span className="result-value success">
+                    <CheckCircle size={16} />
+                    {checkResults.definitions_updated}
+                  </span>
+                </div>
+              )}
+              {checkResults.definitions_failed !== undefined && checkResults.definitions_failed > 0 && (
+                <div className="result-item">
+                  <span className="result-label">Failed:</span>
+                  <span className="result-value warning">
+                    <AlertCircle size={16} />
+                    {checkResults.definitions_failed}
+                  </span>
+                </div>
+              )}
+              {checkResults.missing_count > 0 && checkResults.definitions_created === undefined && (
+                <div className="result-item">
+                  <span className="result-label">Missing:</span>
+                  <span className="result-value warning">
+                    <AlertCircle size={16} />
+                    {checkResults.missing_count}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {checkResults.missing_words.length > 0 && (
+            {checkResults.created_words && checkResults.created_words.length > 0 && (
+              <div className="created-words">
+                <h4>New Definitions Created:</h4>
+                <div className="words-list">
+                  {checkResults.created_words.map((word, idx) => (
+                    <span key={idx} className="word-tag success">
+                      {word}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {checkResults.updated_words && checkResults.updated_words.length > 0 && (
+              <div className="updated-words">
+                <h4>Definitions Updated:</h4>
+                <div className="words-list">
+                  {checkResults.updated_words.map((word, idx) => (
+                    <span key={idx} className="word-tag info">
+                      {word}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {checkResults.failed_words && checkResults.failed_words.length > 0 && (
+              <div className="failed-words">
+                <h4>Failed to Fetch:</h4>
+                <div className="words-list">
+                  {checkResults.failed_words.map((word, idx) => (
+                    <span key={idx} className="word-tag error">
+                      {word}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {checkResults.missing_words.length > 0 && 
+             !checkResults.created_words && 
+             !checkResults.updated_words && (
               <div className="missing-words">
                 <h4>Missing Words:</h4>
                 <div className="words-list">

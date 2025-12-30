@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Loading } from '../../../components/Loading';
 import { toast } from 'react-toastify';
 import { dashboardAPI } from '../../../services/api';
+import { useOnboarding } from '../../../contexts/OnboardingContext';
 
 interface AccountBundle {
   email?: string;
@@ -9,6 +10,7 @@ interface AccountBundle {
 }
 
 const AccountTab = ({ bundle }: { bundle?: AccountBundle | null }) => {
+  const { resetOnboarding } = useOnboarding();
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [oldPassword, setOldPassword] = useState('');
@@ -90,9 +92,23 @@ const AccountTab = ({ bundle }: { bundle?: AccountBundle | null }) => {
     );
   }
 
+  const handleRestartTour = () => {
+    resetOnboarding();
+    toast.success('Onboarding tour will start shortly');
+  };
+
   return (
     <div className="tab-content">
       <div className="account-content">
+        <div className="account-section" style={{ marginBottom: '20px' }}>
+          <button
+            onClick={handleRestartTour}
+            className="dashboard-button"
+            style={{ backgroundColor: '#fbbf24', color: '#000' }}
+          >
+            Restart Onboarding Tour
+          </button>
+        </div>
         <div className="account-section">
           <form onSubmit={handleEmailSubmit} className="short-form">
             <label htmlFor="email">Email:</label>
