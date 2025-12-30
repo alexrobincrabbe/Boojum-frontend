@@ -378,8 +378,10 @@ export const lobbyAPI = {
     return response.data;
   },
 
-  getTimelessBoardGame: async (timelessBoardId: number, level: number) => {
-    const response = await api.get(`/timeless-boards/play/${timelessBoardId}/${level}/`);
+  getTimelessBoardGame: async (timelessBoardId: number, level: number, fromArchive: boolean = false) => {
+    const response = await api.get(`/timeless-boards/play/${timelessBoardId}/${level}/`, {
+      params: fromArchive ? { from_archive: 'true' } : {}
+    });
     return response.data;
   },
   submitTimelessScore: async (timelessBoardId: number, level: number, scoreData: {

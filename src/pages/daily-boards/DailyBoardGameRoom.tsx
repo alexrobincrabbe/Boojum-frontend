@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWordTracking } from '../game-room/services/useWordTracking';
 import { useGameWebSocket } from '../game-room/services/useGameWebSocket';
@@ -14,8 +14,10 @@ import '../game-room/GameRoom.css';
 
 export default function DailyBoardGameRoom() {
   const { dailyBoardId } = useParams<{ dailyBoardId: string }>();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const fromArchive = searchParams.get('from_archive') === 'true';
 
   const token = localStorage.getItem('access_token') || '';
   const isGuest = !user || !token;
@@ -81,8 +83,10 @@ export default function DailyBoardGameRoom() {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const djangoBaseUrl = apiBaseUrl.replace('/api', '');
     const wsBaseUrl = djangoBaseUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
-    return `${wsBaseUrl}/ws/dailyboard/play/${dailyBoardId}/`;
-  }, [dailyBoardId]);
+    // Include from_archive parameter if present
+    const queryString = fromArchive ? '?from_archive=true' : '';
+    return `${wsBaseUrl}/ws/dailyboard/play/${dailyBoardId}/${queryString}`;
+  }, [dailyBoardId, fromArchive]);
 
   // GAME WS - using custom URL for daily boards
   const {
@@ -113,8 +117,8 @@ export default function DailyBoardGameRoom() {
       // Handle ERROR messages
       if (message.type === 'ERROR') {
         toast.error(message.message || 'An error occurred');
-        // If it's an "already played" error, navigate back to daily boards page
-        if (message.code === 'ALREADY_PLAYED') {
+        // If it's an "already played" or "access denied" error, navigate back
+        if (message.code === 'ALREADY_PLAYED' || message.code === 'ACCESS_DENIED') {
           setTimeout(() => {
             navigate('/daily-boards');
           }, 2000); // Give user time to read the message

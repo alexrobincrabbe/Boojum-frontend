@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { GameBoard } from '../game-room/components/GameBoard';
 import { WordLists } from '../game-room/components/WordLists';
@@ -233,8 +233,10 @@ interface TimelessBoardData {
 
 export default function TimelessBoardGameRoom() {
   const { timelessBoardId, level } = useParams<{ timelessBoardId: string; level: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const fromArchive = searchParams.get('from_archive') === 'true';
 
   const [boardData, setBoardData] = useState<TimelessBoardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -363,7 +365,7 @@ export default function TimelessBoardGameRoom() {
       
       try {
         setLoading(true);
-        const data = await lobbyAPI.getTimelessBoardGame(parseInt(timelessBoardId), parseInt(level));
+        const data = await lobbyAPI.getTimelessBoardGame(parseInt(timelessBoardId), parseInt(level), fromArchive);
         setBoardData(data);
         // Check if board is archived (time_remaining_seconds >= 3153600000 means unlimited/archived)
         const archived = data.time_remaining_seconds >= 3153600000;
@@ -438,7 +440,7 @@ export default function TimelessBoardGameRoom() {
     };
 
     fetchBoardData();
-  }, [timelessBoardId, level, navigate]);
+  }, [timelessBoardId, level, navigate, fromArchive]);
 
   // Timer countdown - skip for archived boards
   useEffect(() => {

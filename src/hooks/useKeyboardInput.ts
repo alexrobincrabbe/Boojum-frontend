@@ -60,9 +60,15 @@ export function useKeyboardInput({
       return true;
     }
     
-    // Check if input is within a chat section
-    const chatSection = activeElement.closest('.chat-section');
+    // Check if input is within a chat section (game room chat or lobby chat)
+    const chatSection = activeElement.closest('.chat-section, .sidebar-chat');
     if (chatSection) {
+      return true;
+    }
+    
+    // Check if input has a chat-related class
+    const className = activeElement.className || '';
+    if (className.includes('chat') || className.includes('message')) {
       return true;
     }
     

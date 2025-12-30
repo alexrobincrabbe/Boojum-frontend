@@ -72,9 +72,10 @@ export default function DailyBoardArchiveDetailPage() {
         setLoading(true);
         const boardData = await lobbyAPI.getDailyBoardArchiveDetail(parseInt(boardId, 10));
         setBoard(boardData);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching board:', error);
-        if (error.response?.status === 403) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 403) {
           toast.error('Premium subscription required to access archives');
           navigate('/dashboard');
         } else {
@@ -104,7 +105,7 @@ export default function DailyBoardArchiveDetailPage() {
       return;
     }
     if (board?.id && !board.played) {
-      navigate(`/daily-boards/play/${board.id}`);
+      navigate(`/daily-boards/play/${board.id}?from_archive=true`);
     }
   };
 

@@ -531,20 +531,38 @@ const Layout = ({ children }: LayoutProps) => {
     }
   };
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+  // Track when sidebar was opened to prevent auto-scroll to bottom immediately after
+  const sidebarOpenedTimeRef = useRef<number>(0);
+  const shouldAutoScrollRef = useRef<boolean>(false);
 
   // Scroll right sidebar to top when it opens
   useEffect(() => {
     if (rightSidebarOpen && rightSidebarRef.current) {
+      // Record when sidebar opened and disable auto-scroll
+      sidebarOpenedTimeRef.current = Date.now();
+      shouldAutoScrollRef.current = false;
       // Small delay to ensure the sidebar is rendered
       setTimeout(() => {
         rightSidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        // Re-enable auto-scroll after sidebar has been scrolled to top (allow 2 seconds)
+        setTimeout(() => {
+          shouldAutoScrollRef.current = true;
+        }, 2000);
       }, 100);
+    } else if (!rightSidebarOpen) {
+      // Disable auto-scroll when sidebar closes
+      shouldAutoScrollRef.current = false;
     }
   }, [rightSidebarOpen]);
+
+  // Scroll to bottom when messages change, but only if sidebar has been open and auto-scroll is enabled
+  useEffect(() => {
+    // Only auto-scroll if sidebar is open and auto-scroll is enabled
+    if (!rightSidebarOpen || !shouldAutoScrollRef.current) {
+      return;
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, rightSidebarOpen]);
 
   // Update last read time when right sidebar opens
   useEffect(() => {

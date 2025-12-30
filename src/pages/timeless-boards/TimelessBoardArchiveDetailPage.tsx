@@ -97,7 +97,7 @@ export default function TimelessBoardArchiveDetailPage() {
 
   const handlePlay = () => {
     if (board?.id) {
-      navigate(`/timeless-boards/play/${board.id}/${currentLevel}`);
+      navigate(`/timeless-boards/play/${board.id}/${currentLevel}?from_archive=true`);
     }
   };
 
