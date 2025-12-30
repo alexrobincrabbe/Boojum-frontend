@@ -181,16 +181,7 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
           borderRadius: 8,
           backgroundColor: '#1b1835', // Dark background matching the app theme
           border: '2px solid #fbbf24', // Yellow border
-        },
-        tooltipContainer: {
-          textAlign: 'left',
           color: '#fbbf24', // Yellow text
-        },
-        tooltipTitle: {
-          color: '#fbbf24', // Yellow title
-        },
-        tooltipContent: {
-          color: '#fbbf24', // Yellow content text
         },
         buttonNext: {
           backgroundColor: 'transparent',

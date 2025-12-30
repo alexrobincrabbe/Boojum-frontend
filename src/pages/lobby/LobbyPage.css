@@ -10,6 +10,18 @@
   display: none !important;
 }
 
+/* Style react-joyride tooltip */
+.react-joyride__tooltip {
+  background-color: #1b1835 !important;
+  border: 2px solid #fbbf24 !important;
+  border-radius: 8px !important;
+}
+
+.react-joyride__tooltip p,
+.react-joyride__tooltip div {
+  color: #fbbf24 !important;
+}
+
 .lobby-row {
   display: flex;
   gap: 20px;
