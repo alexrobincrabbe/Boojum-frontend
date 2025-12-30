@@ -180,6 +180,17 @@ const Layout = ({ children }: LayoutProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatPollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rightSidebarRef = useRef<HTMLElement>(null);
+  const [hasNewChatMessages, setHasNewChatMessages] = useState(false);
+
+  // Helper functions for last read time
+  const getLastReadTime = (): number | null => {
+    const stored = localStorage.getItem('lobbyChatLastReadTime');
+    return stored ? parseInt(stored, 10) : null;
+  };
+
+  const setLastReadTime = (timestamp: number) => {
+    localStorage.setItem('lobbyChatLastReadTime', timestamp.toString());
+  };
 
   // Activities state
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -237,6 +248,31 @@ const Layout = ({ children }: LayoutProps) => {
       try {
         const data = await lobbyAPI.getChatMessages();
         setChatMessages(data.messages || []);
+        
+        // If right sidebar is open, update last read time
+        if (rightSidebarOpen) {
+          setLastReadTime(Date.now());
+          setHasNewChatMessages(false);
+        } else {
+          // Check if there are new messages
+          const lastRead = getLastReadTime();
+          if (!lastRead) {
+            // No last read time stored yet, set initial baseline
+            setLastReadTime(Date.now());
+            setHasNewChatMessages(false);
+          } else if (data.messages && data.messages.length > 0) {
+            // Try to parse the latest message timestamp
+            const latestMessage = data.messages[data.messages.length - 1];
+            const messageTime = new Date(latestMessage.timestamp).getTime();
+            if (!isNaN(messageTime) && messageTime > lastRead) {
+              setHasNewChatMessages(true);
+            } else {
+              setHasNewChatMessages(false);
+            }
+          } else {
+            setHasNewChatMessages(false);
+          }
+        }
       } catch (error: any) {
         console.error('Error loading chat messages:', error);
       }
@@ -251,6 +287,25 @@ const Layout = ({ children }: LayoutProps) => {
         if (timestampData.new_message === 'yes') {
           const data = await lobbyAPI.getChatMessages();
           setChatMessages(data.messages || []);
+          
+          // If right sidebar is open, update last read time
+          if (rightSidebarOpen) {
+            setLastReadTime(Date.now());
+            setHasNewChatMessages(false);
+          } else {
+            // Check if there are new messages
+            const lastRead = getLastReadTime();
+            if (lastRead && data.messages && data.messages.length > 0) {
+              // Try to parse the latest message timestamp
+              const latestMessage = data.messages[data.messages.length - 1];
+              const messageTime = new Date(latestMessage.timestamp).getTime();
+              if (!isNaN(messageTime) && messageTime > lastRead) {
+                setHasNewChatMessages(true);
+              } else {
+                setHasNewChatMessages(false);
+              }
+            }
+          }
         }
       } catch (error: any) {
         // Silently handle 404s - endpoint may not exist
@@ -265,7 +320,7 @@ const Layout = ({ children }: LayoutProps) => {
         clearInterval(chatPollingIntervalRef.current);
       }
     };
-  }, []);
+  }, [rightSidebarOpen]);
 
   // Load activities feed
   useEffect(() => {
@@ -491,6 +546,14 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }, [rightSidebarOpen]);
 
+  // Update last read time when right sidebar opens
+  useEffect(() => {
+    if (rightSidebarOpen) {
+      setLastReadTime(Date.now());
+      setHasNewChatMessages(false);
+    }
+  }, [rightSidebarOpen]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !isAuthenticated) return;
@@ -593,8 +656,8 @@ const Layout = ({ children }: LayoutProps) => {
           {poll && (
             <button
               className="poll-button"
-              onClick={() => setPollModalOpen(true)}
-              aria-label="Open poll"
+              onClick={() => setPollModalOpen(!pollModalOpen)}
+              aria-label={pollModalOpen ? "Close poll" : "Open poll"}
             >
               <BarChart3 size={24} />
               <span className="poll-button-label">Poll</span>
@@ -647,7 +710,9 @@ const Layout = ({ children }: LayoutProps) => {
                 className="profile-button-image"
               />
             )}
-            <img src="/images/chat.png" alt="Chat" className="chat-badge" />
+            {hasNewChatMessages && (
+              <img src="/images/chat.png" alt="Chat" className="chat-badge" />
+            )}
           </button>
         </div>
       </nav>

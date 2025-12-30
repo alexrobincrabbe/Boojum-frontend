@@ -18,13 +18,13 @@
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: bold;
-  border: 2px solid #71bbe9;
   background-color: transparent;
   color: #71bbe9;
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.3s ease;
   cursor: pointer;
+  text-decoration: underline;
 }
 
 .tournament-archives-button:hover {
@@ -187,9 +187,9 @@
   padding: 12px 24px;
   font-size: 1.1rem;
   font-weight: bold;
-  border: 2px solid #71bbe9;
-  background-color: transparent;
-  color: #71bbe9;
+  border: 2px solid #33c15b;
+  background-color: rgba(51, 193, 91, 0.2);
+  color: #33c15b;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -198,17 +198,18 @@
 }
 
 .tournament-register-button:hover {
-  background-color: rgba(113, 187, 233, 0.2);
+  background-color: rgba(51, 193, 91, 0.3);
   transform: scale(1.05);
 }
 
 .tournament-register-button.button-registered {
-  border-color: #33c15b;
-  color: #33c15b;
+  border-color: #ff5596;
+  color: #ff5596;
+  background-color: rgba(255, 85, 150, 0.2);
 }
 
 .tournament-register-button.button-registered:hover {
-  background-color: rgba(51, 193, 91, 0.2);
+  background-color: rgba(255, 85, 150, 0.3);
 }
 
 .registration-closed {
@@ -787,3 +788,34 @@
   background-color: rgba(113, 187, 233, 0.1);
 }
 
+@media screen and (max-width: 578px) {
+    .registration-timer-container {
+        flex-direction: column;
+    }
+
+    .team-match-container {
+        min-width: unset;
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .team-match-player-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .team-match-player-link {
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: none;
+        display: block;
+    }
+
+    .team-match-player-status {
+        margin-left: 0;
+        align-self: flex-start;
+    }
+}

@@ -24,6 +24,8 @@
   align-items: center;
   width: 100%;
   margin: 0 auto;
+  border: none !important;
+  max-width: 400px;
 }
 
 #boojumbles .board-container.board-3 {
@@ -31,12 +33,12 @@
 }
 
 #boojumbles .board-container.board-4 {
-  min-width: 400px;
+  min-width: 300px;
   max-width: 400px;
 }
 
 #boojumbles .board-container.board-5 {
-  min-width: 400px;
+  min-width: 300px;
   max-width: 400px;
 }
 

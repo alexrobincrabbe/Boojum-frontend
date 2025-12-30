@@ -113,8 +113,12 @@ export default function DailyBoardPage() {
       navigate('/login');
       return;
     }
-    if (currentBoard?.id) {
+    // On normal page, only allow playing the current board (index 0)
+    // Previous boards should only be playable from the archives page
+    if (currentBoard?.id && currentPage === 0) {
       navigate(`/daily-boards/play/${currentBoard.id}`);
+    } else {
+      toast.error('This board is only available from the archives page');
     }
   };
 
@@ -236,6 +240,8 @@ export default function DailyBoardPage() {
 
         {/* Board Info */}
         <div className="daily-board-header">
+        <h1 className="daily-board-title">{currentBoard.title}</h1>
+
           <div className="daily-board-date">{formatDate(currentBoard.date)}</div>
           <div className="daily-board-meta">
             {currentBoard.type === 'bonus' && (
@@ -247,8 +253,8 @@ export default function DailyBoardPage() {
           </div>
         </div>
 
-        {/* Play Button */}
-        {!currentBoard.played && (
+        {/* Play Button - only show for current board (index 0) */}
+        {!currentBoard.played && currentPage === 0 && (
           <div className="daily-board-play-section">
             {isAuthenticated ? (
               <button className="play-board-btn" onClick={handlePlay}>
@@ -264,8 +270,6 @@ export default function DailyBoardPage() {
 
         {/* High Scores Table */}
         <div className="daily-board-scores-section">
-          <h1 className="daily-board-title">{currentBoard.title}</h1>
-          <h2 className="scores-title">High Scores</h2>
           {currentBoard.scores.length > 0 ? (
             <div className="scores-table-container">
               <table className="scores-table">

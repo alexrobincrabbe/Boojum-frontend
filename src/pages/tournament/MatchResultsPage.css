@@ -365,9 +365,7 @@
 .board-container {
   margin-bottom: 30px;
   padding: 20px;
-  background-color: rgba(19, 19, 42, 0.7);
   border-radius: 10px;
-  border: 2px solid #71bbe9;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -407,7 +405,6 @@
   padding: 10px;
   gap: 10px;
   width: 400px;
-  height: 400px;
   aspect-ratio: 1;
 }
 

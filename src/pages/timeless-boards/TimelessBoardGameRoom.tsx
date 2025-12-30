@@ -1234,11 +1234,10 @@ export default function TimelessBoardGameRoom() {
           </button>
           <span className="pagination-text">Back to Timeless Boards</span>
         </div>
+        <h1 className="timeless-game-level-title" style={{ color: levelInfo.color }}>
+          {levelInfo.name}
+        </h1>
       </div>
-
-      <h1 className="timeless-game-level-title" style={{ color: levelInfo.color }}>
-        {levelInfo.name}
-      </h1>
 
       <div className="timer-controls-container">
         {user && (

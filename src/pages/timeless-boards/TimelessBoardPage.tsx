@@ -71,6 +71,7 @@ export default function TimelessBoardPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [solutionDataByBoard, setSolutionDataByBoard] = useState<Record<number, { board_letters?: string[][]; words_by_length?: Record<string, WordData[]>; board_words?: string[]; boojum?: number[][]; }>>({});
   
   // Get boards for current level
   const boards = boardsByLevel[currentLevel] || [];
@@ -146,9 +147,12 @@ setBoardsByLevel({
 
   const currentBoard = boards[currentPage];
 
-  // Update timer every second
+  // Update timer every second (only for current board, not previous ones)
   useEffect(() => {
-    if (!currentBoard || currentBoard.time_remaining_seconds <= 0) return;
+    if (!currentBoard || currentBoard.time_remaining_seconds <= 0 || currentPage > 0) {
+      setTimeRemaining(0);
+      return;
+    }
 
     setTimeRemaining(currentBoard.time_remaining_seconds);
     const interval = setInterval(() => {
@@ -164,7 +168,7 @@ setBoardsByLevel({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentBoard?.id, currentBoard?.time_remaining_seconds]);
+  }, [currentBoard?.id, currentBoard?.time_remaining_seconds, currentPage, fetchBoards]);
   const hasNext = currentPage > 0; // Can go to newer board (later day) - going backwards in array
   const hasPrevious = currentPage < boards.length - 1; // Can go to older board (earlier day) - going forwards in array
 
@@ -192,7 +196,8 @@ setBoardsByLevel({
 
   const handlePlay = () => {
     // Guests can play timeless boards
-    if (currentBoard?.id && currentBoard.time_remaining_seconds > 0) {
+    // On normal page, previous boards (currentPage > 0) cannot be played
+    if (currentBoard?.id && currentBoard.time_remaining_seconds > 0 && currentPage === 0) {
       navigate(`/timeless-boards/play/${currentBoard.id}/${currentLevel}`);
     } else {
       toast.error('This board has expired');
@@ -240,6 +245,8 @@ setBoardsByLevel({
     );
   }
 
+  // On the normal page, solution is revealed when the board has actually expired (time_remaining_seconds <= 0)
+  // This shows the solution for ALL users when boards expire after 24 hours
   const solutionRevealed = currentBoard.time_remaining_seconds <= 0;
   const displayTimeRemaining = timeRemaining > 0 ? timeRemaining : currentBoard.time_remaining_seconds;
 
@@ -434,7 +441,7 @@ setBoardsByLevel({
             )}
 
             {/* Word Lists - using unified component */}
-            {currentBoard.words_by_length && currentBoard.board_words && (() => {
+            {solutionRevealed && currentBoard.board_words && currentBoard.board_letters && (() => {
               const { boojum, snark } = getBonusLetters(currentBoard);
               
               // Get current user's score to find which words they found
@@ -442,22 +449,18 @@ setBoardsByLevel({
               const userWordsFound = currentUserScore?.which_words_found || [];
               const userWordsFoundSet = new Set(userWordsFound.map((word: string) => word.toLowerCase()));
               
-              // Debug logging
-              console.log('=== Timeless Board Word Highlighting Debug ===');
-              console.log('Current User Score:', currentUserScore);
-              console.log('User Words Found (raw):', userWordsFound);
-              console.log('User Words Found Set (lowercase):', Array.from(userWordsFoundSet));
-              console.log('Board Words Count:', currentBoard.board_words?.length);
-              console.log('Words by Length Keys:', Object.keys(currentBoard.words_by_length || {}));
-              
-              // Build a map of words from words_by_length for quick lookup
+              // Build a map of words from words_by_length for quick lookup (if available from API)
+              // Note: words_by_length may be missing for expired boards when user is not authenticated,
+              // but we can still build the word lists from board_words
               const wordsByLengthMap = new Map<string, WordData>();
-              Object.keys(currentBoard.words_by_length).forEach(length => {
-                const words = currentBoard.words_by_length![length];
-                words.forEach(wordData => {
-                  wordsByLengthMap.set(wordData.word.toLowerCase(), wordData);
+              if (currentBoard.words_by_length) {
+                Object.keys(currentBoard.words_by_length).forEach(length => {
+                  const words = currentBoard.words_by_length![length];
+                  words.forEach(wordData => {
+                    wordsByLengthMap.set(wordData.word.toLowerCase(), wordData);
+                  });
                 });
-              });
+              }
               
               // Convert timeless board WordData format to protocol format for WordLists
               // Include ALL words from board_words, not just those in words_by_length
@@ -489,27 +492,6 @@ setBoardsByLevel({
                   sum_players_found: sumPlayersFound,
                 };
               });
-              
-              // Debug: Log a sample of words to check player_found values
-              const sampleWords: Array<{word: string, player_found: number}> = [];
-              Object.keys(wordsByLengthForComponent).forEach(length => {
-                const words = wordsByLengthForComponent[length];
-                Object.keys(words).slice(0, 5).forEach(word => {
-                  sampleWords.push({
-                    word,
-                    player_found: words[word].player_found
-                  });
-                });
-              });
-              console.log('Sample words with player_found:', sampleWords);
-              console.log('Words with player_found=1:', 
-                Object.values(wordsByLengthForComponent)
-                  .flatMap(words => Object.entries(words))
-                  .filter(([, data]) => data.player_found === 1)
-                  .map(([word]) => word)
-              );
-              console.log('Words Found Set passed to WordLists:', Array.from(userWordsFoundSet));
-              console.log('========================================');
               
               return (
                 <WordLists

@@ -666,6 +666,15 @@
   text-align: center;
 }
 
+.timeless-game-room #board, .timeless-game-room .board-container, .timeless-game-room .game-board {
+    padding: 0px;
+    margin: 0px;
+}
+
+.timeless-game-room h1.timeless-game-level-title {
+  margin-bottom: 0px;
+}
+
 .play-now-btn {
   padding: 15px 40px;
   background-color: var(--color-yellow);

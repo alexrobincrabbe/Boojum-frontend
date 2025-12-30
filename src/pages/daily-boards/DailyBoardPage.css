@@ -148,12 +148,39 @@
   cursor: not-allowed;
 }
 
-.pagination-btn.pagination-prev::before {
+/* Archive pagination buttons - text buttons with arrows (not triangles) */
+.archive-pagination .pagination-btn {
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  border: 1px solid var(--color-blue);
+  background: rgba(19, 19, 42, 0.8);
+  border-radius: 6px;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.archive-pagination .pagination-btn:hover:not(:disabled) {
+  background: rgba(113, 187, 233, 0.2);
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+}
+
+.archive-pagination .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.archive-pagination .pagination-btn.pagination-prev::before {
   content: '←';
   margin-right: 5px;
 }
 
-.pagination-btn.pagination-next::after {
+.archive-pagination .pagination-btn.pagination-next::after {
   content: '→';
   margin-left: 5px;
 }
@@ -181,7 +208,6 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #71bbe9;
   position: relative;
 }
 
@@ -385,7 +411,7 @@
 }
 
 .scores-table thead {
-  background-color: rgba(113, 187, 233, 0.2);
+border-bottom: 2px solid #71bbe9;
 }
 
 .scores-table {
@@ -415,6 +441,8 @@
 .scores-table th.score-col {
   width: 100px;
   text-align: center;
+  font-size:120%;
+  color:#33c15b;
 }
 
 .scores-table th.word-col {
@@ -425,6 +453,8 @@
 .scores-table th.words-col {
   width: 80px;
   text-align: center;
+  font-size:120%;
+  color:#eb5497;
 }
 
 .scores-table tbody tr {

@@ -467,7 +467,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                 {data.registered ? (
                   <div>
                     <button 
-                      className="tournament-register-button button-registered blue"
+                      className="tournament-register-button button-registered"
                       onClick={handleUnregister}
                       disabled={registering}
                     >
@@ -477,7 +477,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                 ) : (
                   <div>
                     <button 
-                      className="tournament-register-button blue"
+                      className="tournament-register-button"
                       onClick={handleRegister}
                       disabled={registering}
                     >

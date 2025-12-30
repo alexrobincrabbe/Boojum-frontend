@@ -232,8 +232,8 @@ export default function TimelessBoardArchiveDetailPage() {
           </div>
         )}
 
-        {/* Solution display */}
-        {board.board_letters && board.words_by_length && (
+        {/* Solution display - only show if user has played */}
+        {board.played && board.board_letters && board.words_by_length && (
           <div className="timeless-board-solution">
             <h2 className="solution-title">Solution</h2>
             {board.board_letters && (

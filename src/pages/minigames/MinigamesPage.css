@@ -59,7 +59,6 @@
   margin-bottom: 20px;
   padding: 20px;
   background: rgba(19, 19, 42, 0.8);
-  border: 2px solid var(--color-blue);
   border-radius: 12px;
 }
 
@@ -291,7 +290,39 @@
 }
 
 @media screen and (max-width: 578px) {
+
+    .archive-list-view {
+      margin-top:40px;
+    }
+    .archive-header {
+       margin-top:40px;
+      }
+      
   .minigames-page {
     padding: 5px;
+  }
+
+  .archive-navigation {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .archive-nav-btn {
+    flex: 1 1 calc(50% - 10px);
+    min-width: calc(50% - 10px);
+  }
+
+  .archive-nav-btn:first-of-type {
+    order: 1;
+  }
+
+  .archive-nav-btn:last-of-type {
+    order: 2;
+  }
+
+  .archive-date-info {
+    order: 3;
+    flex: 1 1 100%;
+    width: 100%;
   }
 }

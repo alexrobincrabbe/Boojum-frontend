@@ -5,14 +5,22 @@ import { useBoardTheme } from '../../contexts/BoardThemeContext';
 import { lobbyAPI } from '../../services/api';
 import { WordLists } from '../game-room/components/WordLists';
 import { Username } from '../../components/Username';
+import { ProfilePicture } from '../../components/ProfilePicture';
 import { toast } from 'react-toastify';
 import './DailyBoardPage.css';
 import '../game-room/GameRoom.css';
 
 interface DailyBoardScore {
   player_id: number | null;
+  player_username: string;
   player_display_name: string;
+  player_profile_url: string;
+  player_profile_picture: string;
+  player_chat_color: string;
   score: number;
+  best_word: string | null;
+  best_word_score: string | null;
+  number_of_words: number;
   is_current_user: boolean;
 }
 
@@ -216,15 +224,16 @@ export default function DailyBoardArchiveDetailPage() {
         {/* High Scores Table */}
         <div className="daily-board-scores-section">
           <h1 className="daily-board-title">{board.title}</h1>
-          <h2 className="scores-title">High Scores</h2>
           {board.scores.length > 0 ? (
             <div className="scores-table-container">
               <table className="scores-table">
                 <thead>
                   <tr>
                     <th className="rank-col"></th>
-                    <th className="player-col">Player</th>
+                    <th className="player-col"></th>
                     <th className="score-col">Score</th>
+                    <th className="word-col">Best Word</th>
+                    <th className="words-col">Words</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -238,13 +247,34 @@ export default function DailyBoardArchiveDetailPage() {
                       <td className="rank-col">{index + 1}</td>
                       <td className="player-col">
                         <div className="player-info">
+                          <ProfilePicture
+                            profilePictureUrl={score.player_profile_picture}
+                            chatColor={score.player_chat_color}
+                            size={40}
+                            showBorder={true}
+                          />
                           <Username
                             username={score.player_display_name}
-                            chatColor="#71bbe9"
+                            chatColor={score.player_chat_color}
                           />
                         </div>
                       </td>
                       <td className="score-col">{score.score} <span className="score-pts">pts</span></td>
+                      <td className="word-col">
+                        <div className="best-word-container">
+                          {score.best_word ? (
+                            <span className="best-word-text">{score.best_word}</span>
+                          ) : (
+                            <span className="hidden-word">*****</span>
+                          )}
+                          {score.best_word_score != null && score.best_word_score !== '' && (
+                            <span className="best-word-score">
+                              {score.best_word_score}<span className="best-word-score-pts">pts</span>
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="words-col">{score.number_of_words}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -303,7 +333,7 @@ export default function DailyBoardArchiveDetailPage() {
                     <span 
                       key={playerId} 
                       className="filtered-player-name" 
-                      style={{ color: '#71bbe9' }}
+                      style={{ color: player.player_chat_color }}
                       onClick={(e) => {
                         togglePlayerFilter(playerId, e);
                       }}
