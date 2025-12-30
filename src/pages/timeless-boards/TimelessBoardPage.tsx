@@ -71,7 +71,6 @@ export default function TimelessBoardPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
-  const [solutionDataByBoard, setSolutionDataByBoard] = useState<Record<number, { board_letters?: string[][]; words_by_length?: Record<string, WordData[]>; board_words?: string[]; boojum?: number[][]; }>>({});
   
   // Get boards for current level
   const boards = boardsByLevel[currentLevel] || [];

@@ -421,9 +421,13 @@ export default function TimelessBoardGameRoom() {
         }, 500);
       } catch (error: unknown) {
         console.error('Error fetching timeless board:', error);
-        const axiosError = error as { response?: { status?: number } };
-        if (axiosError.response?.status === 404 || axiosError.response?.status === 403) {
-          toast.error('Board not found or expired');
+        const axiosError = error as { response?: { status?: number; data?: { error?: string } } };
+        if (axiosError.response?.status === 403) {
+          const errorMessage = axiosError.response?.data?.error || 'This board has expired. Premium users can access expired boards through the archives page.';
+          toast.error(errorMessage);
+          navigate('/timeless-boards');
+        } else if (axiosError.response?.status === 404) {
+          toast.error('Board not found');
           navigate('/timeless-boards');
         } else {
           toast.error('Failed to load board');
