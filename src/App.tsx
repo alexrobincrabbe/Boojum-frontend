@@ -44,6 +44,9 @@ import TournamentGameRoom from "./pages/tournament/TournamentGameRoom";
 import TeamTournamentPage from "./pages/tournament/TeamTournamentPage";
 import TeamTournamentGameRoom from "./pages/tournament/TeamTournamentGameRoom";
 import TeamMatchResultsPage from "./pages/tournament/TeamMatchResultsPage";
+import AdminPage from "./pages/admin/AdminPage";
+import CreateCustomGameboardPage from "./pages/admin/CreateCustomGameboardPage";
+import ConvertSpecialBoardsPage from "./pages/admin/ConvertSpecialBoardsPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react"
@@ -168,6 +171,9 @@ function App() {
               <Route path="/team-tournament/test" element={<TeamTournamentPage tournamentType="test" />} />
               <Route path="/team-tournament/match/:matchId" element={<TeamMatchResultsPage />} />
               <Route path="/team-tournament/play/:matchId" element={<TeamTournamentGameRoom />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/create-custom-gameboard" element={<CreateCustomGameboardPage />} />
+              <Route path="/admin/convert-special-boards" element={<ConvertSpecialBoardsPage />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />
             </Route>

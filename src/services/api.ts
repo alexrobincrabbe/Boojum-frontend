@@ -613,5 +613,36 @@ export const minigamesAPI = {
   },
 };
 
+export const adminAPI = {
+  createCustomGameboards: async (boards: string[][][]) => {
+    const response = await api.post('/admin/create-custom-gameboards/', { boards });
+    return response.data;
+  },
+  checkCustomBoardDefinitions: async (boardIds: number[]) => {
+    const response = await api.post('/admin/check-custom-board-definitions/', { board_ids: boardIds });
+    return response.data;
+  },
+  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[]) => {
+    const response = await api.post('/admin/create-daily-boards/', { boards });
+    return response.data;
+  },
+  createTimelessBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[]) => {
+    const response = await api.post('/admin/create-timeless-boards/', { boards });
+    return response.data;
+  },
+  getDefaultBoardDates: async () => {
+    const response = await api.get('/admin/default-board-dates/');
+    return response.data;
+  },
+  checkBoardDate: async (date: string, boardType: 'daily' | 'timeless') => {
+    const response = await api.post('/admin/check-board-date/', { date, board_type: boardType });
+    return response.data;
+  },
+  getAvailableSpecialBoards: async () => {
+    const response = await api.get('/admin/available-special-boards/');
+    return response.data;
+  },
+};
+
 export default api;
 

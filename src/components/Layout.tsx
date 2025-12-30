@@ -973,6 +973,17 @@ const Layout = ({ children }: LayoutProps) => {
                 </span>
               )}
             </Link>
+            {!authLoading && user?.is_superuser && (
+              <Link
+                to="/admin"
+                className={`nav-link ${location.pathname.startsWith('/admin') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Admin</span>}
+              </Link>
+            )}
           </div>
           <div className="nav-section">
             {leftSidebarOpen && <div className="nav-section-title">Tournament</div>}
@@ -985,17 +996,6 @@ const Layout = ({ children }: LayoutProps) => {
             >
               {leftSidebarOpen && <span>Tournament (Biweekly)</span>}
             </Link>
-            {!authLoading && user?.is_superuser && (
-              <Link
-                to="/tournament/test"
-                className={`nav-link ${location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && <span>Test Tournament</span>}
-              </Link>
-            )}
             <Link
               to="/team-tournament"
               className={`nav-link ${location.pathname.startsWith('/team-tournament') && !location.pathname.startsWith('/team-tournament/test') ? 'active' : ''}`}
@@ -1005,17 +1005,6 @@ const Layout = ({ children }: LayoutProps) => {
             >
               {leftSidebarOpen && <span>Team Tournament</span>}
             </Link>
-            {!authLoading && user?.is_superuser && (
-              <Link
-                to="/team-tournament/test"
-                className={`nav-link ${location.pathname.startsWith('/team-tournament/test') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && <span>Test Team Tournament</span>}
-              </Link>
-            )}
           </div>
         </nav>
       </aside>
