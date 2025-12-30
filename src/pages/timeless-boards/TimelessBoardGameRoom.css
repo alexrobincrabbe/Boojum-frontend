@@ -259,7 +259,7 @@
 
 .guest-clues-message {
   position: absolute;
-  top: -45px;
+  top: -25px;
   left: 50%;
   transform: translateX(-50%);
   padding: 10px 20px;
