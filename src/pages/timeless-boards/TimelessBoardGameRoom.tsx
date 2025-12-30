@@ -1215,13 +1215,22 @@ export default function TimelessBoardGameRoom() {
   const timelessSteps = useMemo(() => {
     const steps: Array<{
       target: string;
-      content: string;
+      content: React.ReactNode;
       placement: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end' | 'center' | 'auto';
       disableScrolling: boolean;
     }> = [
       {
         target: '#board',
-        content: 'Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).',
+        content: (
+          <div>
+            <p>Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).</p>
+            {/* Example: Add a video here if you have one */}
+            {/* <video width="100%" controls style={{ marginTop: '10px', borderRadius: '8px' }}>
+              <source src="/videos/how-to-play-timeless-boards.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video> */}
+          </div>
+        ),
         placement: 'center',
         disableScrolling: false,
       },
@@ -1231,7 +1240,16 @@ export default function TimelessBoardGameRoom() {
     if (user) {
       steps.push({
         target: '[data-onboarding="hint-button"]',
-        content: 'Use the Clues button to reveal which words are on the board. When active, valid words will turn green as you find them. You have a limited number of clues per board.',
+        content: (
+          <div>
+            <p>Use the Clues button to reveal which words are on the board. When active, valid words will turn green as you find them. You have a limited number of clues per board.</p>
+            {/* Example: Add a video here if you have one */}
+            {/* <video width="100%" controls style={{ marginTop: '10px', borderRadius: '8px' }}>
+              <source src="/videos/how-to-use-clues.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video> */}
+          </div>
+        ),
         placement: 'bottom',
         disableScrolling: false,
       });
