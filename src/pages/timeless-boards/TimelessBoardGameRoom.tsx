@@ -1225,8 +1225,10 @@ export default function TimelessBoardGameRoom() {
           <div>
             <p>Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).</p>
             <video 
+              key="timeless-1-video"
               width="100%" 
               controls 
+              preload="auto"
               style={{ marginTop: '10px', borderRadius: '8px', maxWidth: '500px' }}
             >
               <source src="/videos/timeless_1.mov" type="video/quicktime" />
@@ -1248,8 +1250,10 @@ export default function TimelessBoardGameRoom() {
           <div>
             <p>Use the Clues button to reveal which letters are part of valid words. When clues are not active, words turn green when they are valid. When clues are active, letters turn yellow when they are part of a valid word, red when they are not, and green when they form a valid word. You have a limited number of clues per board.</p>
             <video 
+              key="timeless-2-video"
               width="100%" 
               controls 
+              preload="auto"
               style={{ marginTop: '10px', borderRadius: '8px', maxWidth: '500px' }}
             >
               <source src="/videos/timeless_2.mov" type="video/quicktime" />
@@ -1315,7 +1319,7 @@ export default function TimelessBoardGameRoom() {
   // Auto-start onboarding when board is loaded
   const autoStart = !loading && boardData !== null;
 
-  const { JoyrideComponent } = usePageOnboarding({
+  const { JoyrideComponent, resetTour } = usePageOnboarding({
     steps: timelessSteps,
     pageKey: 'timeless-board',
     autoStart,
@@ -1339,6 +1343,33 @@ export default function TimelessBoardGameRoom() {
 
   return (
     <div className="timeless-game-room">
+      {/* Debug: Manual reset button - remove after testing */}
+      <div style={{ position: 'fixed', top: '130px', right: '10px', zIndex: 99999, background: 'rgba(0,0,0,0.8)', padding: '10px', borderRadius: '5px', color: 'white' }}>
+        <div style={{ marginBottom: '5px', fontSize: '12px' }}>
+          Status: {localStorage.getItem('onboarding_timeless-board_completed') === 'true' ? 'Completed' : 'Not completed'}
+        </div>
+        <button 
+          onClick={() => {
+            console.log('Manual reset - steps:', timelessSteps);
+            // Clear localStorage first
+            localStorage.removeItem('onboarding_timeless-board_completed');
+            console.log('Cleared onboarding_timeless-board_completed from localStorage');
+            resetTour();
+          }}
+          style={{ padding: '5px 10px', cursor: 'pointer', marginRight: '5px' }}
+        >
+          Reset Onboarding
+        </button>
+        <button 
+          onClick={() => {
+            localStorage.removeItem('onboarding_timeless-board_completed');
+            console.log('Cleared onboarding_timeless-board_completed from localStorage');
+          }}
+          style={{ padding: '5px 10px', cursor: 'pointer' }}
+        >
+          Clear Only
+        </button>
+      </div>
       {/* Back button */}
       <div className="timeless-game-back-container">
         <div className="pagination-left-container">

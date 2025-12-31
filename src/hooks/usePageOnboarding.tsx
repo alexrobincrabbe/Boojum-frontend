@@ -125,6 +125,23 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
       console.log(`[Onboarding ${pageKey}] Callback:`, { status, type, index, action });
     }
     
+    // Force video loading when step is shown
+    if (type === 'step:after' || type === 'tooltip') {
+      // Small delay to ensure tooltip is rendered
+      setTimeout(() => {
+        const tooltip = document.querySelector('.react-joyride__tooltip');
+        if (tooltip) {
+          const videos = tooltip.querySelectorAll('video');
+          videos.forEach((video) => {
+            if (video instanceof HTMLVideoElement) {
+              // Force video to load
+              video.load();
+            }
+          });
+        }
+      }, 100);
+    }
+    
     // Handle errors - don't mark as completed if there's an error
     if (type === 'error:target_not_found') {
       console.warn(`[Onboarding ${pageKey}] Target not found for step ${index}:`, data.step?.target);
