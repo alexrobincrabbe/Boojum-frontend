@@ -116,7 +116,6 @@
 .timer-value {
     font-family:poiret-one;
   font-size: 2rem;
-  font-weight: bold;
 }
 
 .timer-value.timer-green {
@@ -139,8 +138,8 @@
   padding: 10px 20px;
   background-color: rgba(235, 84, 151, 0.2); /* Reduced opacity - more translucent pink background */
   color: #fff;
-  border: 3px solid var(--color-pink);
-  border-radius: 30px;
+  border: 2px solid var(--color-pink);
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1.2rem; /* Larger font size */
@@ -226,9 +225,9 @@
 .submit-score-button-header {
   width:150px;
   padding: 10px 20px;
-  color: var(--color-green); /* Green text */
-  border: 3px solid var(--color-green); /* Green border */
-  border-radius: 30px;
+  color: white; /* Green text */
+  border: 2px solid var(--color-green); /* Green border */
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
