@@ -1224,11 +1224,15 @@ export default function TimelessBoardGameRoom() {
         content: (
           <div>
             <p>Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).</p>
-            {/* Example: Add a video here if you have one */}
-            {/* <video width="100%" controls style={{ marginTop: '10px', borderRadius: '8px' }}>
-              <source src="/videos/how-to-play-timeless-boards.mp4" type="video/mp4" />
+            <video 
+              width="100%" 
+              controls 
+              style={{ marginTop: '10px', borderRadius: '8px', maxWidth: '500px' }}
+            >
+              <source src="/videos/timeless_1.mov" type="video/quicktime" />
+              <source src="/videos/timeless_1.mov" type="video/mp4" />
               Your browser does not support the video tag.
-            </video> */}
+            </video>
           </div>
         ),
         placement: 'center',
@@ -1242,12 +1246,16 @@ export default function TimelessBoardGameRoom() {
         target: '[data-onboarding="hint-button"]',
         content: (
           <div>
-            <p>Use the Clues button to reveal which words are on the board. When active, valid words will turn green as you find them. You have a limited number of clues per board.</p>
-            {/* Example: Add a video here if you have one */}
-            {/* <video width="100%" controls style={{ marginTop: '10px', borderRadius: '8px' }}>
-              <source src="/videos/how-to-use-clues.mp4" type="video/mp4" />
+            <p>Use the Clues button to reveal which letters are part of valid words. When clues are not active, words turn green when they are valid. When clues are active, letters turn yellow when they are part of a valid word, red when they are not, and green when they form a valid word. You have a limited number of clues per board.</p>
+            <video 
+              width="100%" 
+              controls 
+              style={{ marginTop: '10px', borderRadius: '8px', maxWidth: '500px' }}
+            >
+              <source src="/videos/timeless_2.mov" type="video/quicktime" />
+              <source src="/videos/timeless_2.mov" type="video/mp4" />
               Your browser does not support the video tag.
-            </video> */}
+            </video>
           </div>
         ),
         placement: 'bottom',
