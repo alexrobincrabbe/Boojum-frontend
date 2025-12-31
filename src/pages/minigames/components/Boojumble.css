@@ -43,6 +43,7 @@
 }
 
 #boojumbles .board {
+    font-family: "pompiere", sans-serif !important;
   display: grid !important;
   position: relative;
   border-radius: 25px;
