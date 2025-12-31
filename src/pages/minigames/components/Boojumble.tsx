@@ -303,8 +303,6 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       const previouslyFoundWords: string[] = previouslyFoundWordsStr ? JSON.parse(previouslyFoundWordsStr) : [];
       const newlyFoundWords: string[] = [];
       const tilesToShimmer = new Set<HTMLElement>();
-      console.log('Previously found words:', previouslyFoundWords);
-      console.log('Board id:', currentBoojumble.id);
 
       // Track which tiles should be green (correct position) vs yellow (valid word, wrong position)
       const correctTiles = new Set<HTMLElement>();
@@ -326,7 +324,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
                 const letterChild = tile.querySelector('.letter-child') as HTMLElement;
                 if (letterChild) {
                   tilesToShimmer.add(letterChild);
-                  tilesToShimmerOrdered.push({ tile: letterChild, delay: col * 60 }); // 60ms delay between each letter
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: col * 40 }); // 40ms delay between each letter
                 }
               }
             }
@@ -370,7 +368,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
                 const letterChild = tile.querySelector('.letter-child') as HTMLElement;
                 if (letterChild) {
                   tilesToShimmer.add(letterChild);
-                  tilesToShimmerOrdered.push({ tile: letterChild, delay: col * 60 }); // 60ms delay between each letter
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: col * 40 }); // 40ms delay between each letter
                 }
               }
             }
@@ -414,7 +412,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
                 const letterChild = tile.querySelector('.letter-child') as HTMLElement;
                 if (letterChild) {
                   tilesToShimmer.add(letterChild);
-                  tilesToShimmerOrdered.push({ tile: letterChild, delay: row * 60 }); // 60ms delay between each letter
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: row * 40 }); // 40ms delay between each letter
                 }
               }
             }
@@ -458,7 +456,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
                 const letterChild = tile.querySelector('.letter-child') as HTMLElement;
                 if (letterChild) {
                   tilesToShimmer.add(letterChild);
-                  tilesToShimmerOrdered.push({ tile: letterChild, delay: row * 60 }); // 60ms delay between each letter
+                  tilesToShimmerOrdered.push({ tile: letterChild, delay: row * 40 }); // 40ms delay between each letter
                 }
               }
             }
@@ -501,21 +499,18 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       
       // Apply shimmer animation to newly found words (only correct matches)
       if (newlyFoundWords.length > 0 && tilesToShimmerOrdered.length > 0) {
-        console.log('Applying shimmer to', newlyFoundWords.length, 'newly found words');
-        console.log('Tiles to shimmer:', tilesToShimmerOrdered.length);
         // Play sound effect when shimmer animation triggers
         playSound('boojumble');
         // Apply staggered animation with delays
         tilesToShimmerOrdered.forEach(({ tile, delay }) => {
           setTimeout(() => {
             tile.classList.add('shimmer');
-            console.log('Added shimmer class to tile', tile);
             // Force reflow to ensure animation starts
             tile.offsetHeight;
-            // Remove shimmer class after animation completes (0.6s)
+            // Remove shimmer class after animation completes (0.12s)
             setTimeout(() => {
               tile.classList.remove('shimmer');
-            }, 600);
+            }, 120);
           }, delay);
         });
         
