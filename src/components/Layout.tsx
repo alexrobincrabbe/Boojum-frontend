@@ -158,6 +158,7 @@ interface ChatMessage {
   chat_color: string;
   content: string;
   timestamp: string;
+  timestamp_iso?: string;
   profile_url?: string;
   profile_picture_url?: string | null;
 }
@@ -226,6 +227,7 @@ const Layout = ({ children }: LayoutProps) => {
   const chatPollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rightSidebarRef = useRef<HTMLElement>(null);
   const [hasNewChatMessages, setHasNewChatMessages] = useState(false);
+  const rightSidebarOpenRef = useRef<boolean>(false);
 
   // Helper functions for last read time
   const getLastReadTime = (): number | null => {
@@ -287,15 +289,22 @@ const Layout = ({ children }: LayoutProps) => {
     };
   }, [isAuthenticated, user]);
 
-  // Load chat messages
+  // Update ref when sidebar state changes
   useEffect(() => {
-    const loadChatMessages = async () => {
+    rightSidebarOpenRef.current = rightSidebarOpen;
+  }, [rightSidebarOpen]);
+
+  // Load chat messages and poll continuously
+  useEffect(() => {
+    const loadChatMessages = async (isInitialLoad = false) => {
       try {
         const data = await lobbyAPI.getChatMessages();
         setChatMessages(data.messages || []);
         
-        // If right sidebar is open, update last read time
-        if (rightSidebarOpen) {
+        // Always check for new messages, but only update last read time if sidebar is open
+        // Use ref to get current value (not closure value)
+        const currentSidebarOpen = rightSidebarOpenRef.current;
+        if (currentSidebarOpen) {
           setLastReadTime(Date.now());
           setHasNewChatMessages(false);
         } else {
@@ -303,15 +312,44 @@ const Layout = ({ children }: LayoutProps) => {
           const lastRead = getLastReadTime();
           if (!lastRead) {
             // No last read time stored yet, set initial baseline
-            setLastReadTime(Date.now());
+            if (isInitialLoad && data.messages && data.messages.length > 0) {
+              // Set baseline to the latest message's timestamp (messages are reversed for display, so newest is at the end)
+              const latestMessage = data.messages[data.messages.length - 1];
+              const timestampStr = latestMessage.timestamp_iso;
+              if (timestampStr) {
+                const messageTime = new Date(timestampStr).getTime();
+                if (!isNaN(messageTime)) {
+                  setLastReadTime(messageTime);
+                } else {
+                  setLastReadTime(Date.now());
+                }
+              } else {
+                // timestamp_iso not available, use current time as baseline
+                setLastReadTime(Date.now());
+              }
+            } else if (isInitialLoad) {
+              // No messages yet, set to now
+              setLastReadTime(Date.now());
+            }
             setHasNewChatMessages(false);
           } else if (data.messages && data.messages.length > 0) {
-            // Try to parse the latest message timestamp
+            // Messages are reversed for display (oldest first), so the newest is at the end
             const latestMessage = data.messages[data.messages.length - 1];
-            const messageTime = new Date(latestMessage.timestamp).getTime();
-            if (!isNaN(messageTime) && messageTime > lastRead) {
-              setHasNewChatMessages(true);
+            // Prefer timestamp_iso if available, otherwise skip if only human-readable timestamp exists
+            const timestampStr = latestMessage.timestamp_iso;
+            if (timestampStr) {
+              const messageTime = new Date(timestampStr).getTime();
+              if (!isNaN(messageTime)) {
+                if (messageTime > lastRead) {
+                  setHasNewChatMessages(true);
+                } else {
+                  setHasNewChatMessages(false);
+                }
+              } else {
+                setHasNewChatMessages(false);
+              }
             } else {
+              // timestamp_iso not available - skip badge check
               setHasNewChatMessages(false);
             }
           } else {
@@ -323,34 +361,16 @@ const Layout = ({ children }: LayoutProps) => {
       }
     };
 
-    loadChatMessages();
+    // Initial load
+    loadChatMessages(true);
 
-    // Poll for new messages every 5 seconds
+    // Poll for new messages every 5 seconds - always poll regardless of sidebar state
     chatPollingIntervalRef.current = setInterval(async () => {
       try {
         const timestampData = await lobbyAPI.getLastMessageTimestamp();
         if (timestampData.new_message === 'yes') {
-          const data = await lobbyAPI.getChatMessages();
-          setChatMessages(data.messages || []);
-          
-          // If right sidebar is open, update last read time
-          if (rightSidebarOpen) {
-            setLastReadTime(Date.now());
-            setHasNewChatMessages(false);
-          } else {
-            // Check if there are new messages
-            const lastRead = getLastReadTime();
-            if (lastRead && data.messages && data.messages.length > 0) {
-              // Try to parse the latest message timestamp
-              const latestMessage = data.messages[data.messages.length - 1];
-              const messageTime = new Date(latestMessage.timestamp).getTime();
-              if (!isNaN(messageTime) && messageTime > lastRead) {
-                setHasNewChatMessages(true);
-              } else {
-                setHasNewChatMessages(false);
-              }
-            }
-          }
+          // Load messages and check for new ones
+          await loadChatMessages(false);
         }
       } catch (error: any) {
         // Silently handle 404s - endpoint may not exist
@@ -365,7 +385,7 @@ const Layout = ({ children }: LayoutProps) => {
         clearInterval(chatPollingIntervalRef.current);
       }
     };
-  }, [rightSidebarOpen]);
+  }, []); // Empty deps - poll continuously regardless of sidebar state
 
   // Load activities feed
   useEffect(() => {
