@@ -50,6 +50,7 @@ export default function DailyBoardPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<number | null>>(new Set()); // Empty = show all
+  const [showBestWord, setShowBestWord] = useState(true); // Toggle for mobile: true = best word, false = words count
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isAuthenticated, user } = useAuth();
   const { darkMode } = useBoardTheme();
@@ -113,12 +114,9 @@ export default function DailyBoardPage() {
       navigate('/login');
       return;
     }
-    // On normal page, only allow playing the current board (index 0)
-    // Previous boards should only be playable from the archives page
-    if (currentBoard?.id && currentPage === 0) {
+    // All boards in the list (last 7) are playable
+    if (currentBoard?.id) {
       navigate(`/daily-boards/play/${currentBoard.id}`);
-    } else {
-      toast.error('This board is only available from the archives page');
     }
   };
 
@@ -144,8 +142,15 @@ export default function DailyBoardPage() {
       clearTimeout(toastTimeoutRef.current);
     }
     
-    const wasSelected = selectedPlayerIds.has(playerId);
     const player = boards[currentPage]?.scores?.find((s: DailyBoardScore) => s.player_id === playerId);
+    
+    // Prevent players from selecting themselves (their words are already counted by default)
+    if (player?.is_current_user) {
+      toast.info('Your words are already included by default');
+      return;
+    }
+    
+    const wasSelected = selectedPlayerIds.has(playerId);
     const playerName = player?.player_display_name || 'Player';
     
     setSelectedPlayerIds(prev => {
@@ -253,8 +258,8 @@ export default function DailyBoardPage() {
           </div>
         </div>
 
-        {/* Play Button - only show for current board (index 0) */}
-        {!currentBoard.played && currentPage === 0 && (
+        {/* Play Button - show for any board that hasn't been played (all 7 recent boards are playable) */}
+        {!currentBoard.played && (
           <div className="daily-board-play-section">
             {isAuthenticated ? (
               <button className="play-board-btn" onClick={handlePlay}>
@@ -280,6 +285,17 @@ export default function DailyBoardPage() {
                     <th className="score-col">Score</th>
                     <th className="word-col">Best Word</th>
                     <th className="words-col">Words</th>
+                    <th className="word-toggle-col">
+                      <button
+                        className={`toggle-header-btn ${showBestWord ? 'best-word-mode' : 'words-mode'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowBestWord(!showBestWord);
+                        }}
+                      >
+                        {showBestWord ? 'Best Word' : 'Words'}
+                      </button>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -287,8 +303,8 @@ export default function DailyBoardPage() {
                     <tr
                       key={score.player_id || index}
                       className={`${score.is_current_user ? 'current-user-score' : ''} ${selectedPlayerIds.has(score.player_id) ? 'player-filter-selected' : ''}`}
-                      onClick={(e) => togglePlayerFilter(score.player_id, e)}
-                      style={{ cursor: 'pointer' }}
+                      onClick={(e) => !score.is_current_user && togglePlayerFilter(score.player_id, e)}
+                      style={{ cursor: score.is_current_user ? 'default' : 'pointer' }}
                     >
                       <td className="rank-col">{index + 1}</td>
                       <td className="player-col">
@@ -321,6 +337,25 @@ export default function DailyBoardPage() {
                         </div>
                       </td>
                       <td className="words-col">{score.number_of_words}</td>
+                      {/* Mobile combined column */}
+                      <td className="word-toggle-col">
+                        {showBestWord ? (
+                          <div className="best-word-container">
+                            {score.best_word ? (
+                              <span className="best-word-text">{score.best_word}</span>
+                            ) : (
+                              <span className="hidden-word">*****</span>
+                            )}
+                            {score.best_word_score != null && score.best_word_score !== '' && (
+                              <span className="best-word-score">
+                                {score.best_word_score}<span className="best-word-score-pts">pts</span>
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="words-count">{score.number_of_words}</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

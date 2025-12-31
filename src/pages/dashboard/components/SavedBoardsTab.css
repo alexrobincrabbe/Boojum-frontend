@@ -204,13 +204,7 @@
   margin: 20px 0;
 }
 
-.board-wrapper {
-  position: relative;
-  border-radius: 25px;
-  padding: 0;
-  overflow: visible;
-  display: inline-block;
-}
+/* Board wrapper styles are in GameBoard.css */
 
 .board-preview-container .board {
   display: grid;

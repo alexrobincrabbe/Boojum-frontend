@@ -170,7 +170,8 @@
   color: var(--color-green);
   font-size: 2.5rem;
   font-weight: bold;
-  margin: 0 0 20px 0;
+width:100%;
+white-space: nowrap;
   text-align: center;
 }
 
@@ -448,17 +449,7 @@
   max-width: 100%;
 }
 
-/* Board Wrapper - square with rounded corners - applies to all boards */
-.board-wrapper {
-  position: relative;
-  border-radius: 25px;
-  padding: 0;
-  overflow: visible;
-  display: inline-block;
-  max-width: 100%;
-  box-sizing: border-box;
-  touch-action: none; /* Prevent default touch behaviors like scrolling */
-}
+/* Board Wrapper styles are in GameBoard.css */
 
 /* Board display container - applies to all boards */
 .board-display-container {
@@ -1318,8 +1309,7 @@
     flex-shrink: 0;
   }
 
-  .game-header {
-    max-width: 165px;
+  .game-header {    
     width: 100%;
     box-sizing: border-box;
   }
@@ -1629,10 +1619,7 @@
   pointer-events: none;
 }
 
-/* Make board-wrapper relative for absolute positioning */
-.board-wrapper {
-  position: relative;
-}
+/* Board wrapper styles are in GameBoard.css */
 
 /* Tablet layout: word counters to the left, vertically */
 @media screen and (min-width: 769px) and (max-width: 1199px) {

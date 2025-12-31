@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useWordTracking } from '../game-room/services/useWordTracking';
 import { useGameWebSocket } from '../game-room/services/useGameWebSocket';
 import { GameBoard } from '../game-room/components/GameBoard';
-import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
 import { ScoresModal } from '../game-room/components/ScoresModal';
 // WordData unused here
@@ -83,10 +82,17 @@ export default function DailyBoardGameRoom() {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const djangoBaseUrl = apiBaseUrl.replace('/api', '');
     const wsBaseUrl = djangoBaseUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
-    // Include from_archive parameter if present
+    // Include from_archive parameter if present - WebSocket query strings go after the path
     const queryString = fromArchive ? '?from_archive=true' : '';
     return `${wsBaseUrl}/ws/dailyboard/play/${dailyBoardId}/${queryString}`;
   }, [dailyBoardId, fromArchive]);
+  
+  // Debug: log the WebSocket URL
+  useEffect(() => {
+    if (wsUrl) {
+      console.log('[DailyBoardGameRoom] WebSocket URL:', wsUrl);
+    }
+  }, [wsUrl]);
 
   // GAME WS - using custom URL for daily boards
   const {
@@ -259,17 +265,21 @@ export default function DailyBoardGameRoom() {
                 <button 
                   className="pagination-btn"
                   onClick={() => {
-                    // Navigate to daily boards page with board ID to show the correct board
+                    // Navigate back to archive detail page if accessed from archive, otherwise to daily boards page
                     if (dailyBoardId) {
-                      navigate(`/daily-boards?board=${dailyBoardId}`);
+                      if (fromArchive) {
+                        navigate(`/daily-boards/archive/${dailyBoardId}`);
+                      } else {
+                        navigate(`/daily-boards?board=${dailyBoardId}`);
+                      }
                     } else {
-                      navigate('/daily-boards');
+                      navigate(fromArchive ? '/daily-boards/archive' : '/daily-boards');
                     }
                   }}
-                  aria-label="Back to Everyday Boards"
+                  aria-label={fromArchive ? "Back to Archive" : "Back to Everyday Boards"}
                 >
                 </button>
-                <span className="pagination-text">Back to Everyday Boards</span>
+                <span className="pagination-text">{fromArchive ? "Back to Archive" : "Back to Everyday Boards"}</span>
               </div>
             )}
             <h1 className="daily-board-game-title">{boardTitle}</h1>
@@ -309,14 +319,6 @@ export default function DailyBoardGameRoom() {
                 </div>
               )}
 
-              <div className="word-counters-container">
-                <WordCounters
-                  wordCounts={wordCounts}
-                  wordCountMax={wordCountMax}
-                  gameStatus={gameState.gameStatus}
-                />
-              </div>
-
               <GameBoard
                 gameState={gameState}
                 hasBoardBeenShown={hasBoardBeenShown}
@@ -328,6 +330,8 @@ export default function DailyBoardGameRoom() {
                 onShowScores={() => setIsScoresModalOpen(true)}
                 oneShotSubmitted={oneShotSubmitted}
                 onOneShotConfirmed={handleOneShotConfirmed}
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
               />
             </div>
 

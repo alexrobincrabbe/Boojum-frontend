@@ -28,7 +28,8 @@
   margin-bottom: 2rem;
 }
 
-.board-wrapper {
+/* Scoped to CreateCustomGameboardPage component only */
+.create-custom-gameboard-page .board-wrapper {
   background: rgba(19, 19, 42, 0.8);
   border: 2px solid var(--color-blue, #3b82f6);
   border-radius: 12px;

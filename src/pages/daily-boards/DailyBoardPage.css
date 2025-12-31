@@ -861,11 +861,180 @@ border-bottom: 2px solid #71bbe9;
 
   .scores-table {
     font-size: 0.85rem;
+    min-width: 100% !important;
+    width: 100% !important;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .scores-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
   }
 
   .scores-table th,
   .scores-table td {
-    padding: 8px;
+    padding: 6px 3px;
+  }
+
+  .scores-table th.rank-col {
+    width: 30px;
+    min-width: 30px;
+  }
+
+  .scores-table th.score-col {
+    width: 60px;
+    min-width: 60px;
+  }
+
+  /* Hide desktop columns on mobile */
+  .scores-table th.word-col,
+  .scores-table td.word-col,
+  .scores-table th.words-col,
+  .scores-table td.words-col {
+    display: none;
+  }
+
+  /* Show mobile toggle column */
+  .scores-table th.word-toggle-col,
+  .scores-table td.word-toggle-col {
+    display: table-cell;
+  }
+
+  .scores-table th.word-toggle-col {
+    width: 90px;
+    min-width: 90px;
+    text-align: center;
+    padding: 4px;
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    font-weight: bold;
+    font-family: inherit;
+    text-align: center;
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn.best-word-mode {
+    border: 1px solid #f5ce45;
+    background: rgba(19, 19, 42, 0.8);
+    color: #f5ce45;
+    text-shadow: 0 0 8px rgba(245, 206, 69, 0.6);
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn.best-word-mode:hover {
+    background-color: rgba(245, 206, 69, 0.2);
+    border-color: #f5ce45;
+    box-shadow: 0 0 8px rgba(245, 206, 69, 0.4);
+    transform: scale(1.02);
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn.best-word-mode:active {
+    background-color: rgba(245, 206, 69, 0.3);
+    transform: scale(0.98);
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn.words-mode {
+    border: 1px solid #eb5497;
+    background: rgba(19, 19, 42, 0.8);
+    color: #eb5497;
+    text-shadow: 0 0 8px rgba(235, 84, 151, 0.6);
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn.words-mode:hover {
+    background-color: rgba(235, 84, 151, 0.2);
+    border-color: #eb5497;
+    box-shadow: 0 0 8px rgba(235, 84, 151, 0.4);
+    transform: scale(1.02);
+  }
+
+  .scores-table th.word-toggle-col .toggle-header-btn.words-mode:active {
+    background-color: rgba(235, 84, 151, 0.3);
+    transform: scale(0.98);
+  }
+
+  .scores-table td.word-toggle-col {
+    text-align: center;
+    width: 90px;
+    min-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .scores-table td.word-toggle-col .words-count {
+    color: #eb5497;
+    font-weight: bold;
+    font-size: 120%;
+  }
+
+  .scores-table td.word-toggle-col .best-word-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .scores-table td.word-toggle-col .best-word-text {
+    color: #f5ce45;
+    font-size: 0.7rem;
+  }
+
+  .scores-table td.word-toggle-col .best-word-score {
+    position: static;
+    transform: none;
+    color: #b0b0b0;
+    font-size: 0.65em;
+  }
+
+  /* Make player column smaller on mobile */
+  .scores-table th.player-col {
+    width: 90px;
+    min-width: 90px;
+  }
+
+  .player-info {
+    gap: 6px;
+  }
+
+  .player-info .profile-pic-standard {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    flex-shrink: 0;
+  }
+
+  .player-info .profile-pic-standard img {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .player-info .username {
+    font-size: 0.75rem;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+  }
+
+}
+
+/* Hide mobile toggle column on desktop */
+@media (min-width: 769px) {
+  .scores-table th.word-toggle-col,
+  .scores-table td.word-toggle-col {
+    display: none;
   }
 }
 

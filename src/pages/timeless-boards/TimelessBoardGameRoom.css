@@ -351,10 +351,7 @@
   position: relative;
 }
 
-/* Make board-wrapper relative for absolute positioning */
-.board-wrapper {
-  position: relative;
-}
+/* Board wrapper styles are in GameBoard.css */
 
 /* Tablet layout: word counters to the left, vertically */
 @media screen and (min-width: 769px) and (max-width: 1199px) {
@@ -640,7 +637,8 @@
   .timeless-game-level-title {
     margin-bottom: 0;
     width: 100%;
-    text-align: left;
+    text-align: center;
+    font-size: 1.2rem;
   }
   
   .score-display-container {
@@ -693,5 +691,10 @@
 
   .word-lists-section .word-sublist {
     margin: 3px;
+  }
+
+  .timeless-game-back-container{
+    margin-bottom: 0 !important;
+    gap:0 !important;
   }
 }
