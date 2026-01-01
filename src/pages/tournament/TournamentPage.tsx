@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams, Link } from 'react-router-dom';
 import { tournamentAPI } from '../../services/api';
@@ -6,6 +6,7 @@ import { Loading } from '../../components/Loading';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePageOnboarding, type Step } from '../../hooks/usePageOnboarding';
 import './TournamentPage.css';
 
 interface TournamentPlayer {
@@ -382,6 +383,76 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
     }
   };
 
+  // Onboarding steps for Tournament page (must be before conditional returns)
+  const tournamentSteps = useMemo(() => {
+    const steps: Step[] = [
+      {
+        target: '[data-onboarding="tournament-registration"]',
+        content: (
+          <div>
+            <h3>Tournament Registration</h3>
+            <p>To participate in tournaments, you need to register before the registration period closes. Click the "register" button when registration is open to join the tournament.</p>
+          </div>
+        ),
+        placement: 'bottom',
+      },
+      {
+        target: '[data-onboarding="tournament-rounds"]',
+        content: (
+          <div>
+            <h3>Tournament Rounds</h3>
+            <p>Tournaments are played in rounds. Each round has a 24-hour time limit for players to complete their matches. Make sure to play your match before the round timer expires!</p>
+          </div>
+        ),
+        placement: 'top',
+      },
+      {
+        target: '[data-onboarding="tournament-matches"]',
+        content: (
+          <div>
+            <h3>Playing Your Match</h3>
+            <p>When it's your turn to play, a "Play" button will appear next to your name in the match. Click it to start your game.</p>
+            <video 
+              key="tournament-play"
+              src="/videos/tournament_play.mov" 
+              controls 
+              style={{ width: '100%', maxWidth: '400px', marginTop: '10px' }}
+              preload="auto"
+            />
+          </div>
+        ),
+        placement: 'top',
+      },
+      {
+        target: '[data-onboarding="tournament-matches"]',
+        content: (
+          <div>
+            <h3>Viewing Match Results</h3>
+            <p>Once both players have completed their matches, a "View Results" button will appear under the match. Click it to see detailed results including scores, best words, and other match statistics.</p>
+            <video 
+              key="tournament-result"
+              src="/videos/tournament_results.mov" 
+              controls 
+              style={{ width: '100%', maxWidth: '400px', marginTop: '10px' }}
+              preload="auto"
+            />
+          </div>
+        ),
+        placement: 'top',
+      },
+    ];
+    return steps;
+  }, []);
+
+  // Auto-start onboarding when tournament data is loaded
+  const autoStart = !loading && data !== null && tournamentSteps.length > 0;
+
+  const { JoyrideComponent } = usePageOnboarding({
+    steps: tournamentSteps,
+    pageKey: 'tournament',
+    autoStart,
+  });
+
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;
   }
@@ -390,6 +461,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
     return (
       <div className="tournament-container">
         <div className="error-message">{error}</div>
+        {JoyrideComponent}
       </div>
     );
   }
@@ -400,6 +472,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         <div className="tournament-description">
           <span className="no-tournament">There is no tournament at the moment. Check back soon!</span>
         </div>
+        {JoyrideComponent}
       </div>
     );
   }
@@ -419,24 +492,26 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         )}
         
         {/* Round time remaining */}
-        {data.round_time_remaining.map((roundData) => {
-          const timeRemaining = roundTimeRemaining[roundData.round] || roundData.time_remaining;
-          if (!timeRemaining) return null;
-          // Get current seconds from ref, fallback to initial data
-          const roundSecondsRef = roundSecondsRemainingRefs.current[roundData.round];
-          const currentSeconds = roundSecondsRef !== undefined ? roundSecondsRef : roundData.seconds_remaining;
-          const timeClass = 
-            currentSeconds > 7200 ? 'blue' :
-            currentSeconds > 1800 ? 'yellow' : 'pink';
-          return (
-            <div key={roundData.round} className="round-remaining-container">
-              <span className="yellow">Round {roundData.round} ends:</span>
-              <span className={`time-remaining ${timeClass}`}>
-                {timeRemaining}
-              </span>
-            </div>
-          );
-        })}
+        <div data-onboarding="tournament-rounds">
+          {data.round_time_remaining.map((roundData) => {
+            const timeRemaining = roundTimeRemaining[roundData.round] || roundData.time_remaining;
+            if (!timeRemaining) return null;
+            // Get current seconds from ref, fallback to initial data
+            const roundSecondsRef = roundSecondsRemainingRefs.current[roundData.round];
+            const currentSeconds = roundSecondsRef !== undefined ? roundSecondsRef : roundData.seconds_remaining;
+            const timeClass = 
+              currentSeconds > 7200 ? 'blue' :
+              currentSeconds > 1800 ? 'yellow' : 'pink';
+            return (
+              <div key={roundData.round} className="round-remaining-container">
+                <span className="yellow">Round {roundData.round} ends:</span>
+                <span className={`time-remaining ${timeClass}`}>
+                  {timeRemaining}
+                </span>
+              </div>
+            );
+          })}
+        </div>
 
         <div className="row justify-content-center">
           {/* Tournament Details */}
@@ -451,7 +526,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
           </div>
 
           {/* Registration Section */}
-          <div className="col-12">
+          <div className="col-12" data-onboarding="tournament-registration">
             {!isAuthenticated ? (
               <div className="registration-closed">
                 <span>Please login to take part in the tournament</span>
@@ -720,7 +795,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
                     )}
 
                     {/* Matches */}
-                    <div className="matches-container">
+                    <div className="matches-container" data-onboarding="tournament-matches">
                       {roundMatches.map((match) => {
                         const isCurrentUserPlayer1 = user && match.player_1 && user.id === match.player_1.id;
                         const isCurrentUserPlayer2 = user && match.player_2 && user.id === match.player_2.id;
@@ -928,6 +1003,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
           </div>
         )}
       </div>
+      {JoyrideComponent}
 
       {/* Rules Modal - rendered via portal to escape stacking context */}
       {rulesModalOpen && createPortal(

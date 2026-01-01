@@ -180,14 +180,20 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
               if (tooltip) {
                 const videos = tooltip.querySelectorAll('video');
                 videos.forEach((video) => {
-                  if (video instanceof HTMLVideoElement && video.readyState < 2) {
+                  if (video instanceof HTMLVideoElement) {
+                    // Force video to load
                     video.load();
+                    // Also try to play/pause to trigger loading
+                    video.play().catch(() => {
+                      // Ignore autoplay errors, just trying to trigger load
+                    });
+                    video.pause();
                   }
                 });
               }
             });
             videoLoadTimeoutRef.current = null;
-          }, 0);
+          }, 100);
         }
       }
       return; // Early return to avoid processing other types
@@ -310,7 +316,7 @@ export const resetAllOnboarding = () => {
   localStorage.removeItem('onboarding_completed');
   
   // Reset page-specific onboarding
-  const pageKeys = ['lobby', 'timeless-board', 'boojumble', 'profile'];
+  const pageKeys = ['lobby', 'timeless-board', 'boojumble', 'profile', 'tournament'];
   pageKeys.forEach((key) => {
     localStorage.removeItem(`onboarding_${key}_completed`);
   });

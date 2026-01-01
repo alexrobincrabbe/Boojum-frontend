@@ -299,6 +299,27 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
+.tournament-badge {
+  position: absolute;
+  top: -2px;
+  right: -70px;
+  min-width: 60px;
+  height: 18px;
+  padding: 0 6px;
+  background-color: #f5ce45;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: bold;
+  color: #1b1835;
+  z-index: 1;
+  box-shadow: 0 0 8px rgba(245, 206, 69, 1), 0 0 12px rgba(245, 206, 69, 0.6);
+  animation: pulse 2s ease-in-out infinite;
+  white-space: nowrap;
+}
+
 /* Left Sidebar */
 .left-sidebar {
   position: fixed;
