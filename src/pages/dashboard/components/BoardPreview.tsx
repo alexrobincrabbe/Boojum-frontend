@@ -11,7 +11,7 @@ const PREVIEW_BOARD = [
 ];
 
 export function BoardPreview() {
-  const { darkMode, colorsOff } = useBoardTheme();
+  const { darkMode, colorsOff, boardFont } = useBoardTheme();
   const boardRef = useRef<HTMLDivElement>(null);
 
   // Apply theme classes to preview board
@@ -72,6 +72,21 @@ export function BoardPreview() {
       }
     }
   }, [darkMode, colorsOff]);
+
+  // Apply font to preview board
+  useEffect(() => {
+    if (boardRef.current) {
+      const letters = boardRef.current.getElementsByClassName('letter');
+      const fontFamily = boardFont === 'default' 
+        ? 'inherit' 
+        : `"${boardFont}", sans-serif`;
+      
+      for (let i = 0; i < letters.length; i++) {
+        const letter = letters[i] as HTMLElement;
+        letter.style.fontFamily = fontFamily;
+      }
+    }
+  }, [boardFont]);
 
   return (
     <div className="board-preview-container">

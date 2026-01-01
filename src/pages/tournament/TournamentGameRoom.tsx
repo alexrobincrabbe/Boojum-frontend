@@ -4,9 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useWordTracking } from '../game-room/services/useWordTracking';
 import { useGameWebSocket } from '../game-room/services/useGameWebSocket';
 import { GameBoard } from '../game-room/components/GameBoard';
-import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
-import { PlayersList } from '../game-room/components/PlayersList';
 import { ScoresModal } from '../game-room/components/ScoresModal';
 import { tournamentAPI } from '../../services/api';
 import { toast } from 'react-toastify';
@@ -14,6 +12,7 @@ import { Loading } from '../../components/Loading';
 import { useGameRecording } from '../../hooks/useGameRecording';
 import type { OutboundMessage, GameState } from '../../ws/protocol';
 import '../game-room/GameRoom.css';
+import './TournamentGameRoom.css';
 
 interface MatchInfo {
   match_id: number;
@@ -377,33 +376,20 @@ export default function TournamentGameRoom() {
       {gameState && (
         <div className="game-content">
           <div className="game-header">
-            <h1 style={{ color: '#71bbe9' }}>Tournament Match</h1>
             {showBackButton && (
               <button 
-                className="back-button"
+                className="back-to-tournament-button"
                 onClick={() => {
                   navigate('/tournament');
-                }}
-                style={{
-                  marginLeft: '20px',
-                  padding: '8px 16px',
-                  backgroundColor: '#71bbe9',
-                  color: '#1b1835',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
                 }}
               >
                 ← Back to Tournament
               </button>
             )}
+            <h1 className="tournament-game-title" style={{ color: '#71bbe9' }}>Tournament Match</h1>
           </div>
 
-          <PlayersList players={gameState.players ?? []} variant="mobile" />
-
           <div className="game-main-layout">
-            <PlayersList players={gameState.players ?? []} variant="desktop" />
 
             <div className={`board-section ${connectionState !== 'open' ? 'disconnected' : ''}`}>
               {connectionState !== 'open' && (
@@ -437,14 +423,6 @@ export default function TournamentGameRoom() {
                 </div>
               )}
 
-              <div className="word-counters-container">
-                <WordCounters
-                  wordCounts={wordCounts}
-                  wordCountMax={wordCountMax}
-                  gameStatus={gameState.gameStatus}
-                />
-              </div>
-
               <GameBoard
                 gameState={gameState}
                 hasBoardBeenShown={hasBoardBeenShown}
@@ -460,6 +438,8 @@ export default function TournamentGameRoom() {
                 onRecordSwipeWord={gameRecording.recordSwipeWord}
                 onRecordKeyboardWord={gameRecording.recordKeyboardWord}
                 onRecordBoardRotation={gameRecording.recordBoardRotation}
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
               />
             </div>
 

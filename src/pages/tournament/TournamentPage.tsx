@@ -539,6 +539,31 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         {/* Tournament Rounds and Matches */}
         {data.tournament_started && (data.matches.length > 0 || (data.groups && data.groups.length > 0 && tournament.round_format === 'group_phase')) && (
           <div className="row justify-content-center">
+            {/* Tier/Pool Selection Tab - Before round tabs (only show if pools exist) */}
+            {data.pools && data.pools.length > 0 && (
+              <div className="tier-tabs-container">
+                <div className="tier-tabs">
+                  {data.pools.map((pool) => {
+                    const tierColorClass = pool === 1 ? 'tier-pink' : pool === 2 ? 'tier-yellow' : 'tier-green';
+                    return (
+                      <button
+                        key={pool}
+                        className={`tier-tab ${tierColorClass} ${selectedTier === pool ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedTier(pool);
+                          if (selectedRound === 1 && tournament.round_format === 'group_phase') {
+                            setSelectedGroup(1); // Reset to group 1 when tier changes
+                          }
+                        }}
+                      >
+                        {pool === 1 ? 'SuperStars' : pool === 2 ? 'RisingStars' : 'ShootingStars'}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Round Selection Tab */}
             <div className="round-tabs-container">
               <div className="round-tabs">
@@ -554,31 +579,8 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
               </div>
             </div>
 
-            {/* Tier/Pool Selection Tab - Underneath round tabs (only show if pools exist) */}
-            {data.pools && data.pools.length > 0 && (
-              <div className="tier-tabs-container">
-                <div className="tier-tabs">
-                  {data.pools.map((pool) => (
-                    <button
-                      key={pool}
-                      className={`tier-tab ${selectedTier === pool ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedTier(pool);
-                        if (selectedRound === 1 && tournament.round_format === 'group_phase') {
-                          setSelectedGroup(1); // Reset to group 1 when tier changes
-                        }
-                      }}
-                    >
-                      {pool === 1 ? 'SuperStars' : pool === 2 ? 'RisingStars' : 'ShootingStars'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Selected Round Content */}
             <div className="round-section">
-              <h3 className="round-header blue">Round {selectedRound}</h3>
               {(() => {
                 const roundTimeData = data.round_time_remaining.find(r => r.round === selectedRound);
                 const roundMatches = data.matches.filter(m => {

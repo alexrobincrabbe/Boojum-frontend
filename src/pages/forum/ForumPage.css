@@ -70,7 +70,7 @@
 }
 
 .post-container {
-  border: solid 2px transparent;
+  border: solid 2px var(--color-blue);
   position: relative;
   background: #13132a;
   border-radius: 10px;

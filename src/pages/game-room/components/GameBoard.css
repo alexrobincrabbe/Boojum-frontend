@@ -1,25 +1,34 @@
+@import url("https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap");
+
 /* Game Board styles are in GameRoom.css */
 .game-board {
+    padding:0 !important;   
   position: relative;
 }
 .show-scores-button {
   position: absolute;
   bottom: calc(50% - 35px);
-  left: calc(50% - 41px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
-  padding: 5px;
-  font-size: 110%;
-  font-family: "Chango", sans-serif;
-  font-weight: bold;
+  padding: 5px 10px;
+  font-size: 1.5rem;
+  background-color: transparent;
+  color: #71bbe9;
+  border: 3px solid #71bbe9;
+  border-radius: 8px;
   cursor: pointer;
-  border: 4px solid #eb5497;
-  border-radius: 5px;
-  background-color: #febe38;
-  color: #13132a;
+  font-weight: bold;
+  font-family: "Bungee Hairline", sans-serif;
   transition: all 0.3s ease;
   text-align: center;
   line-height: 1.2;
   display: block;
+  text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 
+               2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146),
+               0 0 10px rgba(113, 187, 233, 0.8);
+  box-shadow: 0 0 15px rgba(113, 187, 233, 0.6), 
+              inset 0 0 15px rgba(113, 187, 233, 0.2);
 }
 .board-wrapper {
   position: relative;
@@ -33,12 +42,17 @@
   background-color: none !important;
 }
 .show-scores-button:hover {
-  background-color: #f5ce45;
-  transform: scale(1.05);
+  background-color: rgba(113, 187, 233, 0.1);
+  transform: translateX(-50%) scale(1.05);
+  text-shadow: 2px 2px 8px rgb(38, 76, 146), -2px -2px 8px rgb(38, 76, 146), 
+               2px -2px 8px rgb(38, 76, 146), -2px 2px 8px rgb(38, 76, 146),
+               0 0 15px rgba(113, 187, 233, 1);
+  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8), 
+              inset 0 0 20px rgba(113, 187, 233, 0.3);
 }
 
 .show-scores-button:active {
-  transform: scale(0.95);
+  transform: translateX(-50%) scale(0.95);
 }
 
 .save-board-button {

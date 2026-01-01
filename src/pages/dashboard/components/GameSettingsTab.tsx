@@ -22,7 +22,7 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
   const initialProfanityFilter = useRef<boolean | null>(null);
   const suppressToast = useRef(true); // avoid toasts on initial mount/remount
   
-  const { darkMode, colorsOff, toggleDarkMode, toggleColors } = useBoardTheme();
+  const { darkMode, colorsOff, boardFont, toggleDarkMode, toggleColors, setBoardFont } = useBoardTheme();
   
   // Wrapper functions to add toast messages
   const handleToggleDarkMode = () => {
@@ -35,6 +35,12 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
     const newColorsOff = !colorsOff;
     toggleColors();
     toast.success(`Highlight colors ${newColorsOff ? 'disabled (grey mode)' : 'enabled (color mode)'}`);
+  };
+
+  const handleFontChange = (font: string) => {
+    setBoardFont(font);
+    const fontName = font === 'default' ? 'Default (site font)' : font;
+    toast.success(`Board font changed to ${fontName}`);
   };
 
   useEffect(() => {
@@ -203,6 +209,28 @@ const GameSettingsTab = ({ bundle, isAuthenticated: _isAuthenticated }: GameSett
               </label>
               <p className="setting-description">
                 When enabled, shows only grey highlights instead of pink and yellow. Green highlights are still shown.
+              </p>
+            </div>
+
+            <div className="game-settings-section">
+              <h3>Board Font</h3>
+              <label htmlFor="board-font" className="font-select-label">
+                <span>Font Family</span>
+                <select
+                  id="board-font"
+                  value={boardFont}
+                  onChange={(e) => handleFontChange(e.target.value)}
+                  className="font-select"
+                >
+                  <option value="default">Default (site font)</option>
+                  <option value="Gluten">Gluten</option>
+                  <option value="Poiret One">Poiret One</option>
+                  <option value="Sour Gummy">Sour Gummy</option>
+                  <option value="Gruppo">Gruppo</option>
+                </select>
+              </label>
+              <p className="setting-description">
+                Choose the font family for board letters. The preview will update to show your selection.
               </p>
             </div>
           </div>

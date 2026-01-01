@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Monoton&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap");
 
 .tournament-container {
   min-height: calc(100vh - 70px);
@@ -41,7 +42,7 @@
   text-align: center;
   font-size: 2rem;
   margin-bottom: 10px;
-  font-family: "Monoton", cursive;
+  font-family: "Bungee Hairline", sans-serif;
   color: #33c15b; /* Green color */
 }
 
@@ -642,9 +643,8 @@
 
 .tier-tab {
   padding: 10px 20px;
-  background-color: rgba(19, 19, 42, 0.5);
-  border: 2px solid #71bbe9;
-  color: #71bbe9;
+  background-color: transparent;
+  border: 2px solid;
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
@@ -652,13 +652,49 @@
   transition: all 0.3s ease;
 }
 
-.tier-tab:hover {
-  background-color: rgba(113, 187, 233, 0.2);
+.tier-tab.tier-pink {
+  border-color: #ff5596;
+  color: #ff5596;
 }
 
-.tier-tab.active {
-  background-color: #71bbe9;
-  color: #1b1835;
+.tier-tab.tier-pink:hover {
+  background-color: rgba(255, 85, 150, 0.2);
+}
+
+.tier-tab.tier-pink.active {
+  background-color: rgba(255, 85, 150, 0.3);
+  border-color: #ff5596;
+  color: #ff5596;
+}
+
+.tier-tab.tier-yellow {
+  border-color: #f5ce45;
+  color: #f5ce45;
+}
+
+.tier-tab.tier-yellow:hover {
+  background-color: rgba(245, 206, 69, 0.2);
+}
+
+.tier-tab.tier-yellow.active {
+  background-color: rgba(245, 206, 69, 0.3);
+  border-color: #f5ce45;
+  color: #f5ce45;
+}
+
+.tier-tab.tier-green {
+  border-color: #33c15b;
+  color: #33c15b;
+}
+
+.tier-tab.tier-green:hover {
+  background-color: rgba(51, 193, 91, 0.2);
+}
+
+.tier-tab.tier-green.active {
+  background-color: rgba(51, 193, 91, 0.3);
+  border-color: #33c15b;
+  color: #33c15b;
 }
 
 /* Round Tabs */
@@ -670,30 +706,55 @@
 
 .round-tabs {
   display: flex;
+  flex-direction: row;
   gap: 10px;
-  justify-content: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #71bbe9;
+  padding-bottom: 0;
   flex-wrap: wrap;
 }
 
 .round-tab {
-  padding: 8px 16px;
-  background-color: rgba(19, 19, 42, 0.5);
-  border: 2px solid #71bbe9;
-  color: #71bbe9;
-  border-radius: 8px;
+  flex: 1;
+  min-width: 120px;
+  padding: 15px 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: all 0.3s ease;
+  background-color: rgba(19, 19, 42, 0.5);
+  color: white;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
 }
 
 .round-tab:hover {
-  background-color: rgba(113, 187, 233, 0.2);
+  opacity: 0.9;
+  background-color: rgba(19, 19, 42, 0.7);
 }
 
 .round-tab.active {
-  background-color: #71bbe9;
-  color: #1b1835;
-  font-weight: bold;
+  background-color: rgba(19, 19, 42, 0.9);
+  border-bottom: 3px solid #71bbe9;
+  color: #71bbe9;
+}
+
+@media (max-width: 768px) {
+  .round-tabs {
+    flex-direction: row;
+    gap: 4px;
+    border-bottom-width: 1px;
+  }
+  .round-tab {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    line-height: 1.1;
+    white-space: normal;
+    word-break: break-word;
+  }
 }
 
 /* Group Tables */

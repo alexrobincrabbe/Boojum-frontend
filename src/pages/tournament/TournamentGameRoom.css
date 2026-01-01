@@ -1,0 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap");
+
+/* Hide player list in tournament games */
+.game-room .players-section-mobile,
+.game-room .players-section-desktop {
+  display: none !important;
+}
+
+/* Make game header font larger on desktop and tablets */
+@media screen and (min-width: 769px) {
+  .game-header h1 {
+    font-size: 2rem;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .game-header h1 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Back to tournament button - positioned absolutely to the left */
+.back-to-tournament-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 16px;
+  background-color: rgba(245, 206, 69, 0.3);
+  color: #f5ce45;
+  border: 2px solid #f5ce45;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.back-to-tournament-button:hover {
+  background-color: rgba(245, 206, 69, 0.4);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.back-to-tournament-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Start button styling with glowing blue border and text */
+.start-game-button {
+  padding: 20px 40px;
+  font-size: 1.5rem;
+  background-color: transparent;
+  color: #71bbe9;
+  border: 3px solid #71bbe9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: "Bungee Hairline", sans-serif;
+  transition: all 0.3s ease;
+  text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 
+               2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146),
+               0 0 10px rgba(113, 187, 233, 0.8);
+  box-shadow: 0 0 15px rgba(113, 187, 233, 0.6), 
+              inset 0 0 15px rgba(113, 187, 233, 0.2);
+}
+
+.start-game-button:hover {
+  background-color: rgba(113, 187, 233, 0.1);
+  transform: scale(1.05);
+  text-shadow: 2px 2px 8px rgb(38, 76, 146), -2px -2px 8px rgb(38, 76, 146), 
+               2px -2px 8px rgb(38, 76, 146), -2px 2px 8px rgb(38, 76, 146),
+               0 0 15px rgba(113, 187, 233, 1);
+  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8), 
+              inset 0 0 20px rgba(113, 187, 233, 0.3);
+}
+
+.start-game-button:active {
+  transform: scale(0.95);
+}
+

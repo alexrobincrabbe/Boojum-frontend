@@ -119,3 +119,43 @@
   box-shadow: 0 0 1px #71bbe9;
 }
 
+/* Font selector styling */
+.font-select-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: white;
+  font-size: 1rem;
+}
+
+.font-select {
+  padding: 8px 12px;
+  background-color: rgba(19, 19, 42, 0.8);
+  border: 2px solid #71bbe9;
+  border-radius: 6px;
+  color: white;
+  font-size: 1rem;
+  font-family: "Quicksand", sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.font-select:hover {
+  border-color: #71bbe9;
+  box-shadow: 0 0 8px rgba(113, 187, 233, 0.4);
+}
+
+.font-select:focus {
+  outline: none;
+  border-color: #71bbe9;
+  box-shadow: 0 0 12px rgba(113, 187, 233, 0.6);
+}
+
+.font-select option {
+  background-color: #1b1835;
+  color: white;
+  padding: 10px;
+}
+

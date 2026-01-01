@@ -159,9 +159,10 @@
   gap: 20px;
   padding: 16px;
   border-radius: 8px;
+  position: relative;
 }
 
-.game-header h1:not(.daily-board-game-title) {
+.game-header h1:not(.daily-board-game-title):not(.tournament-game-title) {
   margin: 0;
   font-size: 0.8rem;
 }
@@ -1386,6 +1387,7 @@ white-space: nowrap;
   }
 
   .color-coding-banner {
+    font-size:150%;
     gap: 5px !important;
   }
 
@@ -1516,6 +1518,7 @@ white-space: nowrap;
 
 /* Color coding banner */
 .color-coding-banner {
+  font-size:150%;
   display: flex;
   justify-content: center;
   align-items: center;

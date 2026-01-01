@@ -1,5 +1,15 @@
 import axios from 'axios';
 
+// Type for push subscription JSON
+interface PushSubscriptionJSON {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
@@ -262,6 +272,26 @@ export const dashboardAPI = {
     const response = await api.post('/dashboard/remove-buddy/', {
       buddy_id: buddyId,
     });
+    return response.data;
+  },
+  getPushNotificationsStatus: async () => {
+    const response = await api.get('/dashboard/push-notifications/');
+    return response.data;
+  },
+  updatePushNotificationsStatus: async (enabled: boolean) => {
+    const response = await api.post('/dashboard/push-notifications/update/', { enabled });
+    return response.data;
+  },
+  getVapidPublicKey: async () => {
+    const response = await api.get('/dashboard/push-notifications/vapid-key/');
+    return response.data.public_key;
+  },
+  savePushSubscription: async (subscription: PushSubscriptionJSON) => {
+    const response = await api.post('/dashboard/push-notifications/subscribe/', subscription);
+    return response.data;
+  },
+  removePushSubscription: async (subscription: PushSubscriptionJSON) => {
+    const response = await api.post('/dashboard/push-notifications/unsubscribe/', subscription);
     return response.data;
   },
 };

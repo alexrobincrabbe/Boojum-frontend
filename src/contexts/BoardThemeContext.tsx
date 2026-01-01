@@ -3,17 +3,40 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 interface BoardThemeContextType {
   darkMode: boolean; // false = light mode, true = dark mode
   colorsOff: boolean; // false = show colors, true = show grey only
+  boardFont: string; // Font family for board letters
   toggleDarkMode: () => void;
   toggleColors: () => void;
+  setBoardFont: (font: string) => void;
 }
 
-const BoardThemeContext = createContext<BoardThemeContextType | undefined>(undefined);
+// Create a default context value with sensible defaults
+const defaultContextValue: BoardThemeContextType = {
+  darkMode: true, // Default to dark mode
+  colorsOff: false,
+  boardFont: 'default',
+  toggleDarkMode: () => {
+    if (import.meta.env.DEV) {
+      console.warn('BoardThemeProvider not available - toggleDarkMode called');
+    }
+  },
+  toggleColors: () => {
+    if (import.meta.env.DEV) {
+      console.warn('BoardThemeProvider not available - toggleColors called');
+    }
+  },
+  setBoardFont: () => {
+    if (import.meta.env.DEV) {
+      console.warn('BoardThemeProvider not available - setBoardFont called');
+    }
+  },
+};
+
+const BoardThemeContext = createContext<BoardThemeContextType>(defaultContextValue);
 
 export const useBoardTheme = () => {
   const context = useContext(BoardThemeContext);
-  if (!context) {
-    throw new Error('useBoardTheme must be used within a BoardThemeProvider');
-  }
+  // In development, check if we're using default values (which shouldn't happen if provider is set up correctly)
+  // Note: We can't reliably detect if we're using default vs provider value, so we'll just return the context
   return context;
 };
 
@@ -31,6 +54,11 @@ export const BoardThemeProvider = ({ children }: BoardThemeProviderProps) => {
   const [colorsOff, setColorsOff] = useState<boolean>(() => {
     const stored = localStorage.getItem('colorsOff');
     return stored === 'true';
+  });
+
+  const [boardFont, setBoardFontState] = useState<string>(() => {
+    const stored = localStorage.getItem('boardFont');
+    return stored || 'default'; // Default to site font
   });
 
   // Apply theme to board when it changes or on mount
@@ -97,6 +125,44 @@ export const BoardThemeProvider = ({ children }: BoardThemeProviderProps) => {
     };
   }, [darkMode]);
 
+  // Apply font to board when it changes
+  useEffect(() => {
+    const applyFont = () => {
+      // Apply to all board types: board, daily-board, timeless-board
+      const boardIds = ['board', 'daily-board', 'timeless-board'];
+      const fontFamily = boardFont === 'default' 
+        ? 'inherit' 
+        : `"${boardFont}", sans-serif`;
+      
+      boardIds.forEach(boardId => {
+        const boardElement = document.getElementById(boardId);
+        if (boardElement) {
+          const letters = boardElement.getElementsByClassName('letter');
+          for (let i = 0; i < letters.length; i++) {
+            const letter = letters[i] as HTMLElement;
+            letter.style.fontFamily = fontFamily;
+          }
+        }
+      });
+    };
+
+    applyFont();
+
+    // Also apply when DOM updates (for dynamically added boards)
+    const observer = new MutationObserver(() => {
+      applyFont();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [boardFont]);
+
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
@@ -109,13 +175,20 @@ export const BoardThemeProvider = ({ children }: BoardThemeProviderProps) => {
     localStorage.setItem('colorsOff', newColorsOff.toString());
   };
 
+  const setBoardFont = (font: string) => {
+    setBoardFontState(font);
+    localStorage.setItem('boardFont', font);
+  };
+
   return (
     <BoardThemeContext.Provider
       value={{
         darkMode,
         colorsOff,
+        boardFont,
         toggleDarkMode,
         toggleColors,
+        setBoardFont,
       }}
     >
       {children}

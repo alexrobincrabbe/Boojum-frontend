@@ -1,18 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap");
+
 .replay-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  background: transparent;
-  border: 2px solid;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 1rem;
+  padding: 20px 40px;
+  font-size: 1.5rem;
+  background-color: transparent;
+  color: #71bbe9;
+  border: 3px solid #71bbe9;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  font-weight: bold;
+  font-family: "Bungee Hairline", sans-serif;
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1.2;
+  display: block;
+  text-shadow: 2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146),
+    2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146),
+    0 0 10px rgba(113, 187, 233, 0.8);
+  box-shadow: 0 0 15px rgba(113, 187, 233, 0.6),
+    inset 0 0 15px rgba(113, 187, 233, 0.2);
 }
 
 .replay-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background-color: rgba(113, 187, 233, 0.1);
   transform: scale(1.05);
+  text-shadow: 2px 2px 8px rgb(38, 76, 146), -2px -2px 8px rgb(38, 76, 146),
+    2px -2px 8px rgb(38, 76, 146), -2px 2px 8px rgb(38, 76, 146),
+    0 0 15px rgba(113, 187, 233, 1);
+  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8),
+    inset 0 0 20px rgba(113, 187, 233, 0.3);
+}
+
+.replay-button:active {
+  transform: scale(0.95);
 }
 
 .match-results-container {
@@ -25,18 +45,56 @@
 .match-results-header {
   text-align: center;
   margin-bottom: 30px;
+  position: relative;
 }
 
 .back-link {
   display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 2px solid #71bbe9;
+  background-color: transparent;
   color: #71bbe9;
+  border-radius: 8px;
   text-decoration: none;
   margin-bottom: 10px;
-  font-size: 1.1rem;
+  transition: all 0.3s ease;
 }
 
 .back-link:hover {
-  text-decoration: underline;
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.05);
+  text-decoration: none;
+}
+
+/* Back to tournament button - positioned absolutely to the left */
+.back-to-tournament-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 16px;
+  background-color: rgba(245, 206, 69, 0.3);
+  color: #f5ce45;
+  border: 2px solid #f5ce45;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  z-index: 10;
+  text-decoration: none;
+}
+
+.back-to-tournament-button:hover {
+  background-color: rgba(245, 206, 69, 0.4);
+  transform: translateY(-50%) scale(1.05);
+  text-decoration: none;
+}
+
+.back-to-tournament-button:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 .match-results-title {
@@ -63,6 +121,11 @@
   padding: 20px;
 }
 
+.player-name {
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
 
 .player-stats {
   display: flex;
@@ -94,13 +157,15 @@
 }
 
 .winner-label {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
+  font-family: "Bungee Hairline", sans-serif;
 }
 
 .winner-name {
-  font-size: 1.3rem;
+  font-size: 2rem;
   font-weight: bold;
+  font-family: "Bungee Hairline", sans-serif;
 }
 
 .match-board-section {
@@ -564,21 +629,27 @@
   background-color: #5aa3c7;
 }
 
-
 /* Word Lists Section */
 .word-lists-section {
   margin-bottom: 30px;
 }
 
 @media (max-width: 768px) {
+  .back-to-tournament-button {
+    top: 20% !important;
+  }
+  .match-results-header {
+    padding-top: 60px;
+  }
+
   .match-results-title {
     font-size: 1.5rem;
   }
-  
+
   .match-players-scores {
     grid-template-columns: 1fr;
   }
-  
+
   .word-lists-legend {
     font-size: 0.8rem;
     gap: 10px;
@@ -596,4 +667,3 @@
     grid-template-columns: 1fr;
   }
 }
-

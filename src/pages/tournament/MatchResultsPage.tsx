@@ -134,6 +134,19 @@ export default function MatchResultsPage() {
     };
   }, [popup]);
 
+  if (loading) {
+    return <Loading minHeight="calc(100vh - 70px)" />;
+  }
+
+  if (error || !data) {
+    return (
+      <div className="match-results-container">
+        <div className="error-message">{error || 'Match not found'}</div>
+        <Link to="/tournament" className="back-link">← Back to Tournament</Link>
+      </div>
+    );
+  }
+
   // Handle word click to show definition
   const handleWordClick = async (e: React.MouseEvent, word: string) => {
     e.preventDefault();
@@ -170,27 +183,6 @@ export default function MatchResultsPage() {
     }
   };
 
-  if (loading) {
-    return <Loading minHeight="calc(100vh - 70px)" />;
-  }
-
-  if (error || !data) {
-    return (
-      <div className="match-results-container">
-        <div className="error-message">{error || 'Match not found'}</div>
-        <Link to="/tournament" className="back-link">← Back to Tournament</Link>
-      </div>
-    );
-  }
-
-  // Convert words_by_length to format expected by WordLists
-  const wordsByLengthForLists: Record<string, string[]> = {};
-  if (data.board.words_by_length) {
-    Object.keys(data.board.words_by_length).forEach(length => {
-      wordsByLengthForLists[length] = data.board.words_by_length[length].map(item => item.word);
-    });
-  }
-
   // Create word lists with color coding
   const wordsByLengthWithColors: Record<string, Array<{
     word: string;
@@ -226,7 +218,7 @@ export default function MatchResultsPage() {
             const queryString = params.toString();
             return `/tournament${queryString ? `?${queryString}` : ''}`;
           })()}
-          className="back-link"
+          className="back-to-tournament-button"
         >
           ← Back to Tournament
         </Link>
@@ -268,16 +260,6 @@ export default function MatchResultsPage() {
                 </div>
               )}
             </div>
-            {((data.result.game_recording_player_1 && data.result.game_recording_player_1.length > 0) ||
-              (data.result.game_recording_player_2 && data.result.game_recording_player_2.length > 0)) && (
-              <button
-                onClick={() => setReplayPlayer(1)}
-                className="replay-button"
-                style={{ borderColor: data.player_1.chat_color }}
-              >
-                ▶ Watch Replay
-              </button>
-            )}
           </div>
 
           <div className="player-score-card">
@@ -314,6 +296,19 @@ export default function MatchResultsPage() {
             </div>
           </div>
         </div>
+
+        {/* Replay Button */}
+        {((data.result.game_recording_player_1 && data.result.game_recording_player_1.length > 0) ||
+          (data.result.game_recording_player_2 && data.result.game_recording_player_2.length > 0)) && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
+            <button
+              onClick={() => setReplayPlayer(1)}
+              className="replay-button"
+            >
+              ▶ Watch Replay
+            </button>
+          </div>
+        )}
 
         {/* Winner */}
         {data.result.winner && (
@@ -392,83 +387,91 @@ export default function MatchResultsPage() {
             </span>
             <span className="color-coding-item" style={{ color: '#fff' }}>Neither got it</span>
           </div>
-          <div id="word-lists">
-            {Object.keys(wordsByLengthWithColors).sort((a, b) => {
-              const aNum = a === '9+' ? 9 : parseInt(a);
-              const bNum = b === '9+' ? 9 : parseInt(b);
-              return bNum - aNum;
-            }).map(length => {
-              // Sort words: both got it, then player 1, then player 2, then neither
-              const sortedWords = [...wordsByLengthWithColors[length]].sort((a, b) => {
-                const aBoth = a.player1Found && a.player2Found ? 0 : 1;
-                const bBoth = b.player1Found && b.player2Found ? 0 : 1;
-                if (aBoth !== bBoth) return aBoth - bBoth;
-                
-                const aPlayer1 = a.player1Found ? 0 : 1;
-                const bPlayer1 = b.player1Found ? 0 : 1;
-                if (aPlayer1 !== bPlayer1) return aPlayer1 - bPlayer1;
-                
-                const aPlayer2 = a.player2Found ? 0 : 1;
-                const bPlayer2 = b.player2Found ? 0 : 1;
-                if (aPlayer2 !== bPlayer2) return aPlayer2 - bPlayer2;
-                
-                // If same category, sort alphabetically
-                return a.word.localeCompare(b.word);
-              });
+          <div className="word-lists-wrapper">
+            <div id="word-lists">
+              {Object.keys(wordsByLengthWithColors).sort((a, b) => {
+                const aNum = a === '9+' ? 9 : parseInt(a);
+                const bNum = b === '9+' ? 9 : parseInt(b);
+                return aNum - bNum;
+              }).map(length => {
+                // Sort words: both got it, then player 1, then player 2, then neither
+                const sortedWords = [...wordsByLengthWithColors[length]].sort((a, b) => {
+                  const aBoth = a.player1Found && a.player2Found ? 0 : 1;
+                  const bBoth = b.player1Found && b.player2Found ? 0 : 1;
+                  if (aBoth !== bBoth) return aBoth - bBoth;
+                  
+                  const aPlayer1 = a.player1Found ? 0 : 1;
+                  const bPlayer1 = b.player1Found ? 0 : 1;
+                  if (aPlayer1 !== bPlayer1) return aPlayer1 - bPlayer1;
+                  
+                  const aPlayer2 = a.player2Found ? 0 : 1;
+                  const bPlayer2 = b.player2Found ? 0 : 1;
+                  if (aPlayer2 !== bPlayer2) return aPlayer2 - bPlayer2;
+                  
+                  // If same category, sort alphabetically
+                  return a.word.localeCompare(b.word);
+                });
 
-              return (
-                <div key={length} className="word-sublist" id={`word-length-${length}`}>
-                  <strong>{length === '9+' ? '9+' : length} - letters</strong>
-                  <div className="word-sublist-scroll" style={{ flexDirection: 'column' }}>
-                    {sortedWords.map((item, idx) => {
-                      let wordColor = '#fff'; // Neither got it - default white
-                      
-                      if (item.player1Found && item.player2Found) {
-                        // Both got it - use yellow/orange fallback
-                        wordColor = '#FFBE86';
-                      } else if (item.player1Found) {
-                        // Player 1 got it - use player 1 color
-                        wordColor = data.player_1.chat_color || '#71bbe9';
-                      } else if (item.player2Found) {
-                        // Player 2 got it - use player 2 color, or fallback if same as player 1
-                        const player2Color = data.player_2.chat_color || '#71bbe9';
-                        const player1Color = data.player_1.chat_color || '#71bbe9';
-                        if (player2Color === player1Color) {
-                          // Fallback color if both players have same color
-                          wordColor = '#B3FFC7'; // Light green/cyan
-                        } else {
-                          wordColor = player2Color;
+                return (
+                  <div key={length} className="word-sublist" id={`word-length-${length}`}>
+                    <strong className="word-sublist-header">
+                      <span className="word-sublist-number">{length === '9+' ? '9+' : length} -</span>
+                      <span className="word-sublist-label">letters</span>
+                    </strong>
+                    <div 
+                      className="word-sublist-scroll"
+                      style={{ flexDirection: 'column' }}
+                    >
+                      {sortedWords.map((item, idx) => {
+                        let wordColor = '#fff'; // Neither got it - default white
+                        
+                        if (item.player1Found && item.player2Found) {
+                          // Both got it - use yellow/orange fallback
+                          wordColor = '#FFBE86';
+                        } else if (item.player1Found) {
+                          // Player 1 got it - use player 1 color
+                          wordColor = data.player_1.chat_color || '#71bbe9';
+                        } else if (item.player2Found) {
+                          // Player 2 got it - use player 2 color, or fallback if same as player 1
+                          const player2Color = data.player_2.chat_color || '#71bbe9';
+                          const player1Color = data.player_1.chat_color || '#71bbe9';
+                          if (player2Color === player1Color) {
+                            // Fallback color if both players have same color
+                            wordColor = '#B3FFC7'; // Light green/cyan
+                          } else {
+                            wordColor = player2Color;
+                          }
                         }
-                      }
-                      
-                      // Calculate word score
-                      const wordScore = calculateWordScore(
-                        item.word,
-                        data.board.boojum_bonus || undefined,
-                        data.board.snark || undefined
-                      );
-                      
-                      return (
-                        <div
-                          key={idx}
-                          className="word"
-                          onClick={(e) => handleWordClick(e, item.word)}
-                          style={{ 
-                            cursor: 'pointer',
-                            color: wordColor
-                          }}
-                        >
-                          <span>{item.word}</span>
-                          <span className="word-score">
-                            ({wordScore}pts)
-                          </span>
-                        </div>
-                      );
-                    })}
+                        
+                        // Calculate word score
+                        const wordScore = calculateWordScore(
+                          item.word,
+                          data.board.boojum_bonus || undefined,
+                          data.board.snark || undefined
+                        );
+                        
+                        return (
+                          <div
+                            key={idx}
+                            className="word"
+                            onClick={(e) => handleWordClick(e, item.word)}
+                            style={{ 
+                              cursor: 'pointer',
+                              color: wordColor
+                            }}
+                          >
+                            <span>{item.word}</span>
+                            <span className="word-score">
+                              ({wordScore}pts)
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
           {/* Definition Popup */}
           {popup && (
