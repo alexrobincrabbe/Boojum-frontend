@@ -23,9 +23,9 @@
 .back-to-tournament-button {
   position: absolute;
   left: 0;
-  top: 50%;
+  top: 40% !important;
   transform: translateY(-50%);
-  padding: 8px 16px;
+  padding: 6px 12px;
   background-color: rgba(245, 206, 69, 0.3);
   color: #f5ce45;
   border: 2px solid #f5ce45;
@@ -44,6 +44,16 @@
 
 .back-to-tournament-button:active {
   transform: translateY(-50%) scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .back-to-tournament-button .back-text {
+    display: none; /* Hide text on mobile */
+  }
+  .back-to-tournament-button {
+    padding: 5px; /* Reduced padding for arrow only */
+    min-width: 36px; /* Reduced min-width */
+  }
 }
 
 /* Start Game Button Overlay */

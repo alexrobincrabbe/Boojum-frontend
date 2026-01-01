@@ -383,7 +383,7 @@ export default function TournamentGameRoom() {
                   navigate('/tournament');
                 }}
               >
-                ← Back to Tournament
+                <span className="back-arrow">←</span> <span className="back-text">Back to Tournament</span>
               </button>
             )}
             <h1 className="tournament-game-title" style={{ color: '#71bbe9' }}>Tournament Match</h1>

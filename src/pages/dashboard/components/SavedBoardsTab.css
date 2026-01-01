@@ -386,8 +386,32 @@
 }
 
 @media (max-width: 768px) {
+  .saved-boards-tab {
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .saved-boards-header {
+    margin-bottom: 20px;
+  }
+
+  .saves-progress-container {
+    min-width: auto;
+    width: 100%;
+  }
+
   .saved-boards-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 15px;
+  }
+
+  .saved-board-card {
+    padding: 15px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .saved-board-header {
@@ -398,6 +422,8 @@
   .board-actions {
     flex-direction: row;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .play-board-btn,
@@ -405,6 +431,17 @@
   .share-board-btn,
   .delete-board-btn {
     flex: 1;
+    min-width: calc(50% - 4px);
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  .board-meta {
+    gap: 10px;
+  }
+
+  .board-room-name {
+    font-size: 1.1rem;
   }
 }
 
