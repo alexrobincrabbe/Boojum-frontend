@@ -152,7 +152,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
     if (notificationsEnabled === null) return;
 
     const newValue = !notificationsEnabled;
-    const previousValue = notificationsEnabled;
 
     // Optimistic UI update - update state immediately
     setNotificationsEnabled(newValue);

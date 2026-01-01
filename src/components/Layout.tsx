@@ -600,19 +600,15 @@ const Layout = ({ children }: LayoutProps) => {
   const sidebarOpenedTimeRef = useRef<number>(0);
   const shouldAutoScrollRef = useRef<boolean>(false);
 
-  // Scroll right sidebar to top when it opens
+  // Scroll chat to bottom when sidebar opens
   useEffect(() => {
-    if (rightSidebarOpen && rightSidebarRef.current) {
-      // Record when sidebar opened and disable auto-scroll
+    if (rightSidebarOpen) {
+      // Record when sidebar opened and enable auto-scroll
       sidebarOpenedTimeRef.current = Date.now();
-      shouldAutoScrollRef.current = false;
-      // Small delay to ensure the sidebar is rendered
+      shouldAutoScrollRef.current = true;
+      // Small delay to ensure the sidebar and chat messages are rendered
       setTimeout(() => {
-        rightSidebarRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-        // Re-enable auto-scroll after sidebar has been scrolled to top (allow 2 seconds)
-        setTimeout(() => {
-          shouldAutoScrollRef.current = true;
-        }, 2000);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } else if (!rightSidebarOpen) {
       // Disable auto-scroll when sidebar closes
