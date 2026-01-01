@@ -166,7 +166,7 @@ const DoodleAlbum = ({ profileUrl, onClose, onDoodleUpdated }: DoodleAlbumProps)
         // Deduplicate by ID when appending new pages
         setDoodles(prev => {
           const existingIds = new Set(prev.map(d => d.id));
-          const newDoodles = (data.doodles || []).filter(d => !existingIds.has(d.id));
+          const newDoodles = (data.doodles || []).filter((d: Doodle) => !existingIds.has(d.id));
           return [...prev, ...newDoodles];
         });
       }
