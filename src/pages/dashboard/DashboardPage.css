@@ -444,6 +444,9 @@ h3 {
   opacity: 0;
   width: 0;
   height: 0;
+  /* Improve touch target on mobile */
+  position: absolute;
+  z-index: 1;
 }
 
 .slider {
@@ -456,6 +459,9 @@ h3 {
   background-color: #ccc;
   transition: 0.2s;
   border-radius: 24px;
+  /* Improve touch target on mobile */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .slider:before {
@@ -481,6 +487,25 @@ input:checked + .slider:before {
 input:disabled + .slider {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Improve mobile touch responsiveness */
+.switch {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  .switch {
+    /* Larger touch target on mobile */
+    min-width: 50px;
+    min-height: 28px;
+  }
+  
+  .slider {
+    /* Slightly larger on mobile for better touch */
+    min-height: 28px;
+  }
 }
 
 /* Notification Categories Section */

@@ -143,18 +143,27 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
       currentValue: notificationsEnabled,
       newValue: !notificationsEnabled,
       isInitialMount: isInitialMount.current,
-      initialValue: initialNotificationsEnabled.current
+      initialValue: initialNotificationsEnabled.current,
+      userAgent: navigator.userAgent,
+      serviceWorkerSupported: 'serviceWorker' in navigator,
+      pushManagerSupported: 'PushManager' in window,
     });
     
     if (notificationsEnabled === null) return;
 
     const newValue = !notificationsEnabled;
+    const previousValue = notificationsEnabled;
+
+    // Optimistic UI update - update state immediately
+    setNotificationsEnabled(newValue);
 
     // If enabling, we need to request permission and create subscription
     if (newValue) {
       try {
         // Check if browser supports notifications
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+          console.error('[NotificationsTab] Push notifications not supported');
+          setNotificationsEnabled(false); // Revert optimistic update
           toast.error('Push notifications are not supported in this browser');
           return;
         }
@@ -165,49 +174,90 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         try {
           registration = await navigator.serviceWorker.register('/sw.js');
           console.log('[NotificationsTab] Service worker registered from /sw.js');
-        } catch (error) {
-          console.log('[NotificationsTab] Failed to register from /sw.js, trying /static/sw.js');
-          registration = await navigator.serviceWorker.register('/static/sw.js');
-          console.log('[NotificationsTab] Service worker registered from /static/sw.js');
+        } catch (error: any) {
+          console.log('[NotificationsTab] Failed to register from /sw.js, trying /static/sw.js', error);
+          try {
+            registration = await navigator.serviceWorker.register('/static/sw.js');
+            console.log('[NotificationsTab] Service worker registered from /static/sw.js');
+          } catch (error2: any) {
+            console.error('[NotificationsTab] Failed to register service worker from both locations', error2);
+            setNotificationsEnabled(false); // Revert optimistic update
+            toast.error('Failed to register service worker. Please check your connection and try again.');
+            return;
+          }
         }
 
         // Request browser permission
-        const permission = await Notification.requestPermission();
+        let permission;
+        try {
+          permission = await Notification.requestPermission();
+          console.log('[NotificationsTab] Notification permission:', permission);
+        } catch (error: any) {
+          console.error('[NotificationsTab] Error requesting notification permission', error);
+          setNotificationsEnabled(false); // Revert optimistic update
+          toast.error('Failed to request notification permission: ' + (error.message || 'Unknown error'));
+          return;
+        }
+        
         if (permission !== 'granted') {
-          toast.error('Notification permission denied');
+          console.warn('[NotificationsTab] Notification permission denied:', permission);
+          setNotificationsEnabled(false); // Revert optimistic update
+          toast.error('Notification permission denied. Please enable notifications in your browser settings.');
           return;
         }
 
         // Get VAPID public key
-        const vapidPublicKey = await dashboardAPI.getVapidPublicKey();
-        console.log('[NotificationsTab] Got VAPID key');
+        let vapidPublicKey;
+        try {
+          vapidPublicKey = await dashboardAPI.getVapidPublicKey();
+          console.log('[NotificationsTab] Got VAPID key');
+        } catch (error: any) {
+          console.error('[NotificationsTab] Error getting VAPID key', error);
+          setNotificationsEnabled(false); // Revert optimistic update
+          toast.error('Failed to get VAPID key: ' + (error.response?.data?.error || error.message || 'Unknown error'));
+          return;
+        }
 
         // Create subscription
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-        });
-
-        console.log('[NotificationsTab] Subscription created:', subscription);
+        let subscription;
+        try {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+          });
+          console.log('[NotificationsTab] Subscription created:', subscription);
+        } catch (error: any) {
+          console.error('[NotificationsTab] Error creating subscription', error);
+          setNotificationsEnabled(false); // Revert optimistic update
+          toast.error('Failed to create push subscription: ' + (error.message || 'Unknown error'));
+          return;
+        }
 
         // Save subscription to backend
         const subscriptionJson = subscription.toJSON();
         if (!subscriptionJson.endpoint) {
-          throw new Error('Subscription endpoint is missing');
+          console.error('[NotificationsTab] Subscription endpoint is missing');
+          setNotificationsEnabled(false); // Revert optimistic update
+          toast.error('Subscription endpoint is missing');
+          return;
         }
-        await dashboardAPI.savePushSubscription({
-          endpoint: subscriptionJson.endpoint,
-          expirationTime: subscriptionJson.expirationTime ?? null,
-          keys: {
-            p256dh: subscriptionJson.keys?.p256dh || '',
-            auth: subscriptionJson.keys?.auth || '',
-          },
-        });
-        console.log('[NotificationsTab] Subscription saved to backend');
-
-        // Update state
-        setNotificationsEnabled(true);
-        initialNotificationsEnabled.current = true;
+        
+        try {
+          await dashboardAPI.savePushSubscription({
+            endpoint: subscriptionJson.endpoint,
+            expirationTime: subscriptionJson.expirationTime ?? null,
+            keys: {
+              p256dh: subscriptionJson.keys?.p256dh || '',
+              auth: subscriptionJson.keys?.auth || '',
+            },
+          });
+          console.log('[NotificationsTab] Subscription saved to backend');
+        } catch (error: any) {
+          console.error('[NotificationsTab] Error saving subscription to backend', error);
+          setNotificationsEnabled(false); // Revert optimistic update
+          toast.error('Failed to save subscription: ' + (error.response?.data?.error || error.message || 'Unknown error'));
+          return;
+        }
         
         // Automatically enable all categories when main switch is turned on
         const updatedCategories = {
@@ -218,17 +268,26 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         };
         setCategorySettings(updatedCategories);
         initialCategorySettings.current = updatedCategories;
-        await dashboardAPI.updatePushNotificationCategories({
-          tournament_matches: true,
-          doodles: true,
-          forum_replies: true,
-          shared_boards: true,
-        });
         
+        try {
+          await dashboardAPI.updatePushNotificationCategories({
+            tournament_matches: true,
+            doodles: true,
+            forum_replies: true,
+            shared_boards: true,
+          });
+        } catch (error: any) {
+          console.error('[NotificationsTab] Error updating categories (non-critical)', error);
+          // Don't revert the main toggle if category update fails
+        }
+        
+        // Confirm state
+        initialNotificationsEnabled.current = true;
         toast.success('Notifications enabled successfully');
       } catch (error: any) {
-        console.error('[NotificationsTab] Error enabling notifications:', error);
-        toast.error(error.message || 'Failed to enable notifications');
+        console.error('[NotificationsTab] Unexpected error enabling notifications', error);
+        setNotificationsEnabled(false); // Revert optimistic update
+        toast.error('Failed to enable notifications: ' + (error.message || 'Unknown error'));
       }
     } else {
       // If disabling, unsubscribe and remove from backend
@@ -237,26 +296,37 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         const subscription = await registration.pushManager.getSubscription();
         
         if (subscription) {
-          // Unsubscribe locally
-          await subscription.unsubscribe();
-          
-          // Remove from backend
-          const subscriptionJson = subscription.toJSON();
-          if (!subscriptionJson.endpoint) {
-            throw new Error('Subscription endpoint is missing');
+          try {
+            // Unsubscribe locally
+            await subscription.unsubscribe();
+            
+            // Remove from backend
+            const subscriptionJson = subscription.toJSON();
+            if (subscriptionJson.endpoint) {
+              await dashboardAPI.removePushSubscription({
+                endpoint: subscriptionJson.endpoint,
+                expirationTime: subscriptionJson.expirationTime ?? null,
+                keys: {
+                  p256dh: subscriptionJson.keys?.p256dh || '',
+                  auth: subscriptionJson.keys?.auth || '',
+                },
+              });
+            }
+          } catch (error: any) {
+            console.error('[NotificationsTab] Error removing subscription (non-critical)', error);
+            // Continue even if unsubscribe fails
           }
-          await dashboardAPI.removePushSubscription({
-            endpoint: subscriptionJson.endpoint,
-            expirationTime: subscriptionJson.expirationTime ?? null,
-            keys: {
-              p256dh: subscriptionJson.keys?.p256dh || '',
-              auth: subscriptionJson.keys?.auth || '',
-            },
-          });
         }
 
         // Update backend status
-        await dashboardAPI.updatePushNotificationsStatus(false);
+        try {
+          await dashboardAPI.updatePushNotificationsStatus(false);
+        } catch (error: any) {
+          console.error('[NotificationsTab] Error updating backend status', error);
+          setNotificationsEnabled(true); // Revert optimistic update
+          toast.error('Failed to update notification status: ' + (error.response?.data?.error || error.message || 'Unknown error'));
+          return;
+        }
         
         // Disable all categories when main switch is turned off
         const updatedCategories = {
@@ -268,13 +338,13 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         setCategorySettings(updatedCategories);
         initialCategorySettings.current = updatedCategories;
         
-        // Update state
-        setNotificationsEnabled(false);
+        // Confirm state
         initialNotificationsEnabled.current = false;
         toast.success('Notifications disabled');
       } catch (error: any) {
-        console.error('[NotificationsTab] Error disabling notifications:', error);
-        toast.error(error.message || 'Failed to disable notifications');
+        console.error('[NotificationsTab] Error disabling notifications', error);
+        setNotificationsEnabled(true); // Revert optimistic update
+        toast.error('Failed to disable notifications: ' + (error.message || 'Unknown error'));
       }
     }
   };
@@ -331,6 +401,10 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
             type="checkbox"
             checked={notificationsEnabled ?? false}
             onChange={handleToggle}
+            onClick={(e) => {
+              // Prevent double-firing on some browsers
+              e.stopPropagation();
+            }}
             disabled={notificationsEnabled === null}
           />
           <span className="slider"></span>
