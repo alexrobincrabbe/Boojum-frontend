@@ -372,7 +372,7 @@ export default function TournamentGameRoom() {
   }
 
   return (
-    <div className="game-room">
+    <div className="game-room tournament-game-room">
       {gameState && (
         <div className="game-content">
           <div className="game-header">

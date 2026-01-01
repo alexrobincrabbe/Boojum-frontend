@@ -42,6 +42,30 @@
   font-size: 1.2rem;
 }
 
+.notification-clear-button {
+  background-color: transparent;
+  border: 1px solid #eb5497;
+  color: #eb5497;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.notification-clear-button:hover {
+  background-color: rgba(235, 84, 151, 0.2);
+  border-color: #ff69b4;
+  color: #ff69b4;
+  box-shadow: 0 0 8px rgba(235, 84, 151, 0.4);
+}
+
+.notification-clear-button:active {
+  background-color: rgba(235, 84, 151, 0.3);
+  transform: scale(0.98);
+}
+
 .notification-unread-badge {
   background-color: #ff69b4;
   color: #fff;

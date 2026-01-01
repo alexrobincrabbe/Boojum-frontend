@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap");
 
 /* Hide player list in tournament games */
-.game-room .players-section-mobile,
-.game-room .players-section-desktop {
+.tournament-game-room .players-section-mobile,
+.tournament-game-room .players-section-desktop {
   display: none !important;
 }
 

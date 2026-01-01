@@ -23,7 +23,7 @@ import TournamentBadges from './TournamentBadges';
 import DoodlesGallery from './DoodlesGallery';
 import { SortableSection } from './SortableSection';
 import ImageCropModal from './ImageCropModal';
-import { usePageOnboarding, resetAllOnboarding, type Step } from '../../hooks/usePageOnboarding';
+import { usePageOnboarding, type Step } from '../../hooks/usePageOnboarding';
 import './ProfilePage.css';
 
 interface GameScore {
@@ -663,24 +663,6 @@ const ProfilePage = () => {
         }
       })()}
       {JoyrideComponent}
-      
-      {/* Debug: Manual reset button - remove after testing */}
-      {isOwnProfile && (
-        <div style={{ position: 'fixed', top: '130px', right: '10px', zIndex: 99999, background: 'rgba(0,0,0,0.8)', padding: '10px', borderRadius: '5px', color: 'white' }}>
-          <div style={{ marginBottom: '5px', fontSize: '12px' }}>
-            Status: {localStorage.getItem('onboarding_profile_completed') === 'true' ? 'Completed' : 'Not completed'}
-          </div>
-          <button 
-            onClick={() => {
-              // Reset all onboarding for all pages
-              resetAllOnboarding();
-            }}
-            style={{ padding: '5px 10px', cursor: 'pointer' }}
-          >
-            Reset All Onboarding
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -749,9 +731,11 @@ const ProfilePicture = ({
       }}
     >
       {hasPlaceholder ? (
-        <div className="profile-pic-default">
-          <div className="default-avatar">👤</div>
-        </div>
+        <img 
+          src="/images/default.png" 
+          alt="Profile" 
+          className="profile-pic-image"
+        />
       ) : (
         <img 
           src={profilePictureUrl} 

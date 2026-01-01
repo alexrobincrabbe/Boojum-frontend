@@ -7,9 +7,9 @@
 }
 .show-scores-button {
   position: absolute;
-  bottom: calc(50% - 35px);
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   z-index: 100;
   padding: 5px 10px;
   font-size: 1.5rem;
@@ -43,32 +43,25 @@
 }
 .show-scores-button:hover {
   background-color: rgba(113, 187, 233, 0.1);
-  transform: translateX(-50%) scale(1.05);
-  text-shadow: 2px 2px 8px rgb(38, 76, 146), -2px -2px 8px rgb(38, 76, 146), 
-               2px -2px 8px rgb(38, 76, 146), -2px 2px 8px rgb(38, 76, 146),
-               0 0 15px rgba(113, 187, 233, 1);
-  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8), 
-              inset 0 0 20px rgba(113, 187, 233, 0.3);
 }
 
 .show-scores-button:active {
-  transform: translateX(-50%) scale(0.95);
+  opacity: 0.9;
 }
 
 .save-board-button {
   position: absolute;
   top: 10px; /* Position at top of the board, inside with 10px gap */
   left: 50%;
-  transform: translateX(-50%);
   z-index: 100;
   padding: 10px 20px;
   font-size: 110%;
   font-family: "Chango", sans-serif;
   font-weight: bold;
   cursor: pointer;
-  border: 3px solid #71bbe9;
-  background-color: rgba(113, 187, 233, 0.2); /* Translucent blue background */
-  color: #71bbe9; /* Blue text */
+  border: 3px solid #f5ce45;
+  background-color: rgba(245, 206, 69, 0.2); /* Translucent yellow background */
+  color: #f5ce45; /* Yellow text */
   border-radius: 10px;
   min-width: 200px;
   height:45px;
@@ -76,24 +69,27 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  box-shadow: 0 0 15px rgba(113, 187, 233, 0.6), 0 0 30px rgba(113, 187, 233, 0.4); /* Glowing blue effect */
+  box-shadow: 0 0 15px rgba(245, 206, 69, 0.6), 0 0 30px rgba(245, 206, 69, 0.4); /* Glowing yellow effect */
   white-space: nowrap;
+  transform: translateX(-50%); /* Center horizontally */
 }
 
 .save-board-button:hover:not(:disabled) {
-  background-color: rgba(113, 187, 233, 0.3);
-  box-shadow: 0 0 20px rgba(113, 187, 233, 0.8), 0 0 40px rgba(113, 187, 233, 0.6);
-  transform: translateX(-50%) scale(1.05);
-}
-
-.save-board-button:active:not(:disabled) {
-  transform: translateX(-50%) scale(0.95);
+  background-color: rgba(245, 206, 69, 0.3);
+  box-shadow: 0 0 20px rgba(245, 206, 69, 0.8), 0 0 40px rgba(245, 206, 69, 0.6);
 }
 
 .save-board-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  box-shadow: 0 0 10px rgba(113, 187, 233, 0.3), 0 0 20px rgba(113, 187, 233, 0.2);
+  box-shadow: 0 0 10px rgba(245, 206, 69, 0.3), 0 0 20px rgba(245, 206, 69, 0.2);
+}
+
+@media screen and (max-width: 768px) {
+  .save-board-button {
+    width: calc(100% - 20px);
+    max-width: 300px;
+  }
 }
 
 .remaining-saves-text {
@@ -177,4 +173,11 @@
   .switch input:focus + .slider {
     box-shadow: 0 0 0 2px rgba(60, 255, 158, 0.5);
   }
-  
+
+
+  @media (max-width: 768px) {
+    .board-container{
+        padding:0 !important;   
+        margin-bottom: 0 !important;
+    }
+}

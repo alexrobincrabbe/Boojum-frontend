@@ -199,6 +199,10 @@ export const authAPI = {
     const response = await api.post('/notifications/mark-read/');
     return response.data;
   },
+  deleteAllNotifications: async () => {
+    const response = await api.delete('/notifications/delete-all/');
+    return response.data;
+  },
 
   updateProfile: async (profileData: FormData) => {
     const response = await api.put('/profile/update/', profileData);

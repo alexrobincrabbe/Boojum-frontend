@@ -65,45 +65,64 @@ const NotificationDropdown = ({ isOpen, onClose, unreadCount, onNotificationsRea
     }
   };
 
-  const renderNotificationMessage = (notification: Notification) => {
-    // For comment/reply notifications, extract username and display with color
-    if (notification.notification_type === 'doodle_comment' || notification.notification_type === 'doodle_reply' || notification.notification_type === 'doodle_solved') {
-      if (notification.commenter_username) {
-        const messageParts = notification.message.split(notification.commenter_username);
-        const beforeUsername = messageParts[0];
-        const afterUsername = messageParts.slice(1).join(notification.commenter_username);
-        
-        return (
-          <>
-            {beforeUsername}
-            {notification.commenter_profile_url ? (
-              <a
-                href={`/profile/${notification.commenter_profile_url}`}
-                className="notification-username-link"
-                style={{ color: notification.commenter_chat_color || '#71bbe9' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/profile/${notification.commenter_profile_url}`);
-                  onClose();
-                }}
-              >
-                {notification.commenter_username}
-              </a>
-            ) : (
-              <span
-                className="notification-username"
-                style={{ color: notification.commenter_chat_color || '#71bbe9' }}
-              >
-                {notification.commenter_username}
-              </span>
-            )}
-            {afterUsername}
-          </>
-        );
-      }
+  const handleClearNotifications = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent dropdown from closing
+    if (notifications.length === 0) return;
+    
+    if (!window.confirm('Are you sure you want to delete all notifications? This cannot be undone.')) {
+      return;
     }
     
-    // For other notifications, just display the message
+    try {
+      await authAPI.deleteAllNotifications();
+      setNotifications([]);
+      onNotificationsRead(); // Update unread count
+      // Optionally show a success message
+    } catch (error: any) {
+      console.error('Error deleting notifications:', error);
+      // Optionally show an error message
+    }
+  };
+
+  const renderNotificationMessage = (notification: Notification) => {
+    // For notifications with user info, extract name from message and display with color
+    // This includes: doodle_comment, doodle_reply, doodle_solved, forum_reply, board_shared, tournament_match
+    if (notification.commenter_username) {
+      // The message contains the display_name (or username), so extract the first word
+      // Messages typically have format: "{display_name/username} ..."
+      const words = notification.message.split(' ');
+      const nameInMessage = words[0]; // This is the display_name or username from the message
+      const restOfMessage = words.slice(1).join(' ');
+      
+      return (
+        <>
+          {notification.commenter_profile_url ? (
+            <a
+              href={`/profile/${notification.commenter_profile_url}`}
+              className="notification-username-link"
+              style={{ color: notification.commenter_chat_color || '#71bbe9' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/profile/${notification.commenter_profile_url}`);
+                onClose();
+              }}
+            >
+              {nameInMessage}
+            </a>
+          ) : (
+            <span
+              className="notification-username"
+              style={{ color: notification.commenter_chat_color || '#71bbe9' }}
+            >
+              {nameInMessage}
+            </span>
+          )}
+          {' '}{restOfMessage}
+        </>
+      );
+    }
+    
+    // For notifications without user info, just display the message
     return <>{notification.message}</>;
   };
 
@@ -114,6 +133,15 @@ const NotificationDropdown = ({ isOpen, onClose, unreadCount, onNotificationsRea
       <div className="notification-dropdown" onClick={(e) => e.stopPropagation()}>
         <div className="notification-dropdown-header">
           <h3>Notifications</h3>
+          {notifications.length > 0 && (
+            <button
+              className="notification-clear-button"
+              onClick={handleClearNotifications}
+              title="Clear all notifications"
+            >
+              Clear All
+            </button>
+          )}
         </div>
         <div className="notification-dropdown-content">
           {loading ? (

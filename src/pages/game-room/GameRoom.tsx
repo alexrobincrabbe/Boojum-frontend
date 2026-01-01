@@ -103,6 +103,8 @@ export default function GameRoom() {
   const [remainingSaves, setRemainingSaves] = useState<number>(10);
   const [isChatExpanded, setIsChatExpanded] = useState(false);
   const [isSavingBoard, setIsSavingBoard] = useState(false);
+  const [lastExpandedMessageCount, setLastExpandedMessageCount] = useState(0);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
 
   // Fetch remaining saves count
   useEffect(() => {
@@ -192,6 +194,28 @@ export default function GameRoom() {
   useScoresModal(gameState, setIsScoresModalOpen, addChatSystemMessage);
   useRoomReset(roomId, resetState, setIsScoresModalOpen);
 
+  // Initialize message count on mount
+  useEffect(() => {
+    if (lastExpandedMessageCount === 0 && chatMessages.length > 0) {
+      setLastExpandedMessageCount(chatMessages.length);
+    }
+  }, [chatMessages.length, lastExpandedMessageCount]);
+
+  // Track new messages when chat is collapsed
+  useEffect(() => {
+    if (!isChatExpanded && chatMessages.length > lastExpandedMessageCount) {
+      setHasNewMessages(true);
+    }
+  }, [chatMessages.length, isChatExpanded, lastExpandedMessageCount]);
+
+  // Reset new messages indicator when chat is expanded
+  useEffect(() => {
+    if (isChatExpanded) {
+      setLastExpandedMessageCount(chatMessages.length);
+      setHasNewMessages(false);
+    }
+  }, [isChatExpanded, chatMessages.length]);
+
   if (!roomId) {
     return <div className="game-room-error">Invalid room ID</div>;
   }
@@ -278,11 +302,12 @@ export default function GameRoom() {
 
           <div className="chat-mobile">
             <button
-              className="chat-mobile-toggle"
+              className={`chat-mobile-toggle ${hasNewMessages ? 'has-new-messages' : ''}`}
               onClick={() => setIsChatExpanded(!isChatExpanded)}
               aria-label={isChatExpanded ? "Collapse chat" : "Expand chat"}
             >
               <span className="chat-toggle-text">Chat</span>
+              {hasNewMessages && <span className="chat-new-messages-indicator">●</span>}
               <span className="chat-toggle-icon">{isChatExpanded ? "▲" : "▼"}</span>
             </button>
             {isChatExpanded && (

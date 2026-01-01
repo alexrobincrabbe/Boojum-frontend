@@ -455,7 +455,7 @@ export function GameBoard({
                   onShowScores();
                 }}
                 style={{
-                  transform: `rotate(${-boardRotation}deg)`,
+                  transform: `translate(-50%, -50%) rotate(${-boardRotation}deg)`,
                 }}
               >
                 Open
@@ -463,6 +463,27 @@ export function GameBoard({
                 scores
               </button>
             ) : null}
+            
+            {/* Save Board button - shown at top of board for authenticated users */}
+            {gameState?.finalScores &&
+              (gameState?.gameStatus === "finished" ||
+                gameState?.gameStatus === "waiting") &&
+              onSaveBoard && remainingSaves !== undefined && (
+                <button
+                  id="save-board-button"
+                  className="save-board-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSaveBoard();
+                  }}
+                  disabled={remainingSaves === 0 || isSavingBoard}
+                  style={{
+                    transform: `translateX(-50%) rotate(${-boardRotation}deg)`,
+                  }}
+                >
+                  {isSavingBoard ? 'Saving...' : `Save board (${remainingSaves})`}
+                </button>
+              )}
           </div>
           {/* SVG container for drawing lines between letters */}
           <svg
@@ -479,24 +500,6 @@ export function GameBoard({
             onCancel={handleCancel}
             boardRef={boardRef}
           />
-          
-          {/* Save Board button - shown at bottom of board for authenticated users */}
-          {gameState?.finalScores &&
-            (gameState?.gameStatus === "finished" ||
-              gameState?.gameStatus === "waiting") &&
-            onSaveBoard && remainingSaves !== undefined && (
-              <button
-                id="save-board-button"
-                className="save-board-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSaveBoard();
-                }}
-                disabled={remainingSaves === 0 || isSavingBoard}
-              >
-                {isSavingBoard ? 'Saving...' : `Save board (${remainingSaves})`}
-              </button>
-            )}
         </div>
 
         {/* Display current word when typing with keyboard - always reserve space */}
