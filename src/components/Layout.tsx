@@ -224,6 +224,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const chatPollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rightSidebarRef = useRef<HTMLElement>(null);
   const [hasNewChatMessages, setHasNewChatMessages] = useState(false);
@@ -600,7 +601,7 @@ const Layout = ({ children }: LayoutProps) => {
   const sidebarOpenedTimeRef = useRef<number>(0);
   const shouldAutoScrollRef = useRef<boolean>(false);
 
-  // Scroll chat to bottom when sidebar opens
+  // Scroll chat messages container to bottom when sidebar opens
   useEffect(() => {
     if (rightSidebarOpen) {
       // Record when sidebar opened and enable auto-scroll
@@ -608,7 +609,9 @@ const Layout = ({ children }: LayoutProps) => {
       shouldAutoScrollRef.current = true;
       // Small delay to ensure the sidebar and chat messages are rendered
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (chatMessagesContainerRef.current) {
+          chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+        }
       }, 100);
     } else if (!rightSidebarOpen) {
       // Disable auto-scroll when sidebar closes
@@ -616,13 +619,15 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }, [rightSidebarOpen]);
 
-  // Scroll to bottom when messages change, but only if sidebar has been open and auto-scroll is enabled
+  // Scroll chat messages container to bottom when messages change, but only if sidebar has been open and auto-scroll is enabled
   useEffect(() => {
     // Only auto-scroll if sidebar is open and auto-scroll is enabled
     if (!rightSidebarOpen || !shouldAutoScrollRef.current) {
       return;
     }
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatMessagesContainerRef.current) {
+      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+    }
   }, [chatMessages, rightSidebarOpen]);
 
   // Update last read time when right sidebar opens
@@ -1293,7 +1298,7 @@ const Layout = ({ children }: LayoutProps) => {
               </button>
             )}
           </div>
-          <div className="sidebar-chat-messages" id="sidebar-messages">
+          <div className="sidebar-chat-messages" id="sidebar-messages" ref={chatMessagesContainerRef}>
             {chatMessages.map((msg, idx) => {
               // Special handling for TheHerald messages
               if (msg.user === "TheHerald") {
