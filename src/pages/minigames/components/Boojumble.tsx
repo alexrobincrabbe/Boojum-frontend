@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, type JSX } from 'react';
+import React, { useState, useEffect, useRef, useMemo, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
 import { playSound } from '../../../utils/sounds';
+import { usePageOnboarding } from '../../../hooks/usePageOnboarding';
 import './Boojumble.css';
 
 interface BoojumbleData {
@@ -733,6 +734,110 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     }
   };
 
+  // Track if component is ready for onboarding (needed for auto-start)
+  const [isReady, setIsReady] = useState(false);
+  
+  // Check when component is ready (letters initialized and DOM element exists)
+  useEffect(() => {
+    if (boojumbles.length > 0 && selectedLevel) {
+      const boardKey = Number(selectedLevel);
+      const boardLetters = letters[boardKey];
+      const hasLetters = boardLetters && Array.isArray(boardLetters) && boardLetters.length > 0;
+      const hasElement = document.querySelector('#boojumbles') !== null;
+      
+      if (hasLetters && hasElement) {
+        setIsReady(true);
+      } else {
+        setIsReady(false);
+      }
+    }
+  }, [letters, boojumbles.length, selectedLevel]);
+
+  // Onboarding steps for Boojumble
+  const boojumbleSteps = useMemo(() => {
+    const steps: Array<{
+      target: string;
+      content: React.ReactNode;
+      placement: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end' | 'center' | 'auto';
+      disableScrolling: boolean;
+    }> = [
+      {
+        target: '#boojumbles',
+        content: (
+          <div>
+            <p>Welcome to Boojumble! Drag and drop letters to rearrange them. Your goal is to form valid words in both rows and columns. Letters turn green when they're in the correct position, and yellow when they're part of a valid word but in the wrong position.</p>
+            <video 
+              key="boojumble-video"
+              width="100%" 
+              controls 
+              preload="auto"
+              style={{ marginTop: '10px', borderRadius: '8px', maxWidth: '500px' }}
+            >
+              <source src="/videos/boojumble.mov" type="video/quicktime" />
+              <source src="/videos/boojumble.mov" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        ),
+        placement: 'center',
+        disableScrolling: false,
+      },
+    ];
+
+    // Add steps for each board size if available
+    const boardSizes = boojumbles.map(b => b.N).sort();
+    
+    boardSizes.forEach((size) => {
+      let sizeName = '';
+      let description = '';
+      
+      if (size === 3) {
+        sizeName = 'Pocket Boojumble';
+        description = 'Pocket Boojumble is a 3x3 grid - the smallest and quickest puzzle! Perfect for a quick challenge.';
+      } else if (size === 4) {
+        sizeName = 'Humble Boojumble';
+        description = 'Humble Boojumble is a 4x4 grid - a medium difficulty puzzle that offers a good balance of challenge and fun.';
+      } else if (size === 5) {
+        sizeName = 'Jumbo Boojumble';
+        description = 'Jumbo Boojumble is a 5x5 grid - the largest and most challenging puzzle! Test your word-finding skills with more letters to work with.';
+      }
+      
+      if (sizeName && description) {
+        steps.push({
+          target: `[data-onboarding="boojumble-button-${size}"]`,
+          content: description,
+          placement: 'top',
+          disableScrolling: false,
+        });
+      }
+    });
+
+    return steps;
+  }, [boojumbles]);
+
+  // Auto-start onboarding when boojumbles are loaded, steps are ready, and component is ready
+  const autoStart = boojumbles.length > 0 && boojumbleSteps.length > 0 && isReady;
+
+  const { JoyrideComponent } = usePageOnboarding({
+    steps: boojumbleSteps,
+    pageKey: 'boojumble',
+    autoStart,
+  });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[Boojumble] Onboarding state:', {
+      boojumblesCount: boojumbles.length,
+      autoStart,
+      stepsCount: boojumbleSteps.length,
+      steps: boojumbleSteps.map(s => s.target),
+      selectedLevel,
+      isReady,
+      boojumblesElement: document.querySelector('#boojumbles'),
+      boardElement: document.querySelector('[data-onboarding="boojumble-board"]'),
+    });
+  }, [boojumbles.length, autoStart, boojumbleSteps.length, selectedLevel, isReady]);
+
   if (boojumbles.length === 0) {
     return <div style={{ color: 'white', padding: '20px' }}>No boojumbles available.</div>;
   }
@@ -757,6 +862,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
             <div
               id={`board-${boojumble.N}`}
               className="board"
+              data-onboarding={selectedLevel === boojumble.N ? "boojumble-board" : undefined}
               ref={(el) => {
                 boardRefs.current[boojumble.N] = el;
               }}
@@ -807,6 +913,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
         <button
           className={`boojumble-button ${selectedLevel === 3 ? 'boojumble-button-active' : ''}`}
           id="pk-bj"
+          data-onboarding="boojumble-button-3"
           onClick={() => setSelectedLevel(3)}
         >
           Pocket Boojumble
@@ -814,6 +921,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
         <button
           className={`boojumble-button ${selectedLevel === 4 ? 'boojumble-button-active' : ''}`}
           id="hm-bj"
+          data-onboarding="boojumble-button-4"
           onClick={() => setSelectedLevel(4)}
         >
           Humble Boojumble
@@ -821,11 +929,13 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
         <button
           className={`boojumble-button ${selectedLevel === 5 ? 'boojumble-button-active' : ''}`}
           id="jm-bj"
+          data-onboarding="boojumble-button-5"
           onClick={() => setSelectedLevel(5)}
         >
           Jumbo Boojumble
         </button>
       </div>
+      {JoyrideComponent}
     </div>
   );
 };

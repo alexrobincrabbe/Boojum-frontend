@@ -212,7 +212,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   // Reset step index when tour starts
   useEffect(() => {
-    if (run && stepIndex === 0) {
+    if (run) {
       setStepIndex(0);
     }
   }, [run]);
@@ -786,30 +786,51 @@ const Layout = ({ children }: LayoutProps) => {
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index, action } = data;
     
+    // When tour starts, ensure we're at step 0
+    if (type === 'tour:start') {
+      setStepIndex(0);
+      return;
+    }
+    
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRun(false);
       setStepIndex(0);
-    } else if (type === 'step:after') {
+      return;
+    }
+    
+    // Handle step navigation in controlled mode
+    if (type === 'step:after') {
+      let newIndex: number;
+      
+      if (action === 'prev') {
+        // For back button, go to previous step
+        newIndex = Math.max(0, stepIndex - 1);
+      } else if (action === 'next') {
+        // For next button, advance
+        newIndex = index + 1;
+      } else {
+        newIndex = index;
+      }
+      
       // Open left sidebar after navigation menu step (step 1)
-      if (index === 1 && !leftSidebarOpen) {
+      if (newIndex === 1 && !leftSidebarOpen && action === 'next') {
         setLeftSidebarOpen(true);
         // Wait for sidebar to render before showing next steps
         setTimeout(() => {
-          setStepIndex(index + 1);
+          setStepIndex(newIndex);
         }, 300);
         return;
       }
       
       // Keep left sidebar open for live games, daily challenges, and tournament steps (2, 3, 4)
-      if (index >= 2 && index <= 4 && !leftSidebarOpen) {
+      if (newIndex >= 2 && newIndex <= 4 && !leftSidebarOpen && action === 'next') {
         setLeftSidebarOpen(true);
       }
       
       // Close left sidebar and open right sidebar after profile menu step
       // For authenticated: profile menu is step 6 (index 6), for guests it's step 5 (index 5)
-      // After adding live games, daily challenges, and tournament steps
       const profileMenuStepIndex = isAuthenticated ? 6 : 5;
-      if (index === profileMenuStepIndex) {
+      if (newIndex === profileMenuStepIndex && action === 'next') {
         if (leftSidebarOpen) {
           setLeftSidebarOpen(false);
         }
@@ -818,31 +839,24 @@ const Layout = ({ children }: LayoutProps) => {
         }
         // Wait for sidebar to render, then advance to next step
         setTimeout(() => {
-          setStepIndex(index + 1);
+          setStepIndex(newIndex);
         }, 600);
-        return; // Don't advance immediately
+        return;
       }
       
-      // For other steps, advance normally
-      setStepIndex(index + 1);
+      // For other steps, update normally
+      setStepIndex(newIndex);
     } else if (type === 'step:before') {
       // Ensure left sidebar is open for steps 2-4 (live games, daily challenges, tournament)
-      if (index >= 2 && index <= 4 && !leftSidebarOpen) {
+      if (index >= 2 && index <= 4 && !leftSidebarOpen && action !== 'prev') {
         setLeftSidebarOpen(true);
       }
       
       // Close left sidebar before showing profile menu step
-      // For authenticated: profile menu is step 6 (index 6), for guests it's step 5 (index 5)
       const profileMenuStepIndex = isAuthenticated ? 6 : 5;
-      if (index === profileMenuStepIndex && leftSidebarOpen) {
+      if (index === profileMenuStepIndex && leftSidebarOpen && action !== 'prev') {
         setLeftSidebarOpen(false);
       }
-    } else if (action === 'prev') {
-      // Handle back button - update step index
-      setStepIndex(index);
-    } else if (action === 'next' || action === 'start') {
-      // Handle next/start - advance step index
-      setStepIndex(index + 1);
     }
   };
 

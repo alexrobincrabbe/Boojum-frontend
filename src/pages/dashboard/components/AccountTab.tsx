@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Loading } from '../../../components/Loading';
 import { toast } from 'react-toastify';
 import { dashboardAPI } from '../../../services/api';
-import { useOnboarding } from '../../../contexts/OnboardingContext';
+import { resetAllOnboarding } from '../../../hooks/usePageOnboarding';
 
 interface AccountBundle {
   email?: string;
@@ -10,7 +10,6 @@ interface AccountBundle {
 }
 
 const AccountTab = ({ bundle }: { bundle?: AccountBundle | null }) => {
-  const { resetOnboarding } = useOnboarding();
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [oldPassword, setOldPassword] = useState('');
@@ -93,8 +92,8 @@ const AccountTab = ({ bundle }: { bundle?: AccountBundle | null }) => {
   }
 
   const handleRestartTour = () => {
-    resetOnboarding();
-    toast.success('Onboarding tour will start shortly');
+    resetAllOnboarding();
+    toast.success('All onboarding tours have been reset. They will start automatically when you visit each page.');
   };
 
   return (

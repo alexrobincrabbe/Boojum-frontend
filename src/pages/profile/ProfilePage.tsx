@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -23,6 +23,7 @@ import TournamentBadges from './TournamentBadges';
 import DoodlesGallery from './DoodlesGallery';
 import { SortableSection } from './SortableSection';
 import ImageCropModal from './ImageCropModal';
+import { usePageOnboarding, resetAllOnboarding, type Step } from '../../hooks/usePageOnboarding';
 import './ProfilePage.css';
 
 interface GameScore {
@@ -274,6 +275,131 @@ const ProfilePage = () => {
     }
   };
 
+  // Calculate isOwnProfile safely (before conditional returns)
+  const isOwnProfile = profile ? currentUser?.id === profile.user.id : false;
+
+  // Onboarding steps for Profile page (must be before conditional returns)
+  const profileSteps = useMemo(() => {
+    // Return empty array if profile is not loaded yet
+    if (!profile) {
+      return [];
+    }
+
+    const steps: Step[] = [
+      {
+        target: '#profile-name',
+        content: (
+          <div>
+            <h3>Welcome to Your Profile</h3>
+            <p>Your profile page displays your game statistics, achievements, and personal information. You can customize everything here to make it your own!</p>
+          </div>
+        ),
+        placement: 'bottom',
+      },
+      {
+        target: '#profile-pic',
+        content: (
+          <div>
+            <h3>Profile Picture</h3>
+            <p>Your profile picture appears here. In edit mode, you can click on it to change your photo.</p>
+          </div>
+        ),
+        placement: 'right',
+      },
+    ];
+
+    // Add Edit Profile button step only if it's the user's own profile
+    if (isOwnProfile) {
+      steps.push({
+        target: '[data-onboarding="edit-profile-button"]',
+        content: (
+          <div>
+            <h3>Edit Profile</h3>
+            <p>Click this button to enter edit mode. In edit mode, you can customize your profile picture, personal details, and rearrange sections by dragging them.</p>
+          </div>
+        ),
+        placement: 'left',
+      });
+    }
+
+    // Add section steps based on section order
+    const order = (sectionOrder && Array.isArray(sectionOrder) && sectionOrder.length === 4) 
+      ? sectionOrder 
+      : ['medals', 'content', 'charts', 'doodles'];
+
+    order.forEach((sectionId) => {
+      let title = '';
+      let description = '';
+      
+      switch (sectionId) {
+        case 'medals':
+          title = 'Tournament Medals';
+          description = 'This section displays your tournament achievements and medals. Compete in tournaments to earn medals!';
+          break;
+        case 'content':
+          title = 'About Me & Game Stats';
+          description = 'This section contains your personal details, game statistics, and "About Me" information. In edit mode, you can update all of these fields.';
+          break;
+        case 'charts':
+          title = 'High Score Charts';
+          description = 'View your high scores across different game modes. Track your progress and see how you rank!';
+          break;
+        case 'doodles':
+          title = 'Doodles Album';
+          description = 'Your collection of doodles from games. Save your favorite doodles to showcase your creativity!';
+          break;
+      }
+
+      if (title && description) {
+        steps.push({
+          target: `[data-onboarding="profile-section-${sectionId}"]`,
+          content: (
+            <div>
+              <h3>{title}</h3>
+              <p>{description}</p>
+              {isOwnProfile && (
+                <p><strong>In edit mode:</strong> You can drag the grip handle to reorder this section.</p>
+              )}
+            </div>
+          ),
+          placement: 'top',
+        });
+      }
+    });
+
+    // Add edit mode customization step if it's the user's own profile and in edit mode
+    if (isOwnProfile && isEditMode) {
+      steps.push({
+        target: '[data-onboarding="profile-edit-mode-info"]',
+        content: (
+          <div>
+            <h3>Customizing Your Profile</h3>
+            <p>In edit mode, you can:</p>
+            <ul style={{ textAlign: 'left', marginTop: '10px' }}>
+              <li>Change your profile picture by clicking on it</li>
+              <li>Edit personal details (name, age, country, etc.)</li>
+              <li>Update your "About Me" section</li>
+              <li>Drag sections using the grip handle to reorder them</li>
+            </ul>
+            <p style={{ marginTop: '10px' }}>Click "Save" when you're done, or "Cancel" to discard changes.</p>
+          </div>
+        ),
+        placement: 'top',
+      });
+    }
+
+    return steps;
+  }, [profile, sectionOrder, isOwnProfile, isEditMode]);
+
+  // Auto-start onboarding when profile is loaded
+  const autoStart = !loading && profile !== null && profileSteps.length > 0;
+
+  const { JoyrideComponent } = usePageOnboarding({
+    steps: profileSteps,
+    pageKey: 'profile',
+    autoStart,
+  });
+
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;
   }
@@ -285,8 +411,6 @@ const ProfilePage = () => {
       </div>
     );
   }
-
-  const isOwnProfile = currentUser?.id === profile.user.id;
 
   // Drag and drop handler
   const handleDragEnd = async (event: { active: { id: string | number }; over: { id: string | number } | null }) => {
@@ -414,11 +538,12 @@ const ProfilePage = () => {
             <button 
               onClick={() => setIsEditMode(true)}
               className="edit-profile-top-button"
+              data-onboarding="edit-profile-button"
             >
               Edit Profile
             </button>
           ) : (
-            <div className="edit-mode-actions">
+            <div className="edit-mode-actions" data-onboarding="profile-edit-mode-info">
               <button 
                 onClick={handleSave} 
                 disabled={saving}
@@ -511,9 +636,11 @@ const ProfilePage = () => {
                     ? 'High Score Charts'
                     : 'Tournament Medals';
                   return (
-                    <SortableSection key={sectionId} id={sectionId} isEditMode={isEditMode} title={title}>
-                      {sectionContent}
-                    </SortableSection>
+                    <div key={sectionId} data-onboarding={`profile-section-${sectionId}`}>
+                      <SortableSection id={sectionId} isEditMode={isEditMode} title={title}>
+                        {sectionContent}
+                      </SortableSection>
+                    </div>
                   );
                 })}
               </SortableContext>
@@ -524,12 +651,36 @@ const ProfilePage = () => {
             <>
               {order.map((sectionId) => {
                 const sectionContent = renderSection(sectionId);
-                return sectionContent;
+                if (!sectionContent) return null;
+                return (
+                  <div key={sectionId} data-onboarding={`profile-section-${sectionId}`}>
+                    {sectionContent}
+                  </div>
+                );
               })}
             </>
           );
         }
       })()}
+      {JoyrideComponent}
+      
+      {/* Debug: Manual reset button - remove after testing */}
+      {isOwnProfile && (
+        <div style={{ position: 'fixed', top: '130px', right: '10px', zIndex: 99999, background: 'rgba(0,0,0,0.8)', padding: '10px', borderRadius: '5px', color: 'white' }}>
+          <div style={{ marginBottom: '5px', fontSize: '12px' }}>
+            Status: {localStorage.getItem('onboarding_profile_completed') === 'true' ? 'Completed' : 'Not completed'}
+          </div>
+          <button 
+            onClick={() => {
+              // Reset all onboarding for all pages
+              resetAllOnboarding();
+            }}
+            style={{ padding: '5px 10px', cursor: 'pointer' }}
+          >
+            Reset All Onboarding
+          </button>
+        </div>
+      )}
     </div>
   );
 };

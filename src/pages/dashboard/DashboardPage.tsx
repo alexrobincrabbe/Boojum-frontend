@@ -30,17 +30,6 @@ const DashboardPage = () => {
       setCurrentUser(user);
     }
   }, [user]);
-  
-  // Debug: Log user info to help troubleshoot
-  useEffect(() => {
-    if (isAuthenticated && currentUser) {
-      console.log('Dashboard - User info:', { 
-        username: currentUser.username, 
-        is_superuser: currentUser.is_superuser,
-        isSuperuser 
-      });
-    }
-  }, [isAuthenticated, currentUser, isSuperuser]);
 
   // All tabs for authenticated users, only game settings for guests
   const allTabs = [
@@ -74,7 +63,6 @@ const DashboardPage = () => {
       if (isAuthenticated) {
         try {
           const userInfo = await authAPI.getUserInfo();
-          console.log('Refreshed user info:', userInfo);
           // Update localStorage with fresh user info
           localStorage.setItem('user', JSON.stringify(userInfo));
           // Update component state

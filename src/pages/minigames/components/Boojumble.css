@@ -1,3 +1,8 @@
+/* Hide react-joyride spotlight */
+.react-joyride_spotlight {
+  display: none !important;
+}
+
 #boojumbles {
   position: relative;
 }
