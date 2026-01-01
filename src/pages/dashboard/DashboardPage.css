@@ -478,6 +478,42 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
+input:disabled + .slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Notification Categories Section */
+.notification-categories-section {
+  margin-top: 40px;
+  padding: 20px;
+  border-top: 2px solid rgba(113, 187, 233, 0.3);
+}
+
+.notification-categories-section h3 {
+  color: #f5ce45;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+.category-setting {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(19, 19, 42, 0.3);
+}
+
+.category-setting span:last-child {
+  color: #fff;
+  font-size: 1rem;
+  flex: 1;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .dashboard-tabs {

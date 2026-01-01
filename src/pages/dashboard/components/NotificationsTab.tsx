@@ -6,14 +6,27 @@ import { Loading } from '../../../components/Loading';
 interface NotificationsTabProps {
   bundle?: {
     push_notifications_enabled?: boolean;
+    push_notification_settings?: {
+      tournament_opponent_played: boolean;
+      doodles_enabled: boolean;
+      forum_replies_enabled: boolean;
+      shared_boards_enabled: boolean;
+    };
   } | null;
 }
 
 const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean | null>(null);
+  const [categorySettings, setCategorySettings] = useState({
+    tournament_opponent_played: false,
+    doodles_enabled: false,
+    forum_replies_enabled: false,
+    shared_boards_enabled: false,
+  });
   const [loading, setLoading] = useState(true);
   const isInitialMount = useRef(true);
   const initialNotificationsEnabled = useRef<boolean | null>(null);
+  const initialCategorySettings = useRef<typeof categorySettings | null>(null);
 
   useEffect(() => {
     console.log('[NotificationsTab] useEffect triggered', {
@@ -23,14 +36,27 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
     });
 
     const initFromBundle = () => {
-      if (bundle && typeof bundle.push_notifications_enabled !== 'undefined') {
-        const fetchedValue = bundle.push_notifications_enabled;
-        console.log('[NotificationsTab] Initializing from bundle:', fetchedValue);
+      if (bundle) {
+        const fetchedEnabled = bundle.push_notifications_enabled;
+        const fetchedCategories = bundle.push_notification_settings;
         
-        // Only update if this is the initial mount
+        if (typeof fetchedEnabled !== 'undefined') {
+          console.log('[NotificationsTab] Initializing enabled from bundle:', fetchedEnabled);
+          if (isInitialMount.current || fetchedEnabled !== notificationsEnabled) {
+            setNotificationsEnabled(fetchedEnabled);
+            initialNotificationsEnabled.current = fetchedEnabled;
+          }
+        }
+        
+        if (fetchedCategories) {
+          console.log('[NotificationsTab] Initializing categories from bundle:', fetchedCategories);
+          if (isInitialMount.current || JSON.stringify(fetchedCategories) !== JSON.stringify(categorySettings)) {
+            setCategorySettings(fetchedCategories);
+            initialCategorySettings.current = fetchedCategories;
+          }
+        }
+        
         if (isInitialMount.current) {
-          setNotificationsEnabled(fetchedValue);
-          initialNotificationsEnabled.current = fetchedValue;
           isInitialMount.current = false;
           setLoading(false);
         }
@@ -40,7 +66,7 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
     };
 
     if (initFromBundle()) {
-      return; // Exit early on initial mount after setting from bundle
+      return;
     }
 
     // Only fetch if bundle wasn't available and this is initial mount
@@ -49,23 +75,50 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
     }
 
     const fetchData = async () => {
-      console.log('[NotificationsTab] Fetching push notifications status from API...');
+      console.log('[NotificationsTab] Fetching dashboard data...');
       try {
         const data = await dashboardAPI.getPushNotificationsStatus();
-        console.log('[NotificationsTab] API response:', data);
-        const fetchedValue = data.push_notifications_enabled ?? false;
-        console.log('[NotificationsTab] Setting notificationsEnabled to:', fetchedValue);
-        setNotificationsEnabled(fetchedValue);
-        initialNotificationsEnabled.current = fetchedValue;
-        isInitialMount.current = false;
+        const fetchedEnabled = data.push_notifications_enabled ?? false;
+        const fetchedCategories = data.categories ?? {
+          tournament_matches: false,
+          doodles: false,
+          forum_replies: false,
+          shared_boards: false,
+        };
+        
+        console.log('[NotificationsTab] Fetched enabled value:', fetchedEnabled);
+        setNotificationsEnabled(fetchedEnabled);
+        initialNotificationsEnabled.current = fetchedEnabled;
+        
+        const categoryState = {
+          tournament_opponent_played: fetchedCategories.tournament_matches ?? false,
+          doodles_enabled: fetchedCategories.doodles ?? false,
+          forum_replies_enabled: fetchedCategories.forum_replies ?? false,
+          shared_boards_enabled: fetchedCategories.shared_boards ?? false,
+        };
+        
+        console.log('[NotificationsTab] Fetched category settings:', categoryState);
+        setCategorySettings(categoryState);
+        initialCategorySettings.current = categoryState;
       } catch (error: any) {
-        console.error('[NotificationsTab] Error fetching push notifications status:', error);
-        console.error('[NotificationsTab] Error response:', error.response);
-        // Default to false if fetch fails
+        console.error('[NotificationsTab] Error fetching dashboard data:', error);
+        toast.error(error.response?.data?.error || 'Error fetching notification settings');
         setNotificationsEnabled(false);
         initialNotificationsEnabled.current = false;
-        isInitialMount.current = false;
+        setCategorySettings({
+          tournament_opponent_played: false,
+          doodles_enabled: false,
+          forum_replies_enabled: false,
+          shared_boards_enabled: false,
+        });
+        initialCategorySettings.current = {
+          tournament_opponent_played: false,
+          doodles_enabled: false,
+          forum_replies_enabled: false,
+          shared_boards_enabled: false,
+        };
       } finally {
+        isInitialMount.current = false;
         setLoading(false);
       }
     };
@@ -155,6 +208,23 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         // Update state
         setNotificationsEnabled(true);
         initialNotificationsEnabled.current = true;
+        
+        // Automatically enable all categories when main switch is turned on
+        const updatedCategories = {
+          tournament_opponent_played: true,
+          doodles_enabled: true,
+          forum_replies_enabled: true,
+          shared_boards_enabled: true,
+        };
+        setCategorySettings(updatedCategories);
+        initialCategorySettings.current = updatedCategories;
+        await dashboardAPI.updatePushNotificationCategories({
+          tournament_matches: true,
+          doodles: true,
+          forum_replies: true,
+          shared_boards: true,
+        });
+        
         toast.success('Notifications enabled successfully');
       } catch (error: any) {
         console.error('[NotificationsTab] Error enabling notifications:', error);
@@ -188,6 +258,16 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         // Update backend status
         await dashboardAPI.updatePushNotificationsStatus(false);
         
+        // Disable all categories when main switch is turned off
+        const updatedCategories = {
+          tournament_opponent_played: false,
+          doodles_enabled: false,
+          forum_replies_enabled: false,
+          shared_boards_enabled: false,
+        };
+        setCategorySettings(updatedCategories);
+        initialCategorySettings.current = updatedCategories;
+        
         // Update state
         setNotificationsEnabled(false);
         initialNotificationsEnabled.current = false;
@@ -196,6 +276,42 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         console.error('[NotificationsTab] Error disabling notifications:', error);
         toast.error(error.message || 'Failed to disable notifications');
       }
+    }
+  };
+
+  const handleCategoryToggle = async (category: keyof typeof categorySettings) => {
+    if (notificationsEnabled === null || !notificationsEnabled) {
+      return; // Do nothing if main notifications are off or loading
+    }
+
+    const newCategorySettings = {
+      ...categorySettings,
+      [category]: !categorySettings[category],
+    };
+    setCategorySettings(newCategorySettings); // Optimistic UI update
+
+    try {
+      const categoryMapping = {
+        tournament_opponent_played: 'tournament_matches',
+        doodles_enabled: 'doodles',
+        forum_replies_enabled: 'forum_replies',
+        shared_boards_enabled: 'shared_boards',
+      } as const;
+      
+      const response = await dashboardAPI.updatePushNotificationCategories({
+        [categoryMapping[category]]: newCategorySettings[category],
+      });
+      toast.success(response.message || `Notification for ${category.replace(/_/g, ' ')} updated!`);
+      initialCategorySettings.current = newCategorySettings;
+    } catch (error: any) {
+      console.error(`[NotificationsTab] Error updating category ${category}:`, error);
+      toast.error(error.response?.data?.error || `Error updating ${category.replace(/_/g, ' ')} notifications.`);
+      setCategorySettings(initialCategorySettings.current || {
+        tournament_opponent_played: false,
+        doodles_enabled: false,
+        forum_replies_enabled: false,
+        shared_boards_enabled: false,
+      }); // Revert on error
     }
   };
 
@@ -222,6 +338,58 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         <span id="push-label">
           {notificationsEnabled === null ? 'Loading...' : (notificationsEnabled ? 'Notifications On' : 'Notifications Off')}
         </span>
+      </div>
+
+      <div className="notification-categories-section">
+        <h3>Category Specific Notifications</h3>
+        <div className="category-setting">
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={categorySettings.tournament_opponent_played}
+              onChange={() => handleCategoryToggle('tournament_opponent_played')}
+              disabled={!notificationsEnabled}
+            />
+            <span className="slider"></span>
+          </label>
+          <span>Tournament Matches</span>
+        </div>
+        <div className="category-setting">
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={categorySettings.doodles_enabled}
+              onChange={() => handleCategoryToggle('doodles_enabled')}
+              disabled={!notificationsEnabled}
+            />
+            <span className="slider"></span>
+          </label>
+          <span>Doodle Notifications (Comments, Replies, Solved)</span>
+        </div>
+        <div className="category-setting">
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={categorySettings.forum_replies_enabled}
+              onChange={() => handleCategoryToggle('forum_replies_enabled')}
+              disabled={!notificationsEnabled}
+            />
+            <span className="slider"></span>
+          </label>
+          <span>Forum Replies</span>
+        </div>
+        <div className="category-setting">
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={categorySettings.shared_boards_enabled}
+              onChange={() => handleCategoryToggle('shared_boards_enabled')}
+              disabled={!notificationsEnabled}
+            />
+            <span className="slider"></span>
+          </label>
+          <span>Shared Boards</span>
+        </div>
       </div>
     </div>
   );

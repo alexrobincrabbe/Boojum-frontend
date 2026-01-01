@@ -282,6 +282,15 @@ export const dashboardAPI = {
     const response = await api.post('/dashboard/push-notifications/update/', { enabled });
     return response.data;
   },
+  updatePushNotificationCategories: async (categories: {
+    tournament_matches?: boolean;
+    doodles?: boolean;
+    forum_replies?: boolean;
+    shared_boards?: boolean;
+  }) => {
+    const response = await api.post('/dashboard/push-notifications/categories/', { categories });
+    return response.data;
+  },
   getVapidPublicKey: async () => {
     const response = await api.get('/dashboard/push-notifications/vapid-key/');
     return response.data.public_key;
