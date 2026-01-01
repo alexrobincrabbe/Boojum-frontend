@@ -164,7 +164,7 @@ export const authAPI = {
   },
 
   setDoodlePublic: async (doodleId: number, isPublic: boolean) => {
-    const response = await api.post(`/doodles/${doodleId}/set-public/`, { public: isPublic });
+    const response = await api.post(`/doodle/${doodleId}/set-public/`, { public: isPublic });
     return response.data;
   },
   getDoodle: async (doodleId: number) => {

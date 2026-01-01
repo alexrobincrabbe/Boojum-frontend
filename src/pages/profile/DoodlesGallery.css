@@ -74,7 +74,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.9);
-  z-index: 10000;
+  z-index: 10020; /* Higher than PollModal (10010), topbar (1003), and users online bar (998) */
   display: flex;
   align-items: center;
   justify-content: center;

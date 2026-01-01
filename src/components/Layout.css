@@ -510,10 +510,46 @@
   color: var(--color-yellow) !important;
 }
 
-.nav-link:hover {
+/* Daily Challenges links - green (both grid and non-grid) */
+.left-sidebar .nav-link[href="/minigames"],
+.left-sidebar .nav-link[href="/doodledum"],
+.left-sidebar .nav-link[href="/daily-boards"],
+.left-sidebar .nav-link[href="/timeless-boards"] {
+  color: var(--color-green) !important;
+}
+
+/* Premium links - yellow by default (both grid and non-grid) - must come after Daily Challenges */
+.left-sidebar .nav-link[href="/daily-boards/archive"],
+.left-sidebar .nav-link[href*="/timeless-boards/archive"],
+.left-sidebar .nav-link[href="/minigames?archive=true"],
+.left-sidebar .nav-link[href*="/minigames?archive=true"] {
+  color: var(--color-yellow) !important;
+}
+
+/* Default hover state - only for left sidebar regular links */
+.left-sidebar .nav-link:hover {
   background-color: var(--bg-blue-20);
   border-left-color: transparent;
-  color: var(--color-yellow);
+}
+
+/* All non-yellow links turn yellow on hover */
+.left-sidebar .nav-link:hover:not([href="/daily-boards/archive"]):not([href*="/timeless-boards/archive"]):not([href="/minigames?archive=true"]):not([href*="/minigames?archive=true"]) {
+  color: var(--color-yellow) !important;
+}
+
+/* Yellow links (premium, tournament) turn white on hover - must come after general hover rule */
+.left-sidebar .nav-link[href="/daily-boards/archive"]:hover,
+.left-sidebar .nav-link[href*="/timeless-boards/archive"]:hover,
+.left-sidebar .nav-link[href="/minigames?archive=true"]:hover,
+.left-sidebar .nav-link[href*="/minigames?archive=true"]:hover,
+.left-sidebar .nav-section:last-child > .nav-link:hover {
+  color: #fff !important;
+}
+
+/* Right sidebar hover effects */
+.right-sidebar .nav-link:hover {
+  background-color: var(--bg-blue-20);
+  border-left-color: transparent;
 }
 
 .nav-link.active {
@@ -541,12 +577,32 @@
   border-bottom: 1px solid var(--bg-blue-10);
   text-align: center;
   justify-content: center;
+}
+
+/* Daily Challenges grid links are already handled by the above rule, but ensure they're green */
+.left-sidebar .nav-links-grid .nav-link[href="/minigames"],
+.left-sidebar .nav-links-grid .nav-link[href="/doodledum"],
+.left-sidebar .nav-links-grid .nav-link[href="/daily-boards"],
+.left-sidebar .nav-links-grid .nav-link[href="/timeless-boards"] {
+  color: var(--color-green) !important;
+}
+
+/* Left sidebar grid links - premium links are yellow */
+.left-sidebar .nav-links-grid .nav-link[href="/daily-boards/archive"],
+.left-sidebar .nav-links-grid .nav-link[href*="/timeless-boards/archive"],
+.left-sidebar .nav-links-grid .nav-link[href="/minigames?archive=true"],
+.left-sidebar .nav-links-grid .nav-link[href*="/minigames?archive=true"] {
+  color: var(--color-yellow) !important;
+}
+
+/* Right sidebar grid links - green by default */
+.right-sidebar .nav-links-grid .nav-link {
   color: var(--color-green) !important;
 }
 
 /* Right sidebar nav link colors */
 .right-sidebar .nav-links-grid .nav-link[href="/dashboard"] {
-  color: var(--color-yellow) !important;
+  color: var(--color-green) !important;
 }
 
 .right-sidebar .nav-links-grid .nav-link[href*="/profile"] {
@@ -561,6 +617,11 @@
   color: var(--color-pink) !important;
 }
 
+/* Right sidebar - all links turn yellow on hover */
+.right-sidebar .nav-link:hover {
+  color: var(--color-yellow) !important;
+}
+
 .nav-links-grid .nav-link:nth-child(odd) {
   border-right: 1px solid var(--bg-blue-10);
 }
@@ -569,6 +630,24 @@
   border-left: none;
   border-bottom-color: transparent;
   background-color: var(--bg-blue-20);
+}
+
+/* Left sidebar grid links - all non-yellow links turn yellow on hover */
+.left-sidebar .nav-links-grid .nav-link:hover:not([href="/daily-boards/archive"]):not([href*="/timeless-boards/archive"]):not([href="/minigames?archive=true"]):not([href*="/minigames?archive=true"]) {
+  color: var(--color-yellow) !important;
+}
+
+/* Premium grid links (yellow by default) turn white on hover */
+.left-sidebar .nav-links-grid .nav-link[href="/daily-boards/archive"]:hover,
+.left-sidebar .nav-links-grid .nav-link[href*="/timeless-boards/archive"]:hover,
+.left-sidebar .nav-links-grid .nav-link[href="/minigames?archive=true"]:hover,
+.left-sidebar .nav-links-grid .nav-link[href*="/minigames?archive=true"]:hover {
+  color: #fff !important;
+}
+
+/* Right sidebar grid links - all turn yellow on hover */
+.right-sidebar .nav-links-grid .nav-link:hover {
+  color: var(--color-yellow) !important;
 }
 
 .nav-links-grid .nav-link.active {

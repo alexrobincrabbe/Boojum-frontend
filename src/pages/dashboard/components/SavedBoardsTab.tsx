@@ -180,8 +180,11 @@ const SavedBoardsTab = () => {
     return <Loading minHeight="400px" />;
   }
 
-  const usedSaves = 10 - remainingSaves;
-  const progressPercentage = (usedSaves / 10) * 100;
+  // Calculate max saves: if we have boards.length saved and remainingSaves remaining, total is boards.length + remainingSaves
+  // This works for both premium (100 max) and regular users (10 max)
+  const maxSaves = boards.length + remainingSaves;
+  const usedSaves = boards.length;
+  const progressPercentage = maxSaves > 0 ? (usedSaves / maxSaves) * 100 : 0;
 
   return (
     <div className="saved-boards-tab">

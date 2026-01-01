@@ -110,7 +110,7 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false, initialDoodleId }: Doo
           </p>
         )}
       </div>
-      {showAlbum && canManageDoodles && (
+      {showAlbum && canManageDoodles && createPortal(
         <DoodleAlbum 
           profileUrl={profileUrl}
           onClose={() => setShowAlbum(false)}
@@ -121,7 +121,8 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false, initialDoodleId }: Doo
               setDoodles(publicDoodles);
             });
           }}
-        />
+        />,
+        document.body
       )}
       {selectedDoodle && createPortal(
         <DoodleFullscreenModal
@@ -162,7 +163,12 @@ const DoodleAlbum = ({ profileUrl, onClose, onDoodleUpdated }: DoodleAlbumProps)
       if (page === 1) {
         setDoodles(data.doodles || []);
       } else {
-        setDoodles(prev => [...prev, ...(data.doodles || [])]);
+        // Deduplicate by ID when appending new pages
+        setDoodles(prev => {
+          const existingIds = new Set(prev.map(d => d.id));
+          const newDoodles = (data.doodles || []).filter(d => !existingIds.has(d.id));
+          return [...prev, ...newDoodles];
+        });
       }
       setHasNext(data.has_next || false);
       setCurrentPage(page);
@@ -206,10 +212,45 @@ const DoodleAlbum = ({ profileUrl, onClose, onDoodleUpdated }: DoodleAlbumProps)
     try {
       const result = await authAPI.setDoodlePublic(doodleId, !currentPublic);
       if (result.ok) {
-        // Update local state
-        setDoodles(prev => prev.map(d => 
-          d.id === doodleId ? { ...d, public: result.public } : d
-        ));
+        // Update local state - reorder if needed and deduplicate
+        setDoodles(prev => {
+          // Find and update the doodle
+          const updated = prev.map(d => 
+            d.id === doodleId ? { ...d, public: result.public } : d
+          );
+          
+          // If doodle became public, move it to the top (public doodles come first)
+          // If doodle became private, move it after all public doodles
+          if (result.public && !currentPublic) {
+            const doodle = updated.find(d => d.id === doodleId);
+            if (doodle) {
+              const withoutDoodle = updated.filter(d => d.id !== doodleId);
+              // Public doodles first, then private ones
+              const publicDoodles = withoutDoodle.filter(d => d.public);
+              const privateDoodles = withoutDoodle.filter(d => !d.public);
+              return [doodle, ...publicDoodles, ...privateDoodles];
+            }
+          } else if (!result.public && currentPublic) {
+            const doodle = updated.find(d => d.id === doodleId);
+            if (doodle) {
+              const withoutDoodle = updated.filter(d => d.id !== doodleId);
+              // Public doodles first, then the one we just made private
+              const publicDoodles = withoutDoodle.filter(d => d.public);
+              const privateDoodles = withoutDoodle.filter(d => !d.public);
+              return [...publicDoodles, doodle, ...privateDoodles];
+            }
+          }
+          
+          // Deduplicate by ID (in case of any duplicates)
+          const seen = new Set<number>();
+          return updated.filter(d => {
+            if (seen.has(d.id)) {
+              return false;
+            }
+            seen.add(d.id);
+            return true;
+          });
+        });
         onDoodleUpdated();
         
         // Show toast notification
