@@ -765,7 +765,14 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
         target: '#boojumbles',
         content: (
           <div>
-            <p>Welcome to Boojumble! Drag and drop letters to rearrange them. Your goal is to form valid words in both rows and columns. Letters turn green when they're in the correct position, and yellow when they're part of a valid word but in the wrong position.</p>
+            <p>
+                Welcome to Boojumble! 
+                Click letters and drag them to rearrange the grid. 
+                Your goal is to form valid words in all rows and columns, from top to bottom and left to right. 
+                Letters turn green when they're in the correct position.
+                 When letters turn yellow, you’ve found a correct word, in the wrong row. 
+                 Try moving it to different rows, until it turns green.
+            </p>
             <video 
               key="boojumble-video"
               width="100%" 
@@ -793,13 +800,13 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       
       if (size === 3) {
         sizeName = 'Pocket Boojumble';
-        description = 'Pocket Boojumble is a 3x3 grid - the smallest and quickest puzzle! Perfect for a quick challenge.';
+        description = 'Pocket Boojumble is a 3x3 grid - the smallest and quickest puzzle! A perfect little challenge.';
       } else if (size === 4) {
         sizeName = 'Humble Boojumble';
         description = 'Humble Boojumble is a 4x4 grid - a medium difficulty puzzle that offers a good balance of challenge and fun.';
       } else if (size === 5) {
         sizeName = 'Jumbo Boojumble';
-        description = 'Jumbo Boojumble is a 5x5 grid - the largest and most challenging puzzle! Test your word-finding skills with more letters to work with.';
+        description = 'Jumbo Boojumble is a 5x5 grid - the largest and most challenging puzzle! Test your word finding skills.';
       }
       
       if (sizeName && description) {

@@ -1223,7 +1223,11 @@ export default function TimelessBoardGameRoom() {
         target: '#board',
         content: (
           <div>
-            <p>Welcome to Timeless Boards! Swipe or click letters to form words. Words must be at least 3 letters and connect adjacent letters (including diagonals).</p>
+            <p>
+                Welcome to Timeless Boards! 
+                Swipe, click or type letters to form words. 
+                Words must be at least 3 letters long and connect to adjacent letters (including diagonally).
+            </p>
             <video 
               key="timeless-1-video"
               width="100%" 
@@ -1248,7 +1252,12 @@ export default function TimelessBoardGameRoom() {
         target: '[data-onboarding="hint-button"]',
         content: (
           <div>
-            <p>Use the Clues button to reveal which letters are part of valid words. When clues are not active, words turn green when they are valid. When clues are active, letters turn yellow when they are part of a valid word, red when they are not, and green when they form a valid word. You have a limited number of clues per board.</p>
+            <p>
+                Use the Clues button to reveal the Pathways - this shows which letters are part of a valid word. 
+                When Clues are active, letters turn yellow if they are part of a valid word, pink when they are not, and green when they form a valid word. 
+                After Pathways turn green, you will need to use another Clue to activate them again.
+                 You have a limited number of Clues per board.
+            </p>
             <video 
               key="timeless-2-video"
               width="100%" 
@@ -1280,7 +1289,7 @@ export default function TimelessBoardGameRoom() {
     // Add rotate buttons step
     steps.push({
       target: '[data-onboarding="rotate-buttons"]',
-      content: 'Use the rotate buttons to turn the board 90 degrees clockwise or counter-clockwise. This can help you see words from different angles!',
+      content: 'Use the rotate buttons to turn the board 90 degrees clockwise or counter-clockwise. This can help you see words from a different perspective!',
       placement: 'top',
       disableScrolling: false,
     });
@@ -1289,7 +1298,7 @@ export default function TimelessBoardGameRoom() {
     if (!isArchived) {
       steps.push({
         target: '[data-onboarding="timer"]',
-        content: 'The timer shows how much time you have left to find words and submit your score. Once time expires, you can no longer submit.',
+        content: 'The timer shows how much time you have left to find words and submit your score. Once time runs out, you can no longer submit.',
         placement: 'bottom',
         disableScrolling: false,
       });
@@ -1308,7 +1317,7 @@ export default function TimelessBoardGameRoom() {
     // Add word lists step
     steps.push({
       target: '[data-onboarding="word-lists"]',
-      content: 'The word lists show all the words you\'ve found, organized by length. Click on any word to see its definition. Words are sorted alphabetically within each length group.',
+      content: 'The word lists show all the words you\'ve found, organized by length. Click on any word to see its definition. Words are sorted alphabetically.',
       placement: 'left',
       disableScrolling: false,
     });

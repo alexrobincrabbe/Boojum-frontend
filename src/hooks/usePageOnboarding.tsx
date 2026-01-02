@@ -41,10 +41,17 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
   const videoLoadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastStepIndexRef = useRef(-1); // Track last step to avoid duplicate video loads
   const currentStepIndexRef = useRef(0); // Track current step index to avoid stale closures
+  const stepsRef = useRef(steps); // Store steps in ref to avoid dependency issues
+  
+  // Update steps ref when steps change
+  useEffect(() => {
+    stepsRef.current = steps;
+  }, [steps]);
 
   // Check if user has completed this page's onboarding
   useEffect(() => {
     const completed = localStorage.getItem(`onboarding_${pageKey}_completed`) === 'true';
+    const currentSteps = stepsRef.current;
     
     // Track when autoStart changes from false to true (not just when it's true)
     const autoStartChanged = autoStart && !prevAutoStartRef.current;
@@ -53,7 +60,7 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
     console.log(`[Onboarding ${pageKey}] useEffect:`, {
       autoStart,
       completed,
-      stepsLength: steps.length,
+      stepsLength: currentSteps.length,
       run,
       hasAttemptedStart: hasAttemptedStartRef.current,
       autoStartChanged
@@ -71,7 +78,7 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
     }
     
     // Only attempt to start when conditions are met
-    if (autoStart && !completed && steps.length > 0 && !run && !hasAttemptedStartRef.current) {
+    if (autoStart && !completed && currentSteps.length > 0 && !run && !hasAttemptedStartRef.current) {
       console.log(`[Onboarding ${pageKey}] Attempting to start tour`);
       hasAttemptedStartRef.current = true;
       
@@ -82,39 +89,46 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
       
       // Small delay to ensure DOM is ready
       timeoutRef.current = setTimeout(() => {
-        // Double-check that elements exist before starting
-        const firstStepTarget = typeof steps[0].target === 'string' 
-          ? document.querySelector(steps[0].target)
-          : steps[0].target;
-        
-        console.log(`[Onboarding ${pageKey}] First step target:`, steps[0].target, 'Found:', !!firstStepTarget);
-        
-        if (firstStepTarget) {
-          console.log(`[Onboarding ${pageKey}] Starting tour!`);
-          currentStepIndexRef.current = 0;
-          setStepIndex(0);
-          setRun(true);
-        } else {
-          // If element not found, try again after a short delay
-          console.log(`[Onboarding ${pageKey}] Target not found, retrying...`);
-          timeoutRef.current = setTimeout(() => {
-            const retryTarget = typeof steps[0].target === 'string' 
-              ? document.querySelector(steps[0].target)
-              : steps[0].target;
-            if (retryTarget) {
-              console.log(`[Onboarding ${pageKey}] Starting tour on retry!`);
-              currentStepIndexRef.current = 0;
-              setStepIndex(0);
-              setRun(true);
-            } else {
-              // If still not found, don't mark as completed
-              console.warn(`[Onboarding ${pageKey}] Target not found after retry: ${steps[0].target}`);
-              hasAttemptedStartRef.current = false; // Allow retry later
-            }
+        const tryStart = (attempt: number) => {
+          // Get current steps from ref
+          const steps = stepsRef.current;
+          if (steps.length === 0) {
+            console.warn(`[Onboarding ${pageKey}] No steps available`);
+            hasAttemptedStartRef.current = false;
             timeoutRef.current = null;
-          }, 500);
-        }
-      }, 1000);
+            return;
+          }
+          
+          // Double-check that elements exist before starting
+          const firstStepTarget = typeof steps[0].target === 'string' 
+            ? document.querySelector(steps[0].target)
+            : steps[0].target;
+          
+          console.log(`[Onboarding ${pageKey}] Attempt ${attempt} - First step target:`, steps[0].target, 'Found:', !!firstStepTarget);
+          
+          if (firstStepTarget) {
+            console.log(`[Onboarding ${pageKey}] Starting tour!`);
+            currentStepIndexRef.current = 0;
+            setStepIndex(0);
+            setRun(true);
+            timeoutRef.current = null;
+          } else if (attempt < 5) {
+            // Retry up to 5 times with increasing delays
+            const delay = attempt * 500; // 500ms, 1000ms, 1500ms, 2000ms, 2500ms
+            console.log(`[Onboarding ${pageKey}] Target not found, retrying in ${delay}ms...`);
+            timeoutRef.current = setTimeout(() => {
+              tryStart(attempt + 1);
+            }, delay);
+          } else {
+            // If still not found after all retries, don't mark as completed
+            console.warn(`[Onboarding ${pageKey}] Target not found after ${attempt} attempts: ${steps[0].target}`);
+            hasAttemptedStartRef.current = false; // Allow retry later
+            timeoutRef.current = null;
+          }
+        };
+        
+        tryStart(1);
+      }, 500);
     }
     
     // Cleanup on unmount
@@ -128,7 +142,7 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
         videoLoadTimeoutRef.current = null;
       }
     };
-  }, [autoStart, pageKey, steps.length, run, steps]);
+  }, [autoStart, pageKey, run]);
 
   const handleCallback = useCallback((data: CallBackProps) => {
     const { status, type, index, action } = data;

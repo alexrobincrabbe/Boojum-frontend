@@ -291,7 +291,7 @@ const ProfilePage = () => {
         content: (
           <div>
             <h3>Welcome to Your Profile</h3>
-            <p>Your profile page displays your game statistics, achievements, and personal information. You can customize everything here to make it your own!</p>
+            <p>Your profile page displays your game statistics, tournament medals, your Doodledum Gallery and any personal information you wish to share. You can customise this page to make it your own!</p>
           </div>
         ),
         placement: 'bottom',
@@ -301,7 +301,7 @@ const ProfilePage = () => {
         content: (
           <div>
             <h3>Profile Picture</h3>
-            <p>Your profile picture appears here. In edit mode, you can click on it to change your photo.</p>
+            <p>Your profile picture appears here. To upload a new profile picture, click within the profile picture circle.</p>
           </div>
         ),
         placement: 'right',
@@ -315,7 +315,7 @@ const ProfilePage = () => {
         content: (
           <div>
             <h3>Edit Profile</h3>
-            <p>Click this button to enter edit mode. In edit mode, you can customize your profile picture, personal details, and rearrange sections by dragging them.</p>
+            <p>Click this button to enter Edit mode. In Edit mode, you can customise your profile picture, personal details and rearrange sections by dragging them up or down.</p>
           </div>
         ),
         placement: 'left',
@@ -334,19 +334,25 @@ const ProfilePage = () => {
       switch (sectionId) {
         case 'medals':
           title = 'Tournament Medals';
-          description = 'This section displays your tournament achievements and medals. Compete in tournaments to earn medals!';
+          description = `This section displays your tournament achievements. 
+          Compete in tournaments to earn medals!\n\nIn Edit mode: You can drag the grip handle to reorder this section.`;
+
           break;
         case 'content':
           title = 'About Me & Game Stats';
-          description = 'This section contains your personal details, game statistics, and "About Me" information. In edit mode, you can update all of these fields.';
+          description = `This section contains your chosen personal details, game statistics and "About Me" information. \n\n
+          In Edit mode, you can update all of these fields and drag the grip handle to reorder this section. `;
           break;
         case 'charts':
-          title = 'High Score Charts';
-          description = 'View your high scores across different game modes. Track your progress and see how you rank!';
+          title = 'Live Game Charts';
+          description = `View your live game charts across different game modes. Track your progress over time! \n\n
+          In Edit mode: You can drag the grip handle to reorder this section.`;
           break;
         case 'doodles':
-          title = 'Doodles Album';
-          description = 'Your collection of doodles from games. Save your favorite doodles to showcase your creativity!';
+          title = 'Doodles Gallery';
+          description = `This is your collection of Doodles from Doodledum. 
+          Manage and set your favourite Doodles to “public” to showcase your artistic flair.  
+          \n\nIn Edit mode: You can drag the grip handle to reorder this section.`;
           break;
       }
 
@@ -358,7 +364,7 @@ const ProfilePage = () => {
               <h3>{title}</h3>
               <p>{description}</p>
               {isOwnProfile && (
-                <p><strong>In edit mode:</strong> You can drag the grip handle to reorder this section.</p>
+                <p><strong>In edit mode:</strong> click these icons to drag and rearrange the sections on your profile to your preference.</p>
               )}
             </div>
           ),

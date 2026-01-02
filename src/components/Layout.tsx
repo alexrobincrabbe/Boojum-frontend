@@ -787,30 +787,30 @@ const Layout = ({ children }: LayoutProps) => {
   const baseSteps: Step[] = [
     {
       target: 'body',
-      content: 'Welcome to Boojum Games! Let\'s take a quick tour to help you get started.',
+      content: 'Welcome to Boojum Games. Let’s take a look around together.',
       placement: 'center',
       disableBeacon: true,
     },
     {
       target: '[data-onboarding="navigation-menu"]',
-      content: 'This is the main navigation menu. Click here to access all games, challenges, and features.',
+      content: 'This is the main navigation menu. Click here to access all games, daily challenges, tournaments, high scores and our forum.',
       placement: 'right',
     },
     {
       target: '[data-onboarding="live-games"]',
-      content: 'Live Games shows all active game rooms where you can join other players in real-time games.',
+      content: 'Live Games shows our game rooms, where you can join other players in realtime, compete for a place on the scoreboards, or simply play for fun!',
       placement: 'right',
       disableScrolling: false,
     },
     {
       target: '[data-onboarding="daily-challenges"]',
-      content: 'Daily Challenges include Mini-Games, Doodledum, Everyday Board, and Timeless Board. These are updated daily or can be played anytime!',
+      content: 'Daily Challenges include Everyday Board, Timeless Board, Mini-Games (Cluejums and Boojumbles) and Doodledum. These are updated every day.',
       placement: 'right',
       disableScrolling: false,
     },
     {
       target: '[data-onboarding="tournament"]',
-      content: 'Participate in biweekly tournaments and team tournaments to compete with other players and climb the leaderboards!',
+      content: 'Participate in biweekly tournaments and team tournaments for a bit of friendly competition!',
       placement: 'right',
       disableScrolling: false,
     },
@@ -818,7 +818,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   const notificationStep: Step = {
     target: '[data-onboarding="notifications"]',
-    content: 'Check your notifications here to stay updated on game activity and messages.',
+    content: 'Check your notifications here to stay updated on site activity, tournament info, messages and boards that have been sent your way.',
     placement: 'bottom',
     disableScrolling: false,
   };
@@ -826,19 +826,19 @@ const Layout = ({ children }: LayoutProps) => {
   const remainingSteps: Step[] = [
     {
       target: '[data-onboarding="profile-menu"]',
-      content: 'Click here to open the right sidebar where you can access your dashboard, profile, and chat with other players.',
+      content: 'Click here to open the right sidebar where you can chat with other players and see what Activities everyone has been up to! From here, you can also access your Dashboard and profile.',
       placement: 'left',
       disableScrolling: false,
     },
     {
       target: '[data-onboarding="lobby-chat"]',
-      content: 'This is the lobby chat where you can communicate with other players. You need to be logged in to send messages.',
+      content: 'This is the lobby Chatterbox where you can speak with other players and leave them messages. You need to be logged in to send messages.',
       placement: 'left',
       disableScrolling: false,
     },
     {
       target: '[data-onboarding="dashboard-link"]',
-      content: 'Visit your dashboard to manage your account settings, saved boards, and preferences.',
+      content: 'Visit your Dashboard to manage your account settings, saved boards and general site preferences.',
       placement: 'left',
       disableScrolling: false,
     },

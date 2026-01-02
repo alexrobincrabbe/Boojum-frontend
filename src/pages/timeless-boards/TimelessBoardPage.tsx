@@ -304,8 +304,9 @@ setBoardsByLevel({
           {/* Info text */}
           <div className="timeless-board-info">
             <ul className="text-blue-glow">
-              <li>You can submit a score for each level of each board - Your progress is automatically saved for the 24 hour period, so you're free to wander off and stretch your legs.</li>
-              <li>When the timer reaches 0, a new board will become available, at which time you'll be able to peek at the word lists from previous puzzles by clicking 'Previous'.</li>
+              <li>Your progress is saved to your device throughout the 24 hour playing period.</li>
+              <li>You can submit a score for each version of every board, but you must submit before the timer runs out. </li>
+              <li>When the timer reaches 0, you can view the full word list by pressing “Previous” at which time a new daily Timeless Board will become available to play.</li>
             </ul>
           </div>
         </div>
