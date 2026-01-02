@@ -59,7 +59,20 @@ export function PollModal({ poll, isOpen, onClose, onVote, isAuthenticated }: Po
                     <div className="poll-bar-container">
                       <div
                         className="poll-bar"
-                        style={{ width: `${option.percentage}%` }}
+                        style={{ 
+                          width: `${option.percentage}%`,
+                          backgroundColor: (() => {
+                            // Cycle through site colors: pink, green, purple, yellow, blue
+                            const colors = [
+                              'rgb(235, 84, 151)', // pink
+                              'rgb(51, 193, 91)',  // green
+                              'rgb(94, 76, 176)',  // purple
+                              'rgb(245, 206, 69)', // yellow
+                              'rgb(113, 187, 233)', // blue
+                            ];
+                            return colors[idx % colors.length];
+                          })()
+                        }}
                       />
                       <span className="poll-percentage">{option.percentage}%</span>
                     </div>

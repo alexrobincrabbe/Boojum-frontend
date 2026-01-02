@@ -202,40 +202,6 @@ const LobbyPage = () => {
 
   return (
     <div className="lobby-container">
-      {/* Debug: Manual start button - remove after testing */}
-      {(
-        <div style={{ position: 'fixed', top: '10px', right: '10px', zIndex: 99999, background: 'rgba(0,0,0,0.8)', padding: '10px', borderRadius: '5px', color: 'white' }}>
-          <div style={{ marginBottom: '5px', fontSize: '12px' }}>
-            Status: {localStorage.getItem('onboarding_lobby_completed') === 'true' ? 'Completed' : 'Not completed'}
-          </div>
-          <button 
-            onClick={() => {
-              console.log('Manual start - steps:', lobbySteps);
-              console.log('Manual start - elements:', {
-                roomsSection: document.querySelector('[data-onboarding="rooms-section"]'),
-                roomCard: document.querySelector('[data-onboarding="room-card"]'),
-                highScores: document.querySelector('[data-onboarding="high-scores-link"]'),
-              });
-              // Clear localStorage first
-              localStorage.removeItem('onboarding_lobby_completed');
-              console.log('Cleared onboarding_lobby_completed from localStorage');
-              resetTour();
-            }}
-            style={{ padding: '5px 10px', cursor: 'pointer', marginRight: '5px' }}
-          >
-            Start Lobby Tour
-          </button>
-          <button 
-            onClick={() => {
-              localStorage.removeItem('onboarding_lobby_completed');
-              console.log('Cleared onboarding_lobby_completed from localStorage');
-            }}
-            style={{ padding: '5px 10px', cursor: 'pointer' }}
-          >
-            Clear Only
-          </button>
-        </div>
-      )}
       <div className="lobby-row">
         {/* Center Column - Rooms & Word of the Day */}
         <div className="lobby-col-center">

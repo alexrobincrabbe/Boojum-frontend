@@ -5,11 +5,25 @@
   width: 100%;
 }
 
+@media screen and (max-width: 768px) {
+  .board-preview-container {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .board-preview-container h4 {
   margin: 0 0 15px 0;
   color: #f5ce45;
   font-size: 1.1rem;
   text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  .board-preview-container h4 {
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+  }
 }
 
 .board-preview-wrapper {

@@ -2,6 +2,14 @@
   padding: 20px;
 }
 
+@media screen and (max-width: 768px) {
+  .game-settings-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
 .game-settings-section {
   margin-bottom: 30px;
   padding: 20px;
@@ -41,9 +49,15 @@
     flex-direction: column;
   }
   
+  .board-settings-controls {
+    order: 2;
+  }
+  
   .board-preview-wrapper-container {
+    order: 1;
     width: 100%;
     min-width: unset;
+    margin-bottom: 20px;
   }
 }
 

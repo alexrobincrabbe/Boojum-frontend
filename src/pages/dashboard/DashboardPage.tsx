@@ -38,7 +38,7 @@ const DashboardPage = () => {
     { id: 'notifications' as TabType, label: 'Push Notifications', guest: false, superuser: false },
     { id: 'account' as TabType, label: 'Account Details', guest: false, superuser: false },
     { id: 'chat' as TabType, label: 'Chat Settings', guest: false, superuser: false },
-    { id: 'playmates' as TabType, label: 'Playmates', guest: false, superuser: false },
+    { id: 'playmates' as TabType, label: 'Buddies', guest: false, superuser: false },
     { id: 'premium' as TabType, label: 'Premium', guest: false, superuser: true },
   ];
 

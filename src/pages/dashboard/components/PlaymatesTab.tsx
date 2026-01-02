@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Loading } from '../../../components/Loading';
 import { toast } from 'react-toastify';
 import { dashboardAPI } from '../../../services/api';
@@ -10,6 +11,7 @@ interface Buddy {
   online: string;
   playing: string;
   time_ago: string;
+  profile_url?: string;
 }
 
 interface PlaymatesBundle {
@@ -177,18 +179,18 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
                 />
               </span>
               <span style={{ color: '#fff', fontSize: '0.9rem' }}>
-                {filterOnlinePlaymatesOnly === null ? 'Loading...' : 'Filter online users to show only playmates'}
+                {filterOnlinePlaymatesOnly === null ? 'Loading...' : 'Filter online users to show only buddies'}
               </span>
             </label>
           </div>
           <form onSubmit={handleAddBuddy} id="buddy-form" className="short-form">
-            <label htmlFor="buddy-search">Search Playmates:</label>
+            <label htmlFor="buddy-search">Search Buddies:</label>
             <input
               type="text"
               id="buddy-search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Find playmate"
+              placeholder="Find buddy"
             />
             <button type="submit" className="dashboard-button">
               Add
@@ -246,14 +248,18 @@ const PlaymatesTab = ({ bundle }: { bundle?: PlaymatesBundle | null }) => {
                         &times;
                       </span>
                     </button>
-                    <div className="buddy-list-name" style={{ color: buddy.chat_color }}>
+                    <Link
+                      to={`/profile/${buddy.profile_url || buddy.display_name.toLowerCase()}`}
+                      className="buddy-list-name"
+                      style={{ color: buddy.chat_color, textDecoration: 'none' }}
+                    >
                       {buddy.display_name}
-                    </div>
+                    </Link>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>You don't have any playmates yet.</p>
+              <p>You don't have any buddies yet.</p>
             )}
           </div>
         </div>

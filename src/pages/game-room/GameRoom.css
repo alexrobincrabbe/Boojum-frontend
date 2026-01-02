@@ -1339,6 +1339,9 @@ white-space: nowrap;
     box-sizing: border-box;
   }
 
+  .game-header not(.daily-board-game-title):not(.tournament-game-title) {
+    width: 165px;
+  }
   .chat-desktop {
     display: flex;
     flex-direction: column;

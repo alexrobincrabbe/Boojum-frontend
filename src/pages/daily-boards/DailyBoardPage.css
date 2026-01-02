@@ -1,6 +1,6 @@
 .daily-board-page {
   min-height: calc(100vh - 140px);
-  padding: 40px 20px;
+  padding: 0px 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -206,8 +206,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
+
   position: relative;
 }
 
@@ -315,14 +314,13 @@
 
 @media (min-width: 768px) {
   .daily-board-title {
-    font-size: 3rem;
+    font-size: 2rem;
   }
 }
 
 .daily-board-date {
   color: var(--color-purple);
   font-size: 1.2rem;
-  margin-bottom: 15px;
   font-weight: 500;
 }
 
@@ -337,19 +335,19 @@
 .board-type.bonus {
   color: #71bbe9;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-style: normal !important;
 }
 
 .board-time-limit {
   color: var(--color-yellow);
-  font-size: 1rem;
+  font-size: 1.5rem;
 }
 
 .board-time-limit .time-value {
   color: var(--color-pink);
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.5rem;
 }
 
 /* Play Button */
@@ -834,7 +832,7 @@ border-bottom: 2px solid #71bbe9;
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .daily-board-page {
-    padding: 20px 10px;
+    padding: 0px 10px;
   }
 
   .daily-board-container {

@@ -53,12 +53,24 @@ const Poll: React.FC<PollProps> = ({ poll: initialPoll }) => {
           <>
             {poll.options.map((option, index) => {
               if (!option.value) return null;
+              // Cycle through site colors: pink, green, purple, yellow, blue
+              const colors = [
+                'rgb(235, 84, 151)', // pink
+                'rgb(51, 193, 91)',  // green
+                'rgb(94, 76, 176)',  // purple
+                'rgb(245, 206, 69)', // yellow
+                'rgb(113, 187, 233)', // blue
+              ];
+              const barColor = colors[index % colors.length];
               return (
                 <div key={index}>
                   <div className="progress" style={{ display: 'inline-block', width: '100%' }}>
                     <div
                       className="progress-bar custom-progress-bar"
-                      style={{ width: `${option.percentage}%` }}
+                      style={{ 
+                        width: `${option.percentage}%`,
+                        backgroundColor: barColor
+                      }}
                       role="progressbar"
                     >
                       {option.percentage}%

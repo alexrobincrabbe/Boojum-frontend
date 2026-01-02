@@ -286,13 +286,13 @@ const MinigamesPage = () => {
                     className={`minigame-tab ${activeTab === 'boojumble' ? 'active' : ''} boojumble-tab`}
                     onClick={() => setActiveTab('boojumble')}
                   >
-                    Boojumble
+                    Boojumbles
                   </button>
                   <button
                     className={`minigame-tab ${activeTab === 'cluejum' ? 'active' : ''} cluejum-tab`}
                     onClick={() => setActiveTab('cluejum')}
                   >
-                    Cluejum
+                    Cluejums
                   </button>
                 </div>
 

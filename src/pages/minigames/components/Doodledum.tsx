@@ -1157,7 +1157,7 @@ const Doodledum: React.FC = () => {
                 {activeDoodledum.is_drawn === 'yes' ? (
                   !isCurrentUserDrawer && (
                     <div className="yellow">
-                      There's a drawing waiting to be guessed! Drawer: {activeDoodledum.drawer}
+                      There's a drawing waiting to be guessed! Artist: {activeDoodledum.drawer}
                     </div>
                   )
                 ) : (
@@ -1308,7 +1308,7 @@ const Doodledum: React.FC = () => {
           <div id="feed-message" style={{ marginBottom: '10px' }}>
             {drawingWord && (
               <div className="green" style={{ fontSize: '1.5em' }}>
-                Your word to draw: <span className="blue">{drawingWord}</span>
+                Draw your interpretation of: <span className="blue">{drawingWord}</span>
               </div>
             )}
           </div>

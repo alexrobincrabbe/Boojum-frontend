@@ -367,6 +367,15 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       {/* Stage 1: typed guesses */}
       {stage === 1 && (
         <div className="word-clue-container" id="word-clue-container-1">
+          <div className="stage-instruction" style={{ 
+            textAlign: "center", 
+            marginBottom: "20px", 
+            color: "#71bbe9",
+            fontSize: "1.1em",
+            fontWeight: "500"
+          }}>
+            Guess the word! You have 3 guesses. A new clue will be revealed for each guess.
+          </div>
           {[1, 2, 3].slice(0, s1ClueStep).map((stepIdx) => {
             const isActive = s1Status === "playing" && stepIdx === s1ClueStep;
             const guessString =
@@ -448,6 +457,15 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       {/* Stage 2: definitions */}
       {stage === 2 && (
         <div className="word-clue-container" id="word-clue-container-2">
+          <div className="stage-instruction" style={{ 
+            textAlign: "center", 
+            marginBottom: "20px", 
+            color: "#71bbe9",
+            fontSize: "1.1em",
+            fontWeight: "500"
+          }}>
+            Guess which word matches the definition given. You have 3 guesses.
+          </div>
           <div className="clue" id="word-clue-2" style={{ minHeight: 50, textAlign: "center" }}>
             {definition.word}
           </div>
@@ -480,6 +498,15 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       {/* Stage 3: synonyms */}
       {stage === 3 && (
         <div className="word-clue-container" id="word-clue-container-3">
+          <div className="stage-instruction" style={{ 
+            textAlign: "center", 
+            marginBottom: "20px", 
+            color: "#71bbe9",
+            fontSize: "1.1em",
+            fontWeight: "500"
+          }}>
+            Guess the synonym. You have 3 guesses.
+          </div>
           <div className="clue" id="word-clue-3" style={{ minHeight: 50, textAlign: "center" }}>
             {synonym.word}
           </div>

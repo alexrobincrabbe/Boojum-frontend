@@ -245,9 +245,10 @@ export default function DailyBoardPage() {
 
         {/* Board Info */}
         <div className="daily-board-header">
+        <div className="daily-board-date">{formatDate(currentBoard.date)}</div>
+
         <h1 className="daily-board-title">{currentBoard.title}</h1>
 
-          <div className="daily-board-date">{formatDate(currentBoard.date)}</div>
           <div className="daily-board-meta">
             {currentBoard.type === 'bonus' && (
               <span className="board-type bonus">Bonus Letters</span>
