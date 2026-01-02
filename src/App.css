@@ -57,3 +57,93 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Home Page Styles */
+.home-page-content {
+  color: #fff;
+}
+
+.home-page-welcome-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-direction: column;
+}
+
+.home-page-profile-picture {
+  flex-shrink: 0;
+}
+
+.home-page-welcome-text {
+  flex: 1;
+  text-align: center;
+}
+
+.home-page-signed-in {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.home-page-signed-in strong {
+  color: #febe38;
+}
+
+.home-page-game-time {
+  font-size: 1.1rem;
+  color: #71bbe9;
+  margin: 0;
+}
+
+.home-page-info-section {
+  margin-top: 30px;
+}
+
+.home-page-info-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.home-page-link {
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.home-page-link-yellow {
+  color: #febe38;
+}
+
+.home-page-link-yellow:hover {
+  color: #f5c842;
+}
+
+.home-page-link-green {
+  color: #4ade80;
+}
+
+.home-page-link-green:hover {
+  color: #22c55e;
+}
+
+.home-page-link-pink {
+  color: #eb5497;
+}
+
+.home-page-link-pink:hover {
+  color: #d9468a;
+}
+
+/* Larger screens - profile picture on left */
+@media (min-width: 768px) {
+  .home-page-welcome-section {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .home-page-welcome-text {
+    text-align: left;
+  }
+}

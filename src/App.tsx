@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Outlet,
+  Link,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,6 +12,9 @@ import { BoardThemeProvider } from "./contexts/BoardThemeContext";
 import { OnboardingProvider } from "./contexts/OnboardingContext";
 import Layout from "./components/Layout";
 import { useRouteActivityTracking } from "./hooks/useRouteActivityTracking";
+import { ProfilePicture } from "./components/ProfilePicture";
+import { authAPI } from "./services/api";
+import { useState, useEffect } from "react";
 import LoginPage from "./pages/login/LoginPage";
 import RegisterPage from "./pages/register/RegisterPage";
 import GoogleUsernamePageWrapper from "./pages/google-username/GoogleUsernamePageWrapper";
@@ -54,6 +58,30 @@ import { Analytics } from "@vercel/analytics/react"
 
 const HomePage = () => {
   const { user, isAuthenticated, loading } = useAuth();
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+  const [profileUrl, setProfileUrl] = useState<string | null>(null);
+  const [chatColor, setChatColor] = useState<string>('#71bbe9');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const profile = await authAPI.getProfile(user.username.toLowerCase());
+          setProfilePictureUrl(profile.profile_picture_url);
+          setProfileUrl(profile.profile_url);
+          setChatColor(profile.chat_color || '#71bbe9');
+        } catch (error) {
+          // Profile might not exist yet, use defaults
+          setProfilePictureUrl(null);
+          setProfileUrl(user.username.toLowerCase());
+        }
+      }
+    };
+
+    if (isAuthenticated && user) {
+      fetchProfile();
+    }
+  }, [isAuthenticated, user]);
 
   if (loading) {
     return (
@@ -68,35 +96,48 @@ const HomePage = () => {
       <SpeedInsights />
       <Analytics />
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4 text-yellow-400">
+        <h1 className="text-4xl font-bold mb-8 text-yellow-400">
           Welcome to Boojum Games!
         </h1>
-        {isAuthenticated ? (
-          <>
-            <p className="text-white mb-6">
-              You are successfully logged in with JWT authentication.
-            </p>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-              <h3 className="font-semibold mb-4 text-yellow-400">
-                User Information:
-              </h3>
-              <p className="text-white">
-                <strong>ID:</strong> {user?.id}
+        {isAuthenticated && user ? (
+          <div className="home-page-content">
+            <div className="home-page-welcome-section">
+              <div className="home-page-profile-picture">
+                <ProfilePicture
+                  profilePictureUrl={profilePictureUrl}
+                  profileUrl={profileUrl || undefined}
+                  chatColor={chatColor}
+                  size={80}
+                  showBorder={true}
+                />
+              </div>
+              <div className="home-page-welcome-text">
+                <p className="home-page-signed-in">
+                  You are signed in as <strong>{user.username}</strong>
+                </p>
+                <p className="home-page-game-time">
+                  It's game time, let's play!
+                </p>
+              </div>
+            </div>
+            <div className="home-page-info-section">
+              <p className="home-page-info-text">
+                Go to your <Link to={`/profile/${profileUrl || user.username.toLowerCase()}`} className="home-page-link home-page-link-yellow">profile page</Link> to update your picture and share info about yourself.
               </p>
-              <p className="text-white">
-                <strong>Username:</strong> {user?.username}
+              <p className="home-page-info-text">
+                Check out your <Link to="/dashboard" className="home-page-link home-page-link-green">dashboard</Link>, you can customise the game appearance, change your username colour and more.
               </p>
-              <p className="text-white">
-                <strong>Email:</strong> {user?.email}
+              <p className="home-page-info-text">
+                Go to the <Link to="/lobby" className="home-page-link home-page-link-pink">live games page</Link>, or check out the daily challenges to start playing now.
               </p>
             </div>
-          </>
+          </div>
         ) : (
           <p className="text-white mb-6">
             Welcome! You can browse the site as a guest or{" "}
-            <a href="/login" className="text-yellow-400 hover:underline">
+            <Link to="/login" className="text-yellow-400 hover:underline">
               login
-            </a>{" "}
+            </Link>{" "}
             to access your account.
           </p>
         )}

@@ -1448,6 +1448,42 @@ white-space: nowrap;
   text-shadow: var(--glow-blue-text);
 }
 
+.word-definition-banner-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.word-definition-banner-container #word-definition-banner {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.game-instructions-button {
+  background-color: #febe38;
+  color: #13132a;
+  border: 2px solid #febe38;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.game-instructions-button:hover {
+  background-color: #f5c842;
+  border-color: #f5c842;
+}
+
+.game-instructions-button:active {
+  background-color: #e6b530;
+  border-color: #e6b530;
+}
+
 .word-lists-wrapper {
   width: 100%;
   overflow-x: auto;

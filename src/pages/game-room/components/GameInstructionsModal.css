@@ -1,0 +1,180 @@
+/* Modal overlay */
+.game-instructions-modal-overlay {
+  position: fixed;
+  z-index: 10020; /* Higher than ScoresModal (10010) and all layout elements */
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-instructions-modal-content {
+  position: relative;
+  background-color: #13132a;
+  border: 3px solid #eb5497;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.game-instructions-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eb5497;
+}
+
+.game-instructions-modal-title {
+  margin: 0;
+  color: #febe38;
+  font-size: 1.5rem;
+}
+
+.game-instructions-modal-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.game-instructions-modal-close:hover {
+  color: #eb5497;
+}
+
+.game-instructions-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.game-instructions-box {
+  border: 2px solid #71bbe9;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: rgba(113, 187, 233, 0.1);
+  margin-bottom: 20px;
+}
+
+.game-instructions-box:last-child {
+  margin-bottom: 0;
+}
+
+.game-instructions-box-title {
+  margin: 0 0 15px 0;
+  color: #71bbe9;
+  font-size: 1.3rem;
+}
+
+.game-instructions-intro {
+  margin: 0 0 15px 0;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.game-instructions-text {
+  margin: 0 0 15px 0;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.game-instructions-list {
+  margin: 15px 0;
+  padding-left: 20px;
+  color: #fff;
+  line-height: 1.8;
+}
+
+.game-instructions-list li {
+  margin-bottom: 10px;
+}
+
+.game-instructions-note {
+  margin: 15px 0 0 0;
+  color: #fff;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.green-text {
+  color: #4ade80;
+  font-weight: bold;
+}
+
+.yellow-text {
+  color: #febe38;
+  font-weight: bold;
+}
+
+.pink-text {
+  color: #eb5497;
+  font-weight: bold;
+}
+
+.game-instructions-scoring-grid {
+  margin: 15px 0;
+}
+
+.scoring-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  color: #fff;
+}
+
+.scoring-row:last-child {
+  border-bottom: none;
+}
+
+.scoring-letters {
+  font-weight: 500;
+}
+
+.scoring-value {
+  color: #febe38;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.game-instructions-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 20px;
+  border-top: 1px solid #eb5497;
+}
+
+.btn.yellow-button {
+  background-color: #febe38;
+  color: #13132a;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.btn.yellow-button:hover {
+  background-color: #f5c842;
+}
+

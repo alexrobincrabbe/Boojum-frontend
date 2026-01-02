@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { WordData as ProtocolWordData } from '../../../ws/protocol';
 import { calculateWordScore } from '../utils/scoreCalculation';
 import { fetchDefinition } from '../../../utils/dictionary';
+import { GameInstructionsModal } from './GameInstructionsModal';
 
 // Extended WordData type to support both formats
 type ExtendedWordData = 
@@ -21,6 +22,7 @@ interface WordListsProps {
   filteredPlayerIds?: Set<number | null>; // Filtered player IDs for daily board solution
   showColorBanner?: boolean; // Whether to show color coding banner (default: true for finished games)
   showDefinitionBanner?: boolean; // Whether to show definition banner (default: true)
+  isLiveGameRoom?: boolean; // Whether this is a live game room (not daily board, tournament, or timeless board)
 }
 
 // Type guard to check if WordData is in protocol format
@@ -44,11 +46,13 @@ export function WordLists({
   filteredPlayerIds = new Set(),
   showColorBanner,
   showDefinitionBanner = true,
+  isLiveGameRoom = false,
 }: WordListsProps) {
   // Definition popup state (hooks must be called before any early returns)
   const [popup, setPopup] = useState<{ word: string; definition: string } | null>(null);
   const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
+  const [isInstructionsModalOpen, setIsInstructionsModalOpen] = useState(false);
 
   // Cleanup popup timeout on unmount
   useEffect(() => {
@@ -302,8 +306,19 @@ export function WordLists({
   return (
     <div className="centered-element">
       {showDefinitionBanner && (
-        <div id="word-definition-banner" className="blue">
-          CLICK ON A WORD TO SEE THE DEFINITION
+        <div id="word-definition-banner-container" className="word-definition-banner-container">
+          <div id="word-definition-banner" className="blue">
+            CLICK ON A WORD TO SEE THE DEFINITION
+          </div>
+          {isLiveGameRoom && (
+            <button
+              className="game-instructions-button"
+              onClick={() => setIsInstructionsModalOpen(true)}
+              aria-label="How to play"
+            >
+              How to Play
+            </button>
+          )}
         </div>
       )}
       {/* Color coding explanation banner */}
@@ -391,6 +406,13 @@ export function WordLists({
             {popup.definition}
           </div>
         </div>
+      )}
+      {/* Game Instructions Modal */}
+      {isLiveGameRoom && (
+        <GameInstructionsModal
+          isOpen={isInstructionsModalOpen}
+          onClose={() => setIsInstructionsModalOpen(false)}
+        />
       )}
     </div>
   );

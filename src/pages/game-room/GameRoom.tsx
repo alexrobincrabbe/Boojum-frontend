@@ -327,6 +327,7 @@ export default function GameRoom() {
             hasFinalScores={!!gameState.finalScores}
             boojum={gameState.boojum}
             snark={gameState.snark}
+            isLiveGameRoom={true}
           />
         </div>
       )}
