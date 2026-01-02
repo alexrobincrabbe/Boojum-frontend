@@ -97,9 +97,11 @@ export function useChatWebSocket({
     const apiBaseUrl =
       import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
     const djangoBaseUrl = apiBaseUrl.replace("/api", "");
-    const wsBaseUrl =
-      import.meta.env.VITE_WS_BASE_URL ||
-      djangoBaseUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
+    // Convert VITE_WS_BASE_URL from https:// to wss:// if set, otherwise use fallback
+    const wsBaseUrlEnv = import.meta.env.VITE_WS_BASE_URL;
+    const wsBaseUrl = wsBaseUrlEnv
+      ? wsBaseUrlEnv.replace(/^http:/, "ws:").replace(/^https:/, "wss:")
+      : djangoBaseUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
 
     const base = `${wsBaseUrl}/ws/chat/${roomId}/${guestParam}/`;
     const url = new URL(base);

@@ -85,7 +85,11 @@ export default function TeamTournamentGameRoom() {
     if (!matchId || !matchInfo || !matchInfo.player_position) return '';
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const djangoBaseUrl = apiBaseUrl.replace('/api', '');
-    const wsBaseUrl = djangoBaseUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
+    // Convert VITE_WS_BASE_URL from https:// to wss:// if set, otherwise use fallback
+    const wsBaseUrlEnv = import.meta.env.VITE_WS_BASE_URL;
+    const wsBaseUrl = wsBaseUrlEnv
+      ? wsBaseUrlEnv.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:')
+      : djangoBaseUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
     return `${wsBaseUrl}/ws/team-tournament/play/${matchId}/${matchInfo.player_position}/`;
   }, [matchId, matchInfo]);
 
