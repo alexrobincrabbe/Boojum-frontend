@@ -391,7 +391,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         content: (
           <div>
             <h3>Tournament Registration</h3>
-            <p>To participate in tournaments, you need to register before the registration period closes. Click the "register" button when registration is open to join the tournament.</p>
+            <p>To participate in tournaments, you need to register before the registration period closes. Click the "register" button when registration is open to join the tournament. </p>
           </div>
         ),
         placement: 'bottom',
@@ -401,7 +401,7 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         content: (
           <div>
             <h3>Tournament Rounds</h3>
-            <p>Tournaments are played in rounds. Each round has a 24-hour time limit for players to complete their matches. Make sure to play your match before the round timer expires!</p>
+            <p>Tournaments are played in rounds. Each round has a 24 hour time limit for players to complete their matches. Make sure to play your match before the timer runs out!</p>
           </div>
         ),
         placement: 'top',
@@ -411,7 +411,8 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         content: (
           <div>
             <h3>Playing Your Match</h3>
-            <p>When it's your turn to play, a "Play" button will appear next to your name in the match. Click it to start your game.</p>
+            <p>When it's your turn to play, a "Play" button will appear next to your name in the match. Click it to go to your match.
+            </p>
             <video 
               key="tournament-play"
               src="/videos/tournament_play.mov" 
@@ -428,7 +429,9 @@ const TournamentPage = ({ tournamentType = 'active' }: TournamentPageProps = {})
         content: (
           <div>
             <h3>Viewing Match Results</h3>
-            <p>Once both players have completed their matches, a "View Results" button will appear under the match. Click it to see detailed results including scores, best words, and other match statistics.</p>
+            <p>
+            Once both players have completed their matches, a "View Results" button will appear under the match. Click it to see detailed results including scores, word count, best words and other match statistics.
+            </p>
             <video 
               key="tournament-result"
               src="/videos/tournament_results.mov" 
