@@ -1339,7 +1339,7 @@ white-space: nowrap;
     box-sizing: border-box;
   }
 
-  .game-header not(.daily-board-game-title):not(.tournament-game-title) {
+  .game-header h1:not(.daily-board-game-title):not(.tournament-game-title) {
     width: 165px;
   }
   .chat-desktop {
