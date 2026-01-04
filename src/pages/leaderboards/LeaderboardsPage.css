@@ -239,15 +239,12 @@
 }
 
 .table-container td.player-name {
-  max-width: 200px;
-  overflow: hidden;
-}
-
-.leaderboard_table,
-.leaderboard_table td,
-.leaderboard_table th {
-  border: none;
-  border-collapse: collapse;
+    margin-bottom: 0 !important;
+    font-size: 1rem !important;
+    font-family: "bungee hairline", sans-serif !important;
+    max-width: 200px;
+    overflow: hidden;
+    font-weight: 600 !important;
 }
 
 .player-name,
@@ -310,6 +307,7 @@
   }
 
   .selector-group {
+
     max-width: 100%;
   }
 
@@ -323,3 +321,6 @@
   }
 }
 
+#gameMode option, #leaderboardType option {
+  font-family: "bungee hairline", sans-serif !important;
+}

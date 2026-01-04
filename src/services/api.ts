@@ -254,8 +254,12 @@ export const dashboardAPI = {
     });
     return response.data;
   },
+  getPlaymatesFilter: async () => {
+    const response = await api.get('/dashboard/playmates-filter/');
+    return response.data;
+  },
   updatePlaymatesFilter: async (filterOnlinePlaymatesOnly: boolean) => {
-    const response = await api.post('/dashboard/playmates-filter/', {
+    const response = await api.post('/dashboard/playmates-filter/update/', {
       filter_online_playmates_only: filterOnlinePlaymatesOnly,
     });
     return response.data;
@@ -495,6 +499,10 @@ export const lobbyAPI = {
 };
 
 export const tournamentAPI = {
+  getTournamentBadge: async () => {
+    const response = await api.get('/tournament/badge/');
+    return response.data;
+  },
   getTournamentData: async (type: 'active' | 'test' = 'active', tournamentId?: number) => {
     const params: { type?: string; id?: number } = {};
     if (tournamentId) {

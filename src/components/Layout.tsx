@@ -484,53 +484,15 @@ const Layout = ({ children }: LayoutProps) => {
         return;
       }
       try {
-        const data = await tournamentAPI.getTournamentData('active');
-        
-        // Check if registration is open and user is not registered
-        if (data.registration_open && !data.registered) {
-          setTournamentBadge('register');
-          return;
-        }
-        
-        // Check if there's a match for the user that they haven't played
-        if (data.tournament_started && data.matches && data.matches.length > 0) {
-          const userMatches = data.matches.filter((match: any) => {
-            // Check if match belongs to current user (player_1 or player_2)
-            const isPlayer1 = match.player_1?.id === user.id;
-            const isPlayer2 = match.player_2?.id === user.id;
-            
-            if (!isPlayer1 && !isPlayer2) {
-              return false; // Match doesn't belong to user
-            }
-            
-            // Check if match is closed
-            if (match.closed) {
-              return false; // Match is closed
-            }
-            
-            // Check if user has submitted their turn
-            if (isPlayer1 && match.result?.player_1_submitted) {
-              return false; // User (player_1) has already played
-            }
-            if (isPlayer2 && match.result?.player_2_submitted) {
-              return false; // User (player_2) has already played
-            }
-            
-            return true; // Match belongs to user and they haven't played their turn
-          });
-          
-          if (userMatches.length > 0) {
-            setTournamentBadge('you-are-up');
-            return;
-          }
-        }
-        
-        setTournamentBadge(null);
+        const data = await tournamentAPI.getTournamentBadge();
+        setTournamentBadge(data.badge || null);
       } catch (error: any) {
         // Silently handle errors (tournament might not exist)
-        if (error?.response?.status !== 404) {
-          console.error('Error loading tournament badge:', error);
+        if (error?.response?.status === 404 || error?.response?.status === 401) {
+          setTournamentBadge(null);
+          return;
         }
+        console.error('Error loading tournament badge:', error);
         setTournamentBadge(null);
       }
     };
@@ -540,25 +502,25 @@ const Layout = ({ children }: LayoutProps) => {
     return () => clearInterval(interval);
   }, [isAuthenticated, user]);
 
-  // Load playmates list and filter preference once for authenticated users (for filtering online list)
+  // Load playmates filter preference for authenticated users (for filtering online list)
   useEffect(() => {
-    const loadPlaymates = async () => {
+    const loadPlaymatesFilter = async () => {
       if (!isAuthenticated) {
         setShowPlaymatesOnly(false);
         return;
       }
       try {
-        const bundle = await dashboardAPI.getDashboardBundle();
+        const data = await dashboardAPI.getPlaymatesFilter();
         // Load filter preference from backend
-        setShowPlaymatesOnly(bundle.playmates?.filter_online_playmates_only || false);
+        setShowPlaymatesOnly(data.filter_online_playmates_only || false);
       } catch (error) {
-        console.error('Error loading playmates for filter', error);
+        console.error('Error loading playmates filter', error);
       }
     };
-    loadPlaymates();
+    loadPlaymatesFilter();
     
-    // Reload playmates and filter preference periodically to sync with dashboard changes
-    const interval = setInterval(loadPlaymates, 5000); // Every 5 seconds
+    // Reload filter preference periodically to sync with dashboard changes
+    const interval = setInterval(loadPlaymatesFilter, 5000); // Every 5 seconds
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
