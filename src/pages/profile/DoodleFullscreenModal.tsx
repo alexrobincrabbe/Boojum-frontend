@@ -23,6 +23,7 @@ interface Comment {
   user: {
     id: number;
     username: string;
+    display_name?: string;
     profile_url?: string;
     chat_color?: string;
   };
@@ -48,6 +49,8 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
   const [isOwner, setIsOwner] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadComments();
@@ -71,6 +74,41 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
     }, 100);
     return () => clearTimeout(timer);
   }, [currentUser, doodle.id]);
+
+  // Set modal width based on image width
+  useEffect(() => {
+    const setModalWidth = () => {
+      const image = imageRef.current;
+      const modal = modalRef.current;
+      if (image && modal) {
+        const imageWidth = image.offsetWidth;
+        if (imageWidth > 0) {
+          // Set modal width to image width + padding (40px total: 20px each side)
+          const modalWidth = imageWidth + 40;
+          modal.style.width = `${modalWidth}px`;
+          modal.style.maxWidth = `${Math.min(modalWidth, window.innerWidth * 0.9)}px`;
+        }
+      }
+    };
+
+    const image = imageRef.current;
+    // Set width when image loads
+    if (image?.complete) {
+      setModalWidth();
+    } else if (image) {
+      image.addEventListener('load', setModalWidth);
+    }
+
+    // Also set on window resize
+    window.addEventListener('resize', setModalWidth);
+
+    return () => {
+      if (image) {
+        image.removeEventListener('load', setModalWidth);
+      }
+      window.removeEventListener('resize', setModalWidth);
+    };
+  }, [doodle.image_url]);
 
   const loadComments = async () => {
     try {
@@ -187,7 +225,7 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
 
   const modalContent = (
     <div className="doodle-fullscreen-overlay" onClick={onClose}>
-      <div className="doodle-fullscreen-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="doodle-fullscreen-modal" ref={modalRef} onClick={(e) => e.stopPropagation()}>
         <button className="doodle-fullscreen-close" onClick={onClose}>
           <X size={24} />
         </button>
@@ -196,6 +234,7 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
           <div className="doodle-fullscreen-image-container">
             {doodle.image_url && (
               <img 
+                ref={imageRef}
                 src={doodle.image_url} 
                 alt={doodle.word}
                 className="doodle-fullscreen-image"
@@ -251,14 +290,14 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
                             onClose();
                           }}
                         >
-                          {comment.user.username}
+                          {comment.user.display_name || comment.user.username}
                         </a>
                       ) : (
                         <span 
                           className="doodle-comment-author"
                           style={{ color: comment.user.chat_color || '#71bbe9' }}
                         >
-                          {comment.user.username}
+                          {comment.user.display_name || comment.user.username}
                         </span>
                       )}
                       <span className="doodle-comment-date">
@@ -337,14 +376,14 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
                                     onClose();
                                   }}
                                 >
-                                  {reply.user.username}
+                                  {reply.user.display_name || reply.user.username}
                                 </a>
                               ) : (
                                 <span 
                                   className="doodle-comment-author"
                                   style={{ color: reply.user.chat_color || '#f5ce45' }}
                                 >
-                                  {reply.user.username}
+                                  {reply.user.display_name || reply.user.username}
                                 </span>
                               )}
                               <span className="doodle-comment-date">

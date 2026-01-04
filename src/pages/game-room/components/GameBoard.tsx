@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import type { GameState } from "../../../ws/protocol";
 import { useBoardSwipe } from "../../../hooks/useBoardSwipe";
 import { useKeyboardInput } from "../../../hooks/useKeyboardInput";
@@ -68,6 +68,7 @@ export function GameBoard({
   const boardRef = useRef<HTMLDivElement>(null);
   const [confirmationWord, setConfirmationWord] = useState<string | null>(null);
   const [debugMode, setDebugMode] = useState(false);
+  const [boardSize, setBoardSize] = useState(0); // Store board size for button positioning
 
   const isOneShot = gameState?.oneShot;
 
@@ -140,6 +141,46 @@ export function GameBoard({
       colorsOffOverride, // Pass colors override for timeless boards
       onExactMatch, // Pass exact match callback for clue deactivation
     });
+
+  // Track board size for button positioning
+  useEffect(() => {
+    const updateBoardSize = () => {
+      if (boardRef.current) {
+        const rect = boardRef.current.getBoundingClientRect();
+        setBoardSize(rect.height || rect.width || 400); // Use height (or width if square), fallback to 400
+      }
+    };
+
+    updateBoardSize();
+    const resizeObserver = new ResizeObserver(updateBoardSize);
+    if (boardRef.current) {
+      resizeObserver.observe(boardRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [gameState?.board]);
+
+  // Calculate save board button transform to keep it at top regardless of rotation
+  const getSaveBoardButtonTransform = useCallback(() => {
+    if (boardSize === 0) {
+      return `translateX(-50%) rotate(${-boardRotation}deg)`;
+    }
+    
+    // Position button at top of board (30px from top edge for better spacing)
+    // Start from center, move up by half board size minus spacing gap
+    const spacing = 30; // Increased spacing from board edge
+    const offsetY = -boardSize / 2 + spacing;
+    const rad = (boardRotation * Math.PI) / 180;
+    
+    // Rotate the offset vector to compensate for board rotation
+    // This keeps the button at the visual "top" of the rotated board
+    const offsetX = -offsetY * Math.sin(rad);
+    const offsetYRotated = offsetY * Math.cos(rad);
+    
+    return `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetYRotated}px)) rotate(${-boardRotation}deg)`;
+  }, [boardSize, boardRotation]);
 
 
   return (
@@ -478,7 +519,9 @@ export function GameBoard({
                   }}
                   disabled={remainingSaves === 0 || isSavingBoard}
                   style={{
-                    transform: `translateX(-50%) rotate(${-boardRotation}deg)`,
+                    top: '50%',
+                    left: '50%',
+                    transform: getSaveBoardButtonTransform(),
                   }}
                 >
                   {isSavingBoard ? 'Saving...' : `Save board (${remainingSaves})`}

@@ -20,7 +20,7 @@
   border: 2px solid #71bbe9;
   border-radius: 12px;
   max-width: 90vw;
-  width: auto;
+  width: fit-content;
   min-width: 300px;
   height: 90vh;
   max-height: 90vh;
@@ -30,6 +30,8 @@
   overflow: hidden;
   z-index: 100000 !important; /* Ensure modal is above overlay */
   pointer-events: auto;
+  /* Prevent content from expanding modal width */
+  align-items: stretch;
 }
 
 .doodle-fullscreen-close {
@@ -61,6 +63,12 @@
   height: 100%;
   overflow: hidden;
   pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
+  /* Prevent content from expanding parent */
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .doodle-fullscreen-image-container {
@@ -71,6 +79,13 @@
   justify-content: center;
   border-bottom: 1px solid rgba(113, 187, 233, 0.3);
   flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  /* Set max-width to prevent expansion beyond image */
+  max-width: 100%;
+  overflow: hidden;
+  /* Ensure container width is determined by image, not content */
+  min-width: 0;
 }
 
 .doodle-fullscreen-image {
@@ -83,6 +98,9 @@
   border: 2px solid #71bbe9;
   margin-bottom: 15px;
   background-color: white;
+  display: block;
+  /* Prevent image from expanding container */
+  flex-shrink: 0;
 }
 
 /* On mobile, keep a reasonable max height */
@@ -101,6 +119,11 @@
   font-size: 1.5rem;
   color: #71bbe9;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .doodle-fullscreen-comments {
@@ -109,6 +132,11 @@
   flex-direction: column;
   overflow: hidden;
   padding: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Allow flex item to shrink below content size */
+  max-width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .doodle-comments-title {
@@ -121,11 +149,16 @@
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(113, 187, 233, 0.3);
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
 }
 
 .doodle-comment-input,
 .doodle-reply-input {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: rgba(19, 19, 42, 0.8);
   border: 2px solid #71bbe9;
   border-radius: 5px;
@@ -137,6 +170,8 @@
   pointer-events: auto;
   -webkit-user-select: text;
   user-select: text;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .doodle-comment-input:focus,
@@ -206,6 +241,9 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
 }
 
 .doodle-comments-loading,
@@ -219,6 +257,9 @@
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(113, 187, 233, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
 }
 
 .doodle-comment-header {
@@ -227,6 +268,10 @@
   gap: 10px;
   margin-bottom: 8px;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .doodle-comment-author {
@@ -234,6 +279,10 @@
   color: #f5ce45;
   text-decoration: none;
   transition: opacity 0.3s ease;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .doodle-comment-author:hover {
@@ -266,10 +315,17 @@
   color: #fff;
   margin-bottom: 10px;
   line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .doodle-comment-reply-section {
   margin-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .doodle-reply-button {
@@ -289,6 +345,9 @@
 
 .doodle-reply-form {
   margin-top: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
 }
 
 .doodle-comment-replies {
@@ -296,10 +355,16 @@
   margin-top: 10px;
   padding-left: 15px;
   border-left: 2px solid rgba(113, 187, 233, 0.3);
+  width: calc(100% - 20px);
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
 }
 
 .doodle-comment-reply {
   margin-bottom: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Prevent stretching */
 }
 
 .doodle-comment-reply .doodle-comment-header {

@@ -5,6 +5,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { Loading } from '../../../components/Loading';
 import DoodleFullscreenModal from '../../profile/DoodleFullscreenModal';
+import CommentBadge from '../../../components/CommentBadge';
 import './Doodledum.css';
 
 interface FeedItem {
@@ -16,6 +17,7 @@ interface FeedItem {
   created_at: string;
   user: string;
   chat_color: string;
+  comment_count?: number;
 }
 
 interface DoodleForModal {
@@ -284,7 +286,21 @@ const Doodledum: React.FC = () => {
   const loadFeed = async () => {
     try {
       const data = await minigamesAPI.getDoodledumFeed();
-      setFeed(data.doodledum_feed || []);
+      const feedData = data.doodledum_feed || [];
+      console.log('Feed data loaded:', feedData.length, 'items');
+      // Debug: Check all doodle items
+      const allDoodles = feedData.filter((item: FeedItem) => item.is_doodle);
+      console.log('Doodle items in feed:', allDoodles.length);
+      if (allDoodles.length > 0) {
+        console.log('Sample doodle items:', allDoodles.slice(0, 3).map((item: FeedItem) => ({
+          has_doodle_id: !!item.doodle_id,
+          doodle_id: item.doodle_id,
+          comment_count: item.comment_count,
+          has_comment_count: 'comment_count' in item,
+          doodle_url: item.doodle_url?.substring(0, 50) + '...'
+        })));
+      }
+      setFeed(feedData);
     } catch (error) {
       console.error('Failed to load feed:', error);
     } finally {
@@ -1520,17 +1536,31 @@ const Doodledum: React.FC = () => {
                         return <>{message.prefix}{message.suffix}</>;
                       })()}
                       {item.doodle_url && (
-                        <img 
-                          src={item.doodle_url} 
-                          alt="Doodle" 
-                          className="doodle-image" 
-                          style={{ 
-                            cursor: isLoadingDoodle ? 'wait' : 'pointer',
-                            opacity: isLoadingDoodle ? 0.6 : 1,
-                            pointerEvents: isLoadingDoodle ? 'none' : 'auto'
-                          }}
-                          onClick={() => handleDoodleClick(item)}
-                        />
+                        <div style={{ position: 'relative', display: 'inline-block', width: '100%', maxWidth: '600px' }}>
+                          <img 
+                            src={item.doodle_url} 
+                            alt="Doodle" 
+                            className="doodle-image" 
+                            style={{ 
+                              cursor: isLoadingDoodle ? 'wait' : 'pointer',
+                              opacity: isLoadingDoodle ? 0.6 : 1,
+                              pointerEvents: isLoadingDoodle ? 'none' : 'auto',
+                              width: '100%',
+                              display: 'block'
+                            }}
+                            onClick={() => handleDoodleClick(item)}
+                          />
+                          {item.doodle_id ? (
+                            <CommentBadge 
+                              doodleId={item.doodle_id} 
+                              commentCount={item.comment_count ?? 0} 
+                            />
+                          ) : item.doodle_url ? (
+                            // If no doodle_id but we have a URL, we could fetch it, but for now just don't show badge
+                            // The badge requires doodle_id to fetch commenters
+                            null
+                          ) : null}
+                        </div>
                       )}
                       <span className="feed-time"> {formatTimeAgo(item.created_at)}</span>
                     </div>

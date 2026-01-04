@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import { authAPI } from '../../services/api';
 import DoodleFullscreenModal from './DoodleFullscreenModal';
+import CommentBadge from '../../components/CommentBadge';
 import './DoodlesGallery.css';
 
 interface Doodle {
@@ -11,6 +12,7 @@ interface Doodle {
   image_url: string | null;
   public: boolean;
   created_at: string | null;
+  comment_count?: number;
 }
 
 interface DoodlesGalleryProps {
@@ -90,15 +92,20 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false, initialDoodleId }: Doo
         {doodles.length > 0 ? (
           <div className="doodles-grid">
             {doodles.map((doodle) => (
-              <div key={doodle.id} className="doodle-item">
+              <div key={doodle.id} className="doodle-item" style={{ position: 'relative' }}>
                 {doodle.image_url && (
-                  <img 
-                    src={doodle.image_url} 
-                    alt={doodle.word}
-                    className="doodle-image"
-                    onClick={() => setSelectedDoodle(doodle)}
-                    style={{ cursor: 'pointer' }}
-                  />
+                  <>
+                    <img 
+                      src={doodle.image_url} 
+                      alt={doodle.word}
+                      className="doodle-image"
+                      onClick={() => setSelectedDoodle(doodle)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    {doodle.comment_count !== undefined && (
+                      <CommentBadge doodleId={doodle.id} commentCount={doodle.comment_count} />
+                    )}
+                  </>
                 )}
                 <div className="doodle-word blue-glow">{doodle.word}</div>
               </div>

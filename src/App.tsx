@@ -61,6 +61,7 @@ const HomePage = () => {
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [profileUrl, setProfileUrl] = useState<string | null>(null);
   const [chatColor, setChatColor] = useState<string>('#71bbe9');
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -70,10 +71,12 @@ const HomePage = () => {
           setProfilePictureUrl(profile.profile_picture_url);
           setProfileUrl(profile.profile_url);
           setChatColor(profile.chat_color || '#71bbe9');
+          setDisplayName(profile.display_name || user.username);
         } catch (error) {
           // Profile might not exist yet, use defaults
           setProfilePictureUrl(null);
           setProfileUrl(user.username.toLowerCase());
+          setDisplayName(user.username);
         }
       }
     };
@@ -113,7 +116,7 @@ const HomePage = () => {
               </div>
               <div className="home-page-welcome-text">
                 <p className="home-page-signed-in">
-                  You are signed in as <strong>{user.username}</strong>
+                  You are signed in as <strong>{displayName || user.username}</strong>
                 </p>
                 <p className="home-page-game-time">
                   It's game time, let's play!

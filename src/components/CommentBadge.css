@@ -1,0 +1,109 @@
+.comment-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(19, 19, 42, 0.95);
+  border: 2px solid #71bbe9;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  color: #71bbe9;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.comment-badge:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.05);
+}
+
+.comment-badge-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.comment-badge-modal {
+  background-color: rgba(19, 19, 42, 0.95);
+  border: 2px solid #71bbe9;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 20px;
+}
+
+.comment-badge-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: 2px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.comment-badge-close:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+}
+
+.comment-badge-title {
+  color: #f5ce45;
+  font-size: 1.2rem;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.comment-badge-loading,
+.comment-badge-empty {
+  text-align: center;
+  color: #71bbe9;
+  padding: 20px;
+}
+
+.comment-badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-badge-item {
+  padding: 10px;
+  background-color: rgba(19, 19, 42, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(113, 187, 233, 0.3);
+}
+
+.comment-badge-name {
+  font-weight: bold;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.comment-badge-name:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+

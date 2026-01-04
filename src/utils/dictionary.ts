@@ -20,6 +20,14 @@ function getCSRFToken(): string | null {
 // Fetch from custom dictionary API
 async function fetchCustomDictionaryDefinition(word: string): Promise<string | null> {
   try {
+    // Normalize the word: trim whitespace
+    const normalizedWord = word.trim();
+    
+    if (!normalizedWord) {
+      console.warn('Empty word provided to fetchCustomDictionaryDefinition');
+      return null;
+    }
+    
     // Get Django base URL - use the same pattern as api.ts
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     const djangoBaseUrl = apiBaseUrl.replace('/api', '');
@@ -38,12 +46,12 @@ async function fetchCustomDictionaryDefinition(word: string): Promise<string | n
     }
     
     const url = `${djangoBaseUrl}/api/get-definition/`;
-    console.log('Fetching definition from:', url, 'for word:', word);
+    console.log('Fetching definition from:', url, 'for word:', normalizedWord);
     
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ word }),
+      body: JSON.stringify({ word: normalizedWord }),
       credentials: 'include', // Include cookies for CSRF token
     });
 

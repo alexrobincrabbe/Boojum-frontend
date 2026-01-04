@@ -1201,11 +1201,6 @@ white-space: nowrap;
   color: #71bbe9;
 }
 
-.chat-time {
-  color: #aaa;
-  font-size: 0.85rem;
-}
-
 .chat-input-form {
   display: flex;
   gap: 8px;
@@ -1722,6 +1717,7 @@ white-space: nowrap;
   }
 
   #word-counters {
+    font-size: 1rem;
     width: auto;
     min-width: 80px;
     /* Match #board height exactly */
@@ -1783,6 +1779,7 @@ white-space: nowrap;
   }
 
   #word-counters {
+    font-size: 1rem;
     width: auto;
     min-width: 80px;
     /* Match #board height exactly */

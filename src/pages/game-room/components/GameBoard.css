@@ -51,8 +51,7 @@
 
 .save-board-button {
   position: absolute;
-  top: 10px; /* Position at top of the board, inside with 10px gap */
-  left: 50%;
+  /* top and left are set inline to account for board rotation */
   z-index: 100;
   padding: 10px 20px;
   font-size: 110%;
@@ -68,10 +67,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
   box-shadow: 0 0 15px rgba(245, 206, 69, 0.6), 0 0 30px rgba(245, 206, 69, 0.4); /* Glowing yellow effect */
   white-space: nowrap;
-  transform: translateX(-50%); /* Center horizontally */
+  /* transform is set inline to account for board rotation */
 }
 
 .save-board-button:hover:not(:disabled) {

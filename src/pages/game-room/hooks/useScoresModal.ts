@@ -45,8 +45,30 @@ export function useScoresModal(
           try {
             const [unicorn, score] = findHighestScoringWord(gameState.wordsByLength!);
             if (unicorn) {
-              const definition = await fetchDefinition(unicorn);
-              const messageContent = `<span class="pink">Unicorn:</span> &nbsp;<span class="green">${unicorn}</span>&nbsp;<span class="yellow">(${score}pts)</span><br><span class="blue">Definition:</span><br><span class="blue">${definition}</span>`;
+              // Normalize the word before lookup (trim whitespace only - API handles case)
+              const normalizedWord = unicorn.trim();
+              console.log(`[Unicorn] Looking up definition for word: "${unicorn}" (normalized: "${normalizedWord}", length: ${normalizedWord.length})`);
+              
+              // Check for any non-printable characters
+              const hasNonPrintable = /[\x00-\x1F\x7F-\x9F]/.test(normalizedWord);
+              if (hasNonPrintable) {
+                console.warn(`[Unicorn] Word contains non-printable characters: "${normalizedWord}"`);
+              }
+              
+              const definition = await fetchDefinition(normalizedWord);
+              
+              console.log(`[Unicorn] Definition result for "${unicorn}":`, definition);
+              
+              // Only show definition if it's found (not the "not found" message)
+              const definitionNotFound = definition === 'Definition not found.' || definition.toLowerCase().includes('definition not found');
+              let messageContent = `<span class="pink">Unicorn:</span> &nbsp;<span class="green">${unicorn}</span>&nbsp;<span class="yellow">(${score}pts)</span>`;
+              
+              if (!definitionNotFound) {
+                messageContent += `<br><span class="blue">Definition:</span><br><span class="blue">${definition}</span>`;
+              } else {
+                console.warn(`[Unicorn] Definition not found for word: "${unicorn}" (normalized: "${normalizedWord}")`);
+              }
+              
               // Send as system message (no username prefix)
               addChatSystemMessage(messageContent);
             }

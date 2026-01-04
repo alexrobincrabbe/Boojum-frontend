@@ -184,9 +184,6 @@ export function Chat({ messages, connectionState, onSendMessage, onReconnect }: 
                   {displayMessage}
                 </span>
               )}
-              <span className="chat-time">
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </span>
             </div>
           );
         })}

@@ -179,6 +179,10 @@ export const authAPI = {
     const response = await api.get(`/doodles/${doodleId}/comments/`);
     return response.data;
   },
+  getDoodleCommenters: async (doodleId: number) => {
+    const response = await api.get(`/doodles/${doodleId}/commenters/`);
+    return response.data;
+  },
   createDoodleComment: async (doodleId: number, commentText: string) => {
     const response = await api.post(`/doodles/${doodleId}/comments/`, { comment_text: commentText });
     return response.data;
