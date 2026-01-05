@@ -45,7 +45,7 @@ export function WordLists({
   filteredPlayerIds = new Set(),
   showColorBanner,
   showDefinitionBanner = true,
-  isLiveGameRoom = false,
+  isLiveGameRoom: _isLiveGameRoom = false,
 }: WordListsProps) {
   // Definition popup state (hooks must be called before any early returns)
   const [popup, setPopup] = useState<{ word: string; definition: string } | null>(null);

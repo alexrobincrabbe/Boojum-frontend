@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import type { GameState } from "../../../ws/protocol";
 import { useBoardSwipe } from "../../../hooks/useBoardSwipe";
 import { useKeyboardInput } from "../../../hooks/useKeyboardInput";
@@ -49,9 +49,9 @@ export function GameBoard({
   wordsFound,
   boardWords,
   onShowScores,
-  onSaveBoard,
-  remainingSaves,
-  isSavingBoard = false,
+  onSaveBoard: _onSaveBoard,
+  remainingSaves: _remainingSaves,
+  isSavingBoard: _isSavingBoard = false,
   oneShotSubmitted = false,
   onOneShotConfirmed,
   colorsOffOverride,
