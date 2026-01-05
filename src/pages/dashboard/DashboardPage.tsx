@@ -6,17 +6,16 @@ import AccountTab from './components/AccountTab';
 import ChatSettingsTab from './components/ChatSettingsTab';
 import PlaymatesTab from './components/PlaymatesTab';
 import GameSettingsTab from './components/GameSettingsTab';
-import SavedBoardsTab from './components/SavedBoardsTab';
 import PremiumTab from './components/PremiumTab';
 import { dashboardAPI } from '../../services/api';
 import { Loading } from '../../components/Loading';
 import './DashboardPage.css';
 
-type TabType = 'notifications' | 'account' | 'chat' | 'playmates' | 'game' | 'saved-boards' | 'premium';
+type TabType = 'notifications' | 'account' | 'chat' | 'playmates' | 'game' | 'premium';
 
 const DashboardPage = () => {
   const { isAuthenticated, user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>(isAuthenticated ? 'saved-boards' : 'game');
+  const [activeTab, setActiveTab] = useState<TabType>(isAuthenticated ? 'game' : 'game');
   const [bundle, setBundle] = useState<any | null>(null);
   const [bundleLoading, setBundleLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(user);
@@ -33,7 +32,6 @@ const DashboardPage = () => {
 
   // All tabs for authenticated users, only game settings for guests
   const allTabs = [
-    { id: 'saved-boards' as TabType, label: 'Saved Boards', guest: false, superuser: false },
     { id: 'game' as TabType, label: 'Game Settings', guest: true, superuser: false },
     { id: 'notifications' as TabType, label: 'Push Notifications', guest: false, superuser: false },
     { id: 'account' as TabType, label: 'Account Details', guest: false, superuser: false },
@@ -125,9 +123,6 @@ const DashboardPage = () => {
             )}
             {isAuthenticated && activeTab === 'playmates' && (
               <PlaymatesTab bundle={bundle?.playmates} />
-            )}
-            {isAuthenticated && activeTab === 'saved-boards' && (
-              <SavedBoardsTab />
             )}
             {isAuthenticated && isSuperuser && activeTab === 'premium' && (
               <PremiumTab />

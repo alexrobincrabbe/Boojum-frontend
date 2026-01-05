@@ -196,6 +196,11 @@ const LobbyPage = () => {
     return 'normal';
   };
 
+  const hasHighScores = (room: Room): boolean => {
+    const roomNameLower = room.room_name.toLowerCase();
+    return ['looking glass', 'lookingglass', 'boojum', 'forevermore', 'unicorn'].includes(roomNameLower);
+  };
+
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;
   }
@@ -249,13 +254,15 @@ const LobbyPage = () => {
                         </div>
                       </div>
                     </Link>
-                    <Link
-                      to={`/leaderboards?gameType=${getGameTypeForLeaderboard(room)}&period=weekly`}
-                      className="room-highscores-link"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      High Scores
-                    </Link>
+                    {hasHighScores(room) && (
+                      <Link
+                        to={`/leaderboards?gameType=${getGameTypeForLeaderboard(room)}&period=weekly`}
+                        className="room-highscores-link"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        High Scores
+                      </Link>
+                    )}
                   </div>
                 );
               })}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Settings, Gamepad2, Users, Plus } from 'lucide-react';
+import { Settings, Gamepad2, Users, Plus, List } from 'lucide-react';
 import './AdminPage.css';
 
 const AdminPage = () => {
@@ -44,6 +44,13 @@ const AdminPage = () => {
                 <div>
                   <div className="link-title">Convert Special Boards</div>
                   <div className="link-description">Convert existing special boards to Daily or Timeless boards</div>
+                </div>
+              </Link>
+              <Link to="/admin/timeless-board-words" className="admin-link">
+                <List size={20} />
+                <div>
+                  <div className="link-title">Timeless Board Word Lists</div>
+                  <div className="link-description">Manage word frequencies for timeless boards (1, 5, 10)</div>
                 </div>
               </Link>
             </div>

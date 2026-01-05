@@ -66,11 +66,30 @@
   font-size: 1.1rem;
 }
 
+.saved-boards-section {
+  margin-bottom: 50px;
+}
+
+.saved-boards-section-title {
+  color: #71bbe9;
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #71bbe9;
+}
+
 .saved-boards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 30px;
   margin-top: 20px;
+}
+
+/* Tablet: 3 columns per row */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .saved-boards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .saved-board-card {
@@ -142,6 +161,7 @@
 
 .play-board-btn,
 .view-scores-btn,
+.view-comments-btn,
 .share-board-btn,
 .delete-board-btn {
   padding: 8px 16px;
@@ -176,6 +196,17 @@
   border-color: #febe38;
 }
 
+.view-comments-btn {
+  background-color: #71bbe9;
+  border-color: #71bbe9;
+  color: #1b1835;
+}
+
+.view-comments-btn:hover {
+  background-color: #5aa8d8;
+  border-color: #5aa8d8;
+}
+
 .share-board-btn {
   background-color: #71bbe9;
   border-color: #71bbe9;
@@ -200,8 +231,25 @@
 
 .board-preview-container {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin: 20px 0;
+  position: relative;
+}
+
+.board-preview-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.board-preview-actions .play-board-btn,
+.board-preview-actions .view-scores-btn,
+.board-preview-actions .view-comments-btn {
+  padding: 8px 20px;
+  font-size: 0.9rem;
 }
 
 /* Board wrapper styles are in GameBoard.css */
@@ -428,6 +476,7 @@
 
   .play-board-btn,
   .view-scores-btn,
+  .view-comments-btn,
   .share-board-btn,
   .delete-board-btn {
     flex: 1;
@@ -443,5 +492,30 @@
   .board-room-name {
     font-size: 1.1rem;
   }
+}
+
+/* Comment badge styling */
+.comment-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(19, 19, 42, 0.95);
+  border: 2px solid #71bbe9;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  color: #71bbe9;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.comment-badge:hover {
+  background-color: rgba(113, 187, 233, 0.2);
+  transform: scale(1.05);
 }
 

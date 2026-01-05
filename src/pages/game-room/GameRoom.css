@@ -351,6 +351,11 @@ white-space: nowrap;
     position:relative;
 }
 
+/* Allow scrolling during intermission */
+.board-container.game-waiting #board {
+  touch-action: auto; /* Enable scrolling when game is waiting */
+}
+
 /* Board Container - matches game_board.css */
 .board-container {
   display: flex;
@@ -496,6 +501,11 @@ white-space: nowrap;
   -webkit-touch-callout: none; /* Prevent iOS callout menu */
   -webkit-user-select: none; /* Prevent text selection */
   user-select: none;
+}
+
+/* Allow scrolling during intermission */
+.board-container.game-waiting #board {
+  touch-action: auto; /* Enable scrolling when game is waiting */
 }
 
 /* Board dark mode background */
@@ -1139,10 +1149,19 @@ white-space: nowrap;
   }
 }
 
+.chat-mobile-expanded {
+  display: flex;
+  flex-direction: column;
+}
+
 .chat-mobile .game-chat-section {
   margin-top: 8px;
   height: 350px;
   max-height: 50vh;
+}
+
+.chat-mobile-toggle-bottom {
+  margin-top: 8px;
 }
 
 .game-chat-section {
@@ -1447,15 +1466,11 @@ white-space: nowrap;
 }
 
 .word-definition-banner-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   width: 100%;
   margin-bottom: 10px;
 }
 
 .word-definition-banner-container #word-definition-banner {
-  flex: 1;
   margin-bottom: 0;
 }
 
@@ -1480,6 +1495,122 @@ white-space: nowrap;
 .game-instructions-button:active {
   background-color: #e6b530;
   border-color: #e6b530;
+}
+
+.game-instructions-button-fixed {
+  position: fixed;
+  top: 85px; /* Below the 70px top bar with 15px margin */
+  right: 20px;
+  z-index: 1002; /* Below modals but above game content */
+  background-color: rgba(254, 190, 56, 0.8); /* Translucent */
+  color: #13132a;
+  border: 2px solid #febe38;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.game-instructions-button-fixed:hover {
+  background-color: #f5c842;
+  border-color: #f5c842;
+}
+
+.game-instructions-button-fixed:active {
+  background-color: #e6b530;
+  border-color: #e6b530;
+}
+
+.save-board-button-container {
+  position: fixed;
+  top: 85px; /* Below the top bar, same height as other top buttons */
+  right: 20px;
+  z-index: 1002; /* Below modals but above game content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Mobile: Position at top left */
+@media screen and (max-width: 768px) {
+  .save-board-button-container {
+    top: 85px;
+    left: 20px;
+    right: auto;
+  }
+}
+
+.save-board-button-fixed {
+  padding: 6px 6px;
+  font-size: 0.75rem;
+  font-family: "Chango", sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid #33c15b;
+  background-color: rgba(51, 193, 91, 0.8); /* Translucent green */
+  color: #13132a; /* Same dark text color as "how to play" button */
+  border-radius: 6px;
+  min-width: 100px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.save-board-button-fixed:hover:not(:disabled) {
+  background-color: rgba(51, 193, 91, 0.9);
+  border-color: #33c15b;
+}
+
+.save-board-button-fixed:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.save-board-info-link {
+  font-size: 0.7rem;
+  color: #71bbe9;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+  text-align: center;
+}
+
+.save-board-info-link:hover {
+  color: #f5ce45;
+}
+
+/* Desktop: Position below users online bar (which is at top: 70px with auto height, typically ~30px) */
+@media screen and (min-width: 769px) {
+  .game-instructions-button-fixed {
+    top: 140px; /* Below the users online bar (70px top bar + ~30px players online bar + 10px margin) */
+    right: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  .save-board-button-container {
+    top: 140px; /* Same vertical position as "how to play" button */
+    right: 180px; /* To the left of "how to play" button */
+  }
+
+  .save-board-button-fixed {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    min-width: 160px;
+    height: 40px;
+    border-radius: 6px;
+  }
+
+  .save-board-info-link {
+    font-size: 0.75rem;
+  }
 }
 
 .word-lists-wrapper {

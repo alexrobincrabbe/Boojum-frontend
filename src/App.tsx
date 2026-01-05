@@ -35,6 +35,7 @@ import TimelessBoardGameRoom from "./pages/timeless-boards/TimelessBoardGameRoom
 import TimelessBoardsArchivePage from "./pages/timeless-boards/TimelessBoardsArchivePage";
 import TimelessBoardArchiveDetailPage from "./pages/timeless-boards/TimelessBoardArchiveDetailPage";
 import SavedBoardGameRoom from "./pages/saved-boards/SavedBoardGameRoom";
+import SavedBoardsPage from "./pages/saved-boards/SavedBoardsPage";
 import LeaderboardsPage from "./pages/leaderboards/LeaderboardsPage";
 import ForumPage from "./pages/forum/ForumPage";
 import ViewPostPage from "./pages/forum/ViewPostPage";
@@ -52,6 +53,7 @@ import TeamMatchResultsPage from "./pages/tournament/TeamMatchResultsPage";
 import AdminPage from "./pages/admin/AdminPage";
 import CreateCustomGameboardPage from "./pages/admin/CreateCustomGameboardPage";
 import ConvertSpecialBoardsPage from "./pages/admin/ConvertSpecialBoardsPage";
+import TimelessBoardWordsPage from "./pages/admin/TimelessBoardWordsPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react"
@@ -198,6 +200,7 @@ function App() {
                 path="/timeless-boards/archive/:boardId/:level"
                 element={<TimelessBoardArchiveDetailPage />}
               />
+              <Route path="/saved-boards" element={<SavedBoardsPage />} />
               <Route
                 path="/saved-boards/play/:boardId"
                 element={<SavedBoardGameRoom />}
@@ -220,6 +223,7 @@ function App() {
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/admin/create-custom-gameboard" element={<CreateCustomGameboardPage />} />
               <Route path="/admin/convert-special-boards" element={<ConvertSpecialBoardsPage />} />
+              <Route path="/admin/timeless-board-words" element={<TimelessBoardWordsPage />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />
             </Route>

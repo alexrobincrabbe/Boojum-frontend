@@ -138,16 +138,24 @@
   color: var(--color-blue);
   text-decoration: none;
   font-size: 0.85rem;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: 2px solid var(--color-blue);
+  background-color: transparent;
   transition: all 0.2s;
-  text-shadow: var(--glow-blue-text);
   z-index: 10;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-block;
+  text-shadow: var(--glow-blue-text);
 }
 
 .room-highscores-link:hover {
-  background-color: var(--bg-blue-20);
-  text-decoration: underline;
+  background-color: var(--color-blue);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(113, 187, 233, 0.4);
+  text-shadow: none;
 }
 
 .room-title {
@@ -457,6 +465,11 @@
 
   .wotd-section p {
     font-size: 0.85rem;
+  }
+
+  .room-highscores-link {
+    font-size: 0.7rem;
+    padding: 4px 10px;
   }
 }
 

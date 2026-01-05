@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from 'react';
 import type { WordData as ProtocolWordData } from '../../../ws/protocol';
 import { calculateWordScore } from '../utils/scoreCalculation';
 import { fetchDefinition } from '../../../utils/dictionary';
-import { GameInstructionsModal } from './GameInstructionsModal';
 
 // Extended WordData type to support both formats
 type ExtendedWordData = 
@@ -52,7 +51,6 @@ export function WordLists({
   const [popup, setPopup] = useState<{ word: string; definition: string } | null>(null);
   const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
-  const [isInstructionsModalOpen, setIsInstructionsModalOpen] = useState(false);
 
   // Cleanup popup timeout on unmount
   useEffect(() => {
@@ -310,15 +308,6 @@ export function WordLists({
           <div id="word-definition-banner" className="blue">
             CLICK ON A WORD TO SEE THE DEFINITION
           </div>
-          {isLiveGameRoom && (
-            <button
-              className="game-instructions-button"
-              onClick={() => setIsInstructionsModalOpen(true)}
-              aria-label="How to play"
-            >
-              How to Play
-            </button>
-          )}
         </div>
       )}
       {/* Color coding explanation banner */}
@@ -406,13 +395,6 @@ export function WordLists({
             {popup.definition}
           </div>
         </div>
-      )}
-      {/* Game Instructions Modal */}
-      {isLiveGameRoom && (
-        <GameInstructionsModal
-          isOpen={isInstructionsModalOpen}
-          onClose={() => setIsInstructionsModalOpen(false)}
-        />
       )}
     </div>
   );

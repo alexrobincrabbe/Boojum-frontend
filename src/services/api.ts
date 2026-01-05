@@ -500,6 +500,21 @@ export const lobbyAPI = {
     const response = await api.get(`/saved-boards/${boardId}/scores/`);
     return response.data;
   },
+  
+  getSavedBoardComments: async (boardId: number) => {
+    const response = await api.get(`/saved-boards/${boardId}/comments/`);
+    return response.data;
+  },
+  
+  createSavedBoardComment: async (boardId: number, commentText: string) => {
+    const response = await api.post(`/saved-boards/${boardId}/comments/`, { comment_text: commentText });
+    return response.data;
+  },
+  
+  replyToSavedBoardComment: async (commentId: number, replyText: string) => {
+    const response = await api.post(`/saved-boards/comments/${commentId}/reply/`, { comment_text: replyText });
+    return response.data;
+  },
 };
 
 export const tournamentAPI = {
@@ -698,6 +713,18 @@ export const adminAPI = {
   },
   getAvailableSpecialBoards: async () => {
     const response = await api.get('/admin/available-special-boards/');
+    return response.data;
+  },
+  listTimelessBoards: async (page: number = 1) => {
+    const response = await api.get('/admin/timeless-boards/', { params: { page } });
+    return response.data;
+  },
+  getTimelessBoardWords: async (timelessBoardId: number) => {
+    const response = await api.get(`/admin/timeless-boards/${timelessBoardId}/words/`);
+    return response.data;
+  },
+  updateTimelessBoardWordFrequencies: async (timelessBoardId: number, words: { '1': string[]; '5': string[]; '10': string[] }) => {
+    const response = await api.post(`/admin/timeless-boards/${timelessBoardId}/words/update/`, { words });
     return response.data;
   },
 };

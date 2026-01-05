@@ -1101,6 +1101,15 @@ const Layout = ({ children }: LayoutProps) => {
                 </button>
               )}
             </div>
+            <Link
+              to="/saved-boards"
+              className={`nav-link ${location.pathname.startsWith('/saved-boards') && !location.pathname.startsWith('/saved-boards/play') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>Saved Boards</span>}
+            </Link>
           </div>
           <div className="nav-section" data-onboarding="daily-challenges">
             {leftSidebarOpen && <div className="nav-section-title">Daily Challenges</div>}

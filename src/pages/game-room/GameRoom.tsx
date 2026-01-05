@@ -17,12 +17,15 @@ import { useGameScoreSubmission } from "./hooks/useGameScoreSubmission";
 import { useWordTrackingRef } from "./hooks/useWordTrackingRef";
 import { useScoresModal } from "./hooks/useScoresModal";
 import { useRoomReset } from "./hooks/useRoomReset";
+import { GameInstructionsModal } from "./components/GameInstructionsModal";
+import { SavedBoardInfoModal } from "./components/SavedBoardInfoModal";
 import {
   useWordSubmitWithConfirmation,
   useOneShotConfirmed,
 } from "./hooks/useWordSubmitWithConfirmation";
 import { lobbyAPI } from "../../services/api";
 import { toast } from "react-toastify";
+import { playSound } from "../../utils/sounds";
 import "./GameRoom.css";
 
 export default function GameRoom() {
@@ -102,9 +105,52 @@ export default function GameRoom() {
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
   const [remainingSaves, setRemainingSaves] = useState<number>(10);
   const [isChatExpanded, setIsChatExpanded] = useState(false);
+  const [isInstructionsModalOpen, setIsInstructionsModalOpen] = useState(false);
+  const [isSavedBoardInfoModalOpen, setIsSavedBoardInfoModalOpen] = useState(false);
   const [isSavingBoard, setIsSavingBoard] = useState(false);
   const [lastExpandedMessageCount, setLastExpandedMessageCount] = useState(0);
   const [hasNewMessages, setHasNewMessages] = useState(false);
+  const prevGameStatusRef = useRef<"waiting" | "playing" | "finished" | undefined>(undefined);
+  const lastBleepSecondRef = useRef<number | null>(null);
+
+  // Play ping sound when game round starts
+  useEffect(() => {
+    const currentStatus = gameState?.gameStatus;
+    const prevStatus = prevGameStatusRef.current;
+
+    // Play ping when status changes to "playing" from "waiting" or "finished"
+    if (currentStatus === "playing" && (prevStatus === "waiting" || prevStatus === "finished")) {
+      playSound("roundStart"); // Using "round-start.mp3" for round start sound
+    }
+
+    prevGameStatusRef.current = currentStatus;
+  }, [gameState?.gameStatus]);
+
+  // Play bleep sound for last 3 seconds of intermission
+  useEffect(() => {
+    const currentStatus = gameState?.gameStatus;
+    const displayTime = timerState?.displayTime;
+
+    // Only play during intermission (waiting status)
+    if (currentStatus === "waiting" && displayTime !== null && displayTime !== undefined) {
+      const timeRemaining = Math.ceil(displayTime);
+      
+      // Play bleep for last 3 seconds (3, 2, 1)
+      if (timeRemaining <= 3 && timeRemaining >= 1) {
+        // Only play once per second
+        if (lastBleepSecondRef.current !== timeRemaining) {
+          playSound("blip"); // Using "blip.mp3" for bleep sound
+          lastBleepSecondRef.current = timeRemaining;
+        }
+      } else if (timeRemaining > 3) {
+        // Reset the ref when we're past the 3-second mark
+        lastBleepSecondRef.current = null;
+      }
+    } else if (currentStatus !== "waiting") {
+      // Reset the ref when we're no longer in waiting status
+      lastBleepSecondRef.current = null;
+    }
+  }, [gameState?.gameStatus, timerState?.displayTime]);
 
   // Fetch remaining saves count
   useEffect(() => {
@@ -301,22 +347,35 @@ export default function GameRoom() {
           </div>
 
           <div className="chat-mobile">
-            <button
-              className={`chat-mobile-toggle ${hasNewMessages ? 'has-new-messages' : ''}`}
-              onClick={() => setIsChatExpanded(!isChatExpanded)}
-              aria-label={isChatExpanded ? "Collapse chat" : "Expand chat"}
-            >
-              <span className="chat-toggle-text">Chat</span>
-              {hasNewMessages && <span className="chat-new-messages-indicator">●</span>}
-              <span className="chat-toggle-icon">{isChatExpanded ? "▲" : "▼"}</span>
-            </button>
+            {!isChatExpanded && (
+              <button
+                className={`chat-mobile-toggle ${hasNewMessages ? 'has-new-messages' : ''}`}
+                onClick={() => setIsChatExpanded(!isChatExpanded)}
+                aria-label="Expand chat"
+              >
+                <span className="chat-toggle-text">Chat</span>
+                {hasNewMessages && <span className="chat-new-messages-indicator">●</span>}
+                <span className="chat-toggle-icon">▼</span>
+              </button>
+            )}
             {isChatExpanded && (
-              <Chat
-                messages={chatMessages}
-                connectionState={chatConnectionState}
-                onSendMessage={sendChatMessage}
-                onReconnect={reconnectChat}
-              />
+              <div className="chat-mobile-expanded">
+                <Chat
+                  messages={chatMessages}
+                  connectionState={chatConnectionState}
+                  onSendMessage={sendChatMessage}
+                  onReconnect={reconnectChat}
+                />
+                <button
+                  className={`chat-mobile-toggle chat-mobile-toggle-bottom ${hasNewMessages ? 'has-new-messages' : ''}`}
+                  onClick={() => setIsChatExpanded(!isChatExpanded)}
+                  aria-label="Collapse chat"
+                >
+                  <span className="chat-toggle-text">Chat</span>
+                  {hasNewMessages && <span className="chat-new-messages-indicator">●</span>}
+                  <span className="chat-toggle-icon">▲</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -342,6 +401,43 @@ export default function GameRoom() {
         finalScores={gameState?.finalScores || null}
         totalPoints={gameState?.totalPoints}
         isOneShot={gameState?.oneShot || false}
+      />
+      {gameState?.finalScores &&
+        (gameState?.gameStatus === "finished" ||
+          gameState?.gameStatus === "waiting") &&
+        !isGuest && handleSaveBoard && remainingSaves !== undefined && (
+          <div className="save-board-button-container">
+            <button
+              className="save-board-button-fixed"
+              onClick={handleSaveBoard}
+              disabled={remainingSaves === 0 || isSavingBoard}
+              aria-label="Save board"
+            >
+              {isSavingBoard ? 'Saving...' : `Save board (${remainingSaves})`}
+            </button>
+            <button
+              className="save-board-info-link"
+              onClick={() => setIsSavedBoardInfoModalOpen(true)}
+              aria-label="What is this?"
+            >
+              what is this?
+            </button>
+          </div>
+        )}
+      <button
+        className="game-instructions-button-fixed"
+        onClick={() => setIsInstructionsModalOpen(true)}
+        aria-label="How to play"
+      >
+        How to Play
+      </button>
+      <GameInstructionsModal
+        isOpen={isInstructionsModalOpen}
+        onClose={() => setIsInstructionsModalOpen(false)}
+      />
+      <SavedBoardInfoModal
+        isOpen={isSavedBoardInfoModalOpen}
+        onClose={() => setIsSavedBoardInfoModalOpen(false)}
       />
     </div>
   );

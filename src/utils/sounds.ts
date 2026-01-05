@@ -47,6 +47,8 @@ export async function loadSounds() {
     const soundPaths = {
       tick: '/sounds/tick.mp3',
       pop: '/sounds/twinkle.mp3',
+      blip: '/sounds/blip.mp3',
+      roundStart: '/sounds/round-start.mp3',
       bloop3: '/sounds/bloop3.mp3',
       bloop4: '/sounds/bloop4.mp3',
       bloop5: '/sounds/bloop5.mp3',
