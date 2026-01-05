@@ -88,6 +88,8 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
           boojum: raw.boojum,
           oneShot: raw.one_shot,
           gameRoundId: raw.game_round_id,  // Include game round ID
+          boardSize: raw.board_size,  // Board size (4 for 4x4, 5 for 5x5)
+          language: raw.language,  // Language (e.g., 'en' for English, 'es' for Spanish)
         },
       } as any;
 

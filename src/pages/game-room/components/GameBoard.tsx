@@ -70,6 +70,8 @@ export function GameBoard({
   const [debugMode, setDebugMode] = useState(false);
 
   const isOneShot = gameState?.oneShot;
+  const boardSize = gameState?.boardSize || 4;  // Default to 4 for backward compatibility
+  const totalCells = boardSize * boardSize;
 
   // Wrapper for onWordSubmit that handles one-shot confirmation
   const handleWordSubmitWrapper = useCallback(
@@ -126,6 +128,7 @@ export function GameBoard({
     boardRotation,
     onRecordSwipeLetter, // Pass recording callback
     onRecordSwipeWord, // Pass swipe word recording callback
+    boardSize, // Pass board size
   );
 
   // Keyboard input functionality
@@ -293,6 +296,8 @@ export function GameBoard({
               MozTransform: `rotate(${boardRotation}deg)`,
               msTransform: `rotate(${boardRotation}deg)`,
               OTransform: `rotate(${boardRotation}deg)`,
+              gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
             }}
             
             onPointerDown={(e) => {
@@ -358,9 +363,9 @@ export function GameBoard({
 
             {!hasBoardBeenShown && !gameState.board
               ? // Show pulsating circles only on first game start (when user joins, before board is available)
-                Array.from({ length: 16 }, (_, i) => {
-                  const row = Math.floor(i / 4);
-                  const col = i % 4;
+                Array.from({ length: totalCells }, (_, i) => {
+                  const row = Math.floor(i / boardSize);
+                  const col = i % boardSize;
                   return (
                     <div
                       key={i}
@@ -385,9 +390,9 @@ export function GameBoard({
                 })
               : gameState.gameStatus === "waiting" && previousBoard
               ? // Show previous board letters in faded color between games
-                Array.from({ length: 16 }, (_, i) => {
-                  const row = Math.floor(i / 4);
-                  const col = i % 4;
+                Array.from({ length: totalCells }, (_, i) => {
+                  const row = Math.floor(i / boardSize);
+                  const col = i % boardSize;
                   const letter = previousBoard?.[row]?.[col] || "";
                   return (
                     <div
@@ -410,9 +415,9 @@ export function GameBoard({
                   );
                 })
               : // Show board letters when available (game in progress)
-                Array.from({ length: 16 }, (_, i) => {
-                  const row = Math.floor(i / 4);
-                  const col = i % 4;
+                Array.from({ length: totalCells }, (_, i) => {
+                  const row = Math.floor(i / boardSize);
+                  const col = i % boardSize;
                   const letter = gameState.board?.[row]?.[col] || "";
                   // Check if this tile is a bonus tile (snark = 1, boojum = 2)
                   const bonusValue = gameState.boojumBonus?.[row]?.[col] || 0;

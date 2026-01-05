@@ -16,7 +16,8 @@ interface BoardMetadata {
 
 const CreateCustomGameboardPage = () => {
   const { user } = useAuth();
-  const [boards, setBoards] = useState<Board[]>([createEmptyBoard()]);
+  const [boardSize, setBoardSize] = useState<number>(4);
+  const [boards, setBoards] = useState<Board[]>([[]]);
   const [boardTypes, setBoardTypes] = useState<BoardType[]>(['gameboard']);
   const [boojumBoards, setBoojumBoards] = useState<BoojumBoard[]>([]);
   const [boardMetadata, setBoardMetadata] = useState<BoardMetadata[]>([]);
@@ -48,23 +49,20 @@ const CreateCustomGameboardPage = () => {
     failed_words?: string[];
   } | null>(null);
 
-  function createEmptyBoard(): Board {
-    return [
-      ['', '', '', ''],
-      ['', '', '', ''],
-      ['', '', '', ''],
-      ['', '', '', ''],
-    ];
+  function createEmptyBoard(size: number = boardSize): Board {
+    return Array(size).fill(null).map(() => Array(size).fill(''));
   }
 
-  function createEmptyBoojumBoard(): BoojumBoard {
-    return [
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-    ];
+  function createEmptyBoojumBoard(size: number = boardSize): BoojumBoard {
+    return Array(size).fill(null).map(() => Array(size).fill(0));
   }
+
+  useEffect(() => {
+    // Initialize boards with correct size
+    if (boards.length === 0 || (boards[0] && boards[0].length !== boardSize)) {
+      setBoards([createEmptyBoard(boardSize)]);
+    }
+  }, [boardSize]);
 
   useEffect(() => {
     // Load default dates when component mounts
@@ -85,9 +83,41 @@ const CreateCustomGameboardPage = () => {
   }, []); // Only run once on mount
 
   const handleAddBoard = () => {
-    setBoards([...boards, createEmptyBoard()]);
+    setBoards([...boards, createEmptyBoard(boardSize)]);
     setBoardTypes([...boardTypes, 'gameboard']);
     setBoardMetadata([...boardMetadata, { title: '', date: '' }]);
+  };
+
+  const handleBoardSizeChange = (newSize: number) => {
+    setBoardSize(newSize);
+    // Resize all existing boards
+    const resizedBoards = boards.map(board => {
+      const resized: Board = [];
+      for (let r = 0; r < newSize; r++) {
+        const row: string[] = [];
+        for (let c = 0; c < newSize; c++) {
+          row.push(board[r]?.[c] || '');
+        }
+        resized.push(row);
+      }
+      return resized;
+    });
+    setBoards(resizedBoards);
+    
+    // Resize boojum boards
+    const resizedBoojumBoards = boojumBoards.map(boojumBoard => {
+      if (!boojumBoard) return createEmptyBoojumBoard(newSize);
+      const resized: BoojumBoard = [];
+      for (let r = 0; r < newSize; r++) {
+        const row: number[] = [];
+        for (let c = 0; c < newSize; c++) {
+          row.push(boojumBoard[r]?.[c] || 0);
+        }
+        resized.push(row);
+      }
+      return resized;
+    });
+    setBoojumBoards(resizedBoojumBoards);
   };
 
   const getNextDate = (type: 'daily' | 'timeless', baseDate: string, currentMetadata: BoardMetadata[], currentTypes: BoardType[], excludeIndex: number): string => {
@@ -123,7 +153,7 @@ const CreateCustomGameboardPage = () => {
     if (type === 'daily' || type === 'timeless') {
       const newBoojumBoards = [...boojumBoards];
       if (!newBoojumBoards[boardIndex]) {
-        newBoojumBoards[boardIndex] = createEmptyBoojumBoard();
+        newBoojumBoards[boardIndex] = createEmptyBoojumBoard(boardSize);
       }
       setBoojumBoards(newBoojumBoards);
 
@@ -263,8 +293,8 @@ const CreateCustomGameboardPage = () => {
     const markValue = activeMarkingMode === 'snark' ? 1 : 2;
 
     // Clear all previous marks of the same type (only one boojum, only one snark)
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
+    for (let r = 0; r < boardSize; r++) {
+      for (let c = 0; c < boardSize; c++) {
         if (boojumBoard[r][c] === markValue) {
           boojumBoard[r][c] = 0;
         }
@@ -310,13 +340,13 @@ const CreateCustomGameboardPage = () => {
         let nextCol = colIndex + 1;
         
         // Move to next row if at end of current row
-        if (nextCol >= 4) {
+        if (nextCol >= boardSize) {
           nextCol = 0;
           nextRow = rowIndex + 1;
         }
         
         // Move to next board if at end of current board
-        if (nextRow >= 4) {
+        if (nextRow >= boardSize) {
           // Don't auto-advance to next board, just stay at last cell
           return;
         }
@@ -336,13 +366,13 @@ const CreateCustomGameboardPage = () => {
         let nextCol = colIndex + 1;
         
         // Move to next row if at end of current row
-        if (nextCol >= 4) {
+        if (nextCol >= boardSize) {
           nextCol = 0;
           nextRow = rowIndex + 1;
         }
         
         // Move to next board if at end of current board
-        if (nextRow >= 4) {
+        if (nextRow >= boardSize) {
           // Don't auto-advance to next board, just stay at last cell
           return;
         }
@@ -377,7 +407,7 @@ const CreateCustomGameboardPage = () => {
         
         // Move to previous row if at start of current row
         if (prevCol < 0) {
-          prevCol = 3;
+          prevCol = boardSize - 1;
           prevRow = rowIndex - 1;
         }
         
@@ -397,7 +427,7 @@ const CreateCustomGameboardPage = () => {
         }
       }
       // If there's a value, let Backspace work normally to delete it
-    } else if (e.key === 'ArrowRight' && colIndex < 3) {
+    } else if (e.key === 'ArrowRight' && colIndex < boardSize - 1) {
       e.preventDefault();
       const nextInput = document.querySelector(
         `input[data-board="${boardIndex}"][data-row="${rowIndex}"][data-col="${colIndex + 1}"]`
@@ -411,7 +441,7 @@ const CreateCustomGameboardPage = () => {
       ) as HTMLInputElement;
       prevInput?.focus();
       prevInput?.select();
-    } else if (e.key === 'ArrowDown' && rowIndex < 3) {
+    } else if (e.key === 'ArrowDown' && rowIndex < boardSize - 1) {
       e.preventDefault();
       const nextInput = document.querySelector(
         `input[data-board="${boardIndex}"][data-row="${rowIndex + 1}"][data-col="${colIndex}"]`
@@ -437,8 +467,8 @@ const CreateCustomGameboardPage = () => {
   const validateBoards = (): boolean => {
     for (let boardIndex = 0; boardIndex < boards.length; boardIndex++) {
       const board = boards[boardIndex];
-      for (let rowIndex = 0; rowIndex < 4; rowIndex++) {
-        for (let colIndex = 0; colIndex < 4; colIndex++) {
+      for (let rowIndex = 0; rowIndex < boardSize; rowIndex++) {
+        for (let colIndex = 0; colIndex < boardSize; colIndex++) {
           const letter = board[rowIndex][colIndex];
           if (!letter || letter.trim() === '') {
             toast.error(`Board ${boardIndex + 1}, row ${rowIndex + 1}, column ${colIndex + 1} is empty`);
@@ -521,20 +551,20 @@ const CreateCustomGameboardPage = () => {
       // Create gameboards first
       let allBoardIds: number[] = [];
       if (gameboardBoards.length > 0) {
-        const response = await adminAPI.createCustomGameboards(gameboardBoards);
+        const response = await adminAPI.createCustomGameboards(gameboardBoards, boardSize);
         allBoardIds = response.boards.map((b: any) => b.id);
       }
 
       // Create daily boards
       if (dailyBoards.length > 0) {
-        const dailyResponse = await adminAPI.createDailyBoards(dailyBoards);
+        const dailyResponse = await adminAPI.createDailyBoards(dailyBoards, boardSize);
         // Use gameboard_id for checking definitions (not the daily board id)
         allBoardIds = [...allBoardIds, ...dailyResponse.boards.map((b: any) => b.gameboard_id || b.id)];
       }
 
       // Create timeless boards
       if (timelessBoards.length > 0) {
-        const timelessResponse = await adminAPI.createTimelessBoards(timelessBoards);
+        const timelessResponse = await adminAPI.createTimelessBoards(timelessBoards, boardSize);
         // Use gameboard_id for checking definitions (not the timeless board id)
         allBoardIds = [...allBoardIds, ...timelessResponse.boards.map((b: any) => b.gameboard_id || b.id)];
       }
@@ -659,6 +689,19 @@ const CreateCustomGameboardPage = () => {
         <p className="page-description">
           Create custom gameboards that will be marked as special. Word lists will be automatically generated.
         </p>
+
+        <div className="board-size-selector" style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+          <label htmlFor="board-size" style={{ marginRight: '10px', fontWeight: 'bold', color: '#333' }}>Board Size:</label>
+          <select
+            id="board-size"
+            value={boardSize}
+            onChange={(e) => handleBoardSizeChange(parseInt(e.target.value))}
+            style={{ padding: '5px 10px', fontSize: '14px', borderRadius: '4px', backgroundColor: '#fff', color: '#333', border: '1px solid #ccc' }}
+          >
+            <option value="4">4x4 (Standard)</option>
+            <option value="5">5x5 (Big Board)</option>
+          </select>
+        </div>
 
         <div className="boards-container">
           {boards.map((board, boardIndex) => {

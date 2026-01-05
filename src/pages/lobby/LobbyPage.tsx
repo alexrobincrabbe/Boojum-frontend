@@ -22,6 +22,11 @@ interface Room {
   created_by?: string;
   created_by_username?: string;
   visibility?: string;
+  language?: string;
+  word_level?: number;
+  board_size?: number;
+  use_special_boards?: boolean;
+  only_special_boards?: boolean;
 }
 
 interface WordOfTheDay {
@@ -316,6 +321,35 @@ const LobbyPage = () => {
                         {room.visibility && (
                           <div className="custom-room-visibility">
                             <strong>Visibility:</strong> {room.visibility === 'public' ? 'Public' : 'Playmates Only'}
+                          </div>
+                        )}
+                        {room.language && (
+                          <div className="custom-room-language">
+                            <strong>Language:</strong> {room.language === 'en' ? 'English' : room.language === 'es' ? 'Spanish' : room.language}
+                          </div>
+                        )}
+                        {room.language === 'en' && room.word_level && (
+                          <div className="custom-room-word-level">
+                            <strong>Word Level:</strong> {
+                              room.word_level === 4 ? 'Curious' :
+                              room.word_level === 7 ? 'Curiouser' :
+                              room.word_level === 10 ? 'Rabbit Hole' :
+                              `Level ${room.word_level}`
+                            }
+                          </div>
+                        )}
+                        {room.board_size && (
+                          <div className="custom-room-board-size">
+                            <strong>Board Size:</strong> {room.board_size}x{room.board_size}
+                          </div>
+                        )}
+                        {room.language === 'en' && (room.use_special_boards || room.only_special_boards) && (
+                          <div className="custom-room-special-boards">
+                            <strong>Special Boards:</strong> {
+                              room.only_special_boards ? 'Only Special Boards' :
+                              room.use_special_boards ? 'Include Special Boards' :
+                              'Exclude Special Boards'
+                            }
                           </div>
                         )}
                       </div>

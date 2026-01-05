@@ -32,7 +32,8 @@ export function useBoardSwipe(
     debugMode: boolean = false,
     boardRotationDeg: number = 0,
     onRecordSwipeLetter?: (letter: string, x: number, y: number, index: number, word?: string) => void,
-    onRecordSwipeWord?: (word: string) => void
+    onRecordSwipeWord?: (word: string) => void,
+    boardSize: number = 4
 ) {
 
     const { darkMode, colorsOff: globalColorsOff } = useBoardTheme();
@@ -43,12 +44,13 @@ export function useBoardSwipe(
     const [debugPath, setDebugPath] = useState<DebugPoint[]>([]);
     const debugPathRef = useRef<DebugPoint[]>([]);
 
+    const totalCells = boardSize * boardSize;
     const [swipeState, setSwipeState] = useState<SwipeState>({
         selectedLetters: [],
         lastX: null,
         lastY: null,
         isMouseDown: false,
-        tracePath: Array(16).fill(false),
+        tracePath: Array(totalCells).fill(false),
         tracePathIndexes: [],
     });
 
@@ -57,7 +59,7 @@ export function useBoardSwipe(
         lastX: null,
         lastY: null,
         isMouseDown: false,
-        tracePath: Array(16).fill(false),
+        tracePath: Array(totalCells).fill(false),
         tracePathIndexes: [],
     });
 
@@ -262,7 +264,8 @@ export function useBoardSwipe(
             const letterContainers = boardRef.current.getElementsByClassName("letter");
             for (let i = 0; i < letterContainers.length; i++) {
                 const el = letterContainers[i] as HTMLElement;
-                if (tracePath[i]) el.classList.add(tileClass);
+                const index = parseInt(el.getAttribute("data-index") || "0");
+                if (tracePath[index]) el.classList.add(tileClass);
             }
         },
         [boardRef, checkMatch, checkPartialMatch, clearTileColors, darkMode, colorsOff, onExactMatch]
@@ -285,11 +288,11 @@ export function useBoardSwipe(
 
                         const lettersToRemove = selectedLetters.length - 1 - matchIndex;
                         const newSelected = selectedLetters.slice(0, matchIndex + 1);
-                        const newTracePath = Array(16).fill(false);
+                        const newTracePath = Array(totalCells).fill(false);
                         const newTracePathIndexes = prev.tracePathIndexes.slice(0, matchIndex + 1);
 
                         for (const [tx, ty] of newTracePathIndexes) {
-                            const idx = ty + tx * 4;
+                            const idx = ty + tx * boardSize;
                             newTracePath[idx] = true;
                         }
 
@@ -342,7 +345,7 @@ export function useBoardSwipe(
                 if (lastX === null || isAdjacent(x, y, lastX, lastY)) {
                     const newSelected = [...selectedLetters, letter];
                     const newTracePath = [...prev.tracePath];
-                    const idx = y + x * 4;
+                    const idx = y + x * boardSize;
                     newTracePath[idx] = true;
 
                     const newTracePathIndexes = [...prev.tracePathIndexes, [x, y] as [number, number]];
@@ -399,6 +402,8 @@ export function useBoardSwipe(
             updateTileColors,
             wordsFound,
             onRecordSwipeLetter,
+            boardSize,
+            totalCells,
         ]
     );
 

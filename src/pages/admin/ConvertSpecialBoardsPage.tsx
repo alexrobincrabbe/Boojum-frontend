@@ -34,13 +34,8 @@ const ConvertSpecialBoardsPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  function createEmptyBoojumBoard(): BoojumBoard {
-    return [
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-    ];
+  function createEmptyBoojumBoard(boardSize: number = 4): BoojumBoard {
+    return Array(boardSize).fill(null).map(() => Array(boardSize).fill(0));
   }
 
   useEffect(() => {
@@ -112,7 +107,9 @@ const ConvertSpecialBoardsPage = () => {
       // Initialize boojum board
       const newBoojum = { ...boojumBoards };
       if (!newBoojum[boardId]) {
-        newBoojum[boardId] = createEmptyBoojumBoard();
+        const board = availableBoards.find(b => b.id === boardId);
+        const boardSize = board?.letters?.length || 4;
+        newBoojum[boardId] = createEmptyBoojumBoard(boardSize);
       }
       setBoojumBoards(newBoojum);
     }
@@ -256,10 +253,11 @@ const ConvertSpecialBoardsPage = () => {
     }
 
     // Check if this letter appears elsewhere on the board
+    const boardSize = board.letters.length;
     const letterPositions: [number, number][] = [];
     
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
+    for (let r = 0; r < boardSize; r++) {
+      for (let c = 0; c < boardSize; c++) {
         if (board.letters[r][c] === letter) {
           letterPositions.push([r, c]);
         }
@@ -276,8 +274,8 @@ const ConvertSpecialBoardsPage = () => {
     const markValue = markingMode === 'snark' ? 1 : 2;
 
     // Clear all previous marks of the same type (only one boojum, only one snark)
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
+    for (let r = 0; r < boardSize; r++) {
+      for (let c = 0; c < boardSize; c++) {
         if (boojumBoard[r][c] === markValue) {
           boojumBoard[r][c] = 0;
         }
@@ -337,7 +335,8 @@ const ConvertSpecialBoardsPage = () => {
 
         const boardType = boardTypes[boardId];
         const metadata = boardMetadata[boardId];
-        const boojum = boojumBoards[boardId] || createEmptyBoojumBoard();
+        const boardSizeForBoard = board.letters.length;
+        const boojum = boojumBoards[boardId] || createEmptyBoojumBoard(boardSizeForBoard);
 
         if (boardType === 'daily') {
           dailyBoards.push({
@@ -358,14 +357,18 @@ const ConvertSpecialBoardsPage = () => {
         }
       }
 
+      // Get board size from first board (all should have same size)
+      const firstBoard = availableBoards.find(b => selectedBoardIds.has(b.id));
+      const boardSize = firstBoard?.letters?.length || 4;
+
       // Create daily boards
       if (dailyBoards.length > 0) {
-        await adminAPI.createDailyBoards(dailyBoards.map(({ boardId, ...rest }) => rest));
+        await adminAPI.createDailyBoards(dailyBoards.map(({ boardId, ...rest }) => rest), boardSize);
       }
 
       // Create timeless boards
       if (timelessBoards.length > 0) {
-        await adminAPI.createTimelessBoards(timelessBoards.map(({ boardId, ...rest }) => rest));
+        await adminAPI.createTimelessBoards(timelessBoards.map(({ boardId, ...rest }) => rest), boardSize);
       }
 
       toast.success(`Successfully converted ${selectedBoardIds.size} board(s)!`);

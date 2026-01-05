@@ -16,6 +16,7 @@ interface WordListsProps {
   hasFinalScores?: boolean; // Indicates if we have final scores (game just finished)
   boojum?: string; // Bonus letter that doubles word multiplier
   snark?: string; // Bonus letter that doubles letter score
+  language?: string; // Language for definition lookup (e.g., 'en' for English, 'es' for Spanish)
   // Optional props for daily board solution color coding
   currentUserId?: number | null; // Current user ID for daily board solution
   filteredPlayerIds?: Set<number | null>; // Filtered player IDs for daily board solution
@@ -41,6 +42,7 @@ export function WordLists({
   hasFinalScores = false,
   boojum,
   snark,
+  language = 'en',
   currentUserId,
   filteredPlayerIds = new Set(),
   showColorBanner,
@@ -108,7 +110,7 @@ export function WordLists({
     });
 
     try {
-      const definition = await fetchDefinition(word);
+      const definition = await fetchDefinition(word, language);
       setPopup({
         word,
         definition,

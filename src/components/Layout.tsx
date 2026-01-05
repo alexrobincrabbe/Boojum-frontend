@@ -1183,6 +1183,15 @@ const Layout = ({ children }: LayoutProps) => {
             >
               {leftSidebarOpen && <span>Minigames Archive</span>}
             </Link>
+            <Link
+              to="/custom-room"
+              className={`nav-link ${location.pathname === '/custom-room' ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>Create Custom Room</span>}
+            </Link>
               </div>
             </div>
           )}

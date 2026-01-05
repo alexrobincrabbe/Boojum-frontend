@@ -454,9 +454,9 @@
 
 /* Ensure board uses grid layout */
 .board-container #board {
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  display: grid ;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) ;
+  grid-template-rows: repeat(4, minmax(0, 1fr)) ;
   position: relative;
   border-radius: 25px;
   padding: 10px;

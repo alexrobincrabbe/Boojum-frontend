@@ -350,6 +350,7 @@ export const premiumAPI = {
     visibility: string;
     color: string;
     description?: string;
+    board_size?: number;
   }) => {
     const response = await api.post('/custom-room/create-or-update/', roomData);
     return response.data;
@@ -684,8 +685,12 @@ export const minigamesAPI = {
 };
 
 export const adminAPI = {
-  createCustomGameboards: async (boards: string[][][]) => {
-    const response = await api.post('/admin/create-custom-gameboards/', { boards });
+  createCustomGameboards: async (boards: string[][][], boardSize: number = 4) => {
+    const response = await api.post('/admin/create-custom-gameboards/', { 
+      boards,
+      board_size: boardSize,
+      language: 'en'
+    });
     return response.data;
   },
   checkCustomBoardDefinitions: async (boardIds: number[], fetchDefinitions: boolean = false) => {
@@ -695,12 +700,20 @@ export const adminAPI = {
     });
     return response.data;
   },
-  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[]) => {
-    const response = await api.post('/admin/create-daily-boards/', { boards });
+  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[], boardSize: number = 4) => {
+    const response = await api.post('/admin/create-daily-boards/', { 
+      boards,
+      board_size: boardSize,
+      language: 'en'
+    });
     return response.data;
   },
-  createTimelessBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[]) => {
-    const response = await api.post('/admin/create-timeless-boards/', { boards });
+  createTimelessBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[], boardSize: number = 4) => {
+    const response = await api.post('/admin/create-timeless-boards/', { 
+      boards,
+      board_size: boardSize,
+      language: 'en'
+    });
     return response.data;
   },
   getDefaultBoardDates: async () => {

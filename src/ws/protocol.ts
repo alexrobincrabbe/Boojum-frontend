@@ -54,8 +54,10 @@ export interface GameState {
   wordsByLength?: Record<string, string[]> | Record<string, Record<string, WordData>>;  // Words grouped by length (simple format during game, detailed format with scores at end)
   boojum?: string;  // Bonus letter that doubles word multiplier
   snark?: string;  // Bonus letter that doubles letter score
-  boojumBonus?: number[][];  // 4x4 array: 1 = snark, 2 = boojum, 0 = normal
+  boojumBonus?: number[][];  // NxN array: 1 = snark, 2 = boojum, 0 = normal
   oneShot?: boolean;  // True if this is a one-shot/unicorn room (only one word allowed)
+  boardSize?: number;  // Size of the board (4 for 4x4, 5 for 5x5, defaults to 4)
+  language?: string;  // Language for the room (e.g., 'en' for English, 'es' for Spanish, defaults to 'en')
   // Add other game-specific state fields as needed
 }
 

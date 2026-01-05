@@ -486,8 +486,7 @@ white-space: nowrap;
 #timeless-board {
   display: grid;
   position: relative;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(4, minmax(0, 1fr));
+  /* grid-template-columns and grid-template-rows are set dynamically via inline styles based on board size */
   border-radius: 25px;
   padding: 10px;
   gap: 10px;
@@ -724,7 +723,10 @@ white-space: nowrap;
 .dot-6,
 .dot-9,
 .dot-12,
-.dot-15 {
+.dot-15,
+.dot-18,
+.dot-21,
+.dot-24 {
   border-radius: 50%;
   height: 30px;
   width: 30px;
@@ -737,7 +739,9 @@ white-space: nowrap;
 .dot-7,
 .dot-10,
 .dot-13,
-.dot-16 {
+.dot-16,
+.dot-19,
+.dot-22 {
   border-radius: 50%;
   height: 30px;
   width: 30px;
@@ -749,7 +753,10 @@ white-space: nowrap;
 .dot-5,
 .dot-8,
 .dot-11,
-.dot-14 {
+.dot-14,
+.dot-17,
+.dot-20,
+.dot-23 {
   border-radius: 50%;
   height: 30px;
   width: 30px;
@@ -804,6 +811,33 @@ white-space: nowrap;
 }
 .dot-15 {
   animation-delay: 1.5s;
+}
+.dot-16 {
+  animation-delay: 1.6s;
+}
+.dot-17 {
+  animation-delay: 1.7s;
+}
+.dot-18 {
+  animation-delay: 1.8s;
+}
+.dot-19 {
+  animation-delay: 1.9s;
+}
+.dot-20 {
+  animation-delay: 2s;
+}
+.dot-21 {
+  animation-delay: 2.1s;
+}
+.dot-22 {
+  animation-delay: 2.2s;
+}
+.dot-23 {
+  animation-delay: 2.3s;
+}
+.dot-24 {
+  animation-delay: 2.4s;
 }
 
 @keyframes glow-animation-green {

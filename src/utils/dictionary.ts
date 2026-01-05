@@ -18,7 +18,7 @@ function getCSRFToken(): string | null {
 }
 
 // Fetch from custom dictionary API
-async function fetchCustomDictionaryDefinition(word: string): Promise<string | null> {
+async function fetchCustomDictionaryDefinition(word: string, language: string = 'en'): Promise<string | null> {
   try {
     // Normalize the word: trim whitespace
     const normalizedWord = word.trim();
@@ -46,12 +46,12 @@ async function fetchCustomDictionaryDefinition(word: string): Promise<string | n
     }
     
     const url = `${djangoBaseUrl}/api/get-definition/`;
-    console.log('Fetching definition from:', url, 'for word:', normalizedWord);
+    console.log('Fetching definition from:', url, 'for word:', normalizedWord, 'language:', language);
     
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ word: normalizedWord }),
+      body: JSON.stringify({ word: normalizedWord, language }),
       credentials: 'include', // Include cookies for CSRF token
     });
 
@@ -87,8 +87,8 @@ async function fetchCustomDictionaryDefinition(word: string): Promise<string | n
 /**
  * Fetch word definition from custom dictionary only
  */
-export async function fetchDefinition(word: string): Promise<string> {
-  const definition = await fetchCustomDictionaryDefinition(word);
+export async function fetchDefinition(word: string, language: string = 'en'): Promise<string> {
+  const definition = await fetchCustomDictionaryDefinition(word, language);
   return definition || 'Definition not found.';
 }
 

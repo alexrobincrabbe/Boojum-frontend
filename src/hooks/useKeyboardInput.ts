@@ -13,6 +13,7 @@ interface UseKeyboardInputParams {
   onRecordKeyboardWord?: (word: string, tracePath: boolean[]) => void;
   colorsOffOverride?: boolean; // Override global colorsOff setting (for timeless boards)
   onExactMatch?: (word: string) => void; // Callback when letters turn green (exact match found)
+  boardSize?: number; // Size of the board (4 for 4x4, 5 for 5x5, defaults to 4)
 }
 
 export function useKeyboardInput({
@@ -26,12 +27,14 @@ export function useKeyboardInput({
   onRecordKeyboardWord,
   colorsOffOverride,
   onExactMatch,
+  boardSize = 4,
 }: UseKeyboardInputParams) {
   const { darkMode, colorsOff: colorsOffFromContext } = useBoardTheme();
   // Use override if provided, otherwise use context value
   const colorsOff = colorsOffOverride !== undefined ? colorsOffOverride : colorsOffFromContext;
+  const totalCells = boardSize * boardSize;
   const [currentWord, setCurrentWord] = useState('');
-  const [tracePath, setTracePath] = useState<boolean[]>(Array(16).fill(false));
+  const [tracePath, setTracePath] = useState<boolean[]>(Array(totalCells).fill(false));
   const currentWordRef = useRef('');
   const boardRef = useRef(board);
   const lastExactMatchRef = useRef<string>(''); // Track last exact match word, matching swipe implementation
@@ -128,8 +131,9 @@ export function useKeyboardInput({
           'tile-no-match-light', 'tile-match-light', 'tile-partial-match-light',
           'tile-no-match-grey-dark', 'tile-no-match-grey-light', 'tile-match-grey-light');
         
-        // Apply color if in trace path
-        if (tracePathArray[i]) {
+        // Apply color if in trace path - use data-index attribute to match tracePathArray indexing
+        const index = parseInt(letterEl.getAttribute("data-index") || "0");
+        if (tracePathArray[index]) {
           let tileClass: string;
           const modeSuffix = darkMode ? 'dark' : 'light';
           
@@ -169,7 +173,7 @@ export function useKeyboardInput({
   // Search board recursively to find valid paths
   const searchBoard = useCallback((word: string) => {
     if (!board || !word) {
-      const emptyTracePath = Array(16).fill(false);
+      const emptyTracePath = Array(totalCells).fill(false);
       setTracePath(emptyTracePath);
       updateTileColors('', emptyTracePath);
       if (onTracePathUpdate) {
@@ -178,10 +182,10 @@ export function useKeyboardInput({
       return;
     }
 
-    const rows = 4;
-    const columns = 4;
+    const rows = boardSize;
+    const columns = boardSize;
     if (word.length > rows * columns) {
-      const emptyTracePath = Array(16).fill(false);
+      const emptyTracePath = Array(totalCells).fill(false);
       setTracePath(emptyTracePath);
       updateTileColors('', emptyTracePath);
       if (onTracePathUpdate) {
@@ -190,8 +194,8 @@ export function useKeyboardInput({
       return;
     }
 
-    const visited: boolean[][] = Array.from(Array(4), () => new Array(4).fill(false));
-    const newTracePath: boolean[] = Array(16).fill(false);
+    const visited: boolean[][] = Array.from(Array(boardSize), () => new Array(boardSize).fill(false));
+    const newTracePath: boolean[] = Array(totalCells).fill(false);
 
     const searchBoardRecursive = (
       lastRow: number,
@@ -249,7 +253,7 @@ export function useKeyboardInput({
     
     // Update tile colors after tracePath is set
     updateTileColors(word, newTracePath);
-  }, [board, onTracePathUpdate, updateTileColors, onRecordKeyboardWord]);
+  }, [board, onTracePathUpdate, updateTileColors, onRecordKeyboardWord, boardSize, totalCells]);
 
   // Add letter to word
   const addLetter = useCallback((key: string) => {
@@ -277,7 +281,7 @@ export function useKeyboardInput({
     setCurrentWord((prev) => {
       if (prev.length === 0) {
         // Clear everything if word is empty
-        const emptyTracePath = Array(16).fill(false);
+        const emptyTracePath = Array(totalCells).fill(false);
         setTracePath(emptyTracePath);
         updateTileColors('', emptyTracePath);
         if (onTracePathUpdate) {
@@ -300,7 +304,7 @@ export function useKeyboardInput({
       
       // If word is now empty, clear everything
       if (newWord.length === 0) {
-        const emptyTracePath = Array(16).fill(false);
+        const emptyTracePath = Array(totalCells).fill(false);
         setTracePath(emptyTracePath);
         updateTileColors('', emptyTracePath);
         if (onTracePathUpdate) {
@@ -319,12 +323,12 @@ export function useKeyboardInput({
       
       return newWord;
     });
-  }, [searchBoard, updateTileColors, onTracePathUpdate, onRecordKeyboardWord]);
+  }, [searchBoard, updateTileColors, onTracePathUpdate, onRecordKeyboardWord, totalCells]);
 
   // Clear word
   const clearWord = useCallback(() => {
     setCurrentWord('');
-    const emptyTracePath = Array(16).fill(false);
+    const emptyTracePath = Array(totalCells).fill(false);
     setTracePath(emptyTracePath);
     
     // Reset lastExactMatchRef when word is cleared - matching swipe implementation
@@ -349,7 +353,7 @@ export function useKeyboardInput({
     if (onRecordKeyboardWord) {
       onRecordKeyboardWord('', emptyTracePath);
     }
-  }, [onTracePathUpdate, board, onRecordKeyboardWord]);
+  }, [onTracePathUpdate, board, onRecordKeyboardWord, totalCells]);
 
   // Handle keyboard input
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
