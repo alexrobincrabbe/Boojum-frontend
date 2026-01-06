@@ -348,6 +348,7 @@ export default function DailyBoardGameRoom() {
             hasFinalScores={!!gameState.finalScores}
             boojum={gameState.boojum}
             snark={gameState.snark}
+            language={gameState.language}
           />
         </div>
       )}

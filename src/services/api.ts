@@ -732,6 +732,22 @@ export const adminAPI = {
     const response = await api.get('/admin/timeless-boards/', { params: { page } });
     return response.data;
   },
+  listBoardsForDeletion: async (page: number = 1, pageSize: number = 20, type: 'all' | 'gameboard' | 'daily' | 'timeless' = 'all') => {
+    const response = await api.get('/admin/list-boards/', { params: { page, page_size: pageSize, type } });
+    return response.data;
+  },
+  deleteGameboard: async (boardId: number) => {
+    const response = await api.delete(`/admin/delete-gameboard/${boardId}/`);
+    return response.data;
+  },
+  deleteDailyBoard: async (boardId: number) => {
+    const response = await api.delete(`/admin/delete-daily-board/${boardId}/`);
+    return response.data;
+  },
+  deleteTimelessBoard: async (boardId: number) => {
+    const response = await api.delete(`/admin/delete-timeless-board/${boardId}/`);
+    return response.data;
+  },
   getTimelessBoardWords: async (timelessBoardId: number) => {
     const response = await api.get(`/admin/timeless-boards/${timelessBoardId}/words/`);
     return response.data;

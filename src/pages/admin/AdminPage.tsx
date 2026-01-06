@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Settings, Gamepad2, Users, Plus, List } from 'lucide-react';
+import { Settings, Gamepad2, Users, Plus, List, Trash2 } from 'lucide-react';
 import './AdminPage.css';
 
 const AdminPage = () => {
@@ -51,6 +51,13 @@ const AdminPage = () => {
                 <div>
                   <div className="link-title">Timeless Board Word Lists</div>
                   <div className="link-description">Manage word frequencies for timeless boards (1, 5, 10)</div>
+                </div>
+              </Link>
+              <Link to="/admin/delete-boards" className="admin-link">
+                <Trash2 size={20} />
+                <div>
+                  <div className="link-title">Delete Boards</div>
+                  <div className="link-description">Delete gameboards, daily boards, or timeless boards</div>
                 </div>
               </Link>
             </div>

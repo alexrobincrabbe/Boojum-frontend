@@ -149,7 +149,18 @@ const ConvertSpecialBoardsPage = () => {
     if (type === 'daily' || type === 'timeless') {
       const newBoojum = { ...boojumBoards };
       if (!newBoojum[boardId]) {
-        newBoojum[boardId] = createEmptyBoojumBoard();
+        const board = availableBoards.find(b => b.id === boardId);
+        const boardSize = board?.letters?.length || 4;
+        newBoojum[boardId] = createEmptyBoojumBoard(boardSize);
+      } else {
+        // Ensure existing boojum board matches board size
+        const board = availableBoards.find(b => b.id === boardId);
+        const boardSize = board?.letters?.length || 4;
+        const existingBoojum = newBoojum[boardId];
+        // Check if boojum size matches board size, recreate if not
+        if (existingBoojum.length !== boardSize || (existingBoojum[0] && existingBoojum[0].length !== boardSize)) {
+          newBoojum[boardId] = createEmptyBoojumBoard(boardSize);
+        }
       }
       setBoojumBoards(newBoojum);
 
@@ -270,20 +281,34 @@ const ConvertSpecialBoardsPage = () => {
       return;
     }
 
-    const boojumBoard = { ...boojumBoards[boardId] };
+    // Ensure boojum board exists and is the correct size
+    let boojumBoard = boojumBoards[boardId];
+    if (!boojumBoard || boojumBoard.length !== boardSize || (boojumBoard[0] && boojumBoard[0].length !== boardSize)) {
+      // Create a new boojum board with the correct size
+      boojumBoard = createEmptyBoojumBoard(boardSize);
+    } else {
+      // Deep copy the boojum board array
+      boojumBoard = boojumBoard.map(row => [...row]);
+    }
+    
     const markValue = markingMode === 'snark' ? 1 : 2;
 
     // Clear all previous marks of the same type (only one boojum, only one snark)
     for (let r = 0; r < boardSize; r++) {
       for (let c = 0; c < boardSize; c++) {
-        if (boojumBoard[r][c] === markValue) {
+        if (boojumBoard[r] && boojumBoard[r][c] === markValue) {
           boojumBoard[r][c] = 0;
         }
       }
     }
 
     // Mark the selected letter
-    boojumBoard[rowIndex][colIndex] = markValue;
+    if (boojumBoard[rowIndex] && boojumBoard[rowIndex][colIndex] !== undefined) {
+      boojumBoard[rowIndex][colIndex] = markValue;
+    } else {
+      toast.error('Invalid board position');
+      return;
+    }
 
     const newBoojumBoards = { ...boojumBoards };
     newBoojumBoards[boardId] = boojumBoard;
@@ -336,7 +361,15 @@ const ConvertSpecialBoardsPage = () => {
         const boardType = boardTypes[boardId];
         const metadata = boardMetadata[boardId];
         const boardSizeForBoard = board.letters.length;
-        const boojum = boojumBoards[boardId] || createEmptyBoojumBoard(boardSizeForBoard);
+        let boojum = boojumBoards[boardId];
+        
+        // Ensure boojum board exists and matches board size
+        if (!boojum || boojum.length !== boardSizeForBoard || (boojum[0] && boojum[0].length !== boardSizeForBoard)) {
+          boojum = createEmptyBoojumBoard(boardSizeForBoard);
+        } else {
+          // Deep copy to ensure we're sending a proper array structure
+          boojum = boojum.map(row => [...row]);
+        }
 
         if (boardType === 'daily') {
           dailyBoards.push({

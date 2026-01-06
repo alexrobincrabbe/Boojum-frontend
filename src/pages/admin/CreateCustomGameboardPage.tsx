@@ -2,17 +2,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { adminAPI } from '../../services/api';
 import { toast } from 'react-toastify';
-import { Plus, X, CheckCircle, AlertCircle, Calendar, Infinity } from 'lucide-react';
+import { Plus, X, CheckCircle, AlertCircle } from 'lucide-react';
 import './CreateCustomGameboardPage.css';
 
 type Board = string[][];
 type BoojumBoard = number[][]; // 0 = normal, 1 = snark, 2 = boojum
-type BoardType = 'gameboard' | 'daily' | 'timeless' | null;
+type BoardType = 'gameboard' | null;
 
-interface BoardMetadata {
-  title: string;
-  date: string;
-}
 
 const CreateCustomGameboardPage = () => {
   const { user } = useAuth();
@@ -20,9 +16,6 @@ const CreateCustomGameboardPage = () => {
   const [boards, setBoards] = useState<Board[]>([[]]);
   const [boardTypes, setBoardTypes] = useState<BoardType[]>(['gameboard']);
   const [boojumBoards, setBoojumBoards] = useState<BoojumBoard[]>([]);
-  const [boardMetadata, setBoardMetadata] = useState<BoardMetadata[]>([]);
-  const [activeMarkingMode, setActiveMarkingMode] = useState<'snark' | 'boojum' | null>(null);
-  const [dateErrors, setDateErrors] = useState<{ [key: number]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [createdBoardIds, setCreatedBoardIds] = useState<number[]>([]);
@@ -64,28 +57,10 @@ const CreateCustomGameboardPage = () => {
     }
   }, [boardSize]);
 
-  useEffect(() => {
-    // Load default dates when component mounts
-    const loadDefaultDates = async () => {
-      try {
-        await adminAPI.getDefaultBoardDates();
-        // Initialize metadata for existing boards
-        const defaultMetadata: BoardMetadata[] = boards.map(() => ({
-          title: '',
-          date: '',
-        }));
-        setBoardMetadata(defaultMetadata);
-      } catch (error) {
-        console.error('Error loading default dates:', error);
-      }
-    };
-    loadDefaultDates();
-  }, []); // Only run once on mount
 
   const handleAddBoard = () => {
     setBoards([...boards, createEmptyBoard(boardSize)]);
     setBoardTypes([...boardTypes, 'gameboard']);
-    setBoardMetadata([...boardMetadata, { title: '', date: '' }]);
   };
 
   const handleBoardSizeChange = (newSize: number) => {
@@ -120,204 +95,11 @@ const CreateCustomGameboardPage = () => {
     setBoojumBoards(resizedBoojumBoards);
   };
 
-  const getNextDate = (type: 'daily' | 'timeless', baseDate: string, currentMetadata: BoardMetadata[], currentTypes: BoardType[], excludeIndex: number): string => {
-    // Base date from database is already the next date (last date + 1 day)
-    let latestDate = new Date(baseDate);
-    
-    // Find the highest date among boards of the SAME TYPE ONLY in current session
-    // Exclude the current board (excludeIndex) from the calculation
-    // Daily and timeless boards count separately
-    for (let i = 0; i < currentMetadata.length; i++) {
-      // Skip the current board and only consider boards of the exact same type (daily or timeless)
-      if (i !== excludeIndex && currentTypes[i] === type && currentMetadata[i]?.date) {
-        const date = new Date(currentMetadata[i].date);
-        if (date >= latestDate) {
-          // If there's a board with this date or later, add one day to it
-          latestDate = new Date(date);
-          latestDate.setDate(latestDate.getDate() + 1);
-        }
-      }
-    }
-    
-    // Return the date (baseDate if no other boards, or latestDate + 1 if other boards exist)
-    return latestDate.toISOString().split('T')[0];
-  };
-
-  const handleBoardTypeChange = async (boardIndex: number, type: BoardType) => {
-    const newTypes = [...boardTypes];
-    const previousType = newTypes[boardIndex];
-    newTypes[boardIndex] = type;
-    setBoardTypes(newTypes);
-
-    // Initialize boojum board if switching to daily/timeless
-    if (type === 'daily' || type === 'timeless') {
-      const newBoojumBoards = [...boojumBoards];
-      if (!newBoojumBoards[boardIndex]) {
-        newBoojumBoards[boardIndex] = createEmptyBoojumBoard(boardSize);
-      }
-      setBoojumBoards(newBoojumBoards);
-
-      // Only update date if switching from a different type or if date is not set
-      const currentMetadata = [...boardMetadata];
-      if (!currentMetadata[boardIndex]) {
-        currentMetadata[boardIndex] = { title: '', date: '' };
-      }
-      
-      const shouldUpdateDate = previousType !== type || !currentMetadata[boardIndex].date;
-
-      if (shouldUpdateDate) {
-        // Load default date and title
-        try {
-          const data = await adminAPI.getDefaultBoardDates();
-          
-          // Calculate next date considering both database and current session
-          // IMPORTANT: Daily and timeless boards count separately
-          // Exclude current board from calculation
-          let nextDate: string;
-          let boardNumber: number;
-          
-          if (type === 'daily') {
-            // Only look at other daily boards (excluding current) for date calculation
-            nextDate = getNextDate('daily', data.next_daily_date, currentMetadata, newTypes, boardIndex);
-            // Count only other daily boards in the current session (excluding current)
-            const dailyCount = newTypes.filter((t, i) => t === 'daily' && i !== boardIndex).length;
-            boardNumber = data.next_daily_number + dailyCount;
-            currentMetadata[boardIndex].date = nextDate;
-            currentMetadata[boardIndex].title = `Everyday Board No. ${boardNumber}`;
-          } else if (type === 'timeless') {
-            // Only look at other timeless boards (excluding current) for date calculation
-            nextDate = getNextDate('timeless', data.next_timeless_date, currentMetadata, newTypes, boardIndex);
-            // Count only other timeless boards in the current session (excluding current)
-            const timelessCount = newTypes.filter((t, i) => t === 'timeless' && i !== boardIndex).length;
-            boardNumber = data.next_timeless_number + timelessCount;
-            currentMetadata[boardIndex].date = nextDate;
-            currentMetadata[boardIndex].title = `Timeless Board No. ${boardNumber}`;
-          }
-          
-          setBoardMetadata(currentMetadata);
-          
-          // Clear any date errors when switching types
-          const newDateErrors = { ...dateErrors };
-          delete newDateErrors[boardIndex];
-          setDateErrors(newDateErrors);
-        } catch (error) {
-          console.error('Error loading default dates:', error);
-        }
-      }
-    } else {
-      // Clear metadata when switching back to gameboard
-      const newMetadata = [...boardMetadata];
-      if (newMetadata[boardIndex]) {
-        newMetadata[boardIndex] = { title: '', date: '' };
-      }
-      setBoardMetadata(newMetadata);
-      
-      // Clear date errors
-      const newDateErrors = { ...dateErrors };
-      delete newDateErrors[boardIndex];
-      setDateErrors(newDateErrors);
-    }
-  };
-
-  const handleTitleChange = (boardIndex: number, title: string) => {
-    const newMetadata = [...boardMetadata];
-    if (!newMetadata[boardIndex]) {
-      newMetadata[boardIndex] = { title: '', date: '' };
-    }
-    newMetadata[boardIndex].title = title;
-    setBoardMetadata(newMetadata);
-  };
-
-  const handleDateChange = async (boardIndex: number, date: string, boardType: BoardType) => {
-    const newMetadata = [...boardMetadata];
-    if (!newMetadata[boardIndex]) {
-      newMetadata[boardIndex] = { title: '', date: '' };
-    }
-    newMetadata[boardIndex].date = date;
-    setBoardMetadata(newMetadata);
-
-    // Validate date if it's a daily or timeless board
-    if (date && (boardType === 'daily' || boardType === 'timeless')) {
-      try {
-        const response = await adminAPI.checkBoardDate(date, boardType);
-        if (!response.available) {
-          const newDateErrors = { ...dateErrors };
-          newDateErrors[boardIndex] = response.message || 'A board already exists for this date';
-          setDateErrors(newDateErrors);
-        } else {
-          const newDateErrors = { ...dateErrors };
-          delete newDateErrors[boardIndex];
-          setDateErrors(newDateErrors);
-        }
-      } catch (error: any) {
-        const newDateErrors = { ...dateErrors };
-        newDateErrors[boardIndex] = error.response?.data?.error || 'Error checking date';
-        setDateErrors(newDateErrors);
-      }
-    }
-  };
-
-  const handleMarkLetter = (boardIndex: number, rowIndex: number, colIndex: number) => {
-    if (!activeMarkingMode) {
-      toast.error('Please select Snark or Boojum mode first');
-      return;
-    }
-
-    const board = boards[boardIndex];
-    const letter = board[rowIndex][colIndex];
-    
-    if (!letter || letter.trim() === '') {
-      toast.error('Cannot mark empty cell');
-      return;
-    }
-
-    // Check if this letter appears elsewhere on the board
-    const letterPositions: [number, number][] = [];
-    
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
-        if (board[r][c] === letter) {
-          letterPositions.push([r, c]);
-        }
-      }
-    }
-
-    // If letter appears more than once, show error
-    if (letterPositions.length > 1) {
-      toast.error(`${letter} appears ${letterPositions.length} times on the board. Each letter can only appear once to be marked.`);
-      return;
-    }
-
-    const newBoojumBoards = [...boojumBoards];
-    const boojumBoard = newBoojumBoards[boardIndex];
-    const markValue = activeMarkingMode === 'snark' ? 1 : 2;
-
-    // Clear all previous marks of the same type (only one boojum, only one snark)
-    for (let r = 0; r < boardSize; r++) {
-      for (let c = 0; c < boardSize; c++) {
-        if (boojumBoard[r][c] === markValue) {
-          boojumBoard[r][c] = 0;
-        }
-      }
-    }
-
-    // Mark the selected letter
-    boojumBoard[rowIndex][colIndex] = markValue;
-
-    newBoojumBoards[boardIndex] = boojumBoard;
-    setBoojumBoards(newBoojumBoards);
-    toast.success(`Marked "${letter}" as ${activeMarkingMode === 'snark' ? 'Snark' : 'Boojum'}`);
-  };
-
   const handleRemoveBoard = (index: number) => {
     if (boards.length > 1) {
       setBoards(boards.filter((_, i) => i !== index));
       setBoardTypes(boardTypes.filter((_, i) => i !== index));
       setBoojumBoards(boojumBoards.filter((_, i) => i !== index));
-      setBoardMetadata(boardMetadata.filter((_, i) => i !== index));
-      const newDateErrors = { ...dateErrors };
-      delete newDateErrors[index];
-      setDateErrors(newDateErrors);
     }
   };
 
@@ -496,78 +278,13 @@ const CreateCustomGameboardPage = () => {
       return;
     }
 
-    // Validate daily/timeless boards have boojum data
-    for (let i = 0; i < boards.length; i++) {
-      if (boardTypes[i] === 'daily' || boardTypes[i] === 'timeless') {
-        if (!boojumBoards[i]) {
-          toast.error(`Board ${i + 1} is set as ${boardTypes[i]} but boojum data is missing`);
-          return;
-        }
-      }
-    }
+      // No validation needed for daily/timeless boards (removed from this page)
 
     setIsSubmitting(true);
     try {
-      // Validate daily/timeless boards have required fields
-      for (let i = 0; i < boards.length; i++) {
-        if (boardTypes[i] === 'daily' || boardTypes[i] === 'timeless') {
-          const metadata = boardMetadata[i];
-          if (!metadata || !metadata.title || !metadata.date) {
-            toast.error(`Board ${i + 1} (${boardTypes[i]}) requires a title and date`);
-            return;
-          }
-          if (dateErrors[i]) {
-            toast.error(`Board ${i + 1} has an invalid date: ${dateErrors[i]}`);
-            return;
-          }
-        }
-      }
-
-      // Separate boards by type
-      const gameboardBoards: Board[] = [];
-      const dailyBoards: { board: Board; boojum: BoojumBoard; title: string; date: string }[] = [];
-      const timelessBoards: { board: Board; boojum: BoojumBoard; title: string; date: string }[] = [];
-
-      for (let i = 0; i < boards.length; i++) {
-        if (boardTypes[i] === 'daily') {
-          dailyBoards.push({ 
-            board: boards[i], 
-            boojum: boojumBoards[i],
-            title: boardMetadata[i]?.title || '',
-            date: boardMetadata[i]?.date || '',
-          });
-        } else if (boardTypes[i] === 'timeless') {
-          timelessBoards.push({ 
-            board: boards[i], 
-            boojum: boojumBoards[i],
-            title: boardMetadata[i]?.title || '',
-            date: boardMetadata[i]?.date || '',
-          });
-        } else {
-          gameboardBoards.push(boards[i]);
-        }
-      }
-
-      // Create gameboards first
-      let allBoardIds: number[] = [];
-      if (gameboardBoards.length > 0) {
-        const response = await adminAPI.createCustomGameboards(gameboardBoards, boardSize);
-        allBoardIds = response.boards.map((b: any) => b.id);
-      }
-
-      // Create daily boards
-      if (dailyBoards.length > 0) {
-        const dailyResponse = await adminAPI.createDailyBoards(dailyBoards, boardSize);
-        // Use gameboard_id for checking definitions (not the daily board id)
-        allBoardIds = [...allBoardIds, ...dailyResponse.boards.map((b: any) => b.gameboard_id || b.id)];
-      }
-
-      // Create timeless boards
-      if (timelessBoards.length > 0) {
-        const timelessResponse = await adminAPI.createTimelessBoards(timelessBoards, boardSize);
-        // Use gameboard_id for checking definitions (not the timeless board id)
-        allBoardIds = [...allBoardIds, ...timelessResponse.boards.map((b: any) => b.gameboard_id || b.id)];
-      }
+      // Create gameboards only (daily/timeless creation moved to convert boards page)
+      const response = await adminAPI.createCustomGameboards(boards, boardSize);
+      const allBoardIds = response.boards.map((b: any) => b.id);
 
       setCreatedBoardIds(allBoardIds);
       toast.success(`Successfully created ${allBoardIds.length} board(s)!`);
@@ -705,9 +422,10 @@ const CreateCustomGameboardPage = () => {
 
         <div className="boards-container">
           {boards.map((board, boardIndex) => {
-            const boardType = boardTypes[boardIndex] || 'gameboard';
-            const boojumBoard = boojumBoards[boardIndex];
-            const showMarkingBoard = boardType === 'daily' || boardType === 'timeless';
+            // Board type is always 'gameboard' now (daily/timeless removed)
+            // const boardType = boardTypes[boardIndex] || 'gameboard';
+            // const boojumBoard = boojumBoards[boardIndex];
+            // const showMarkingBoard = false; // No longer needed - marking only for daily/timeless
 
             return (
               <div key={boardIndex} className="board-wrapper">
@@ -727,57 +445,12 @@ const CreateCustomGameboardPage = () => {
                 <div className="board-type-selector">
                   <label>Create as:</label>
                   <div className="board-type-buttons">
-                    <button
-                      className={`type-btn ${boardType === 'gameboard' ? 'active' : ''}`}
-                      onClick={() => handleBoardTypeChange(boardIndex, 'gameboard')}
-                    >
-                      Gameboard
-                    </button>
-                    <button
-                      className={`type-btn ${boardType === 'daily' ? 'active' : ''}`}
-                      onClick={() => handleBoardTypeChange(boardIndex, 'daily')}
-                    >
-                      <Calendar size={16} />
-                      Daily Board
-                    </button>
-                    <button
-                      className={`type-btn ${boardType === 'timeless' ? 'active' : ''}`}
-                      onClick={() => handleBoardTypeChange(boardIndex, 'timeless')}
-                    >
-                      <Infinity size={16} />
-                      Timeless Board
-                    </button>
+                    {/* Board type selection removed - only gameboards are created on this page */}
+                    {/* Daily and timeless boards are created via the convert boards page */}
                   </div>
                 </div>
 
-                {(boardType === 'daily' || boardType === 'timeless') && (
-                  <div className="board-metadata">
-                    <div className="metadata-field">
-                      <label htmlFor={`title-${boardIndex}`}>Title:</label>
-                      <input
-                        id={`title-${boardIndex}`}
-                        type="text"
-                        className="metadata-input"
-                        value={boardMetadata[boardIndex]?.title || ''}
-                        onChange={(e) => handleTitleChange(boardIndex, e.target.value)}
-                        placeholder={`${boardType === 'daily' ? 'Everyday' : 'Timeless'} Board No. X`}
-                      />
-                    </div>
-                    <div className="metadata-field">
-                      <label htmlFor={`date-${boardIndex}`}>Date:</label>
-                      <input
-                        id={`date-${boardIndex}`}
-                        type="date"
-                        className={`metadata-input ${dateErrors[boardIndex] ? 'error' : ''}`}
-                        value={boardMetadata[boardIndex]?.date || ''}
-                        onChange={(e) => handleDateChange(boardIndex, e.target.value, boardType)}
-                      />
-                      {dateErrors[boardIndex] && (
-                        <span className="error-message">{dateErrors[boardIndex]}</span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {/* Metadata fields removed - only for daily/timeless boards which are created via convert boards page */}
 
                 <div className="boards-layout">
                   <div className="input-board-section">
@@ -810,52 +483,8 @@ const CreateCustomGameboardPage = () => {
                     </div>
                   </div>
 
-                  {showMarkingBoard && boojumBoard && (
-                    <div className="marking-board-section">
-                      <h3>Mark Boojum/Snark</h3>
-                      <div className="marking-controls">
-                        <button
-                          className={`mark-btn snark-btn ${activeMarkingMode === 'snark' ? 'active' : ''}`}
-                          onClick={() => setActiveMarkingMode(activeMarkingMode === 'snark' ? null : 'snark')}
-                        >
-                          Snark
-                        </button>
-                        <button
-                          className={`mark-btn boojum-btn ${activeMarkingMode === 'boojum' ? 'active' : ''}`}
-                          onClick={() => setActiveMarkingMode(activeMarkingMode === 'boojum' ? null : 'boojum')}
-                        >
-                          Boojum
-                        </button>
-                      </div>
-                      <div className="board-grid marking-board">
-                        {board.map((row, rowIndex) => (
-                          <div key={rowIndex} className="board-row">
-                            {row.map((letter, colIndex) => {
-                              const markValue = boojumBoard[rowIndex][colIndex];
-                              const isSnark = markValue === 1;
-                              const isBoojum = markValue === 2;
-                              
-                              return (
-                                <div
-                                  key={colIndex}
-                                  className={`marking-cell ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
-                                  onClick={() => handleMarkLetter(boardIndex, rowIndex, colIndex)}
-                                  title={letter || 'Empty'}
-                                >
-                                  {letter === 'QU' ? 'Qu' : (letter || '')}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
-                      {activeMarkingMode && (
-                        <p className="marking-hint">
-                          Click letters on the board to mark them as {activeMarkingMode === 'snark' ? 'Snark' : 'Boojum'}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  {/* Marking board section removed - boojum/snark marking is only for daily/timeless boards */}
+                  {/* Daily and timeless boards are created via the convert boards page */}
                 </div>
               </div>
             );
