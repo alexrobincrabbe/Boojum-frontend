@@ -28,9 +28,12 @@ async function fetchCustomDictionaryDefinition(word: string, language: string = 
       return null;
     }
     
-    // Get Django base URL - use the same pattern as api.ts
+    // Get Django base URL - construct it properly from VITE_API_BASE_URL
+    // VITE_API_BASE_URL should be like: https://api.boojumgames.com/api
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-    const djangoBaseUrl = apiBaseUrl.replace('/api', '');
+    // Remove trailing /api if present to get the base domain
+    // Use regex to match /api only at the end of the string
+    const djangoBaseUrl = apiBaseUrl.replace(/\/api\/?$/, '') || 'http://localhost:8000';
     
     const csrfToken = getCSRFToken();
     
