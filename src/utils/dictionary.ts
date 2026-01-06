@@ -45,7 +45,7 @@ async function fetchCustomDictionaryDefinition(word: string, language: string = 
       console.warn('CSRF token not found - definition request may fail');
     }
     
-    const url = `${djangoBaseUrl}/api/get-definition/`;
+    const url = `${djangoBaseUrl}/get-definition/`;
     console.log('Fetching definition from:', url, 'for word:', normalizedWord, 'language:', language);
     
     const response = await fetch(url, {
