@@ -45,6 +45,7 @@ interface TimelessBoard {
   board_words?: string[];
   boojum?: number[][];
   words_by_length?: Record<string, WordData[]>;
+  board_size?: number; // Board size (4 for 4x4, 5 for 5x5)
 }
 
 const LEVELS = [
@@ -218,8 +219,9 @@ setBoardsByLevel({
     let snarkLetter: string | undefined;
 
     if (board.boojum && board.board_letters) {
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
+      const boardSize = board.board_size || (board.board_letters?.[0]?.length || 4);
+      for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
           if (board.boojum[r][c] === 1) {
             snarkLetter = board.board_letters[r][c];
           } else if (board.boojum[r][c] === 2) {
@@ -401,19 +403,27 @@ setBoardsByLevel({
         )}
 
         {/* Solution display */}
-        {solutionRevealed && (
-          <div className="timeless-board-solution">
-            <h2 className="solution-title">Solution</h2>
-            {currentBoard.board_letters && (
+        {solutionRevealed && currentBoard.board_letters && (() => {
+          // Determine board size from board_size field or derive from board_letters
+          const boardSize = currentBoard.board_size || (currentBoard.board_letters?.[0]?.length || 4);
+          const totalCells = boardSize * boardSize;
+          
+          return (
+            <div className="timeless-board-solution">
+              <h2 className="solution-title">Solution</h2>
               <div className="board-display-container">
                 <div className="board-wrapper">
                   <div 
                     id="timeless-board" 
                     className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
+                    style={{
+                      gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
+                      gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
+                    }}
                   >
-                    {Array.from({ length: 16 }, (_, i) => {
-                      const row = Math.floor(i / 4);
-                      const col = i % 4;
+                    {Array.from({ length: totalCells }, (_, i) => {
+                      const row = Math.floor(i / boardSize);
+                      const col = i % boardSize;
                       const letter = currentBoard.board_letters?.[row]?.[col] || '';
                       let bonusValue = 0;
                       if (currentBoard.boojum && Array.isArray(currentBoard.boojum) && currentBoard.boojum[row]) {
@@ -438,10 +448,9 @@ setBoardsByLevel({
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Word Lists - using unified component */}
-            {solutionRevealed && currentBoard.board_words && currentBoard.board_letters && (() => {
+              {/* Word Lists - using unified component */}
+              {solutionRevealed && currentBoard.board_words && currentBoard.board_letters && (() => {
               const { boojum, snark } = getBonusLetters(currentBoard);
               
               // Get current user's score to find which words they found
@@ -505,9 +514,10 @@ setBoardsByLevel({
                   showDefinitionBanner={true}
                 />
               );
-            })()}
-          </div>
-        )}
+              })()}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

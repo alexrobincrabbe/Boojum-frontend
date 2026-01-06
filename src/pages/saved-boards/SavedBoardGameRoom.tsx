@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useWordTracking } from '../game-room/services/useWordTracking';
 import { useGameWebSocket } from '../game-room/services/useGameWebSocket';
 import { GameBoard } from '../game-room/components/GameBoard';
-import { WordCounters } from '../game-room/components/WordCounters';
 import { WordLists } from '../game-room/components/WordLists';
 import { ScoresModal } from '../game-room/components/ScoresModal';
 import { toast } from 'react-toastify';
@@ -225,7 +224,7 @@ export default function SavedBoardGameRoom() {
                 <button 
                   className="pagination-btn"
                   onClick={() => {
-                    navigate('/dashboard?saved-boards');
+                    navigate('/saved-boards');
                   }}
                   aria-label="Back to Saved Boards"
                 >
@@ -270,14 +269,6 @@ export default function SavedBoardGameRoom() {
                 </div>
               )}
 
-              <div className="word-counters-container">
-                <WordCounters
-                  wordCounts={wordCounts}
-                  wordCountMax={wordCountMax}
-                  gameStatus={gameState.gameStatus}
-                />
-              </div>
-
               <GameBoard
                 gameState={gameState}
                 hasBoardBeenShown={hasBoardBeenShown}
@@ -289,6 +280,8 @@ export default function SavedBoardGameRoom() {
                 onShowScores={() => setIsScoresModalOpen(true)}
                 oneShotSubmitted={oneShotSubmitted}
                 onOneShotConfirmed={handleOneShotConfirmed}
+                wordCounts={wordCounts}
+                wordCountMax={wordCountMax}
               />
             </div>
 
@@ -301,6 +294,7 @@ export default function SavedBoardGameRoom() {
             hasFinalScores={!!gameState.finalScores}
             boojum={gameState.boojum}
             snark={gameState.snark}
+            language={gameState.language}
           />
         </div>
       )}

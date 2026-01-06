@@ -189,19 +189,24 @@ export default function GameRoom() {
 
     setIsSavingBoard(true);
 
-    // Get timer from room API to ensure we get the correct game timer (not intermission timer)
-    // timerState.initialTimer might be intermission (10s) instead of game_time (e.g., 20s)
+    // Get timer - prioritize gameTime from gameState (actual game timer used)
+    // gameTime is the actual game timer, not the intermission timer
+    // gameState.initialTimer might be the intermission timer (10s) if game status is 'finished'
     let timer = 90; // default
-    try {
-      const lobbyData = await lobbyAPI.getLobbyData();
-      const room = lobbyData.rooms?.find((r: any) => r.room_slug === roomId);
-      if (room?.timer) {
-        timer = room.timer;
+    if (gameState.gameTime && gameState.gameTime > 0) {
+      // gameTime is the actual game timer used - this is the most reliable source
+      timer = gameState.gameTime;
+    } else {
+      // Fallback to room API if gameTime not available
+      try {
+        const lobbyData = await lobbyAPI.getLobbyData();
+        const room = lobbyData.rooms?.find((r: any) => r.room_slug === roomId);
+        if (room?.timer) {
+          timer = room.timer;
+        }
+      } catch (error) {
+        console.error('Error fetching room timer:', error);
       }
-    } catch (error) {
-      console.error('Error fetching room timer:', error);
-      // Fallback to timerState if API fails
-      timer = timerState?.initialTimer || 90;
     }
     const oneShot = gameState.oneShot || false;
 

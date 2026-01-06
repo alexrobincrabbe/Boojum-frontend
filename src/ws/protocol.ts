@@ -46,7 +46,8 @@ export interface GameState {
   gameRoundId?: string;  // Unique identifier for this game round (for localStorage persistence)
   currentRound?: number;
   timeRemaining?: number;
-  initialTimer?: number;  // Initial timer value for progress bar calculation
+  initialTimer?: number;  // Initial timer value for progress bar calculation (may be intermission timer)
+  gameTime?: number;  // Actual game timer used (not intermission timer)
   board?: string[][];
   boardWords?: string[];  // List of valid words on the board
   finalScores?: Record<string, FinalScore>;  // Final scores when game ends

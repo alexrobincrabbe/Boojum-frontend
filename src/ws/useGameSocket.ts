@@ -46,6 +46,7 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
         boardSize: raw.state?.board ? `${raw.state.board.length}x${raw.state.board[0]?.length || 0}` : 'none',
         timeRemaining: raw.state?.timeRemaining,
         initialTimer: raw.state?.initialTimer,
+        gameTime: raw.state?.gameTime,
         hasBoardWords: !!raw.state?.boardWords,
         boardWordsCount: raw.state?.boardWords?.length || 0,
         hasWordsByLength: !!raw.state?.wordsByLength,

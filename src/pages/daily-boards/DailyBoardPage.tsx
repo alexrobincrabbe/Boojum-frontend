@@ -43,6 +43,7 @@ interface DailyBoard {
   board_words?: string[];
   boojum?: number[][];
   words_by_length?: Record<string, WordData[]>;
+  board_size?: number; // Board size (4 for 4x4, 5 for 5x5)
 }
 
 export default function DailyBoardPage() {
@@ -182,8 +183,9 @@ export default function DailyBoardPage() {
     let boojumLetter: string | undefined;
     let snarkLetter: string | undefined;
     
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
+    const boardSize = board.board_size || (board.board_letters?.[0]?.length || 4);
+    for (let row = 0; row < boardSize; row++) {
+      for (let col = 0; col < boardSize; col++) {
         const bonusValue = board.boojum[row]?.[col] || 0;
         const letter = board.board_letters[row]?.[col];
         
@@ -368,18 +370,27 @@ export default function DailyBoardPage() {
         </div>
 
         {/* Board Solution and Word List (if played) */}
-        {currentBoard.played && currentBoard.board_letters && currentBoard.words_by_length && (
-          <div className="daily-board-solution">
-            <h2 className="solution-title">Board Solution</h2>
-            <div className="board-display-container">
-              <div className="board-wrapper">
-                <div 
-                  id="daily-board" 
-                  className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
-                >
-                {Array.from({ length: 16 }, (_, i) => {
-                  const row = Math.floor(i / 4);
-                  const col = i % 4;
+        {currentBoard.played && currentBoard.board_letters && currentBoard.words_by_length && (() => {
+          // Determine board size from board_size field or derive from board_letters
+          const boardSize = currentBoard.board_size || (currentBoard.board_letters?.[0]?.length || 4);
+          const totalCells = boardSize * boardSize;
+          
+          return (
+            <div className="daily-board-solution">
+              <h2 className="solution-title">Board Solution</h2>
+              <div className="board-display-container">
+                <div className="board-wrapper">
+                  <div 
+                    id="daily-board" 
+                    className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
+                    style={{
+                      gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
+                      gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
+                    }}
+                  >
+                  {Array.from({ length: totalCells }, (_, i) => {
+                    const row = Math.floor(i / boardSize);
+                    const col = i % boardSize;
                   const letter = currentBoard.board_letters?.[row]?.[col] || '';
                   // boojum is a 2D array: [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]]
                   // Values: 0 = no bonus, 1 = snark (doubles letter), 2 = boojum (doubles word)
@@ -478,8 +489,9 @@ export default function DailyBoardPage() {
                 />
               );
             })()}
-          </div>
-        )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

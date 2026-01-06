@@ -43,6 +43,7 @@ interface DailyBoard {
   board_words?: string[];
   boojum?: number[][];
   words_by_length?: Record<string, WordData[]>;
+  board_size?: number; // Board size (4 for 4x4, 5 for 5x5)
 }
 
 export default function DailyBoardArchiveDetailPage() {
@@ -145,11 +146,12 @@ export default function DailyBoardArchiveDetailPage() {
   const getBonusLetters = (board: DailyBoard): { boojum?: string; snark?: string } => {
     if (!board.boojum || !board.board_letters) return {};
     
+    const boardSize = board.board_size || (board.board_letters?.[0]?.length || 4);
     let boojumLetter: string | undefined;
     let snarkLetter: string | undefined;
     
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
+    for (let row = 0; row < boardSize; row++) {
+      for (let col = 0; col < boardSize; col++) {
         const bonusValue = board.boojum[row]?.[col] || 0;
         const letter = board.board_letters[row]?.[col];
         
@@ -287,45 +289,54 @@ export default function DailyBoardArchiveDetailPage() {
         </div>
 
         {/* Board Solution and Word List (if played) */}
-        {board.played && board.board_letters && board.words_by_length && (
-          <div className="daily-board-solution">
-            <h2 className="solution-title">Board Solution</h2>
-            <div className="board-display-container">
-              <div className="board-wrapper">
-                <div 
-                  id="daily-board" 
-                  className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
-                >
-                {Array.from({ length: 16 }, (_, i) => {
-                  const row = Math.floor(i / 4);
-                  const col = i % 4;
-                  const letter = board.board_letters?.[row]?.[col] || '';
-                  let bonusValue = 0;
-                  if (board.boojum && Array.isArray(board.boojum) && board.boojum[row]) {
-                    bonusValue = board.boojum[row][col] || 0;
-                  }
-                  const isSnark = bonusValue === 1;
-                  const isBoojum = bonusValue === 2;
-                  
-                  return (
-                    <div 
-                      key={i} 
-                      className={`letter ${darkMode ? 'dark-mode' : 'light-mode'} ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
-                      data-x={row}
-                      data-y={col}
-                      data-index={i}
-                      data-letter={letter}
-                    >
-                      <div className="letValue">{letter}</div>
-                    </div>
-                  );
-                })}
+        {board.played && board.board_letters && board.words_by_length && (() => {
+          // Determine board size from board_size field or derive from board_letters
+          const boardSize = board.board_size || (board.board_letters?.[0]?.length || 4);
+          const totalCells = boardSize * boardSize;
+          
+          return (
+            <div className="daily-board-solution">
+              <h2 className="solution-title">Board Solution</h2>
+              <div className="board-display-container">
+                <div className="board-wrapper">
+                  <div 
+                    id="daily-board" 
+                    className={`board ${darkMode ? 'board-dark' : 'board-light'}`}
+                    style={{
+                      gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
+                      gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
+                    }}
+                  >
+                  {Array.from({ length: totalCells }, (_, i) => {
+                    const row = Math.floor(i / boardSize);
+                    const col = i % boardSize;
+                    const letter = board.board_letters?.[row]?.[col] || '';
+                    let bonusValue = 0;
+                    if (board.boojum && Array.isArray(board.boojum) && board.boojum[row]) {
+                      bonusValue = board.boojum[row][col] || 0;
+                    }
+                    const isSnark = bonusValue === 1;
+                    const isBoojum = bonusValue === 2;
+                    
+                    return (
+                      <div 
+                        key={i} 
+                        className={`letter ${darkMode ? 'dark-mode' : 'light-mode'} ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
+                        data-x={row}
+                        data-y={col}
+                        data-index={i}
+                        data-letter={letter}
+                      >
+                        <div className="letValue">{letter}</div>
+                      </div>
+                    );
+                  })}
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <h3 className="word-list-title">All Words</h3>
-            {selectedPlayerIds.size > 0 && (
+              
+              <h3 className="word-list-title">All Words</h3>
+              {selectedPlayerIds.size > 0 && (
               <div className="player-filter-banner">
                 <span className="filter-label">Filtered by:</span>
                 {Array.from(selectedPlayerIds).map(playerId => {
@@ -355,43 +366,44 @@ export default function DailyBoardArchiveDetailPage() {
                 </button>
               </div>
             )}
-            {selectedPlayerIds.size === 0 && (
-              <div className="player-filter-banner">
-                <span className="filter-label">Showing: All players</span>
-                <span className="filter-hint">select players to add filters</span>
-              </div>
-            )}
-            {(() => {
-              const { boojum, snark } = getBonusLetters(board);
-              const wordsByLengthForComponent: Record<string, Record<string, { word: string; sum_players_found: number; players_found: (number | null)[] }>> = {};
-              
-              if (board.words_by_length) {
-                Object.keys(board.words_by_length).forEach(length => {
-                  const words = board.words_by_length![length];
-                  wordsByLengthForComponent[length] = {};
-                  words.forEach(wordData => {
-                    wordsByLengthForComponent[length][wordData.word] = wordData;
+              {selectedPlayerIds.size === 0 && (
+                <div className="player-filter-banner">
+                  <span className="filter-label">Showing: All players</span>
+                  <span className="filter-hint">select players to add filters</span>
+                </div>
+              )}
+              {(() => {
+                const { boojum, snark } = getBonusLetters(board);
+                const wordsByLengthForComponent: Record<string, Record<string, { word: string; sum_players_found: number; players_found: (number | null)[] }>> = {};
+                
+                if (board.words_by_length) {
+                  Object.keys(board.words_by_length).forEach(length => {
+                    const words = board.words_by_length![length];
+                    wordsByLengthForComponent[length] = {};
+                    words.forEach(wordData => {
+                      wordsByLengthForComponent[length][wordData.word] = wordData;
+                    });
                   });
-                });
-              }
-              
-              return (
-                <WordLists
-                  wordsByLength={wordsByLengthForComponent}
-                  wordsFound={new Set()}
-                  gameStatus="finished"
-                  hasFinalScores={true}
-                  boojum={boojum}
-                  snark={snark}
-                  currentUserId={user?.id || null}
-                  filteredPlayerIds={selectedPlayerIds}
-                  showColorBanner={true}
-                  showDefinitionBanner={true}
-                />
-              );
-            })()}
-          </div>
-        )}
+                }
+                
+                return (
+                  <WordLists
+                    wordsByLength={wordsByLengthForComponent}
+                    wordsFound={new Set()}
+                    gameStatus="finished"
+                    hasFinalScores={true}
+                    boojum={boojum}
+                    snark={snark}
+                    currentUserId={user?.id || null}
+                    filteredPlayerIds={selectedPlayerIds}
+                    showColorBanner={true}
+                    showDefinitionBanner={true}
+                  />
+                );
+              })()}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

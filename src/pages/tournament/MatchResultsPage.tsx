@@ -59,6 +59,7 @@ interface MatchDetails {
     boojum_bonus: string | null;
     snark: string | null;
     boojum_array: number[][] | null;
+    board_size?: number; // Board size (4 for 4x4, 5 for 5x5)
     words_by_length: Record<string, Array<{
       word: string;
       player1FoundWord: boolean;
@@ -328,45 +329,54 @@ export default function MatchResultsPage() {
         )}
 
         {/* Game Board */}
-        {data && (
-          <div className="match-board-section">
-            <div className="board-wrapper">
-              <div 
-                id="board"
-                className="board-dark"
-              >
-                {data.board.letters.map((row, rowIndex) =>
-                  row.map((letter, colIndex) => {
-                    // Check if this tile is a bonus tile (snark = 1, boojum = 2)
-                    // boojum_array is a 2D array: [[0,0,0,0], [0,1,0,0], [0,0,2,0], ...]
-                    const boojumRow = data.board.boojum_array?.[rowIndex];
-                    const bonusValue = boojumRow?.[colIndex] ?? 0;
-                    const isSnark = bonusValue === 1;
-                    const isBoojum = bonusValue === 2;
-                    
-                    // Build className string
-                    let className = 'letter dark-mode';
-                    if (isSnark) {
-                      className += ' snark';
-                    }
-                    if (isBoojum) {
-                      className += ' boojum';
-                    }
-                    
-                    return (
-                      <div
-                        key={`${rowIndex}-${colIndex}`}
-                        className={className.trim()}
-                      >
-                        <div className="letValue">{letter}</div>
-                      </div>
-                    );
-                  })
-                )}
+        {data && (() => {
+          // Determine board size from board_size field or derive from board.letters
+          const boardSize = data.board.board_size || (data.board.letters?.[0]?.length || 4);
+          
+          return (
+            <div className="match-board-section">
+              <div className="board-wrapper">
+                <div 
+                  id="board"
+                  className="board-dark"
+                  style={{
+                    gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
+                    gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {data.board.letters.map((row, rowIndex) =>
+                    row.map((letter, colIndex) => {
+                      // Check if this tile is a bonus tile (snark = 1, boojum = 2)
+                      // boojum_array is a 2D array: [[0,0,0,0], [0,1,0,0], [0,0,2,0], ...]
+                      const boojumRow = data.board.boojum_array?.[rowIndex];
+                      const bonusValue = boojumRow?.[colIndex] ?? 0;
+                      const isSnark = bonusValue === 1;
+                      const isBoojum = bonusValue === 2;
+                      
+                      // Build className string
+                      let className = 'letter dark-mode';
+                      if (isSnark) {
+                        className += ' snark';
+                      }
+                      if (isBoojum) {
+                        className += ' boojum';
+                      }
+                      
+                      return (
+                        <div
+                          key={`${rowIndex}-${colIndex}`}
+                          className={className.trim()}
+                        >
+                          <div className="letValue">{letter}</div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Word Lists with Color Coding */}
         <div className="centered-element">

@@ -148,6 +148,23 @@
   font-weight: bold;
 }
 
+.board-settings {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+}
+
+.board-setting {
+  padding: 2px 8px;
+  background-color: rgba(113, 187, 233, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(113, 187, 233, 0.3);
+  color: #aaa;
+}
+
 .board-date {
   color: #aaa;
   font-size: 0.85rem;

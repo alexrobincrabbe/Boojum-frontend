@@ -22,6 +22,10 @@ interface SavedBoard {
   shared_at?: string; // Only present for received boards
   board_owner_id?: number; // Only present for received boards
   comment_count?: number;
+  is_custom?: boolean; // Whether this board came from a custom room
+  language?: string; // Language of the board (e.g., 'en', 'es')
+  board_size?: number; // Board size (4 for 4x4, 5 for 5x5)
+  word_level?: number; // Word level (4, 7, or 10)
 }
 
 const SavedBoardsTab = () => {
@@ -222,6 +226,25 @@ const SavedBoardsTab = () => {
               <span className="board-timer">Timer: {board.timer || 90}s</span>
               {board.one_shot && <span className="board-oneshot">One-Shot</span>}
             </div>
+            {board.is_custom && (board.language || board.board_size || board.word_level) && (
+              <div className="board-settings">
+                {board.language && (
+                  <span className="board-setting">
+                    Language: {board.language === 'es' ? 'Spanish' : 'English'}
+                  </span>
+                )}
+                {board.board_size && (
+                  <span className="board-setting">
+                    Size: {board.board_size}x{board.board_size}
+                  </span>
+                )}
+                {board.word_level && board.language === 'en' && (
+                  <span className="board-setting">
+                    Level: {board.word_level === 4 ? 'Curious' : board.word_level === 7 ? 'Curiouser' : board.word_level === 10 ? 'Rabbit Hole' : board.word_level}
+                  </span>
+                )}
+              </div>
+            )}
             <div className="board-date">{formatDate(board.saved_at)}</div>
           </div>
           {!isReceived && (
@@ -263,29 +286,44 @@ const SavedBoardsTab = () => {
             </div>
           )}
           <div className="board-wrapper">
-            <div id={`saved-board-${board.id}`} className="board board-dark">
-              {Array.from({ length: 16 }, (_, i) => {
-                const row = Math.floor(i / 4);
-                const col = i % 4;
-                const letter = board.board_letters?.[row]?.[col] || '';
-                const bonusValue = board.bonus_letters?.[row]?.[col] || 0;
-                const isSnark = bonusValue === 1;
-                const isBoojum = bonusValue === 2;
+            {(() => {
+              // Determine board size from board_letters dimensions
+              const boardSize = board.board_letters?.[0]?.length || 4;
+              const totalCells = boardSize * boardSize;
+              
+              return (
+                <div 
+                  id={`saved-board-${board.id}`} 
+                  className="board board-dark"
+                  style={{
+                    gridTemplateColumns: `repeat(${boardSize}, minmax(0, 1fr))`,
+                    gridTemplateRows: `repeat(${boardSize}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {Array.from({ length: totalCells }, (_, i) => {
+                    const row = Math.floor(i / boardSize);
+                    const col = i % boardSize;
+                    const letter = board.board_letters?.[row]?.[col] || '';
+                    const bonusValue = board.bonus_letters?.[row]?.[col] || 0;
+                    const isSnark = bonusValue === 1;
+                    const isBoojum = bonusValue === 2;
 
-                return (
-                  <div
-                    key={i}
-                    className={`letter dark-mode ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
-                    data-x={row}
-                    data-y={col}
-                    data-index={i}
-                    data-letter={letter}
-                  >
-                    <div className="letValue">{letter}</div>
-                  </div>
-                );
-              })}
-            </div>
+                    return (
+                      <div
+                        key={i}
+                        className={`letter dark-mode ${isSnark ? 'snark' : ''} ${isBoojum ? 'boojum' : ''}`}
+                        data-x={row}
+                        data-y={col}
+                        data-index={i}
+                        data-letter={letter}
+                      >
+                        <div className="letValue">{letter}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
           <div className="board-preview-actions">
             <button
