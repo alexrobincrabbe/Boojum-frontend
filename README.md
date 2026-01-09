@@ -25,15 +25,15 @@ Live multiplayer word games (Boggle-style) with real-time rooms, chat, tournamen
 ```mermaid
 flowchart LR
   %% Clients
-  U[Player Browser] -->|HTTPS| FE[React + TypeScript\n(Vite)]
-  FE -->|REST API| API[Heroku Web Dynos\nDjango + DRF]
-  FE -->|WebSocket| WS[Heroku Web Dynos\nDjango Channels]
+  U[Player Browser] -->|HTTPS| FE[React + TypeScript (Vite)]
+  FE -->|REST API| API[Heroku Web Dynos - Django + DRF]
+  FE -->|WebSocket| WS[Heroku Web Dynos - Django Channels]
 
-  subgraph Infra["Shared infrastructure"]
-    AMQP[(CloudAMQP / RabbitMQ\nChannels group messaging)]
-    REDIS[(Redis\nRoom & game state)]
+  subgraph Infra[Shared infrastructure]
+    AMQP[(CloudAMQP / RabbitMQ - Channels messaging)]
+    REDIS[(Redis - Room & game state)]
     DB[(PostgreSQL)]
-    CLOUD[(Cloudinary\nMedia storage)]
+    CLOUD[(Cloudinary - Media storage)]
   end
 
   WS <--> AMQP
@@ -41,9 +41,10 @@ flowchart LR
   WS <--> REDIS
   API --> CLOUD
 
-  WORKER[Heroku Worker Dyno\nPhase transitions & scheduling] <--> REDIS
+  WORKER[Heroku Worker Dyno - Game phases & scheduling] <--> REDIS
   WORKER <--> AMQP
   WORKER <--> DB
+
 ```
 
 ## Data flow: REST vs WebSockets vs shared state
@@ -61,22 +62,23 @@ sequenceDiagram
   participant Worker as Heroku Worker Dyno
   participant DB as PostgreSQL
 
-  Note over Client: Non-realtime / persistent data
-  Client->>API: GET /api/profile/... /leaderboards/... /dashboard/...
+  Note over Client: Non-realtime data
+  Client->>API: REST requests
   API->>DB: Read/write persistent data
   API-->>Client: JSON response
 
   Note over Client: Realtime gameplay
   Client->>Web: WebSocket connect + join_room
-  Web->>Redis: Read room snapshot (phase, board, players, etc.)
+  Web->>Redis: Read room snapshot
   Web-->>Client: STATE_SNAPSHOT
 
   Note over Worker: Time-based orchestration
-  Worker->>Redis: Poll/compute next phase boundary (timestamp-based)
-  Worker->>Redis: Advance phase + write updated room state
-  Worker->>MQ: group_send boundary event (board_update / game_over / final_scores)
-  MQ-->>Web: Fan out to all web dynos in group
-  Web-->>Client: WebSocket event(s)
+  Worker->>Redis: Check phase timestamps
+  Worker->>Redis: Advance phase
+  Worker->>MQ: Broadcast boundary event
+  MQ-->>Web: Fan-out to web dynos
+  Web-->>Client: WebSocket update
+
 ```
 
 ## WebSocket event model (high level)
@@ -84,19 +86,20 @@ sequenceDiagram
 ```mermaid
 flowchart TD
   A[Client connects] --> B[STATE_SNAPSHOT]
-  B --> C{Realtime events}
-  C --> D[DELTA_UPDATE\nplayers/presence changes]
-  C --> E[board_update\nstart of round]
-  C --> F[timer boundary\nphase changes only]
-  C --> G[game_over\nend of round]
-  C --> H[final_scores\nresults broadcast]
+  B --> C[Realtime events]
+  C --> D[DELTA_UPDATE - presence]
+  C --> E[board_update - round start]
+  C --> F[phase boundary event]
+  C --> G[game_over]
+  C --> H[final_scores]
 
-  subgraph ClientSideTimer["Client-side timer"]
-    T1[serverNow + phaseStartedAt + duration] --> T2[Compute remaining time locally]
-    T2 --> T3[UI ticks locally\n(no per-second server messages)]
+  subgraph Timer[Client-side timer]
+    T1[Server timestamps] --> T2[Compute remaining time]
+    T2 --> T3[Local UI countdown]
   end
 
-  B --> ClientSideTimer
+  B --> Timer
+
 ```
 
 
