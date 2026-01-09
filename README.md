@@ -103,143 +103,141 @@ flowchart TD
 ```
 
 
-Why this architecture?
+## 🧠 Why this architecture?
 
-This design is driven by three real-world constraints:
+This design is driven by three real-world constraints.
 
-1) Multi-dyno correctness (no “split brain” rooms)
+---
 
-With more than one backend instance, in-memory state is unsafe because each dyno has its own memory.
+### 1. Multi-dyno correctness (no “split-brain” rooms)
 
-Using Redis as the shared state store ensures:
+With more than one backend instance, **in-memory state is unsafe** because each dyno has its own memory.
 
-consistent room/game state across instances
+Using **Redis** as a shared state store ensures:
 
-reliable mid-game joining (server can always reconstruct a snapshot)
+- Consistent room and game state across backend instances  
+- Reliable mid-game joining (the server can always reconstruct a full snapshot)  
+- Coordination between worker and web dynos without relying on process memory  
 
-worker + web dynos coordinate through shared state (no reliance on process memory)
+---
 
-2) Low message volume (broker limits + cost)
+### 2. Low message volume (broker limits & cost)
 
-A “tick every second” server timer can explode message volume (especially with multiple rooms) and can exceed free/low-tier broker limits.
+A naive server-side timer that ticks every second can quickly explode message volume—especially with multiple rooms—and exceed free or low-tier message broker limits.
 
-3) Client-side progress storage is intentionally used for transient per-player data (e.g. words found during a round).
-This avoids excessive server updates while ensuring players can recover seamlessly from disconnects without losing progress.
+To avoid this, Boojum uses a **timestamp-based phase model**:
 
-Instead:
+- The server stores:
+  - current phase (`intermission`, `game`, `scoring`)
+  - phase start timestamp
+  - phase duration
+- The frontend computes remaining time locally
+- The backend sends **only boundary events** (start, end, scoring)
 
-the server stores phase + phase start timestamp + duration
+**Result:**
+- Smooth client-side countdown UI  
+- Far fewer real-time messages  
+- Scales to more concurrent rooms cheaply  
 
-the frontend computes time remaining locally
+#### Client-side progress storage
+Transient per-player data (e.g. words found during a round) is intentionally stored client-side.
 
-the backend sends only boundary events (start/end/scoring)
+This:
+- Avoids excessive server updates
+- Allows players to recover seamlessly from disconnects
+- Keeps real-time traffic minimal
 
-Result:
+---
 
-smooth countdown UI
+### 3. Clear responsibility split (web vs worker)
 
-far fewer messages
+Responsibilities are clearly separated:
 
-scales to more rooms cheaply
+- **Web dynos**
+  - Handle WebSocket connections
+  - Serve REST API requests
+  - Route real-time messages via the channel layer
 
-3) Clear responsibility split (web vs worker)
+- **Worker dyno**
+  - Manages game timers and phase transitions
+  - Triggers board generation and scoring phases
+  - Operates independently of WebSocket connections
 
-Web dynos handle WebSockets and API requests (connection handling + routing)
+This separation keeps the WebSocket layer responsive and prevents long-running scheduling logic from being tied to a specific web process.
 
-Worker dyno handles time-based orchestration (phase transitions, triggers)
+---
 
-This keeps the WebSocket layer responsive and prevents long-running scheduling logic from being tied to one web process.
-
-🔌 Real-time communication model
+## 🔌 Real-time communication model
 
 The frontend receives WebSocket updates for:
 
-player presence / players list updates
+- Player presence and players list updates
+- Board updates at the start of a round
+- Round-end announcements
+- Final score broadcasts
 
-board updates at round start
+Timers are computed client-side using server timestamps so timing remains accurate even if:
 
-round-end announcements
+- A player joins mid-round
+- The connection briefly drops and reconnects
 
-final score broadcasts
+---
 
-Timers are computed client-side based on server timestamps so timing stays accurate even if:
-
-a player joins mid-round
-
-the connection drops and reconnects briefly
-
-🗄 Tech stack (platform)
-Frontend (this repo)
-
-## Reconnection & client-side resilience
+## 🔁 Reconnection & client-side resilience
 
 Boojum is designed to handle temporary disconnects without penalizing players.
 
-Client-side progress persistence
+### Client-side progress persistence
 
-During an active game, the frontend stores current game progress in localStorage, including:
+During an active game, the frontend stores current game progress in `localStorage`, including:
 
-words found so far
-
-current score
-
-per-word discovery state
-
-current game round identifier
+- Words found so far
+- Current score
+- Per-word discovery state
+- Current game round identifier
 
 If a player:
 
-refreshes the page
-
-briefly loses connection
-
-disconnects and reconnects to the same room
+- Refreshes the page
+- Briefly loses connection
+- Disconnects and reconnects to the same room
 
 …the frontend restores this local state and resynchronizes with the server using the latest room snapshot.
 
-Why this is done client-side
+### Why this is done client-side
 
-Prevents accidental score loss due to network issues
+- Prevents accidental score loss due to network issues
+- Avoids unnecessary server writes for every word found
+- Keeps real-time message volume low
+- Allows smooth reconnection even mid-round
 
-Avoids unnecessary server writes for every word found
+The server remains the **authoritative source** for:
 
-Keeps the real-time message volume low
+- Round timing
+- Board configuration
+- Final score submission and validation
 
-Allows smooth reconnection even mid-round
+This hybrid approach balances **resilience**, **performance**, and **cost efficiency**.
 
-The server remains the authoritative source for:
+---
 
-round timing
+## 🗄 Tech stack (platform)
 
-board configuration
-
-final score submission and validation
-
-This hybrid approach balances resilience, performance, and cost efficiency.
-
-React + TypeScript
-
+### Frontend (this repository)
+- React + TypeScript
 - Vite
-
 - Axios
-
 - WebSockets
 
-Backend (private repo)
-
+### Backend (private repository)
 - Django + Django REST Framework
-
 - Django Channels (WebSockets)
-
 - CloudAMQP (RabbitMQ) as Channels channel layer
-
-- Redis for room/game state
-
-- Heroku worker dyno for game phases/transitions
-
+- Redis for room and game state
+- Heroku worker dyno for game phases and transitions
 - PostgreSQL for persistent storage
+- Cloudinary for media storage
 
-- Cloudinary for media storage 
 
 👤 Author
 
