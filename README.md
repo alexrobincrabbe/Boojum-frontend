@@ -44,8 +44,8 @@ flowchart LR
   WORKER[Heroku Worker Dyno\nPhase transitions & scheduling] <--> REDIS
   WORKER <--> AMQP
   WORKER <--> DB
-
 ```
+
 ## Data flow: REST vs WebSockets vs shared state
 
 This diagram shows what goes where (and why).
