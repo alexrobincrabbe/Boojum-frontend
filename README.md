@@ -24,26 +24,26 @@ Live multiplayer word games (Boggle-style) with real-time rooms, chat, tournamen
 
 ```mermaid
 flowchart LR
-  %% Clients
-  U[Player Browser] -->|HTTPS| FE[React + TypeScript (Vite)]
-  FE -->|REST API| API[Heroku Web Dynos - Django + DRF]
-  FE -->|WebSocket| WS[Heroku Web Dynos - Django Channels]
+  U[Browser] --> FE[Frontend]
+  FE --> API[Backend REST]
+  FE --> WS[Backend WebSocket]
 
-  subgraph Infra[Shared infrastructure]
-    AMQP[(CloudAMQP / RabbitMQ - Channels messaging)]
-    REDIS[(Redis - Room & game state)]
-    DB[(PostgreSQL)]
-    CLOUD[(Cloudinary - Media storage)]
+  subgraph Infra[Infrastructure]
+    MQ[(RabbitMQ)]
+    R[(Redis)]
+    DB[(Postgres)]
+    C[(Cloudinary)]
   end
 
-  WS <--> AMQP
+  WS <--> MQ
+  WS <--> R
   API <--> DB
-  WS <--> REDIS
-  API --> CLOUD
+  API --> C
 
-  WORKER[Heroku Worker Dyno - Game phases & scheduling] <--> REDIS
-  WORKER <--> AMQP
-  WORKER <--> DB
+  W[Worker] <--> R
+  W <--> MQ
+  W <--> DB
+
 
 ```
 
