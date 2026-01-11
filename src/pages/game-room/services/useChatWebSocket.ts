@@ -44,6 +44,12 @@ interface UseChatWebSocketReturn {
   sendMessage: (message: string) => void;
   reconnect: () => void;
   addSystemMessage: (message: string) => void; // Add system message (no username)
+  userList: Array<{
+    username: string;
+    profile_picture_url?: string;
+    profile_url?: string;
+    chat_color?: string;
+  }>; // Chat user list from user_list_update events
 }
 
 export function useChatWebSocket({
@@ -54,6 +60,12 @@ export function useChatWebSocket({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting");
+  const [userList, setUserList] = useState<Array<{
+    username: string;
+    profile_picture_url?: string;
+    profile_url?: string;
+    chat_color?: string;
+  }>>([]);
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef(0);
@@ -163,22 +175,39 @@ export function useChatWebSocket({
 
     ws.onmessage = (event) => {
       try {
-        const data: ChatWebSocketMessage = JSON.parse(event.data);
+        const data: ChatWebSocketMessage | { type: string } = JSON.parse(event.data);
 
-        if (data.event_type === "chat_update") {
-          const newMessage: ChatMessage = {
-            user: data.username || "System",
-            message: data.message_content || "",
-            timestamp: Date.now(),
-            chatColor: data.chat_color,
-            profileUrl: data.profile_url,
-            messageType: data.message_type as
-              | "chat_message"
-              | "user_join_or_leave",
-          };
-          setMessages((prev) => [...prev, newMessage]);
-        } else if (data.event_type === "user_list_update") {
-          // ignore for now (or store separately if you want)
+        // Handle PING/PONG heartbeat (case-insensitive)
+        if ('type' in data && typeof data.type === 'string' && data.type.toUpperCase() === "PING") {
+          // Respond with PONG
+          ws.send(JSON.stringify({ type: "PONG" }));
+          return;
+        }
+
+        // Handle normal chat messages
+        if ('event_type' in data) {
+          if (data.event_type === "chat_update") {
+            const newMessage: ChatMessage = {
+              user: data.username || "System",
+              message: data.message_content || "",
+              timestamp: Date.now(),
+              chatColor: data.chat_color,
+              profileUrl: data.profile_url,
+              messageType: data.message_type as
+                | "chat_message"
+                | "user_join_or_leave",
+            };
+            setMessages((prev) => [...prev, newMessage]);
+          } else if (data.event_type === "user_list_update") {
+            // Update user list when received from server
+            console.log("[ChatWS] Received user_list_update:", data.user_list);
+            if (data.user_list && Array.isArray(data.user_list)) {
+              console.log("[ChatWS] Updating user list with", data.user_list.length, "users");
+              setUserList(data.user_list);
+            } else {
+              console.warn("[ChatWS] Invalid user_list_update data:", data);
+            }
+          }
         }
       } catch (error) {
         console.error("[ChatWS] Error parsing message:", error);
@@ -322,5 +351,6 @@ export function useChatWebSocket({
     sendMessage,
     reconnect,
     addSystemMessage,
+    userList,
   };
 }

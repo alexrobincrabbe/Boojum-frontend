@@ -69,23 +69,31 @@ export function useGameWebSocket({
     // Use the Django server URL, not the Vite dev server
 
     const [guestName, setGuestName] = useState<string>("");
+    const [guestId, setGuestId] = useState<string | null>(null);
 
+    // Load guest_id from localStorage on mount
     useEffect(() => {
         if (!isGuest) {
             setGuestName("");
+            setGuestId(null);
             return;
         }
 
-        const existing = localStorage.getItem("guest_name");
-        if (existing) {
-            setGuestName(existing);
-            return;
+        const existingName = localStorage.getItem("guest_name");
+        if (existingName) {
+            setGuestName(existingName);
+        } else {
+            // Safe: runs in effect, not render
+            const name = `Guest_${crypto?.randomUUID?.().slice(0, 8) ?? Math.random().toString(16).slice(2, 10)}`;
+            localStorage.setItem("guest_name", name);
+            setGuestName(name);
         }
 
-        // Safe: runs in effect, not render
-        const name = `Guest_${crypto?.randomUUID?.().slice(0, 8) ?? Math.random().toString(16).slice(2, 10)}`;
-        localStorage.setItem("guest_name", name);
-        setGuestName(name);
+        // Load guest_id from localStorage
+        const existingGuestId = localStorage.getItem("guest_id");
+        if (existingGuestId) {
+            setGuestId(existingGuestId);
+        }
     }, [isGuest]);
 
 
@@ -109,8 +117,15 @@ export function useGameWebSocket({
             ? wsBaseUrlEnv.replace(/^http:/, "ws:").replace(/^https:/, "wss:")
             : djangoBaseUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
 
-        return `${wsBaseUrl}/ws/game/${roomId}/${guestParam}/`;
-    }, [roomId, isGuest, guestName, customWsUrl]);
+        // Build URL with guest_id query parameter if available
+        const baseUrl = `${wsBaseUrl}/ws/game/${roomId}/${guestParam}/`;
+        if (isGuest && guestId) {
+            const url = new URL(baseUrl);
+            url.searchParams.set("guest_id", guestId);
+            return url.toString();
+        }
+        return baseUrl;
+    }, [roomId, isGuest, guestName, guestId, customWsUrl]);
 
 
     // Handle incoming WebSocket messages
@@ -119,23 +134,80 @@ export function useGameWebSocket({
             switch (message.type) {
                 case 'STATE_SNAPSHOT': {
                     const newState = message.state;
+                    
+                    // Store guest_id if provided (for guests)
+                    if (newState.guestId && isGuest) {
+                        localStorage.setItem("guest_id", newState.guestId);
+                        setGuestId(newState.guestId);
+                    }
+                    
                     setGameState(newState);
                     onGameStateChange?.(newState);
 
-                    // Update timer if present in STATE_SNAPSHOT (for reconnection during active game)
-                    if (newState.timeRemaining !== undefined || newState.initialTimer !== undefined) {
-                        const timer = timerRef.current;
-                        if (newState.timeRemaining !== undefined) {
-                            timer.time = newState.timeRemaining;
-                            timer.progressBar = newState.timeRemaining;
-                            setDisplayTime(newState.timeRemaining);
+                    // Update timer using phase-based timing (new Redis system) or legacy timing
+                    const timer = timerRef.current;
+                    let shouldUpdateTimer = false;
+                    let remainingTime = 0;
+                    let initialTime = 0;
+
+                    // Check for timer data in order of preference:
+                    // 1. Server-provided remainingTime (most accurate)
+                    // 2. Legacy timeRemaining
+                    // 3. Calculate from phase info if available
+                    
+                    if (newState.remainingTime !== undefined || newState.timeRemaining !== undefined) {
+                        // Don't start timer if phase_started_at is 0 (no timer running yet)
+                        if (newState.phaseStartedAt === 0) {
+                            shouldUpdateTimer = false;
+                        } else {
+                            // Use provided remainingTime or timeRemaining (preferred)
+                            remainingTime = newState.remainingTime ?? newState.timeRemaining ?? 0;
+                            // Determine initial time from phase duration or legacy fields
+                            if (newState.phaseDuration !== undefined) {
+                                initialTime = newState.phaseDuration;
+                            } else if (newState.initialTimer !== undefined) {
+                                initialTime = newState.initialTimer;
+                            } else if (newState.gameTime !== undefined) {
+                                initialTime = newState.gameTime;
+                            } else {
+                                // Default fallback
+                                initialTime = newState.gameStatus === 'playing' ? (newState.gameTime || 90) : 45;
+                            }
+                            shouldUpdateTimer = true;
                         }
-                        if (newState.initialTimer !== undefined) {
-                            const initial = newState.initialTimer;
-                            timer.initialTimer = initial;
-                            timer.initialProgressBar = initial;
-                            setInitialTimer(initial);
+                    } else if (newState.phase && newState.phaseStartedAt !== undefined && newState.phaseDuration !== undefined && newState.serverNow !== undefined) {
+                        // Don't start timer if phase_started_at is 0 (no timer running yet)
+                        if (newState.phaseStartedAt === 0) {
+                            shouldUpdateTimer = false;
+                        } else {
+                            // Calculate remaining time from phase info (fallback if remainingTime not provided)
+                            const serverNow = newState.serverNow;
+                            const phaseStartedAt = newState.phaseStartedAt;
+                            const phaseDuration = newState.phaseDuration;
+                            
+                            // Calculate elapsed time: serverNow is when message was sent, so elapsed = serverNow - phaseStartedAt
+                            const phaseElapsed = serverNow - phaseStartedAt;
+                            remainingTime = Math.max(0, phaseDuration - phaseElapsed);
+                            
+                            initialTime = phaseDuration;
+                            shouldUpdateTimer = true;
                         }
+                    } else if (newState.initialTimer !== undefined) {
+                        // Legacy timer support - only initialTimer provided
+                        initialTime = newState.initialTimer;
+                        // If no remaining time provided, assume full duration
+                        remainingTime = initialTime;
+                        shouldUpdateTimer = true;
+                    }
+
+                    if (shouldUpdateTimer) {
+                        timer.time = remainingTime;
+                        timer.progressBar = remainingTime;
+                        timer.initialTimer = initialTime;
+                        timer.initialProgressBar = initialTime;
+                        setDisplayTime(remainingTime);
+                        setInitialTimer(initialTime);
+                        
                         // Restart timer sync when receiving STATE_SNAPSHOT with timer data
                         timer.lastUpdateTime = performance.now();
                         timer.lastUpdateTimeProgressBar = performance.now();
@@ -193,31 +265,26 @@ export function useGameWebSocket({
 
                 case 'DELTA_UPDATE': {
                     setGameState((prev) => {
+                        // Merge delta with previous state (or create new state)
+                        const updated: GameState = prev ? { ...prev, ...message.delta } : {
+                            roomId: '',
+                            players: [],
+                            gameStatus: (message.delta.gameStatus as 'waiting' | 'playing' | 'finished') || 'waiting',
+                            ...message.delta,
+                        } as GameState;
+                        
                         // If board is in delta update, always use it (for new players joining mid-game)
                         if (message.delta.board) {
-                            // Board update - merge with existing state or create new state
-                            const updated: GameState = prev ? { ...prev, ...message.delta } : {
-                                roomId: '',
-                                players: [],
-                                gameStatus: (message.delta.gameStatus as 'waiting' | 'playing' | 'finished') || 'waiting',
-                                ...message.delta,
-                            } as GameState;
-                            
                             // Track when a board is first shown - set it immediately if board exists
                             if (updated?.board && !hasBoardBeenShownRef.current) {
                                 hasBoardBeenShownRef.current = true;
                                 setHasBoardBeenShown(true);
                             }
-                            
-                            onGameStateChange?.(updated);
-                            return updated;
-                        }
-                        
-                        // For non-board updates, preserve board if it's not in the delta update
-                        const updated = prev ? { ...prev, ...message.delta } : prev;
-                        // Ensure board is preserved if it exists in prev but not in delta
-                        if (prev?.board && !message.delta.board && updated) {
-                            updated.board = prev.board;
+                        } else {
+                            // Ensure board is preserved if it exists in prev but not in delta
+                            if (prev?.board && !message.delta.board && updated) {
+                                updated.board = prev.board;
+                            }
                         }
 
                         // Clear finalScores when new game starts (status changes to 'playing')
@@ -285,23 +352,69 @@ export function useGameWebSocket({
                         });
                     }
 
-                    // Sync timer when server sends timer updates
-                    if (
-                        message.delta.timeRemaining !== undefined ||
-                        message.delta.initialTimer !== undefined
-                    ) {
+                    // Sync timer when server sends timer updates (phase-based or legacy)
+                    const delta = message.delta;
+                    let shouldUpdateTimer = false;
+                    let remainingTime = 0;
+                    let initialTime = 0;
+
+                    // Prefer phase-based timing if available
+                    // Don't skip timer initialization for intermission phase (it should start)
+                    if (delta.phase && delta.phaseStartedAt !== undefined && delta.phaseDuration !== undefined && delta.serverNow !== undefined) {
+                        // Only skip if phase_started_at is 0 (no timer running yet)
+                        if (delta.phaseStartedAt === 0) {
+                            shouldUpdateTimer = false;
+                        } else {
+                            const now = Math.floor(Date.now() / 1000);
+                            const serverNow = delta.serverNow as number;
+                            const phaseStartedAt = delta.phaseStartedAt as number;
+                            const phaseDuration = delta.phaseDuration as number;
+                            
+                            const clientElapsed = now - serverNow;
+                            const phaseElapsed = (now - phaseStartedAt) - clientElapsed;
+                            remainingTime = Math.max(0, phaseDuration - phaseElapsed);
+                            initialTime = phaseDuration;
+                            shouldUpdateTimer = true;
+                        }
+                    } else if (delta.remainingTime !== undefined) {
+                        // Use remainingTime if provided (e.g., from intermission_start message)
+                        remainingTime = delta.remainingTime as number;
+                        // Determine initial time from phase duration or other fields
+                        if (delta.phaseDuration !== undefined) {
+                            initialTime = delta.phaseDuration as number;
+                        } else if (delta.initialTimer !== undefined) {
+                            initialTime = delta.initialTimer as number;
+                        } else if (delta.gameTime !== undefined) {
+                            initialTime = delta.gameTime as number;
+                        } else {
+                            initialTime = 90; // Default fallback
+                        }
+                        // Start timer if remainingTime is provided (intermission and game phases should start)
+                        // Only skip if remainingTime is 0 (no timer running yet)
+                        if (remainingTime !== 0) {
+                            shouldUpdateTimer = true;
+                        }
+                    } else if (delta.timeRemaining !== undefined || delta.initialTimer !== undefined) {
+                        // Legacy timer support
+                        if (delta.timeRemaining !== undefined) {
+                            remainingTime = delta.timeRemaining as number;
+                        }
+                        if (delta.initialTimer !== undefined) {
+                            initialTime = delta.initialTimer as number;
+                        } else if (delta.gameTime !== undefined) {
+                            initialTime = delta.gameTime as number;
+                        }
+                        shouldUpdateTimer = true;
+                    }
+
+                    if (shouldUpdateTimer) {
                         const timer = timerRef.current;
-                        if (message.delta.timeRemaining !== undefined) {
-                            timer.time = message.delta.timeRemaining as number;
-                            timer.progressBar = message.delta.timeRemaining as number;
-                            setDisplayTime(message.delta.timeRemaining as number);
-                        }
-                        if (message.delta.initialTimer !== undefined) {
-                            const initial = message.delta.initialTimer as number;
-                            timer.initialTimer = initial;
-                            timer.initialProgressBar = initial;
-                            setInitialTimer(initial);
-                        }
+                        timer.time = remainingTime;
+                        timer.progressBar = remainingTime;
+                        timer.initialTimer = initialTime;
+                        timer.initialProgressBar = initialTime;
+                        setDisplayTime(remainingTime);
+                        setInitialTimer(initialTime);
 
                         // Restart offline timer when synced
                         timer.lastUpdateTime = performance.now();
@@ -408,7 +521,7 @@ export function useGameWebSocket({
                 }
             }
         },
-        [initializeWordLists, onGameStateChange, onPreviousBoardChange]
+        [initializeWordLists, onGameStateChange, onPreviousBoardChange, isGuest, guestId]
     );
 
     const handleWsError = useCallback((err: Event | Error) => {
@@ -428,6 +541,7 @@ export function useGameWebSocket({
         url: wsUrl,
         roomId: roomId || '',
         token,
+        guestId: guestId,
         maxAttempts: 10,
         initialReconnectDelay: 1000,
         maxReconnectDelay: 30000,

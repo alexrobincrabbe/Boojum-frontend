@@ -15,7 +15,9 @@ export function useScoresModal(
   addChatSystemMessage: (message: string) => void
 ): void {
   useEffect(() => {
-    if (gameState?.finalScores && gameState.gameStatus === 'finished') {
+    // Open modal when final scores are received, regardless of status
+    // (status might be 'finished' or 'waiting' depending on timing)
+    if (gameState?.finalScores && (gameState.gameStatus === 'finished' || gameState.gameStatus === 'waiting')) {
       setIsScoresModalOpen(true);
       
       // Show unicorn message in chat for one-shot games

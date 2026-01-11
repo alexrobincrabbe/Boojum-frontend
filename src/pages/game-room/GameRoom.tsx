@@ -72,6 +72,7 @@ export default function GameRoom() {
     sendMessage: sendChatMessage,
     reconnect: reconnectChat,
     addSystemMessage: addChatSystemMessage,
+    userList: _chatUserList,
   } = useChatWebSocket({
     roomId: roomId || "",
     token,

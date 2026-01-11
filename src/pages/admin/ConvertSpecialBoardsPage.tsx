@@ -12,6 +12,7 @@ type BoardType = 'daily' | 'timeless' | null;
 interface BoardMetadata {
   title: string;
   date: string;
+  timer?: number; // Timer in seconds, only for daily boards
 }
 
 interface AvailableBoard {
@@ -52,7 +53,7 @@ const ConvertSpecialBoardsPage = () => {
         
         for (const boardId of selectedBoardIds) {
           if (!newMetadata[boardId]) {
-            newMetadata[boardId] = { title: '', date: '' };
+            newMetadata[boardId] = { title: '', date: '', timer: 90 };
           }
           if (!newTypes[boardId]) {
             newTypes[boardId] = null;
@@ -166,7 +167,7 @@ const ConvertSpecialBoardsPage = () => {
 
       const newMetadata = { ...boardMetadata };
       if (!newMetadata[boardId]) {
-        newMetadata[boardId] = { title: '', date: '' };
+        newMetadata[boardId] = { title: '', date: '', timer: 90 };
       }
       
       // Only update date if switching from a different type or if date is not set
@@ -190,6 +191,10 @@ const ConvertSpecialBoardsPage = () => {
             boardNumber = (data.next_daily_number || 1) + dailyCount;
             newMetadata[boardId].date = nextDate;
             newMetadata[boardId].title = `Daily Board #${boardNumber}`;
+            // Initialize timer to default if not already set
+            if (!newMetadata[boardId].timer) {
+              newMetadata[boardId].timer = 90;
+            }
           } else if (type === 'timeless') {
             // Only look at other timeless boards (excluding current) for date calculation
             nextDate = getNextDate('timeless', data.next_timeless_date || '', newMetadata, newTypes, boardId);
@@ -211,16 +216,25 @@ const ConvertSpecialBoardsPage = () => {
   const handleTitleChange = (boardId: number, title: string) => {
     const newMetadata = { ...boardMetadata };
     if (!newMetadata[boardId]) {
-      newMetadata[boardId] = { title: '', date: '' };
+      newMetadata[boardId] = { title: '', date: '', timer: 90 };
     }
     newMetadata[boardId].title = title;
+    setBoardMetadata(newMetadata);
+  };
+
+  const handleTimerChange = (boardId: number, timer: number) => {
+    const newMetadata = { ...boardMetadata };
+    if (!newMetadata[boardId]) {
+      newMetadata[boardId] = { title: '', date: '', timer: 90 };
+    }
+    newMetadata[boardId].timer = timer;
     setBoardMetadata(newMetadata);
   };
 
   const handleDateChange = async (boardId: number, date: string) => {
     const newMetadata = { ...boardMetadata };
     if (!newMetadata[boardId]) {
-      newMetadata[boardId] = { title: '', date: '' };
+      newMetadata[boardId] = { title: '', date: '', timer: 90 };
     }
     newMetadata[boardId].date = date;
     setBoardMetadata(newMetadata);
@@ -345,13 +359,21 @@ const ConvertSpecialBoardsPage = () => {
           toast.error(`Board ID ${boardId} has an invalid date: ${dateErrors[boardId]}`);
           return;
         }
+        // Validate timer for daily boards
+        if (boardType === 'daily') {
+          const timer = metadata.timer ?? 90;
+          if (!timer || timer < 1 || !Number.isFinite(timer)) {
+            toast.error(`Board ID ${boardId} (daily) requires a valid timer (minimum 1 second)`);
+            return;
+          }
+        }
       }
     }
 
     setIsSubmitting(true);
     try {
       // Separate boards by type
-      const dailyBoards: { board: Board; boojum: BoojumBoard; title: string; date: string; boardId: number }[] = [];
+      const dailyBoards: { board: Board; boojum: BoojumBoard; title: string; date: string; time_limit: number; boardId: number }[] = [];
       const timelessBoards: { board: Board; boojum: BoojumBoard; title: string; date: string; boardId: number }[] = [];
 
       for (const boardId of selectedBoardIds) {
@@ -377,6 +399,7 @@ const ConvertSpecialBoardsPage = () => {
             boojum,
             title: metadata.title,
             date: metadata.date,
+            time_limit: metadata.timer || 90,
             boardId,
           });
         } else if (boardType === 'timeless') {
@@ -564,6 +587,19 @@ const ConvertSpecialBoardsPage = () => {
                                   <div className="error-message">{dateErrors[board.id]}</div>
                                 )}
                               </div>
+                              {boardType === 'daily' && (
+                                <div className="metadata-field">
+                                  <label>Timer (seconds)</label>
+                                  <input
+                                    type="number"
+                                    className="metadata-input"
+                                    value={metadata?.timer || 90}
+                                    onChange={(e) => handleTimerChange(board.id, parseInt(e.target.value) || 90)}
+                                    min="1"
+                                    placeholder="90"
+                                  />
+                                </div>
+                              )}
                             </div>
 
                             {showMarkingBoard && (

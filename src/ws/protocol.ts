@@ -10,7 +10,7 @@
 // ============================================================================
 
 export type OutboundMessage =
-  | { type: 'JOIN_ROOM'; roomId: string }
+  | { type: 'JOIN_ROOM'; roomId: string; guestId?: string }
   | { type: 'LEAVE_ROOM'; roomId: string }
   | { type: 'PLAYER_ACTION'; action: string; data: Record<string, unknown> }
   | { type: 'CHAT'; message: string }
@@ -41,13 +41,21 @@ export type InboundMessage =
 export interface GameState {
   roomId: string;
   players: Player[];
-  currentPlayerId?: string;  // channel_name of the current player (so frontend knows which player is "me")
+  currentPlayerId?: string;  // Stable player ID (user:{id} or guest:{uuid}) - use this for player identification
+  currentConnId?: string;  // Channel name (for backwards compatibility)
   gameStatus: 'waiting' | 'playing' | 'finished';
   gameRoundId?: string;  // Unique identifier for this game round (for localStorage persistence)
   currentRound?: number;
-  timeRemaining?: number;
-  initialTimer?: number;  // Initial timer value for progress bar calculation (may be intermission timer)
+  timeRemaining?: number;  // Legacy: remaining time in seconds (deprecated, use phase-based timing)
+  initialTimer?: number;  // Legacy: initial timer value (deprecated, use phase-based timing)
   gameTime?: number;  // Actual game timer used (not intermission timer)
+  // Phase-based timing (new Redis-based system)
+  serverNow?: number;  // Server timestamp (Unix seconds UTC)
+  phase?: 'game' | 'intermission';  // Current phase
+  phaseStartedAt?: number;  // When current phase started (Unix seconds UTC)
+  phaseDuration?: number;  // Duration of current phase in seconds
+  remainingTime?: number;  // Remaining time in current phase (calculated client-side)
+  guestId?: string;  // Guest UUID (for guests, stored in localStorage)
   board?: string[][];
   boardWords?: string[];  // List of valid words on the board
   finalScores?: Record<string, FinalScore>;  // Final scores when game ends
@@ -63,7 +71,7 @@ export interface GameState {
 }
 
 export interface Player {
-  id: string;  // channel_name - unique per WebSocket connection
+  id: string;  // Stable player ID (user:{id} or guest:{uuid}) - use this for player identification
   userId?: number | null;  // User ID if authenticated, null/undefined for guests
   username: string;
   score: number;

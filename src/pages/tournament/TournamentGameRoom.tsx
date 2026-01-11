@@ -42,35 +42,6 @@ export default function TournamentGameRoom() {
   const [showBackButton, setShowBackButton] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
 
-  // Check localStorage for active match on mount
-  useEffect(() => {
-    if (!matchId) return;
-    
-    const activeMatchKey = `tournament_match_${matchId}`;
-    const activeMatchData = localStorage.getItem(activeMatchKey);
-    
-    if (activeMatchData) {
-      try {
-        const data = JSON.parse(activeMatchData);
-        // Check if this is still the active match and game is in progress
-        if (data.matchId === matchId && data.gameStatus === 'playing') {
-          setShowStartButton(false);
-          setGameStarted(true);
-        } else if (data.gameStatus === 'finished') {
-          // Game finished, clean up localStorage
-          localStorage.removeItem(activeMatchKey);
-        }
-      } catch {
-        // Invalid data, clean up
-        localStorage.removeItem(activeMatchKey);
-      }
-    }
-  }, [matchId]);
-
-  // Clear localStorage if backend says game is waiting but localStorage says playing
-  // This handles the case where the game ended or room was cleaned up
-  // Note: This useEffect must be placed after gameState is defined (after useGameWebSocket call)
-
   // Load match info - wait for auth to load first
   useEffect(() => {
     // Don't check until auth has finished loading
@@ -220,23 +191,14 @@ export default function TournamentGameRoom() {
     submitOneShotWord(word, time, sendJson);
   }, [gameState, timerState, submitOneShotWord, sendJson]);
 
-  // Handle start game button
+  // Handle start game button (matching daily board behavior)
   const handleStartGame = useCallback(() => {
-    if (sendJson && !gameStarted && matchId) {
-      // sendJson automatically converts START_GAME to event_type: 'start_game'
+    if (sendJson && !gameStarted) {
       sendJson({ type: 'START_GAME' });
       setShowStartButton(false);
       setGameStarted(true);
-      
-      // Store active match in localStorage
-      const activeMatchKey = `tournament_match_${matchId}`;
-      localStorage.setItem(activeMatchKey, JSON.stringify({
-        matchId,
-        gameStatus: 'playing',
-        timestamp: Date.now(),
-      }));
     }
-  }, [sendJson, gameStarted, matchId]);
+  }, [sendJson, gameStarted]);
 
   // Scores modal state
   const [isScoresModalOpen, setIsScoresModalOpen] = useState(false);
@@ -255,7 +217,7 @@ export default function TournamentGameRoom() {
     }
   }, [gameState?.gameStatus, gameRecording]);
 
-  // Submit final score when game ends
+  // Submit final score when game ends (matching daily board behavior exactly)
   const prevGameStatusRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     const currentStatus = gameState?.gameStatus;
@@ -263,10 +225,11 @@ export default function TournamentGameRoom() {
     
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
-      // Get recording data
+      console.log('[Tournament Score] Game ended, submitting score');
+      // Get recording data (tournament-specific)
       const recording = gameRecording.getRecording();
       
-      // Create a wrapper sendJson that includes recording data
+      // Create a wrapper sendJson that includes recording data (tournament-specific)
       const sendJsonWithRecording = (message: OutboundMessage) => {
         // If this is a submit_final_score message, add recording data
         if (message.type === 'PLAYER_ACTION' && message.action === 'submit_final_score' && message.data) {
@@ -275,6 +238,7 @@ export default function TournamentGameRoom() {
         sendJson(message);
       };
       
+      // Call submitFinalScore exactly like daily board (it will use closure gameState)
       submitFinalScore(sendJsonWithRecording);
     }
     
@@ -287,43 +251,28 @@ export default function TournamentGameRoom() {
     };
   }, [initializeWordLists]);
 
-  // Open scores modal when final scores are received and show back button
+  // Open scores modal when final scores are received and show back button (matching daily board)
   useEffect(() => {
-    if (gameState?.finalScores && gameState.gameStatus === 'finished') {
+    const hasFinalScores = gameState?.finalScores && Object.keys(gameState.finalScores).length > 0;
+    const isFinished = gameState?.gameStatus === 'finished';
+    
+    if (hasFinalScores && isFinished) {
       setIsScoresModalOpen(true);
       setShowBackButton(true); // Show back button when game finishes
     }
   }, [gameState?.finalScores, gameState?.gameStatus]);
 
   // Hide start button if game is already playing (e.g., on reconnect)
+  // Match daily board behavior - simpler logic
   useEffect(() => {
-    if (!matchId) return;
-    
-    const activeMatchKey = `tournament_match_${matchId}`;
-    
     if (gameState?.gameStatus === 'playing') {
       setShowStartButton(false);
       setGameStarted(true);
-      
-      // Update localStorage to reflect game is playing
-      localStorage.setItem(activeMatchKey, JSON.stringify({
-        matchId,
-        gameStatus: 'playing',
-        timestamp: Date.now(),
-      }));
-    } else if (gameState?.gameStatus === 'finished') {
-      // Game finished, clean up localStorage
-      localStorage.removeItem(activeMatchKey);
-      setShowStartButton(false);
     } else if (gameState?.gameStatus === 'waiting' && !gameStarted) {
       // Only show start button if game is waiting and hasn't been started yet
-      // But check localStorage first
-      const activeMatchData = localStorage.getItem(activeMatchKey);
-      if (!activeMatchData) {
-        setShowStartButton(true);
-      }
+      setShowStartButton(true);
     }
-  }, [gameState?.gameStatus, gameState?.board, gameState?.boardWords, gameState?.timeRemaining, gameState?.initialTimer, gameStarted, matchId, showStartButton]);
+  }, [gameState?.gameStatus, gameStarted]);
 
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;

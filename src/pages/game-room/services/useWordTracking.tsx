@@ -96,9 +96,15 @@ export function useWordTracking(
     score: 0,
   });
   const wordsFoundArrayRef = useRef<string[]>([]);
+  
+  // Track score changes to trigger saves (refs don't trigger re-renders)
+  const [scoreUpdateTrigger, setScoreUpdateTrigger] = useState(0);
 
   // Track previous gameRoundId to detect game changes
   const previousGameRoundIdRef = useRef<string | undefined>(undefined);
+  
+  // Track if we've restored state for the current game (prevent saving before restore)
+  const hasRestoredRef = useRef<boolean>(false);
   // Initialize word lists and counters when board updates
   const initializeWordLists = useCallback(
     (
@@ -136,12 +142,23 @@ export function useWordTracking(
 
       if (isNewGame && currentGameRoundId && stateToUse?.roomId && username) {
         // New game - try to restore from localStorage
+        console.log('[useWordTracking] New game detected, attempting restore:', {
+          currentGameRoundId,
+          previousGameRoundId: previousGameRoundIdRef.current,
+          roomId: stateToUse.roomId,
+          username,
+        });
         const restored = loadGameState(
           stateToUse.roomId,
           username,
           currentGameRoundId
         );
         if (restored) {
+          console.log('[useWordTracking] Restoring state from localStorage:', {
+            totalScore: restored.totalScore,
+            wordsFoundCount: restored.wordsFound.length,
+            wordCounts: restored.wordCounts,
+          });
           // Restore player state
           setWordsFound(wordsArrayToSet(restored.wordsFound));
           setWordCounts(restored.wordCounts);
@@ -149,6 +166,8 @@ export function useWordTracking(
           bestWordRef.current = restored.bestWord;
           wordsFoundArrayRef.current = restored.wordsFoundArray;
           setOneShotSubmitted(restored.oneShotSubmitted);
+          hasRestoredRef.current = true; // Mark that we've restored
+          setScoreUpdateTrigger(prev => prev + 1); // Trigger save effect to update display
 
           // Send restored score to backend if game is in progress
           if (
@@ -182,6 +201,8 @@ export function useWordTracking(
           bestWordRef.current = { word: "", score: 0 };
           wordsFoundArrayRef.current = [];
           setOneShotSubmitted(false);
+          setScoreUpdateTrigger(0); // Reset score update trigger
+          hasRestoredRef.current = true; // Mark that we've checked (no restore needed for new game)
         }
         previousGameRoundIdRef.current = currentGameRoundId;
       } else if (
@@ -195,6 +216,8 @@ export function useWordTracking(
         bestWordRef.current = { word: "", score: 0 };
         wordsFoundArrayRef.current = [];
         setOneShotSubmitted(false);
+        setScoreUpdateTrigger(0); // Reset score update trigger
+        hasRestoredRef.current = false; // Reset restore flag for new game
         if (stateToUse?.roomId && username && previousGameRoundIdRef.current) {
           // Clear old game state for this username
           clearGameState(stateToUse.roomId, username);
@@ -213,15 +236,42 @@ export function useWordTracking(
       !gameState?.gameRoundId ||
       gameState.gameStatus !== "playing"
     ) {
+      // Debug: log why we're not saving
+      if (gameState) {
+        console.log('[useWordTracking] Not saving to localStorage:', {
+          hasRoomId: !!gameState.roomId,
+          hasGameRoundId: !!gameState.gameRoundId,
+          gameStatus: gameState.gameStatus,
+          roomId: gameState.roomId,
+          gameRoundId: gameState.gameRoundId,
+        });
+      }
+      return;
+    }
+
+    // Don't save until we've checked for/restored existing state
+    // This prevents overwriting saved state with 0 on initial load
+    if (!hasRestoredRef.current) {
+      console.log('[useWordTracking] Not saving yet: waiting for restore check');
       return;
     }
 
     const username = getCurrentUsername();
     if (!username) {
+      console.log('[useWordTracking] Not saving: no username found');
       return; // Can't save without username
     }
 
     // Save current player state
+    console.log('[useWordTracking] Saving to localStorage:', {
+      roomId: gameState.roomId,
+      username,
+      gameRoundId: gameState.gameRoundId,
+      totalScore: totalScoreRef.current,
+      wordsFoundCount: wordsFound.size,
+      wordsFoundArrayLength: wordsFoundArrayRef.current.length,
+    });
+    
     saveGameState(gameState.roomId, username, gameState.gameRoundId, {
       wordsFound,
       wordCounts,
@@ -234,6 +284,7 @@ export function useWordTracking(
     wordsFound,
     wordCounts,
     oneShotSubmitted,
+    scoreUpdateTrigger, // Trigger save when score changes
     gameState?.roomId,
     gameState?.gameRoundId,
     gameState?.gameStatus,
@@ -267,6 +318,9 @@ export function useWordTracking(
         bestWordRef.current = { word, score: wordScore };
       }
       wordsFoundArrayRef.current.push(word);
+      
+      // Trigger save by updating trigger state
+      setScoreUpdateTrigger(prev => prev + 1);
 
       // Word is valid and not found - update state
       setWordsFound((prev) => {
@@ -330,12 +384,28 @@ export function useWordTracking(
 
   // Submit final score when game ends
   const submitFinalScore = useCallback(
-    (sendJson: (message: any) => void) => {
+    (sendJson: (message: any) => void, currentGameState?: typeof gameState) => {
+      // Use passed gameState or fallback to closure gameState
+      const stateToUse = currentGameState || gameState;
+      
+      console.log('[submitFinalScore] Called with:', {
+        hasBoardWords: !!stateToUse?.boardWords,
+        gameStatus: stateToUse?.gameStatus,
+        alreadySubmitted: scoreSubmittedRef.current,
+        totalScore: totalScoreRef.current,
+        wordsFound: wordsFoundArrayRef.current.length,
+      });
+      
       if (
-        !gameState?.boardWords ||
-        gameState.gameStatus !== "finished" ||
+        !stateToUse?.boardWords ||
+        stateToUse.gameStatus !== "finished" ||
         scoreSubmittedRef.current
       ) {
+        console.log('[submitFinalScore] Early return:', {
+          reason: !stateToUse?.boardWords ? 'no boardWords' : 
+                  stateToUse.gameStatus !== "finished" ? `status is ${stateToUse.gameStatus}, not finished` : 
+                  'already submitted'
+        });
         return;
       }
 
@@ -343,7 +413,7 @@ export function useWordTracking(
 
       // Create which_words_found array: 1 if word was found, 0 otherwise
       // Use case-sensitive matching to match original implementation
-      const whichWordsFound = gameState.boardWords.map((word) =>
+      const whichWordsFound = stateToUse.boardWords.map((word) =>
         wordsFoundArrayRef.current.some((foundWord) => foundWord === word)
           ? 1
           : 0
@@ -356,6 +426,8 @@ export function useWordTracking(
         number_of_words_found: wordsFoundArrayRef.current.length,
         which_words_found: whichWordsFound,
       };
+
+      console.log('[submitFinalScore] Submitting score:', scoreData);
 
       sendJson({
         type: "PLAYER_ACTION",

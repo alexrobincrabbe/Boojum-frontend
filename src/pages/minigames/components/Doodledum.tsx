@@ -1550,16 +1550,14 @@ const Doodledum: React.FC = () => {
                             }}
                             onClick={() => handleDoodleClick(item)}
                           />
-                          {item.doodle_id ? (
+                          {/* Always show comment badge for doodles, even if no comments or no doodle_id yet */}
+                          {item.is_doodle && (
                             <CommentBadge 
-                              doodleId={item.doodle_id} 
-                              commentCount={item.comment_count ?? 0} 
+                              doodleId={item.doodle_id || 0} 
+                              commentCount={item.comment_count ?? 0}
+                              onOpenComments={() => handleDoodleClick(item)}
                             />
-                          ) : item.doodle_url ? (
-                            // If no doodle_id but we have a URL, we could fetch it, but for now just don't show badge
-                            // The badge requires doodle_id to fetch commenters
-                            null
-                          ) : null}
+                          )}
                         </div>
                       )}
                       <span className="feed-time"> {formatTimeAgo(item.created_at)}</span>

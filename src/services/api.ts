@@ -700,7 +700,7 @@ export const adminAPI = {
     });
     return response.data;
   },
-  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[], boardSize: number = 4) => {
+  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string; time_limit?: number }[], boardSize: number = 4) => {
     const response = await api.post('/admin/create-daily-boards/', { 
       boards,
       board_size: boardSize,

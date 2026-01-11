@@ -13,6 +13,7 @@ export interface UseGameSocketOptions {
   url: string;
   roomId: string;
   token: string;
+  guestId?: string | null;  // Guest UUID for guest users
   maxAttempts?: number;
   initialReconnectDelay?: number;
   maxReconnectDelay?: number;
@@ -75,23 +76,49 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
       } as any;
 
     case 'board_update':
+      const delta: any = {
+        // NOTE: if your GameState expects a 2D grid, convert here.
+        // For now we pass through what backend sends.
+        board: raw.board_letters,
+        boardWords: raw.board_words,
+        wordsByLength: raw.board_sublists,
+        boojumBonus: raw.boojum_bonus,
+        snark: raw.snark,
+        boojum: raw.boojum,
+        oneShot: raw.one_shot,
+        gameRoundId: raw.game_round_id,  // Include game round ID
+        boardSize: raw.board_size,  // Board size (4 for 4x4, 5 for 5x5)
+        language: raw.language,  // Language (e.g., 'en' for English, 'es' for Spanish)
+      };
+      
+      // Include phase/timer info if provided (from worker)
+      if (raw.phase !== undefined) {
+        delta.phase = raw.phase;
+        delta.phaseStartedAt = raw.phaseStartedAt;
+        delta.phaseDuration = raw.phaseDuration;
+        delta.remainingTime = raw.remainingTime;
+        delta.serverNow = raw.serverNow;
+        delta.gameStatus = raw.gameStatus || 'playing';  // Include gameStatus
+      }
+      
+      // Include gameStatus if provided (indicates game is starting)
+      if (raw.gameStatus !== undefined) {
+        delta.gameStatus = raw.gameStatus;
+      }
+      
+      // Include timer fields if provided
+      if (raw.remainingTime !== undefined) {
+        delta.remainingTime = raw.remainingTime;
+        delta.timeRemaining = raw.remainingTime;
+      }
+      if (raw.phaseDuration !== undefined) {
+        delta.initialTimer = raw.phaseDuration;
+      }
+      
       return {
         type: 'DELTA_UPDATE',
         seq: raw.seq ?? 0,
-        delta: {
-          // NOTE: if your GameState expects a 2D grid, convert here.
-          // For now we pass through what backend sends.
-          board: raw.board_letters,
-          boardWords: raw.board_words,
-          wordsByLength: raw.board_sublists,
-          boojumBonus: raw.boojum_bonus,
-          snark: raw.snark,
-          boojum: raw.boojum,
-          oneShot: raw.one_shot,
-          gameRoundId: raw.game_round_id,  // Include game round ID
-          boardSize: raw.board_size,  // Board size (4 for 4x4, 5 for 5x5)
-          language: raw.language,  // Language (e.g., 'en' for English, 'es' for Spanish)
-        },
+        delta,
       } as any;
 
     case 'final_scores':
@@ -126,9 +153,9 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
         type: 'SHOW_BACK_BUTTON',
       } as any;
 
-    case 'game_over':
+    case 'game_over': {
       // Game has ended - trigger score submission by setting status to finished
-      // Don't show as ERROR message
+      // Timer will start after final scores are sent (via intermission_start)
       return {
         type: 'DELTA_UPDATE',
         seq: raw.seq ?? 0,
@@ -136,6 +163,43 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
           gameStatus: 'finished',
         },
       } as any;
+    }
+
+    case 'intermission_start': {
+      // Intermission timer starts after final scores are sent
+      const intermissionDelta: any = {
+        gameStatus: raw.gameStatus || 'waiting',
+      };
+      
+      // Include phase/timer fields
+      if (raw.phase !== undefined) {
+        intermissionDelta.phase = raw.phase;
+      }
+      if (raw.phaseStartedAt !== undefined) {
+        intermissionDelta.phaseStartedAt = raw.phaseStartedAt;
+      }
+      if (raw.phaseDuration !== undefined) {
+        intermissionDelta.phaseDuration = raw.phaseDuration;
+      }
+      if (raw.remainingTime !== undefined) {
+        intermissionDelta.remainingTime = raw.remainingTime;
+      }
+      if (raw.serverNow !== undefined) {
+        intermissionDelta.serverNow = raw.serverNow;
+      }
+      if (raw.timeRemaining !== undefined) {
+        intermissionDelta.timeRemaining = raw.timeRemaining;
+      }
+      if (raw.initialTimer !== undefined) {
+        intermissionDelta.initialTimer = raw.initialTimer;
+      }
+      
+      return {
+        type: 'DELTA_UPDATE',
+        seq: raw.seq ?? 0,
+        delta: intermissionDelta,
+      } as any;
+    }
 
     default:
       console.warn('[useGameSocket] Unhandled backend message:', raw);
@@ -153,6 +217,9 @@ function convertOutboundToBackend(message: OutboundMessage): any {
   if (message.type === 'JOIN_ROOM') {
     backend.event_type = 'join_room';
     backend.roomId = message.roomId;
+    if (message.guestId) {
+      backend.guest_id = message.guestId;
+    }
   } else if (message.type === 'RESYNC') {
     backend.event_type = 'resync';
     if (message.lastSeq !== undefined) backend.last_seq = message.lastSeq;
@@ -187,6 +254,7 @@ export function useGameSocket({
   url,
   roomId,
   token,
+  guestId,
   maxAttempts = 10,
   initialReconnectDelay = 1000,
   maxReconnectDelay = 30000,
@@ -351,7 +419,7 @@ export function useGameSocket({
       if (ws.readyState !== WebSocket.OPEN) return;
 
       try {
-        sendRawOnSocket(ws, { type: 'JOIN_ROOM', roomId });
+        sendRawOnSocket(ws, { type: 'JOIN_ROOM', roomId, guestId: guestId || undefined });
 
         // You can later implement true seq-based resync.
         if (lastSeqRef.current !== null) {
@@ -363,7 +431,7 @@ export function useGameSocket({
         console.error('[useGameSocket] resync failed:', e);
       }
     },
-    [roomId, sendRawOnSocket]
+    [roomId, guestId, sendRawOnSocket]
   );
 
   const connect = useCallback(() => {
