@@ -4,6 +4,7 @@ import { teamTournamentAPI } from '../../services/api';
 import { Loading } from '../../components/Loading';
 import { X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { toast } from 'react-toastify';
 import './TournamentPage.css';
 
 interface TeamPlayer {
@@ -58,9 +59,19 @@ interface TeamTournament {
   finalist_team: Team | null;
 }
 
+interface RegisteredPlayer {
+  id: number;
+  username: string;
+  display_name: string;
+  profile_url: string;
+  profile_picture_url: string;
+  chat_color: string;
+}
+
 interface TeamTournamentData {
   active_tournament: TeamTournament | null;
   registration_open: boolean;
+  registered: boolean;
   tournament_started: boolean;
   matches: TeamMatch[];
   rounds: number;
@@ -72,6 +83,8 @@ interface TeamTournamentData {
   registration_time_remaining: string;
   registration_seconds_remaining: number;
   time_till_start: string;
+  registered_players: RegisteredPlayer[];
+  no_registered_players: number;
 }
 
 interface TeamTournamentPageProps {
@@ -85,7 +98,9 @@ const TeamTournamentPage = ({ tournamentType = 'active' }: TeamTournamentPagePro
   const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [selectedRound, setSelectedRound] = useState<number>(1);
   const [roundTimeRemaining, setRoundTimeRemaining] = useState<Record<number, string>>({});
-  const { user } = useAuth();
+  const [registering, setRegistering] = useState(false);
+  const [registrationTimeRemaining, setRegistrationTimeRemaining] = useState<string>('');
+  const { user, isAuthenticated } = useAuth();
 
   const cleanTournamentName = (name: string) => {
     return name.replace(/&nbsp;/g, '').trim();
@@ -113,6 +128,67 @@ const TeamTournamentPage = ({ tournamentType = 'active' }: TeamTournamentPagePro
 
     loadTournamentData();
   }, [tournamentType]);
+
+  // Registration timer countdown
+  const registrationCountdownRef = useRef<number | null>(null);
+  const registrationSecondsRemainingRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!data || !data.registration_time_remaining || data.registration_seconds_remaining <= 0) {
+      setRegistrationTimeRemaining('');
+      if (registrationCountdownRef.current !== null) {
+        clearInterval(registrationCountdownRef.current);
+        registrationCountdownRef.current = null;
+      }
+      return;
+    }
+
+    registrationSecondsRemainingRef.current = data.registration_seconds_remaining;
+    setRegistrationTimeRemaining(data.registration_time_remaining);
+
+    if (registrationCountdownRef.current !== null) {
+      clearInterval(registrationCountdownRef.current);
+    }
+
+    const updateRegistrationCountdown = () => {
+      const secondsRemaining = registrationSecondsRemainingRef.current;
+      if (secondsRemaining <= 0) {
+        setRegistrationTimeRemaining('');
+        if (registrationCountdownRef.current !== null) {
+          clearInterval(registrationCountdownRef.current);
+          registrationCountdownRef.current = null;
+        }
+        return;
+      }
+
+      const days = Math.floor(secondsRemaining / (3600 * 24));
+      const hours = Math.floor((secondsRemaining % (3600 * 24)) / 3600);
+      const minutes = Math.floor((secondsRemaining % 3600) / 60);
+      const secs = secondsRemaining % 60;
+
+      let timeString = '';
+      if (days > 0) {
+        timeString = `${days} days ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      } else {
+        timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      setRegistrationTimeRemaining(timeString);
+      registrationSecondsRemainingRef.current--;
+    };
+
+    updateRegistrationCountdown();
+    registrationCountdownRef.current = window.setInterval(() => {
+      updateRegistrationCountdown();
+    }, 1000);
+
+    return () => {
+      if (registrationCountdownRef.current !== null) {
+        clearInterval(registrationCountdownRef.current);
+        registrationCountdownRef.current = null;
+      }
+    };
+  }, [data]);
 
   // Real-time countdown for round timers
   const roundCountdownRefs = useRef<Record<number, number | null>>({});
@@ -203,6 +279,50 @@ const TeamTournamentPage = ({ tournamentType = 'active' }: TeamTournamentPagePro
     return team.player_1.id === user.id || team.player_2.id === user.id || team.player_3.id === user.id;
   };
 
+  const handleRegister = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to register for the tournament');
+      return;
+    }
+    
+    setRegistering(true);
+    try {
+      const response = await teamTournamentAPI.register(tournamentType);
+      toast.success(response.message || 'Registered successfully!');
+      // Reload tournament data to update registration status
+      const tournamentData = await teamTournamentAPI.getTeamTournamentData(tournamentType);
+      setData(tournamentData);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to register for tournament');
+      console.error('Error registering team for tournament:', err);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleUnregister = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to withdraw from the tournament');
+      return;
+    }
+    
+    setRegistering(true);
+    try {
+      const response = await teamTournamentAPI.unregister(tournamentType);
+      toast.success(response.message || 'Unregistered successfully!');
+      // Reload tournament data to update registration status
+      const tournamentData = await teamTournamentAPI.getTeamTournamentData(tournamentType);
+      setData(tournamentData);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to unregister from tournament');
+      console.error('Error unregistering team from tournament:', err);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   if (loading) {
     return <Loading minHeight="calc(100vh - 70px)" />;
   }
@@ -259,6 +379,91 @@ const TeamTournamentPage = ({ tournamentType = 'active' }: TeamTournamentPagePro
               View Rules and Info
             </button>
           </div>
+
+          {/* Registration Section */}
+          <div className="col-12" data-onboarding="team-tournament-registration">
+            {!isAuthenticated ? (
+              <div className="registration-closed">
+                <span>Please login to take part in the tournament</span>
+              </div>
+            ) : (data.registration_open || registrationTimeRemaining) ? (
+              <div>
+                {registrationTimeRemaining && (
+                  <div className="registration-timer-container">
+                    <span className="blue">Signup ends: </span>
+                    <span className="green">{registrationTimeRemaining}</span>
+                  </div>
+                )}
+                {data.registered ? (
+                  <div>
+                    <button 
+                      className="tournament-register-button button-registered"
+                      onClick={handleUnregister}
+                      disabled={registering}
+                    >
+                      {registering ? 'Withdrawing...' : 'withdraw'}
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <button 
+                      className="tournament-register-button"
+                      onClick={handleRegister}
+                      disabled={registering}
+                    >
+                      {registering ? 'Registering...' : 'register'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              !data.tournament_started && (
+                <div className="registration-closed">
+                  <span className="pink">Registration is closed.</span>
+                  {data.time_till_start && (
+                    <span> Tournament starts in: &nbsp;<em className="yellow">{data.time_till_start}</em></span>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+
+          {/* Registered Players List */}
+          {!data.tournament_started && data.registered_players && data.registered_players.length > 0 && (
+            <div className="col-12">
+              <h3 className="round-header blue">Registered Players ({data.no_registered_players})</h3>
+              <div className="registered-players-list">
+                {data.registered_players.map((player) => {
+                  const profilePictureUrl = player.profile_picture_url || '/images/default.png';
+                  const chatColor = player.chat_color || '#71bbe9';
+                  const isGlowWorm = chatColor === '#71bbe9';
+                  
+                  return (
+                    <div key={player.id} className="registered-player">
+                      <img
+                        src={profilePictureUrl}
+                        alt={player.display_name}
+                        className="registered-player-avatar"
+                        style={{ borderColor: chatColor }}
+                      />
+                      <a 
+                        href={`/profile/${player.profile_url}`} 
+                        className="player-link"
+                        style={{
+                          color: chatColor,
+                          textShadow: isGlowWorm 
+                            ? '2px 2px 6px rgb(38, 76, 146), -2px -2px 6px rgb(38, 76, 146), 2px -2px 6px rgb(38, 76, 146), -2px 2px 6px rgb(38, 76, 146)'
+                            : 'none'
+                        }}
+                      >
+                        {player.display_name}
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tournament Rounds and Matches */}

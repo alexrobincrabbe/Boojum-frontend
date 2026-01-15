@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { authAPI, lobbyAPI, dashboardAPI, forumAPI, tournamentAPI } from '../services/api';
+import { authAPI, lobbyAPI, dashboardAPI, forumAPI, tournamentAPI, teamTournamentAPI } from '../services/api';
 import { X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Joyride from 'react-joyride';
@@ -250,6 +250,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadForumPosts, setUnreadForumPosts] = useState(0);
   const [tournamentBadge, setTournamentBadge] = useState<'register' | 'you-are-up' | null>(null);
+  const [teamTournamentBadge, setTeamTournamentBadge] = useState<'register' | 'you-are-up' | null>(null);
   const [guestsOnline, setGuestsOnline] = useState(0);
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
   const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
@@ -499,6 +500,32 @@ const Layout = ({ children }: LayoutProps) => {
 
     loadTournamentBadge();
     const interval = setInterval(loadTournamentBadge, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, [isAuthenticated, user]);
+
+  // Load team tournament badge status
+  useEffect(() => {
+    const loadTeamTournamentBadge = async () => {
+      if (!isAuthenticated || !user) {
+        setTeamTournamentBadge(null);
+        return;
+      }
+      try {
+        const data = await teamTournamentAPI.getTeamTournamentBadge();
+        setTeamTournamentBadge(data.badge || null);
+      } catch (error: any) {
+        // Silently handle errors (tournament might not exist)
+        if (error?.response?.status === 404 || error?.response?.status === 401) {
+          setTeamTournamentBadge(null);
+          return;
+        }
+        console.error('Error loading team tournament badge:', error);
+        setTeamTournamentBadge(null);
+      }
+    };
+
+    loadTeamTournamentBadge();
+    const interval = setInterval(loadTeamTournamentBadge, 30000); // Every 30 seconds
     return () => clearInterval(interval);
   }, [isAuthenticated, user]);
 
@@ -1271,7 +1298,17 @@ const Layout = ({ children }: LayoutProps) => {
                 if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
               }}
             >
-              {leftSidebarOpen && <span>Team Tournament</span>}
+              {leftSidebarOpen && (
+                <span style={{ position: 'relative' }}>
+                  Team Tournament
+                  {teamTournamentBadge === 'register' && (
+                    <span className="team-tournament-badge">Register!</span>
+                  )}
+                  {teamTournamentBadge === 'you-are-up' && (
+                    <span className="team-tournament-badge">You are up!</span>
+                  )}
+                </span>
+              )}
             </Link>
           </div>
         </nav>

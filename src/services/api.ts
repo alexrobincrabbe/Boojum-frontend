@@ -562,9 +562,25 @@ export const tournamentAPI = {
 };
 
 export const teamTournamentAPI = {
+  getTeamTournamentBadge: async () => {
+    const response = await api.get('/team-tournament/badge/');
+    return response.data;
+  },
   getTeamTournamentData: async (type: 'active' | 'test' = 'active') => {
     const url = type === 'test' ? '/team-tournament/test_tournament/' : '/team-tournament/';
     const response = await api.get(url);
+    return response.data;
+  },
+  register: async (tournamentType: 'active' | 'test' = 'active') => {
+    const response = await api.post('/team-tournament/registration/', {
+      type: tournamentType,
+    });
+    return response.data;
+  },
+  unregister: async (tournamentType: 'active' | 'test' = 'active') => {
+    const response = await api.post('/team-tournament/unregistration/', {
+      type: tournamentType,
+    });
     return response.data;
   },
   getTeamMatchDetails: async (matchId: number) => {

@@ -103,7 +103,11 @@ const DoodlesGallery = ({ profileUrl, isEditMode = false, initialDoodleId }: Doo
                       style={{ cursor: 'pointer' }}
                     />
                     {doodle.comment_count !== undefined && (
-                      <CommentBadge doodleId={doodle.id} commentCount={doodle.comment_count} />
+                      <CommentBadge 
+                        doodleId={doodle.id} 
+                        commentCount={doodle.comment_count}
+                        onOpenComments={() => setSelectedDoodle(doodle)}
+                      />
                     )}
                   </>
                 )}
