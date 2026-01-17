@@ -14,6 +14,7 @@ interface ArchiveBoard {
   played: boolean;
   total_points: number;
   number_of_words: number;
+  board_size?: number; // Board size (4 for 4x4, 5 for 5x5)
 }
 
 export default function DailyBoardsArchivePage() {
@@ -101,6 +102,10 @@ export default function DailyBoardsArchivePage() {
                 <span className="archive-board-date">{formatDate(board.date)}</span>
               </div>
               <div className="archive-board-info">
+                <div className="archive-board-stat">
+                  <span className="stat-label">Size:</span>
+                  <span className="stat-value">{board.board_size || 4}x{board.board_size || 4}</span>
+                </div>
                 <div className="archive-board-stat">
                   <span className="stat-label">Total Points:</span>
                   <span className="stat-value">{board.total_points}</span>

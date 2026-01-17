@@ -57,16 +57,11 @@ export function saveGameState(
 ): void {
   if (!gameRoundId || !username) {
     // No game round ID or username means no active game - don't save
-    console.log('[saveGameState] Not saving: missing gameRoundId or username', {
-      gameRoundId,
-      username,
-    });
     return;
   }
 
   if (!isLocalStorageAvailable()) {
     // localStorage not available (e.g., incognito mode) - skip saving
-    console.log('[saveGameState] Not saving: localStorage not available');
     return;
   }
 
@@ -86,14 +81,6 @@ export function saveGameState(
 
     const storageKey = getStorageKey(roomId, username);
     localStorage.setItem(storageKey, JSON.stringify(stored));
-    console.log('[saveGameState] Saved to localStorage:', {
-      storageKey,
-      gameRoundId,
-      roomId,
-      username,
-      totalScore: playerState.totalScore,
-      wordsFoundCount: playerState.wordsFound.size,
-    });
   } catch (error) {
     console.error('Error saving game state to localStorage:', error);
   }
@@ -107,48 +94,25 @@ export function loadGameState(
   username: string,
   currentGameRoundId: string | undefined
 ): StoredGameState | null {
-  console.log('[loadGameState] Attempting to load:', {
-    roomId,
-    username,
-    currentGameRoundId,
-  });
-
   if (!currentGameRoundId || !username) {
     // No game round ID or username means no active game - nothing to restore
-    console.log('[loadGameState] Missing gameRoundId or username');
     return null;
   }
 
   if (!isLocalStorageAvailable()) {
     // localStorage not available (e.g., incognito mode) - return null
-    console.log('[loadGameState] localStorage not available');
     return null;
   }
 
   try {
     const storageKey = getStorageKey(roomId, username);
     const stored = localStorage.getItem(storageKey);
-    console.log('[loadGameState] Checking localStorage:', {
-      storageKey,
-      hasStored: !!stored,
-    });
     
     if (!stored) {
-      console.log('[loadGameState] No stored state found');
       return null;
     }
 
     const parsed: StoredGameState = JSON.parse(stored);
-    console.log('[loadGameState] Parsed stored state:', {
-      storedGameRoundId: parsed.gameRoundId,
-      storedRoomId: parsed.roomId,
-      storedUsername: parsed.username,
-      storedTotalScore: parsed.totalScore,
-      storedWordsFoundCount: parsed.wordsFound.length,
-      matchesGameRoundId: parsed.gameRoundId === currentGameRoundId,
-      matchesRoomId: parsed.roomId === roomId,
-      matchesUsername: parsed.username === username,
-    });
 
     // Check if stored state matches current game round, room, and username
     if (
@@ -156,12 +120,10 @@ export function loadGameState(
       parsed.roomId === roomId &&
       parsed.username === username
     ) {
-      console.log('[loadGameState] State matches - returning restored state');
       return parsed;
     }
 
     // Game round or username doesn't match - clear old data for this username
-    console.log('[loadGameState] State does not match - clearing old data');
     clearGameState(roomId, username);
     return null;
   } catch (error) {

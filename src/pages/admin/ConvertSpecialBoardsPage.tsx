@@ -498,7 +498,7 @@ const ConvertSpecialBoardsPage = () => {
                   <div key={board.id} className={`board-card ${isSelected ? 'selected' : ''}`}>
                     <div className="board-card-header">
                       <div className="board-info">
-                        <h3>Board #{board.id}</h3>
+                        <h3>Board #{board.id} <span className={`board-size-label ${board.letters.length === 5 ? 'size-5x5' : ''}`}>{board.letters.length}x{board.letters.length}</span></h3>
                         {board.words && board.words.length > 0 && (
                           <p className="longest-word">
                             Longest word: <strong>{board.words.reduce((longest, word) => 

@@ -287,19 +287,6 @@ const Doodledum: React.FC = () => {
     try {
       const data = await minigamesAPI.getDoodledumFeed();
       const feedData = data.doodledum_feed || [];
-      console.log('Feed data loaded:', feedData.length, 'items');
-      // Debug: Check all doodle items
-      const allDoodles = feedData.filter((item: FeedItem) => item.is_doodle);
-      console.log('Doodle items in feed:', allDoodles.length);
-      if (allDoodles.length > 0) {
-        console.log('Sample doodle items:', allDoodles.slice(0, 3).map((item: FeedItem) => ({
-          has_doodle_id: !!item.doodle_id,
-          doodle_id: item.doodle_id,
-          comment_count: item.comment_count,
-          has_comment_count: 'comment_count' in item,
-          doodle_url: item.doodle_url?.substring(0, 50) + '...'
-        })));
-      }
       setFeed(feedData);
     } catch (error) {
       console.error('Failed to load feed:', error);
@@ -1099,7 +1086,6 @@ const Doodledum: React.FC = () => {
         doodleData = await authAPI.getDoodle(item.doodle_id);
       } else {
         // If no doodle_id, try to find doodle by image URL
-        console.log('No doodle_id available, trying to find doodle by URL...', item.doodle_url);
         doodleData = await authAPI.getDoodleByUrl(item.doodle_url);
       }
       

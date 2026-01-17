@@ -91,6 +91,25 @@
   color: var(--color-blue, #3b82f6);
   margin: 0 0 0.5rem 0;
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.board-size-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-yellow, #fbbf24);
+  background: rgba(251, 191, 36, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-yellow, #fbbf24);
+}
+
+.board-size-label.size-5x5 {
+  color: #ec4899;
+  background: rgba(236, 72, 153, 0.2);
+  border: 1px solid #ec4899;
 }
 
 .board-info p {

@@ -200,9 +200,7 @@ export function useChatWebSocket({
             setMessages((prev) => [...prev, newMessage]);
           } else if (data.event_type === "user_list_update") {
             // Update user list when received from server
-            console.log("[ChatWS] Received user_list_update:", data.user_list);
             if (data.user_list && Array.isArray(data.user_list)) {
-              console.log("[ChatWS] Updating user list with", data.user_list.length, "users");
               setUserList(data.user_list);
             } else {
               console.warn("[ChatWS] Invalid user_list_update data:", data);

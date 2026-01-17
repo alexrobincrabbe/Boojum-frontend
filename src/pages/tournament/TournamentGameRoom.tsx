@@ -225,7 +225,6 @@ export default function TournamentGameRoom() {
     
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
-      console.log('[Tournament Score] Game ended, submitting score');
       // Get recording data (tournament-specific)
       const recording = gameRecording.getRecording();
       

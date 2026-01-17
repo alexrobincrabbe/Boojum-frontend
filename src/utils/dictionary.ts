@@ -49,7 +49,6 @@ async function fetchCustomDictionaryDefinition(word: string, language: string = 
     }
     
     const url = `${djangoBaseUrl}/get-definition/`;
-    console.log('Fetching definition from:', url, 'for word:', normalizedWord, 'language:', language);
     
     const response = await fetch(url, {
       method: 'POST',
@@ -69,16 +68,14 @@ async function fetchCustomDictionaryDefinition(word: string, language: string = 
       return null;
     }
     
-    console.log('Dictionary API response:', data);
-    
     // Return definition if available (matching original: data.definition || data.error)
     if (data.definition) {
       return data.definition;
     }
     
-    // If there's an error, log it and return null
+    // If there's an error, return null
     if (data.error) {
-      console.log('Dictionary API error:', data.error);
+      // Error logged in response parsing above
     }
     return null;
   } catch (error) {

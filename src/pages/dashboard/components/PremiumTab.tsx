@@ -73,13 +73,9 @@ const PremiumTab = () => {
   const loadPremiumStatus = async () => {
     try {
       const status = await premiumAPI.getPremiumStatus();
-      console.log('Premium status response:', status);
       setPremiumStatus(status.is_premium);
       if (status.subscription) {
-        console.log('Subscription info:', status.subscription);
         setSubscriptionInfo(status.subscription);
-      } else {
-        console.log('No subscription info in response');
       }
       // Update user context if available (to keep it in sync)
       if (status.is_premium !== user?.is_premium) {

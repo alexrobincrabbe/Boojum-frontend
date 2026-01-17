@@ -190,6 +190,9 @@ const TimelessBoardWordsPage = () => {
     
     setWordsData(newWordsData);
     setDraggedWord(null);
+    
+    // Show toast confirmation
+    toast.success(`"${word}" moved from Frequency ${sourceFreq} to Frequency ${targetFreq}`);
   };
 
   const handleDragEnd = () => {
@@ -262,6 +265,9 @@ const TimelessBoardWordsPage = () => {
           newWordsData[sourceFreq as keyof WordsData] = newWordsData[sourceFreq as keyof WordsData].filter(w => w !== word);
           newWordsData[targetFreq as keyof WordsData] = [...newWordsData[targetFreq as keyof WordsData], word].sort();
           setWordsData(newWordsData);
+          
+          // Show toast confirmation
+          toast.success(`"${word}" moved from Frequency ${sourceFreq} to Frequency ${targetFreq}`);
         }
       }
       

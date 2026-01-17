@@ -339,6 +339,17 @@
   font-style: normal !important;
 }
 
+.board-size {
+  color: var(--color-yellow);
+  font-size: 1.5rem;
+}
+
+.board-size .size-value {
+  color: var(--color-pink);
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
 .board-time-limit {
   color: var(--color-yellow);
   font-size: 1.5rem;

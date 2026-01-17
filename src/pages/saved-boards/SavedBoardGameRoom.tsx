@@ -159,7 +159,6 @@ export default function SavedBoardGameRoom() {
     
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
-      console.log('[Score] Game ended, submitting score');
       submitFinalScore(sendJson);
     }
     

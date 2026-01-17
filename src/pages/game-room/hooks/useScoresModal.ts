@@ -49,7 +49,6 @@ export function useScoresModal(
             if (unicorn) {
               // Normalize the word before lookup (trim whitespace only - API handles case)
               const normalizedWord = unicorn.trim();
-              console.log(`[Unicorn] Looking up definition for word: "${unicorn}" (normalized: "${normalizedWord}", length: ${normalizedWord.length})`);
               
               // Check for any non-printable characters
               const hasNonPrintable = /[\x00-\x1F\x7F-\x9F]/.test(normalizedWord);
@@ -58,8 +57,6 @@ export function useScoresModal(
               }
               
               const definition = await fetchDefinition(normalizedWord);
-              
-              console.log(`[Unicorn] Definition result for "${unicorn}":`, definition);
               
               // Only show definition if it's found (not the "not found" message)
               const definitionNotFound = definition === 'Definition not found.' || definition.toLowerCase().includes('definition not found');

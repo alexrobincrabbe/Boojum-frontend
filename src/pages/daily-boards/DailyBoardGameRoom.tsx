@@ -91,12 +91,6 @@ export default function DailyBoardGameRoom() {
     return `${wsBaseUrl}/ws/dailyboard/play/${dailyBoardId}/${queryString}`;
   }, [dailyBoardId, fromArchive]);
   
-  // Debug: log the WebSocket URL
-  useEffect(() => {
-    if (wsUrl) {
-      console.log('[DailyBoardGameRoom] WebSocket URL:', wsUrl);
-    }
-  }, [wsUrl]);
 
   // GAME WS - using custom URL for daily boards
   const {
@@ -203,7 +197,6 @@ export default function DailyBoardGameRoom() {
     
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
-      console.log('[Score] Game ended, submitting score');
       submitFinalScore(sendJson);
     }
     

@@ -38,8 +38,6 @@ const NewPostPage = () => {
   const quillContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('NewPostPage useEffect - loading:', loading, 'isAuthenticated:', isAuthenticated);
-    
     // Wait for auth to finish loading before checking
     if (loading) {
       return;
@@ -47,12 +45,9 @@ const NewPostPage = () => {
 
     // Only redirect if we're sure the user is not authenticated
     if (!isAuthenticated) {
-      console.log('User not authenticated, redirecting to login');
       navigate('/login');
       return;
     }
-    
-    console.log('User authenticated, initializing editor');
 
     // Initialize Quill editor
     const initQuill = async () => {

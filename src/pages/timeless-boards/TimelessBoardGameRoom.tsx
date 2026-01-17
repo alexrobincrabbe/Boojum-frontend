@@ -143,8 +143,6 @@ const showPerfect = (elementId: string) => {
     // Store handlers for cleanup
     (el as any).__arrowUpdateHandlers = (el as any).__arrowUpdateHandlers || [];
     (el as any).__arrowUpdateHandlers.push(handleUpdate);
-    
-    console.log('[addLoopingArrows] Created arrows with fixed positioning');
   }, delay);
 };
 
@@ -543,7 +541,6 @@ export default function TimelessBoardGameRoom() {
       const letterContainer = letterEl as HTMLElement;
       const letterDiv = letterContainer.querySelector('.letValue') as HTMLElement;
       if (!letterDiv) {
-        console.log(`[animateLetters] Letter ${index}: No letterDiv found`);
         return;
       }
       
@@ -555,36 +552,12 @@ export default function TimelessBoardGameRoom() {
         const targetRect = targetElement.getBoundingClientRect();
         
         if (!letterRect || !targetRect) {
-          console.log(`[animateLetters] Letter ${index}: Missing rects`, { letterRect, targetRect });
           return;
         }
         
         // Get scroll offsets - matches original
         const scrollX = window.scrollX || window.pageXOffset;
         const scrollY = window.scrollY || window.pageYOffset;
-        
-        // Log scroll and rect info
-        console.log(`[animateLetters] Letter ${index} - Before calculation:`, {
-          letterText: letterDiv.textContent?.trim(),
-          letterRect: {
-            left: letterRect.left,
-            top: letterRect.top,
-            right: letterRect.right,
-            bottom: letterRect.bottom,
-            width: letterRect.width,
-            height: letterRect.height
-          },
-          targetRect: {
-            left: targetRect.left,
-            top: targetRect.top,
-            right: targetRect.right,
-            bottom: targetRect.bottom,
-            width: targetRect.width,
-            height: targetRect.height
-          },
-          scroll: { scrollX, scrollY },
-          viewport: { width: window.innerWidth, height: window.innerHeight }
-        });
         
         // Calculate absolute positions including scroll - matches original
         const letterX = letterRect.left + scrollX;
@@ -600,20 +573,6 @@ export default function TimelessBoardGameRoom() {
         const letterFontSize = parseFloat(getComputedStyle(letterDiv).fontSize);
         const targetFontSize = parseFloat(getComputedStyle(targetElement).fontSize);
         const scaleFactor = targetFontSize / letterFontSize;
-        
-        console.log(`[animateLetters] Letter ${index} - Calculated positions:`, {
-          letterX,
-          letterY,
-          targetX,
-          targetY,
-          dx,
-          dy,
-          letterFontSize,
-          targetFontSize,
-          scaleFactor,
-          letterContainerRect: letterContainer.getBoundingClientRect(),
-          letterDivRect: letterRect
-        });
         
         // Clone the letter element - matches original
         // Create a fresh span element instead of cloning to avoid inherited styles
@@ -658,51 +617,14 @@ export default function TimelessBoardGameRoom() {
         clone.classList.add('letter-animate');
         document.body.appendChild(clone);
         
-        // Log after appending to DOM
-        const cloneRect = clone.getBoundingClientRect();
-        console.log(`[animateLetters] Letter ${index} - After appending clone:`, {
-          cloneStyle: {
-            position: clone.style.position,
-            left: clone.style.left,
-            top: clone.style.top,
-            fontSize: clone.style.fontSize,
-            opacity: clone.style.opacity
-          },
-          cloneRect: {
-            left: cloneRect.left,
-            top: cloneRect.top,
-            width: cloneRect.width,
-            height: cloneRect.height
-          },
-          expectedPosition: { letterX, letterY },
-          actualPosition: { left: cloneRect.left, top: cloneRect.top },
-          difference: {
-            x: cloneRect.left - letterRect.left,
-            y: cloneRect.top - letterRect.top
-          }
-        });
-        
         // Force reflow and start animation - matches original
         setTimeout(() => {
           void clone.offsetWidth; // Force reflow
           clone.classList.add('start');
-          
-          // Log after starting animation
-          const cloneRectAfter = clone.getBoundingClientRect();
-          console.log(`[animateLetters] Letter ${index} - After starting animation:`, {
-            cloneRect: {
-              left: cloneRectAfter.left,
-              top: cloneRectAfter.top,
-              width: cloneRectAfter.width,
-              height: cloneRectAfter.height
-            },
-            hasStartClass: clone.classList.contains('start')
-          });
         }, delay);
         
         // Remove after animation - matches original
         clone.addEventListener('animationend', () => {
-          console.log(`[animateLetters] Letter ${index} - Animation ended`);
           clone.remove();
         });
       }, delay);
@@ -714,7 +636,6 @@ export default function TimelessBoardGameRoom() {
     // Get the word element in the word list
     const wordListElement = document.getElementById(`word-length-${word.length >= 9 ? '9+' : word.length}`);
     if (!wordListElement) {
-      console.log('[animateLettersToWord] Word list element not found');
       return;
     }
     
@@ -731,14 +652,12 @@ export default function TimelessBoardGameRoom() {
       }) as HTMLElement | undefined;
       
       if (!targetWordElement) {
-        console.log('[animateLettersToWord] Target word element not found for word:', word);
         return;
       }
       
       // Get selected letters from the board - look for letters with tile classes
       const boardElement = document.getElementById('board');
       if (!boardElement) {
-        console.log('[animateLettersToWord] Board element not found');
         return;
       }
       
@@ -806,7 +725,6 @@ export default function TimelessBoardGameRoom() {
           }
         }
         
-        console.log('[animateLettersToWord] Could not find valid path for word:', word);
         return;
       }
       
@@ -1109,10 +1027,8 @@ export default function TimelessBoardGameRoom() {
     
     // After initial glow animation (1100ms), check if we should switch to pulsating glow
     setTimeout(() => {
-      console.log('[handleHintClick] Initial glow timeout fired, API succeeded:', hintApiSucceededRef.current);
       // Only remove initial glow if API succeeded and we're adding pulsating glow
       if (hintApiSucceededRef.current) {
-        console.log('[handleHintClick] Switching to pulsating glow');
         setHintGlowInitial(false);
         // Force restart pulsating animation
         setHintActiveGlow(false);
@@ -1121,8 +1037,6 @@ export default function TimelessBoardGameRoom() {
             setHintActiveGlow(true);
           });
         });
-      } else {
-        console.log('[handleHintClick] API not succeeded yet, keeping initial glow');
       }
       // If API hasn't succeeded yet, keep the initial glow (it maintains base level glow)
     }, 1100);
@@ -1146,7 +1060,6 @@ export default function TimelessBoardGameRoom() {
       
       if (elapsedTime >= animationDuration) {
         // Animation has completed (enough time has passed), switch immediately
-        console.log('[handleHintClick] Animation completed, switching to pulsating glow immediately');
         setHintGlowInitial(false);
         // Force restart pulsating animation
         setHintActiveGlow(false);
@@ -1158,11 +1071,9 @@ export default function TimelessBoardGameRoom() {
       } else {
         // Animation still running, calculate remaining time and switch when it completes
         const remainingTime = animationDuration - elapsedTime;
-        console.log('[handleHintClick] Animation still running, will switch in', remainingTime, 'ms');
         setTimeout(() => {
           // Use a ref check to avoid stale closure
           if (hintApiSucceededRef.current) {
-            console.log('[handleHintClick] Switching to pulsating glow after animation completes');
             setHintGlowInitial(false);
             // Force restart pulsating animation
             setHintActiveGlow(false);

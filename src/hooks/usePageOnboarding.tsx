@@ -57,18 +57,8 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
     const autoStartChanged = autoStart && !prevAutoStartRef.current;
     prevAutoStartRef.current = autoStart;
     
-    console.log(`[Onboarding ${pageKey}] useEffect:`, {
-      autoStart,
-      completed,
-      stepsLength: currentSteps.length,
-      run,
-      hasAttemptedStart: hasAttemptedStartRef.current,
-      autoStartChanged
-    });
-    
     // Reset hasAttemptedStart only when autoStart changes from false to true
     if (autoStartChanged && hasAttemptedStartRef.current) {
-      console.log(`[Onboarding ${pageKey}] Resetting hasAttemptedStart`);
       hasAttemptedStartRef.current = false;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -79,7 +69,6 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
     
     // Only attempt to start when conditions are met
     if (autoStart && !completed && currentSteps.length > 0 && !run && !hasAttemptedStartRef.current) {
-      console.log(`[Onboarding ${pageKey}] Attempting to start tour`);
       hasAttemptedStartRef.current = true;
       
       // Clear any existing timeout
@@ -104,10 +93,7 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
             ? document.querySelector(steps[0].target)
             : steps[0].target;
           
-          console.log(`[Onboarding ${pageKey}] Attempt ${attempt} - First step target:`, steps[0].target, 'Found:', !!firstStepTarget);
-          
           if (firstStepTarget) {
-            console.log(`[Onboarding ${pageKey}] Starting tour!`);
             currentStepIndexRef.current = 0;
             setStepIndex(0);
             setRun(true);
@@ -115,7 +101,6 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
           } else if (attempt < 5) {
             // Retry up to 5 times with increasing delays
             const delay = attempt * 500; // 500ms, 1000ms, 1500ms, 2000ms, 2500ms
-            console.log(`[Onboarding ${pageKey}] Target not found, retrying in ${delay}ms...`);
             timeoutRef.current = setTimeout(() => {
               tryStart(attempt + 1);
             }, delay);
@@ -168,11 +153,6 @@ export const usePageOnboarding = ({ steps, pageKey, autoStart = false }: UsePage
         newIndex = Math.max(0, currentStepIndexRef.current - 1);
       } else {
         newIndex = index;
-      }
-      
-      // Log navigation actions for debugging
-      if (action === 'prev' || action === 'next') {
-        console.log(`[Onboarding ${pageKey}] step:after ${action} - index: ${index}, newIndex: ${newIndex}, currentRef: ${currentStepIndexRef.current}`);
       }
       
       // Only update if index actually changed (use ref to avoid stale closure)

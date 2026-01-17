@@ -240,7 +240,6 @@ const DoodleFullscreenModal = ({ doodle, onClose }: DoodleFullscreenModalProps) 
                 className="doodle-fullscreen-image"
               />
             )}
-            <div className="doodle-fullscreen-word blue-glow">{doodle.word}</div>
           </div>
 
           <div className="doodle-fullscreen-comments">

@@ -255,6 +255,9 @@ export default function DailyBoardPage() {
             {currentBoard.type === 'bonus' && (
               <span className="board-type bonus">Bonus Letters</span>
             )}
+            <span className="board-size">
+              Size: <span className="size-value">{currentBoard.board_size || (currentBoard.board_letters?.[0]?.length || 4)}x{currentBoard.board_size || (currentBoard.board_letters?.[0]?.length || 4)}</span>
+            </span>
             <span className="board-time-limit">
               Time Limit: <span className="time-value">{currentBoard.time_limit}s</span>
             </span>

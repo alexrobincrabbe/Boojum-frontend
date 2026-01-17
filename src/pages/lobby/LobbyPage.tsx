@@ -103,16 +103,6 @@ const LobbyPage = () => {
   // Auto-start when data is loaded and we have steps
   const autoStart = !loading && adminRooms.length > 0 && lobbySteps.length > 0;
   
-  // Debug logging
-  useEffect(() => {
-    console.log('[LobbyPage] Onboarding state:', {
-      loading,
-      adminRoomsCount: adminRooms.length,
-      autoStart,
-      stepsCount: lobbySteps.length,
-      steps: lobbySteps.map(s => s.target),
-    });
-  }, [loading, adminRooms.length, autoStart, lobbySteps.length]);
 
   const { JoyrideComponent, resetTour } = usePageOnboarding({
     steps: lobbySteps,
@@ -126,12 +116,10 @@ const LobbyPage = () => {
     // Also expose a function to check/clear localStorage
     (window as any).checkLobbyOnboarding = () => {
       const completed = localStorage.getItem('onboarding_lobby_completed');
-      console.log('Lobby onboarding completed status:', completed);
       return completed;
     };
     (window as any).clearLobbyOnboarding = () => {
       localStorage.removeItem('onboarding_lobby_completed');
-      console.log('Cleared lobby onboarding from localStorage');
       resetTour();
     };
     return () => {

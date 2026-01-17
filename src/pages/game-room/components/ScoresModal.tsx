@@ -84,21 +84,6 @@ export function ScoresModal({
     if (isOpen && scoresRef.current) {
       scoresRef.current.scrollTop = 0;
       
-      // Log the modal HTML once when it opens (for debugging column alignment)
-      if (!hasLoggedHTML.current && scoresRef.current) {
-        const table = scoresRef.current.querySelector('table');
-        if (table) {
-          const headerRow = table.querySelector('thead tr');
-          const dataRow = table.querySelector('tbody tr');
-          const headerCols = headerRow?.querySelectorAll('th').length || 0;
-          const dataCols = dataRow?.querySelectorAll('td').length || 0;
-          console.log('[ScoresModal] Column counts - Header:', headerCols, 'Data:', dataCols);
-          console.log('[ScoresModal] Header cells:', Array.from(headerRow?.querySelectorAll('th') || []).map(th => th.textContent?.trim() || th.className));
-          console.log('[ScoresModal] Data cells:', Array.from(dataRow?.querySelectorAll('td') || []).map(td => td.textContent?.trim().substring(0, 20) || td.className));
-          console.log('[ScoresModal] Full table HTML:', table.outerHTML);
-        }
-        hasLoggedHTML.current = true;
-      }
     } else if (!isOpen) {
       // Reset the log flag when modal closes so it logs again next time
       hasLoggedHTML.current = false;

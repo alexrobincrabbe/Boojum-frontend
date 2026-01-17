@@ -29,19 +29,12 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
   const initialCategorySettings = useRef<typeof categorySettings | null>(null);
 
   useEffect(() => {
-    console.log('[NotificationsTab] useEffect triggered', {
-      bundle,
-      isInitialMount: isInitialMount.current,
-      currentNotificationsEnabled: notificationsEnabled
-    });
-
     const initFromBundle = () => {
       if (bundle) {
         const fetchedEnabled = bundle.push_notifications_enabled;
         const fetchedCategories = bundle.push_notification_settings;
         
         if (typeof fetchedEnabled !== 'undefined') {
-          console.log('[NotificationsTab] Initializing enabled from bundle:', fetchedEnabled);
           if (isInitialMount.current || fetchedEnabled !== notificationsEnabled) {
             setNotificationsEnabled(fetchedEnabled);
             initialNotificationsEnabled.current = fetchedEnabled;
@@ -49,7 +42,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         }
         
         if (fetchedCategories) {
-          console.log('[NotificationsTab] Initializing categories from bundle:', fetchedCategories);
           if (isInitialMount.current || JSON.stringify(fetchedCategories) !== JSON.stringify(categorySettings)) {
             setCategorySettings(fetchedCategories);
             initialCategorySettings.current = fetchedCategories;
@@ -75,7 +67,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
     }
 
     const fetchData = async () => {
-      console.log('[NotificationsTab] Fetching dashboard data...');
       try {
         const data = await dashboardAPI.getPushNotificationsStatus();
         const fetchedEnabled = data.push_notifications_enabled ?? false;
@@ -86,7 +77,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
           shared_boards: false,
         };
         
-        console.log('[NotificationsTab] Fetched enabled value:', fetchedEnabled);
         setNotificationsEnabled(fetchedEnabled);
         initialNotificationsEnabled.current = fetchedEnabled;
         
@@ -97,7 +87,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
           shared_boards_enabled: fetchedCategories.shared_boards ?? false,
         };
         
-        console.log('[NotificationsTab] Fetched category settings:', categoryState);
         setCategorySettings(categoryState);
         initialCategorySettings.current = categoryState;
       } catch (error: any) {
@@ -139,16 +128,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
   };
 
   const handleToggle = async () => {
-    console.log('[NotificationsTab] Toggle clicked', {
-      currentValue: notificationsEnabled,
-      newValue: !notificationsEnabled,
-      isInitialMount: isInitialMount.current,
-      initialValue: initialNotificationsEnabled.current,
-      userAgent: navigator.userAgent,
-      serviceWorkerSupported: 'serviceWorker' in navigator,
-      pushManagerSupported: 'PushManager' in window,
-    });
-    
     if (notificationsEnabled === null) return;
 
     const newValue = !notificationsEnabled;
@@ -172,12 +151,9 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         let registration;
         try {
           registration = await navigator.serviceWorker.register('/sw.js');
-          console.log('[NotificationsTab] Service worker registered from /sw.js');
         } catch (error: any) {
-          console.log('[NotificationsTab] Failed to register from /sw.js, trying /static/sw.js', error);
           try {
             registration = await navigator.serviceWorker.register('/static/sw.js');
-            console.log('[NotificationsTab] Service worker registered from /static/sw.js');
           } catch (error2: any) {
             console.error('[NotificationsTab] Failed to register service worker from both locations', error2);
             setNotificationsEnabled(false); // Revert optimistic update
@@ -190,7 +166,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         let permission;
         try {
           permission = await Notification.requestPermission();
-          console.log('[NotificationsTab] Notification permission:', permission);
         } catch (error: any) {
           console.error('[NotificationsTab] Error requesting notification permission', error);
           setNotificationsEnabled(false); // Revert optimistic update
@@ -209,7 +184,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
         let vapidPublicKey;
         try {
           vapidPublicKey = await dashboardAPI.getVapidPublicKey();
-          console.log('[NotificationsTab] Got VAPID key');
         } catch (error: any) {
           console.error('[NotificationsTab] Error getting VAPID key', error);
           setNotificationsEnabled(false); // Revert optimistic update
@@ -224,7 +198,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
           });
-          console.log('[NotificationsTab] Subscription created:', subscription);
         } catch (error: any) {
           console.error('[NotificationsTab] Error creating subscription', error);
           setNotificationsEnabled(false); // Revert optimistic update
@@ -250,7 +223,6 @@ const NotificationsTab = ({ bundle }: NotificationsTabProps) => {
               auth: subscriptionJson.keys?.auth || '',
             },
           });
-          console.log('[NotificationsTab] Subscription saved to backend');
         } catch (error: any) {
           console.error('[NotificationsTab] Error saving subscription to backend', error);
           setNotificationsEnabled(false); // Revert optimistic update

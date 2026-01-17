@@ -831,20 +831,6 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     autoStart,
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log('[Boojumble] Onboarding state:', {
-      boojumblesCount: boojumbles.length,
-      autoStart,
-      stepsCount: boojumbleSteps.length,
-      steps: boojumbleSteps.map(s => s.target),
-      selectedLevel,
-      isReady,
-      boojumblesElement: document.querySelector('#boojumbles'),
-      boardElement: document.querySelector('[data-onboarding="boojumble-board"]'),
-    });
-  }, [boojumbles.length, autoStart, boojumbleSteps.length, selectedLevel, isReady]);
-
   if (boojumbles.length === 0) {
     return <div style={{ color: 'white', padding: '20px' }}>No boojumbles available.</div>;
   }
