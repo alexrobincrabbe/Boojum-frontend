@@ -9,6 +9,26 @@ interface ChatMessage {
   chatColor?: string;
   profileUrl?: string;
   messageType?: 'chat_message' | 'user_join_or_leave';
+  isBot?: boolean;
+  traceId?: string;
+  isBotTraceDecision?: boolean;
+  eventLabel?: string;
+}
+
+function TraceLink({ traceId }: { traceId: string }) {
+  return (
+    <>
+      {' '}
+      <a
+        className="chat-trace-link"
+        href={`/admin/bot-trace?message=${encodeURIComponent(traceId)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        trace
+      </a>
+    </>
+  );
 }
 
 interface ChatProps {
@@ -16,9 +36,10 @@ interface ChatProps {
   connectionState: 'connecting' | 'open' | 'reconnecting' | 'closed' | 'closing';
   onSendMessage: (message: string) => void;
   onReconnect?: () => void;
+  showTraceLinks?: boolean;
 }
 
-export function Chat({ messages, connectionState, onSendMessage, onReconnect }: ChatProps) {
+export function Chat({ messages, connectionState, onSendMessage, onReconnect, showTraceLinks }: ChatProps) {
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -165,25 +186,49 @@ export function Chat({ messages, connectionState, onSendMessage, onReconnect }: 
             ? msg.message 
             : filterProfanity(msg.message, profanityFilterEnabled);
 
+          const isDecisionLine = Boolean(msg.isBotTraceDecision);
+          const showTrace =
+            showTraceLinks &&
+            Boolean(msg.traceId) &&
+            msg.messageType !== 'user_join_or_leave' &&
+            (Boolean(msg.isBot) || isDecisionLine);
+
           return (
-            <div key={idx} className="chat-message">
-              <span className="chat-user" style={userStyle}>
-                {msg.user}:
+            <div
+              key={idx}
+              className={`chat-message${isDecisionLine ? ' chat-message-bot-trace-decision' : ''}`}
+            >
+              <span
+                className="chat-user"
+                style={isDecisionLine ? { color: '#A9A9A9', fontStyle: 'italic' } : userStyle}
+              >
+                {isDecisionLine && msg.eventLabel
+                  ? `${msg.eventLabel} · ${msg.user}:`
+                  : `${msg.user}:`}
               </span>
               {containsHTML ? (
-                <span 
+                <span
                   className="chat-text"
-                  style={isGuest ? { color: '#808080', fontStyle: 'italic' } : {}}
+                  style={
+                    isDecisionLine || isGuest
+                      ? { color: '#A9A9A9', fontStyle: 'italic' }
+                      : {}
+                  }
                   dangerouslySetInnerHTML={{ __html: displayMessage }}
                 />
               ) : (
-                <span 
+                <span
                   className="chat-text"
-                  style={isGuest ? { color: '#808080', fontStyle: 'italic' } : {}}
+                  style={
+                    isDecisionLine || isGuest
+                      ? { color: '#A9A9A9', fontStyle: 'italic' }
+                      : {}
+                  }
                 >
                   {displayMessage}
                 </span>
               )}
+              {showTrace && msg.traceId ? <TraceLink traceId={msg.traceId} /> : null}
             </div>
           );
         })}

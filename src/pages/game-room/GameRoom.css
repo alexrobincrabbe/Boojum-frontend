@@ -254,6 +254,13 @@ white-space: nowrap;
   margin-left: 0px;
 }
 
+.bot-player-indicator {
+  color: #888;
+  font-size: 0.85em;
+  font-style: italic;
+  font-weight: normal;
+}
+
 .user-list-username {
   display: inline-block;
   justify-content: center;
@@ -1236,6 +1243,23 @@ white-space: nowrap;
 .chat-text {
   color: #fff;
   flex: 1;
+}
+
+.chat-trace-link {
+  font-size: 0.75rem;
+  color: #7ce7c6;
+  text-decoration: underline;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chat-trace-link:hover {
+  color: #a8f5e0;
+}
+
+.chat-message-bot-trace-decision {
+  opacity: 0.92;
+  font-size: 0.9rem;
 }
 
 /* Color classes for HTML messages (unicorn, etc.) */

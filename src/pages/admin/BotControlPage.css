@@ -1,0 +1,251 @@
+.bot-control-page {
+  padding: 1.5rem 0 3rem;
+}
+
+.bot-control-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.bot-control-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #71bbe9;
+  text-decoration: none;
+}
+
+.bot-control-subtitle {
+  color: #aaa;
+  max-width: 42rem;
+}
+
+.bot-control-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .bot-control-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bot-list-panel {
+  border: 1px solid rgba(113, 187, 233, 0.25);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.bot-create-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(113, 187, 233, 0.15);
+  border: 1px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.bot-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bot-create-form input,
+.bot-create-form select,
+.bot-field input,
+.bot-field select,
+.bot-field textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #1a1a2e;
+  color: #eee;
+}
+
+.bot-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bot-list li button {
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem;
+  margin-bottom: 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ddd;
+  cursor: pointer;
+}
+
+.bot-list li button.active {
+  border-color: #71bbe9;
+  background: rgba(113, 187, 233, 0.12);
+}
+
+.bot-list-name {
+  display: block;
+  font-weight: 600;
+}
+
+.bot-list-room {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.bot-list-inactive {
+  font-size: 0.75rem;
+  color: #c96;
+}
+
+.bot-editor-panel {
+  border: 1px solid rgba(113, 187, 233, 0.25);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.bot-editor-empty {
+  color: #888;
+}
+
+.bot-editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.bot-editor-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bot-editor-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-save {
+  background: #33c15b;
+  color: #111;
+}
+
+.btn-delete {
+  background: rgba(235, 84, 151, 0.2);
+  color: #eb5497;
+  border: 1px solid #eb5497 !important;
+}
+
+.bot-field {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.bot-field > span:first-child {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.bot-field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bot-field-checkbox input {
+  width: auto;
+}
+
+.bot-skill-value {
+  margin-left: 0.5rem;
+  color: #71bbe9;
+}
+
+.bot-field-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: #9aa0a6;
+  line-height: 1.35;
+}
+
+.bot-schedule-mode {
+  margin-bottom: 0.5rem;
+}
+
+.bot-add-slot-btn {
+  margin: 0.75rem 0;
+  padding: 0.45rem 0.75rem;
+  background: rgba(113, 187, 233, 0.2);
+  border: 1px solid #71bbe9;
+  color: #71bbe9;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.bot-schedules h3 {
+  margin: 0 0 0.5rem;
+}
+
+.bot-schedule-slot {
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.bot-weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  width: 100%;
+}
+
+.bot-weekdays label {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-remove-slot {
+  background: transparent;
+  border: 1px solid #666;
+  color: #aaa;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bot-schedules-hint {
+  font-size: 0.85rem;
+  color: #888;
+}

@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { appendSessionTraceEvent } from "../../../utils/botTraceStore";
+import { normalizeTracePayload } from "../../../utils/botTraceTypes";
 
 interface ChatWebSocketMessage {
   event_type: string;
@@ -7,6 +9,12 @@ interface ChatWebSocketMessage {
   username?: string;
   chat_color?: string;
   profile_url?: string;
+  is_bot?: boolean;
+  trace_id?: string | null;
+  bot_name?: string;
+  responded?: boolean;
+  event_label?: string;
+  trace?: Record<string, unknown>;
   user_list?: Array<{
     username: string;
     profile_picture_url?: string;
@@ -22,13 +30,18 @@ export interface ChatMessage {
   chatColor?: string;
   profileUrl?: string;
   messageType?: "chat_message" | "user_join_or_leave";
+  isBot?: boolean;
+  traceId?: string;
+  isBotTraceDecision?: boolean;
+  eventLabel?: string;
 }
 
 interface UseChatWebSocketParams {
     roomId: string;
     token: string;
     isGuest: boolean;
-    guestName: string; // ✅ new
+    guestName: string;
+    showAdminTraces?: boolean;
   }
   
 type ConnectionState =
@@ -56,6 +69,7 @@ export function useChatWebSocket({
   roomId,
   token,
   isGuest,
+  showAdminTraces = false,
 }: UseChatWebSocketParams): UseChatWebSocketReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [connectionState, setConnectionState] =
@@ -122,7 +136,7 @@ export function useChatWebSocket({
     if (token) url.searchParams.set("token", token);
 
     return url.toString();
-  }, [roomId, isGuest, guestName, guestParam, token]);
+  }, [roomId, isGuest, guestName, guestParam, token, showAdminTraces]);
 
   // --- connect() uses a ref so scheduleReconnect can call it without lint errors
   const connectRef = useRef<() => void>(() => {});
@@ -196,8 +210,28 @@ export function useChatWebSocket({
               messageType: data.message_type as
                 | "chat_message"
                 | "user_join_or_leave",
+              isBot: Boolean(data.is_bot),
+              traceId: data.trace_id || undefined,
             };
             setMessages((prev) => [...prev, newMessage]);
+          } else if (showAdminTraces && data.event_type === "chat_trace" && data.trace) {
+            appendSessionTraceEvent(normalizeTracePayload(data.trace));
+          } else if (showAdminTraces && data.event_type === "bot_trace_decision" && data.trace_id) {
+            const botName = data.bot_name || "Bot";
+            const eventLabel = (data.event_label || "").trim();
+            setMessages((prev) => [
+              ...prev,
+              {
+                user: botName,
+                message: "(no response)",
+                timestamp: Date.now(),
+                messageType: "chat_message",
+                isBot: true,
+                isBotTraceDecision: true,
+                eventLabel: eventLabel || undefined,
+                traceId: data.trace_id,
+              },
+            ]);
           } else if (data.event_type === "user_list_update") {
             // Update user list when received from server
             if (data.user_list && Array.isArray(data.user_list)) {

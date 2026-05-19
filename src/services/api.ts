@@ -519,6 +519,10 @@ export const lobbyAPI = {
 };
 
 export const tournamentAPI = {
+  getRegistrationAlerts: async () => {
+    const response = await api.get('/tournament/registration-alerts/');
+    return response.data as { solo: boolean; team: boolean };
+  },
   getTournamentBadge: async () => {
     const response = await api.get('/tournament/badge/');
     return response.data;
@@ -770,6 +774,35 @@ export const adminAPI = {
   },
   updateTimelessBoardWordFrequencies: async (timelessBoardId: number, words: { '1': string[]; '5': string[]; '10': string[] }) => {
     const response = await api.post(`/admin/timeless-boards/${timelessBoardId}/words/update/`, { words });
+    return response.data;
+  },
+  listBots: async () => {
+    const response = await api.get('/admin/bots/');
+    return response.data;
+  },
+  createBot: async (data: {
+    display_name: string;
+    room_id: number;
+    personality_prompt?: string;
+    skill_level?: number;
+    words_per_minute?: number;
+    word_length_factor?: number;
+    schedules?: unknown[];
+    is_active?: boolean;
+  }) => {
+    const response = await api.post('/admin/bots/', data);
+    return response.data;
+  },
+  updateBot: async (botId: number, data: Record<string, unknown>) => {
+    const response = await api.patch(`/admin/bots/${botId}/`, data);
+    return response.data;
+  },
+  deleteBot: async (botId: number) => {
+    const response = await api.delete(`/admin/bots/${botId}/`);
+    return response.data;
+  },
+  getBotTrace: async (traceId: string) => {
+    const response = await api.get(`/admin/bots/traces/${encodeURIComponent(traceId)}/`);
     return response.data;
   },
 };

@@ -76,6 +76,7 @@ interface Profile {
     pool: number;
   }>;
   profile_section_order?: string[];
+  is_bot?: boolean;
 }
 
 const ProfilePage = () => {
@@ -587,6 +588,9 @@ const ProfilePage = () => {
             >
               {profile.display_name}
             </h1>
+            {profile.is_bot && (
+              <p className="profile-bot-notice">This player is an AI game bot.</p>
+            )}
           </div>
         </div>
       </div>

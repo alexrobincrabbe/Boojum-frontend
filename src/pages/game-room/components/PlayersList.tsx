@@ -33,6 +33,9 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
                 style={{ color: isGuest ? '#808080' : chatColor }}
               >
                 {player.username}
+                {player.isBot && (
+                  <span className="bot-player-indicator" title="AI player"> · bot</span>
+                )}
               </span>
             );
           })}
@@ -101,6 +104,9 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
                 style={{ color: profileUrl ? chatColor : '#808080' }}
               >
                 {player.username}
+                {player.isBot && (
+                  <span className="bot-player-indicator" title="AI player"> · bot</span>
+                )}
               </span>
             </div>
           );

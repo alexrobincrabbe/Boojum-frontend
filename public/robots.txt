@@ -1,0 +1,8 @@
+# https://www.boojumgames.com/robots.txt
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+
+Allow: /
+
+Sitemap: https://www.boojumgames.com/sitemap.xml

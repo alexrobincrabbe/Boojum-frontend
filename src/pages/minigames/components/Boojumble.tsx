@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
+import { notifyDailyChallengesUpdated } from '../../../utils/dailyChallengeStatus';
 import { playSound } from '../../../utils/sounds';
 import { usePageOnboarding } from '../../../hooks/usePageOnboarding';
 import './Boojumble.css';
@@ -695,6 +696,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
     });
     localStorage.setItem(`minigames-${currentBoojumble.id}`, JSON.stringify(flatLetters));
+    notifyDailyChallengesUpdated();
     // Note: words found are saved separately in checkAndInit function when words are checked
   };
 

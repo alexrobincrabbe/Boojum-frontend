@@ -73,6 +73,13 @@ const MinigamesPage = () => {
   const [showListView, setShowListView] = useState(false);
 
   useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'boojumble' || tab === 'cluejum') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     // Load played dates from localStorage
     const stored = localStorage.getItem('minigames-played');
     if (stored) {
@@ -175,6 +182,18 @@ const MinigamesPage = () => {
     // Switch to game view and navigate to selected date
     setShowListView(false);
     setSearchParams({ archive: 'true', date });
+  };
+
+  const handleTabChange = (tab: 'boojumble' | 'cluejum') => {
+    setActiveTab(tab);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('tab', tab);
+        return next;
+      },
+      { replace: true },
+    );
   };
 
 
@@ -284,13 +303,13 @@ const MinigamesPage = () => {
                 <div className="minigames-tabs">
                   <button
                     className={`minigame-tab ${activeTab === 'boojumble' ? 'active' : ''} boojumble-tab`}
-                    onClick={() => setActiveTab('boojumble')}
+                    onClick={() => handleTabChange('boojumble')}
                   >
                     Boojumbles
                   </button>
                   <button
                     className={`minigame-tab ${activeTab === 'cluejum' ? 'active' : ''} cluejum-tab`}
-                    onClick={() => setActiveTab('cluejum')}
+                    onClick={() => handleTabChange('cluejum')}
                   >
                     Cluejums
                   </button>

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { authAPI, lobbyAPI, dashboardAPI, forumAPI, tournamentAPI, teamTournamentAPI } from '../services/api';
-import { X, Bell, BarChart3, Pin, PinOff } from 'lucide-react';
+import { X, Bell, BarChart3, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Joyride from 'react-joyride';
 
@@ -43,6 +43,8 @@ const STATUS = {
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
 import { Username } from './Username';
+import { useDailyChallengeAlerts } from '../hooks/useDailyChallengeAlerts';
+import { useTournamentRegistrationAlerts } from '../hooks/useTournamentRegistrationAlerts';
 import './Layout.css';
 
 // Component to convert anchor tags to React Router Links
@@ -206,6 +208,10 @@ const Layout = ({ children }: LayoutProps) => {
   const [rightSidebarPinned, setRightSidebarPinned] = useState(false);
   const [isTabletOrDesktop, setIsTabletOrDesktop] = useState(window.innerWidth >= 768);
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
+  const { doodledumNeedsGuess, boojumbleUnsolved, cluejumUnsolved } = useDailyChallengeAlerts(
+    user?.username ?? null,
+  );
+  const { soloRegistrationOpen, teamRegistrationOpen } = useTournamentRegistrationAlerts();
   const { run, setRun } = useOnboarding();
   const [stepIndex, setStepIndex] = useState(0);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
@@ -551,19 +557,22 @@ const Layout = ({ children }: LayoutProps) => {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  // Load poll data
+  // Load poll data (polled so vote state stays in sync)
   useEffect(() => {
     const loadPoll = async () => {
       try {
         const data = await lobbyAPI.getLobbyData();
         setPoll(data.poll || null);
       } catch (error: any) {
-        // Silently handle errors - poll is optional
         console.error('Error loading poll:', error);
       }
     };
     loadPoll();
-  }, []);
+    const interval = setInterval(loadPoll, 15000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  const pollNeedsVote = Boolean(poll && isAuthenticated && poll.user_vote == null);
 
   // Load notifications
   useEffect(() => {
@@ -915,6 +924,68 @@ const Layout = ({ children }: LayoutProps) => {
     }
   };
 
+  const renderShortcuts = () => (
+    <>
+      <Link
+        to="/minigames?tab=boojumble"
+        className={`topbar-shortcut topbar-shortcut--boojumble${boojumbleUnsolved ? ' topbar-shortcut--active' : ''}`}
+        aria-label={boojumbleUnsolved ? 'Unsolved Boojumbles' : 'Boojumbles'}
+      >
+        <Grid3x3 size={20} />
+        <span className="topbar-shortcut-label">Boojumble</span>
+        {boojumbleUnsolved && <span className="topbar-shortcut-badge" />}
+      </Link>
+      <Link
+        to="/minigames?tab=cluejum"
+        className={`topbar-shortcut topbar-shortcut--cluejum${cluejumUnsolved ? ' topbar-shortcut--active' : ''}`}
+        aria-label={cluejumUnsolved ? 'Unsolved Cluejum' : 'Cluejum'}
+      >
+        <Lightbulb size={20} />
+        <span className="topbar-shortcut-label">Cluejum</span>
+        {cluejumUnsolved && <span className="topbar-shortcut-badge" />}
+      </Link>
+      <Link
+        to="/doodledum"
+        className={`topbar-shortcut topbar-shortcut--doodle${doodledumNeedsGuess ? ' topbar-shortcut--active' : ''}`}
+        aria-label={doodledumNeedsGuess ? 'Unsolved doodle to guess' : 'Doodledum'}
+      >
+        <Palette size={20} />
+        <span className="topbar-shortcut-label">Doodle</span>
+        {doodledumNeedsGuess && <span className="topbar-shortcut-badge" />}
+      </Link>
+      <Link
+        to="/tournament"
+        className={`topbar-shortcut topbar-shortcut--tournament${soloRegistrationOpen ? ' topbar-shortcut--active' : ''}`}
+        aria-label={soloRegistrationOpen ? 'Tournament registration open' : 'Tournament'}
+      >
+        <Trophy size={20} />
+        <span className="topbar-shortcut-label">Tournament</span>
+        {soloRegistrationOpen && <span className="topbar-shortcut-badge" />}
+      </Link>
+      <Link
+        to="/team-tournament"
+        className={`topbar-shortcut topbar-shortcut--tournament${teamRegistrationOpen ? ' topbar-shortcut--active' : ''}`}
+        aria-label={teamRegistrationOpen ? 'Team tournament registration open' : 'Team tournament'}
+      >
+        <Trophy size={20} />
+        <span className="topbar-shortcut-label">Team</span>
+        {teamRegistrationOpen && <span className="topbar-shortcut-badge" />}
+      </Link>
+      {poll && (
+        <button
+          type="button"
+          className={`topbar-shortcut topbar-shortcut--poll${pollNeedsVote ? ' topbar-shortcut--active' : ''}`}
+          onClick={() => setPollModalOpen(!pollModalOpen)}
+          aria-label={pollModalOpen ? 'Close poll' : pollNeedsVote ? 'Poll — vote now' : 'Open poll'}
+        >
+          <BarChart3 size={20} />
+          <span className="topbar-shortcut-label">Poll</span>
+          {pollNeedsVote && <span className="topbar-shortcut-badge" />}
+        </button>
+      )}
+    </>
+  );
+
   return (
     <div className="layout-container">
       {/* Top Bar */}
@@ -934,17 +1005,9 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
         </div>
         <div className="top-bar-right">
-          {/* Poll Button */}
-          {poll && (
-            <button
-              className="poll-button"
-              onClick={() => setPollModalOpen(!pollModalOpen)}
-              aria-label={pollModalOpen ? "Close poll" : "Open poll"}
-            >
-              <BarChart3 size={24} />
-              <span className="poll-button-label">Poll</span>
-            </button>
-          )}
+          <div className="topbar-shortcuts-group topbar-shortcuts-group--desktop">
+            {renderShortcuts()}
+          </div>
           {isAuthenticated && (
             <>
               {/* Mobile Users Online Button */}
@@ -1128,27 +1191,52 @@ const Layout = ({ children }: LayoutProps) => {
                 </button>
               )}
             </div>
-            <Link
-              to="/saved-boards"
-              className={`nav-link ${location.pathname.startsWith('/saved-boards') && !location.pathname.startsWith('/saved-boards/play') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Saved Boards</span>}
-            </Link>
+            {isAuthenticated && (
+              <Link
+                to="/saved-boards"
+                className={`nav-link ${location.pathname.startsWith('/saved-boards') && !location.pathname.startsWith('/saved-boards/play') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Saved Boards</span>}
+              </Link>
+            )}
           </div>
           <div className="nav-section" data-onboarding="daily-challenges">
             {leftSidebarOpen && <div className="nav-section-title">Daily Challenges</div>}
             <div className="nav-links-grid">
               <Link
-                to="/minigames"
-                className={`nav-link ${location.pathname.startsWith('/minigames') ? 'active' : ''}`}
+                to="/minigames?tab=boojumble"
+                className={`nav-link ${location.pathname.startsWith('/minigames') && (searchParams.get('tab') === 'boojumble' || !searchParams.get('tab')) ? 'active' : ''}`}
                 onClick={() => {
                   if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                 }}
               >
-                {leftSidebarOpen && <span>Mini-Games</span>}
+                {leftSidebarOpen && (
+                  <span style={{ position: 'relative' }}>
+                    Boojumbles
+                    {boojumbleUnsolved && (
+                      <span className="forum-badge">!</span>
+                    )}
+                  </span>
+                )}
+              </Link>
+              <Link
+                to="/minigames?tab=cluejum"
+                className={`nav-link ${location.pathname.startsWith('/minigames') && searchParams.get('tab') === 'cluejum' ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && (
+                  <span style={{ position: 'relative' }}>
+                    Cluejums
+                    {cluejumUnsolved && (
+                      <span className="forum-badge">!</span>
+                    )}
+                  </span>
+                )}
               </Link>
               <Link
                 to="/doodledum"
@@ -1157,7 +1245,14 @@ const Layout = ({ children }: LayoutProps) => {
                   if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
                 }}
               >
-                {leftSidebarOpen && <span>Doodledum</span>}
+                {leftSidebarOpen && (
+                  <span style={{ position: 'relative' }}>
+                    Doodledum
+                    {doodledumNeedsGuess && (
+                      <span className="forum-badge">!</span>
+                    )}
+                  </span>
+                )}
               </Link>
               <Link
                 to="/daily-boards"
@@ -1488,6 +1583,13 @@ const Layout = ({ children }: LayoutProps) => {
           }}
         />
       )}
+
+      {/* Mobile bottom bar — daily shortcuts */}
+      <nav className="mobile-bottom-bar" aria-label="Quick links">
+        <div className="mobile-bottom-bar-inner">
+          {renderShortcuts()}
+        </div>
+      </nav>
 
       {/* Poll Modal */}
       <PollModal

@@ -55,6 +55,8 @@ import CreateCustomGameboardPage from "./pages/admin/CreateCustomGameboardPage";
 import ConvertSpecialBoardsPage from "./pages/admin/ConvertSpecialBoardsPage";
 import TimelessBoardWordsPage from "./pages/admin/TimelessBoardWordsPage";
 import DeleteBoardsPage from "./pages/admin/DeleteBoardsPage";
+import BotControlPage from "./pages/admin/BotControlPage";
+import BotTracePage from "./pages/admin/BotTracePage";
 import CreateCustomRoomPage from "./pages/custom-room/CreateCustomRoomPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -227,6 +229,8 @@ function App() {
               <Route path="/admin/convert-special-boards" element={<ConvertSpecialBoardsPage />} />
               <Route path="/admin/timeless-board-words" element={<TimelessBoardWordsPage />} />
               <Route path="/admin/delete-boards" element={<DeleteBoardsPage />} />
+              <Route path="/admin/bot-control" element={<BotControlPage />} />
+              <Route path="/admin/bot-trace" element={<BotTracePage />} />
               <Route path="/custom-room" element={<CreateCustomRoomPage />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />

@@ -8,6 +8,7 @@
   position: relative;
   margin: 0;
   padding: 0;
+  --mobile-bottom-bar-height: 60px;
 }
 
 /* Top Bar */
@@ -129,37 +130,240 @@
 .top-bar-right {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
+  min-width: 0;
 }
 
-/* Poll Button */
-.poll-button {
+.topbar-shortcuts-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* Mobile bottom bar — shortcuts moved off top bar */
+.mobile-bottom-bar {
+  display: none;
+}
+
+.mobile-bottom-bar-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  width: 100%;
+  height: 100%;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+/* Topbar shortcut buttons — blue by default, themed colour when active */
+.topbar-shortcut {
+  position: relative;
+  flex-shrink: 0;
   background: transparent;
   border: 2px solid var(--color-blue);
   color: var(--color-blue);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  font-family: inherit;
+  line-height: 1;
 }
 
-.poll-button:hover {
+.topbar-shortcut:hover {
   background-color: var(--bg-blue-transparent);
-  transform: scale(1.05);
 }
 
-.poll-button-label {
-  font-size: 0.9rem;
+.topbar-shortcut-label {
+  font-size: 0.85rem;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+.topbar-shortcut-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(19, 19, 42, 0.95);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Active: Boojumble — green */
+.topbar-shortcut--boojumble.topbar-shortcut--active {
+  border-color: #33c15b;
+  color: #33c15b;
+}
+
+.topbar-shortcut--boojumble.topbar-shortcut--active:hover {
+  background-color: rgba(51, 193, 91, 0.15);
+}
+
+.topbar-shortcut--boojumble.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: #33c15b;
+  box-shadow: 0 0 6px rgba(51, 193, 91, 1), 0 0 10px rgba(51, 193, 91, 0.6);
+}
+
+/* Active: Cluejum — pink */
+.topbar-shortcut--cluejum.topbar-shortcut--active {
+  border-color: #eb5497;
+  color: #eb5497;
+}
+
+.topbar-shortcut--cluejum.topbar-shortcut--active:hover {
+  background-color: rgba(235, 84, 151, 0.15);
+}
+
+.topbar-shortcut--cluejum.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: #eb5497;
+  box-shadow: 0 0 6px rgba(235, 84, 151, 1), 0 0 10px rgba(235, 84, 151, 0.6);
+}
+
+/* Active: Doodle — yellow */
+.topbar-shortcut--doodle.topbar-shortcut--active {
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+}
+
+.topbar-shortcut--doodle.topbar-shortcut--active:hover {
+  background-color: rgba(245, 206, 69, 0.15);
+}
+
+.topbar-shortcut--doodle.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: var(--color-yellow);
+  box-shadow: 0 0 6px rgba(245, 206, 69, 1), 0 0 10px rgba(245, 206, 69, 0.6);
+}
+
+/* Active: Tournament — purple */
+.topbar-shortcut--tournament.topbar-shortcut--active {
+  border-color: var(--color-purple);
+  color: var(--color-purple);
+}
+
+.topbar-shortcut--tournament.topbar-shortcut--active:hover {
+  background-color: var(--bg-purple-transparent);
+}
+
+.topbar-shortcut--tournament.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: var(--color-purple);
+  box-shadow: 0 0 6px rgba(94, 76, 176, 1), 0 0 10px rgba(94, 76, 176, 0.6);
+}
+
+/* Active: Poll — purple */
+.topbar-shortcut--poll.topbar-shortcut--active {
+  border-color: var(--color-purple);
+  color: var(--color-purple);
+}
+
+.topbar-shortcut--poll.topbar-shortcut--active:hover {
+  background-color: var(--bg-purple-transparent);
+}
+
+.topbar-shortcut--poll.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: var(--color-purple);
+  box-shadow: 0 0 6px rgba(94, 76, 176, 1), 0 0 10px rgba(94, 76, 176, 0.6);
 }
 
 @media (max-width: 768px) {
-  .poll-button-label {
-    display: none;
+  .top-bar {
+    padding: 0 10px;
+  }
+
+  .top-bar-right {
+    gap: 8px;
+  }
+
+  .topbar-shortcuts-group--desktop {
+    display: none !important;
+  }
+
+  .mobile-bottom-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-bottom-bar-height);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    background-color: rgba(19, 19, 42, 0.98);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid var(--color-blue);
+    box-shadow: 0 -4px 12px var(--bg-blue-30);
+    z-index: 1003;
+    align-items: center;
+  }
+
+  .mobile-bottom-bar .topbar-shortcut {
+    flex: 1;
+    min-width: 0;
+    max-width: 72px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 2px 4px;
+    border-width: 1.5px;
+    border-radius: 8px;
+    margin: 4px 0;
+  }
+
+  .mobile-bottom-bar .topbar-shortcut svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+  }
+
+  .mobile-bottom-bar .topbar-shortcut-label {
+    display: block;
+    font-size: 0.58rem;
+    font-weight: 600;
+    line-height: 1.1;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .mobile-bottom-bar .topbar-shortcut-badge {
+    width: 8px;
+    height: 8px;
+    top: 2px;
+    right: calc(50% - 18px);
+  }
+
+  .main-content {
+    padding-bottom: calc(var(--mobile-bottom-bar-height) + env(safe-area-inset-bottom, 0));
+  }
+
+  .sidebar-overlay {
+    bottom: calc(var(--mobile-bottom-bar-height) + env(safe-area-inset-bottom, 0));
+  }
+
+  .left-sidebar,
+  .right-sidebar {
+    bottom: calc(var(--mobile-bottom-bar-height) + env(safe-area-inset-bottom, 0));
+    height: auto;
+  }
+
+  .notification-button,
+  .profile-picture-button-top {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .mobile-users-button {
+    padding: 6px 8px;
+    font-size: 0.8rem;
   }
 }
 

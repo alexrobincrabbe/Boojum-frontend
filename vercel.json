@@ -1,5 +1,23 @@
 {
-    "rewrites": [
-      { "source": "/api/(.*)", "destination": "/api/$1" }, 
-      { "source": "/(.*)", "destination": "/index.html" }     ]
-  }
+  "redirects": [
+    {
+      "source": "/rooms",
+      "destination": "/lobby",
+      "permanent": true
+    },
+    {
+      "source": "/rooms/",
+      "destination": "/lobby",
+      "permanent": true
+    },
+    {
+      "source": "/rooms/((?!guest)[^/]+)/?",
+      "destination": "/rooms/guest/$1/",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

@@ -77,6 +77,7 @@ export interface Player {
   score: number;
   isReady: boolean;
   isConnected: boolean;
+  isBot?: boolean;
 }
 
 export interface ScoreUpdate {

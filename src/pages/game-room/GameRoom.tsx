@@ -77,7 +77,8 @@ export default function GameRoom() {
     roomId: roomId || "",
     token,
     isGuest,
-    guestName, // ✅ pass it in
+    guestName,
+    showAdminTraces: Boolean(user?.is_superuser),
   });
 
   const {
@@ -348,6 +349,7 @@ export default function GameRoom() {
                 connectionState={chatConnectionState}
                 onSendMessage={sendChatMessage}
                 onReconnect={reconnectChat}
+                showTraceLinks={Boolean(user?.is_superuser)}
               />
             </div>
           </div>
@@ -371,6 +373,7 @@ export default function GameRoom() {
                   connectionState={chatConnectionState}
                   onSendMessage={sendChatMessage}
                   onReconnect={reconnectChat}
+                  showTraceLinks={Boolean(user?.is_superuser)}
                 />
                 <button
                   className={`chat-mobile-toggle chat-mobile-toggle-bottom ${hasNewMessages ? 'has-new-messages' : ''}`}

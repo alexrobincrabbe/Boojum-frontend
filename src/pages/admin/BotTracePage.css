@@ -1,0 +1,327 @@
+/* Bot trace dashboard — layout matches capstone TraceDashboardPage */
+
+.bot-trace-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  color: #e8eaed;
+}
+
+.bot-trace-page .play-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.bot-trace-page .page-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.bot-trace-page .muted {
+  color: #9aa0a6;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.bot-trace-error {
+  color: #f28b82;
+  margin: 0.5rem 0 0;
+}
+
+.bot-trace-page .layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .bot-trace-page .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bot-trace-page .card {
+  background: #1e2228;
+  border: 1px solid #3c4043;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.bot-trace-page .card-elevated {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.bot-trace-page .btn {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #5f6368;
+  background: #303134;
+  color: #e8eaed;
+  font-size: 0.875rem;
+}
+
+.bot-trace-page .btn-secondary {
+  background: #3c4043;
+}
+
+.bot-trace-page .btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  text-align: left;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+}
+
+.bot-trace-page .trace-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bot-trace-page .trace-open-btn-active {
+  border-color: #7ce7c6 !important;
+  color: #7ce7c6 !important;
+  background: rgba(124, 231, 198, 0.08) !important;
+}
+
+/* Graph + node details side by side */
+.bot-trace-page .trace-flow-layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .bot-trace-page .trace-flow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bot-trace-page .trace-diagram-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.bot-trace-page .trace-diagram-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.bot-trace-page .trace-right-panel {
+  min-width: 0;
+}
+
+.bot-trace-page .trace-right-panel h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+/* Diagram canvas: SVG edges under absolutely positioned node buttons */
+.bot-trace-page .trace-diagram-wrap {
+  position: relative;
+  width: 560px;
+  height: 1060px;
+  flex-shrink: 0;
+  background: #14171c;
+  border: 1px solid #3c4043;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bot-trace-page .trace-diagram-wrap-vertical {
+  /* capstone class hook — same as base wrap */
+}
+
+.bot-trace-page .trace-diagram-wrap-popup {
+  width: min(560px, calc(100vw - 3rem));
+  height: min(1060px, calc(100vh - 8rem));
+  max-width: 100%;
+}
+
+.bot-trace-page .trace-diagram-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: block;
+}
+
+.bot-trace-page .trace-flow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 560px;
+  height: 1060px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bot-trace-page .trace-flow-vertical {
+  /* nodes layer */
+}
+
+.bot-trace-page .trace-flow-node {
+  position: absolute;
+  width: 120px;
+  height: 36px;
+  margin: 0;
+  padding: 4px 6px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: center;
+  word-break: break-word;
+  overflow: hidden;
+  border: 1px solid #5f6368;
+  border-radius: 6px;
+  background: #2d3136;
+  color: #bdc1c6;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+}
+
+.bot-trace-page .trace-flow-node:hover {
+  border-color: #8ab4f8;
+}
+
+.bot-trace-page .trace-flow-node-active {
+  border-color: #7ce7c6;
+  color: #7ce7c6;
+  background: #1a2e28;
+}
+
+.bot-trace-page .trace-flow-node-selected {
+  border-color: #7ce7c6;
+  color: #fff;
+  background: #1a3d34;
+  box-shadow: 0 0 0 2px rgba(124, 231, 198, 0.35);
+}
+
+/* Inline diagram scrolls inside trace panel on small viewports */
+.bot-trace-page .trace-flow-layout > .trace-diagram-wrap:not(.trace-diagram-wrap-popup) {
+  max-width: 100%;
+  overflow: auto;
+}
+
+@media (max-width: 600px) {
+  .bot-trace-page .trace-diagram-wrap {
+    width: 100%;
+    max-width: 560px;
+    transform-origin: top left;
+  }
+}
+
+/* Node detail cards */
+.bot-trace-page .trace-node-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bot-trace-page .trace-node-card {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #3c4043;
+  border-radius: 6px;
+  background: #25282c;
+}
+
+.bot-trace-page .trace-node-card summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.bot-trace-page .trace-state-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 11px;
+  color: #9aa0a6;
+  margin: 10px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.bot-trace-page .trace-state-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.bot-trace-page .trace-state-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background: #1e2228;
+  border: 1px solid #3c4043;
+}
+
+.bot-trace-page .trace-state-row-changed {
+  background: #1a2e28;
+  border-color: #7ce7c6;
+}
+
+.bot-trace-page .trace-state-key {
+  font-weight: 600;
+  color: #e8eaed;
+  word-break: break-word;
+}
+
+.bot-trace-page .trace-state-before,
+.bot-trace-page .trace-state-after {
+  color: #bdc1c6;
+  word-break: break-word;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+}
+
+/* Expanded diagram modal */
+.bot-trace-page .trace-diagram-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.bot-trace-page .trace-diagram-modal-content {
+  background: #1e2228;
+  border: 1px solid #3c4043;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  max-width: min(600px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+}
+
+.bot-trace-page .trace-diagram-modal-content .trace-diagram-wrap {
+  margin: 0 auto;
+}

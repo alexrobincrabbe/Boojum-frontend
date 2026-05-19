@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { minigamesAPI, authAPI } from '../../../services/api';
+import { notifyDailyChallengesUpdated } from '../../../utils/dailyChallengeStatus';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { Loading } from '../../../components/Loading';
@@ -1128,6 +1129,7 @@ const Doodledum: React.FC = () => {
       const wordLength = activeDoodledum?.word?.length || 0;
       setGuessLetters(wordLength > 0 ? new Array(wordLength).fill('') : []);
       toast.success('Guess submitted!');
+      notifyDailyChallengesUpdated();
       await Promise.all([loadFeed(), checkDoodledum()]);
       // Only focus first input if not loading a doodle modal
       if (!isLoadingDoodle && wordLength > 0) {

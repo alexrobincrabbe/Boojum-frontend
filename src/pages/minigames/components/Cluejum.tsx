@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { minigamesAPI } from "../../../services/api";
+import { notifyDailyChallengesUpdated } from "../../../utils/dailyChallengeStatus";
 import "./Cluejum.css";
 import { getClue, getSuccessMessage, getTodayString, isLetterMatch } from "../utils/cluejum.utils";
 
@@ -152,7 +153,12 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
     return <div className="yellow" style={{ textAlign: "center" }}>No clues available today.</div>;
   }
 
-  const saveStage = (s: number) => localStorage.setItem(`wordClues-${today}`, String(s));
+  const saveStage = (s: number) => {
+    localStorage.setItem(`wordClues-${today}`, String(s));
+    if (s === 3) {
+      notifyDailyChallengesUpdated();
+    }
+  };
   const setScore = (s: number, score: number) =>
     localStorage.setItem(`cluejumScore-${today}-${s}`, String(score));
 

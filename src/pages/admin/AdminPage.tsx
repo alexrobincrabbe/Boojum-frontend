@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Settings, Gamepad2, Users, Plus, List, Trash2 } from 'lucide-react';
+import { Settings, Gamepad2, Users, Plus, List, Trash2, Bot } from 'lucide-react';
 import './AdminPage.css';
 
 const AdminPage = () => {
@@ -60,6 +60,13 @@ const AdminPage = () => {
                   <div className="link-description">Delete gameboards, daily boards, or timeless boards</div>
                 </div>
               </Link>
+              <Link to="/admin/bot-control" className="admin-link">
+                <Bot size={20} />
+                <div>
+                  <div className="link-title">Bot Control</div>
+                  <div className="link-description">Create AI players for live rooms, schedules, and personalities</div>
+                </div>
+              </Link>
             </div>
           </div>
 
@@ -92,4 +99,3 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
-
