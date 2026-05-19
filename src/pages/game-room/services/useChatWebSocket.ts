@@ -219,19 +219,17 @@ export function useChatWebSocket({
           } else if (showAdminTraces && data.event_type === "bot_trace_decision" && data.trace_id) {
             const botName = data.bot_name || "Bot";
             const eventLabel = (data.event_label || "").trim();
-            setMessages((prev) => [
-              ...prev,
-              {
-                user: botName,
-                message: "(no response)",
-                timestamp: Date.now(),
-                messageType: "chat_message",
-                isBot: true,
-                isBotTraceDecision: true,
-                eventLabel: eventLabel || undefined,
-                traceId: data.trace_id,
-              },
-            ]);
+            const decisionMessage: ChatMessage = {
+              user: botName,
+              message: "(no response)",
+              timestamp: Date.now(),
+              messageType: "chat_message",
+              isBot: true,
+              isBotTraceDecision: true,
+              eventLabel: eventLabel || undefined,
+              traceId: data.trace_id ?? undefined,
+            };
+            setMessages((prev) => [...prev, decisionMessage]);
           } else if (data.event_type === "user_list_update") {
             // Update user list when received from server
             if (data.user_list && Array.isArray(data.user_list)) {

@@ -190,7 +190,6 @@ export function Chat({ messages, connectionState, onSendMessage, onReconnect, sh
           const showTrace =
             showTraceLinks &&
             Boolean(msg.traceId) &&
-            msg.messageType !== 'user_join_or_leave' &&
             (Boolean(msg.isBot) || isDecisionLine);
 
           return (
