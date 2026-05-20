@@ -572,6 +572,16 @@ h2 {
   gap: 10px;
 }
 
+.bot-profile-back-link {
+  color: #71bbe9;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.bot-profile-back-link:hover {
+  text-decoration: underline;
+}
+
 .edit-profile-top-button {
   padding: 5px 10px;
   border: 3px solid #f5ce45;

@@ -224,6 +224,26 @@
   border: none;
 }
 
+.btn-edit-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e8f6ff;
+  background: rgba(113, 187, 233, 0.12);
+  border: 1px solid rgba(113, 187, 233, 0.55);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-edit-profile:hover {
+  background: rgba(113, 187, 233, 0.28);
+  border-color: #71bbe9;
+}
+
 .btn-save {
   background: #33c15b;
   color: #111;

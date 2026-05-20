@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { adminAPI } from '../../services/api';
 import { toast } from 'react-toastify';
-import { Bot, Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
+import { Bot, Plus, Trash2, ArrowLeft, Save, UserPen } from 'lucide-react';
 import './BotControlPage.css';
 
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -262,6 +262,14 @@ const BotControlPage = () => {
                   <div className="bot-editor-toolbar">
                     <h2>{selected.display_name}</h2>
                     <div className="bot-editor-actions">
+                      {selected.profile_url ? (
+                        <Link
+                          to={`/profile/${encodeURIComponent(selected.profile_url)}?edit=1`}
+                          className="btn-edit-profile"
+                        >
+                          <UserPen size={16} /> Edit profile
+                        </Link>
+                      ) : null}
                       <button
                         type="button"
                         className="btn-save"

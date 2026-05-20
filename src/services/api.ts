@@ -797,6 +797,16 @@ export const adminAPI = {
     const response = await api.patch(`/admin/bots/${botId}/`, data);
     return response.data;
   },
+  updateBotProfile: async (botId: number, profileData: FormData) => {
+    const response = await api.patch(`/admin/bots/${botId}/profile/`, profileData);
+    return response.data;
+  },
+  updateBotProfileSectionOrder: async (botId: number, sectionOrder: string[]) => {
+    const response = await api.patch(`/admin/bots/${botId}/profile/`, {
+      section_order: sectionOrder,
+    });
+    return response.data;
+  },
   deleteBot: async (botId: number) => {
     const response = await api.delete(`/admin/bots/${botId}/`);
     return response.data;

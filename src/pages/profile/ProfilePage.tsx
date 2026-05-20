@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   DndContext,
@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { authAPI } from '../../services/api';
+import { adminAPI, authAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { Loading } from '../../components/Loading';
 import HighScoreCharts from './HighScoreCharts';
@@ -77,6 +77,7 @@ interface Profile {
   }>;
   profile_section_order?: string[];
   is_bot?: boolean;
+  game_bot_id?: number | null;
 }
 
 const ProfilePage = () => {
@@ -156,6 +157,19 @@ const ProfilePage = () => {
     fetchProfile();
   }, [profileUrl]);
 
+  const isOwnProfile = profile ? currentUser?.id === profile.user.id : false;
+  const isAdminEditingBot = Boolean(
+    currentUser?.is_superuser && profile?.is_bot && profile?.game_bot_id
+  );
+  const canEditProfile = isOwnProfile || isAdminEditingBot;
+
+  useEffect(() => {
+    if (!profile || !canEditProfile) return;
+    if (searchParams.get('edit') === '1') {
+      setIsEditMode(true);
+    }
+  }, [profile, canEditProfile, searchParams]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -227,7 +241,10 @@ const ProfilePage = () => {
         formDataToSend.append('profile_picture', formData.profile_picture);
       }
       
-      const updatedProfile = await authAPI.updateProfile(formDataToSend);
+      const updatedProfile =
+        isAdminEditingBot && profile.game_bot_id
+          ? await adminAPI.updateBotProfile(profile.game_bot_id, formDataToSend)
+          : await authAPI.updateProfile(formDataToSend);
       setProfile(updatedProfile);
       setIsEditMode(false);
       setFormData(prev => ({ ...prev, profile_picture: null }));
@@ -275,9 +292,6 @@ const ProfilePage = () => {
       setPreviewImageUrl(null);
     }
   };
-
-  // Calculate isOwnProfile safely (before conditional returns)
-  const isOwnProfile = profile ? currentUser?.id === profile.user.id : false;
 
   // Onboarding steps for Profile page (must be before conditional returns)
   const profileSteps = useMemo(() => {
@@ -375,7 +389,7 @@ const ProfilePage = () => {
     });
 
     // Add edit mode customization step if it's the user's own profile and in edit mode
-    if (isOwnProfile && isEditMode) {
+    if (canEditProfile && isEditMode) {
       steps.push({
         target: '[data-onboarding="profile-edit-mode-info"]',
         content: (
@@ -396,7 +410,7 @@ const ProfilePage = () => {
     }
 
     return steps;
-  }, [profile, sectionOrder, isOwnProfile, isEditMode]);
+  }, [profile, sectionOrder, canEditProfile, isEditMode]);
 
   // Auto-start onboarding when profile is loaded
   const autoStart = !loading && profile !== null && profileSteps.length > 0;
@@ -432,7 +446,11 @@ const ProfilePage = () => {
       
       // Save the new order
       try {
-        await authAPI.updateProfileSectionOrder(newOrder);
+        if (isAdminEditingBot && profile.game_bot_id) {
+          await adminAPI.updateBotProfileSectionOrder(profile.game_bot_id, newOrder);
+        } else {
+          await authAPI.updateProfileSectionOrder(newOrder);
+        }
         toast.success('Section order updated');
       } catch (err: any) {
         const errorMsg = err.response?.data?.error || 'Failed to update section order';
@@ -539,15 +557,20 @@ const ProfilePage = () => {
   return (
     <div className="container-fluid profile-container">
       {/* Edit/Save/Cancel Buttons - Top Right */}
-      {isOwnProfile && (
+      {canEditProfile && (
         <div className="profile-actions-top-right">
+          {isAdminEditingBot && (
+            <Link to="/admin/bots" className="bot-profile-back-link">
+              ← Bot Control
+            </Link>
+          )}
           {!isEditMode ? (
             <button 
               onClick={() => setIsEditMode(true)}
               className="edit-profile-top-button"
               data-onboarding="edit-profile-button"
             >
-              Edit Profile
+              {isAdminEditingBot ? 'Edit Bot Profile' : 'Edit Profile'}
             </button>
           ) : (
             <div className="edit-mode-actions" data-onboarding="profile-edit-mode-info">
@@ -601,7 +624,7 @@ const ProfilePage = () => {
           <div id="profile-pic-container-top">
             <ProfilePicture 
               profilePictureUrl={previewImageUrl || profile.profile_picture_url}
-              isOwnProfile={isOwnProfile}
+              isOwnProfile={canEditProfile}
               isEditMode={isEditMode}
               onFileChange={handleFileChange}
               chatColor={profile.chat_color}
