@@ -419,6 +419,10 @@ export const lobbyAPI = {
     });
     return response.data;
   },
+  getOpenPlayBoardScores: async (boardId: number) => {
+    const response = await api.get(`/open-play/${boardId}/scores/`);
+    return response.data;
+  },
   getDailyBoardsArchive: async (page: number = 1, perPage: number = 20) => {
     const response = await api.get('/daily-boards/archive/', {
       params: { page, per_page: perPage },

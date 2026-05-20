@@ -2,25 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { lobbyAPI, dashboardAPI } from '../../services/api';
-import { Username } from '../../components/Username';
-import { ProfilePicture } from '../../components/ProfilePicture';
 import { Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { OpenPlayScoresTable, type OpenPlayScoreRow } from './OpenPlayScoresTable';
 import './OpenPlayPage.css';
 import '../daily-boards/DailyBoardPage.css';
-
-interface OpenPlayLeader {
-  player_id: number;
-  player_display_name: string;
-  player_profile_url: string;
-  player_profile_picture: string;
-  player_chat_color: string;
-  score: number;
-  best_word: string | null;
-  best_word_score: number | string | null;
-  number_of_words: number;
-  is_current_user: boolean;
-}
 
 interface OpenPlayBoardItem {
   id: number;
@@ -31,7 +17,7 @@ interface OpenPlayBoardItem {
   number_of_words: number;
   total_points: number;
   played: boolean;
-  leaders: OpenPlayLeader[];
+  leaders: OpenPlayScoreRow[];
   player_count: number;
 }
 
@@ -65,6 +51,9 @@ export default function OpenPlayPage() {
   const [newBonus, setNewBonus] = useState(false);
   const [creating, setCreating] = useState(false);
   const [showBestWord, setShowBestWord] = useState(true);
+  const [scoreboardBoard, setScoreboardBoard] = useState<OpenPlayBoardItem | null>(null);
+  const [fullScores, setFullScores] = useState<OpenPlayScoreRow[]>([]);
+  const [scoresLoading, setScoresLoading] = useState(false);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const fetchingRef = useRef(false);
@@ -166,6 +155,31 @@ export default function OpenPlayPage() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const openFullScoreboard = async (board: OpenPlayBoardItem) => {
+    setScoreboardBoard(board);
+    setFullScores([]);
+    setScoresLoading(true);
+    try {
+      const data = await lobbyAPI.getOpenPlayBoardScores(board.id);
+      setFullScores(data.scores || []);
+    } catch {
+      toast.error('Could not load scoreboard');
+      setScoreboardBoard(null);
+    } finally {
+      setScoresLoading(false);
+    }
+  };
+
+  const closeFullScoreboard = () => {
+    setScoreboardBoard(null);
+    setFullScores([]);
+  };
+
+  const handleToggleBestWord = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowBestWord((prev) => !prev);
   };
 
   const formatDate = (iso: string) => {
@@ -348,102 +362,25 @@ export default function OpenPlayPage() {
               </div>
 
               <div className="daily-board-scores-section">
-                {board.leaders.length > 0 ? (
-                  <div className="scores-table-container">
-                    <table className="scores-table">
-                      <thead>
-                        <tr>
-                          <th className="rank-col" />
-                          <th className="player-col" />
-                          <th className="score-col">Score</th>
-                          <th className="word-col">Best Word</th>
-                          <th className="words-col">Words</th>
-                          <th className="word-toggle-col">
-                            <button
-                              type="button"
-                              className={`toggle-header-btn ${showBestWord ? 'best-word-mode' : 'words-mode'}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowBestWord(!showBestWord);
-                              }}
-                            >
-                              {showBestWord ? 'Best Word' : 'Words'}
-                            </button>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {board.leaders.map((leader, index) => (
-                          <tr
-                            key={leader.player_id || index}
-                            className={leader.is_current_user ? 'current-user-score' : ''}
-                          >
-                            <td className="rank-col">{index + 1}</td>
-                            <td className="player-col">
-                              <div className="player-info">
-                                <ProfilePicture
-                                  profilePictureUrl={leader.player_profile_picture}
-                                  profileUrl={leader.player_profile_url}
-                                  chatColor={leader.player_chat_color}
-                                  size={40}
-                                  showBorder
-                                />
-                                <Username
-                                  username={leader.player_display_name}
-                                  profileUrl={leader.player_profile_url}
-                                  chatColor={leader.player_chat_color}
-                                />
-                              </div>
-                            </td>
-                            <td className="score-col">
-                              {leader.score} <span className="score-pts">pts</span>
-                            </td>
-                            <td className="word-col">
-                              <div className="best-word-container">
-                                {leader.best_word ? (
-                                  <span className="best-word-text">{leader.best_word}</span>
-                                ) : (
-                                  <span className="hidden-word">*****</span>
-                                )}
-                                {leader.best_word_score != null && leader.best_word_score !== '' && (
-                                  <span className="best-word-score">
-                                    {leader.best_word_score}
-                                    <span className="best-word-score-pts">pts</span>
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="words-col">{leader.number_of_words}</td>
-                            <td className="word-toggle-col">
-                              {showBestWord ? (
-                                <div className="best-word-container">
-                                  {leader.best_word ? (
-                                    <span className="best-word-text">{leader.best_word}</span>
-                                  ) : (
-                                    <span className="hidden-word">*****</span>
-                                  )}
-                                  {leader.best_word_score != null && leader.best_word_score !== '' && (
-                                    <span className="best-word-score">
-                                      {leader.best_word_score}
-                                      <span className="best-word-score-pts">pts</span>
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="words-count">{leader.number_of_words}</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="no-scores">No scores yet</div>
-                )}
+                <OpenPlayScoresTable
+                  scores={board.leaders}
+                  showBestWord={showBestWord}
+                  onToggleBestWord={handleToggleBestWord}
+                />
               </div>
 
               <div className="open-play-card-actions">
+                {board.player_count > 0 && (
+                  <button
+                    type="button"
+                    className="open-play-view-scores-btn"
+                    onClick={() => openFullScoreboard(board)}
+                  >
+                    {board.player_count > 3
+                      ? `Full scoreboard (${board.player_count})`
+                      : 'Full scoreboard'}
+                  </button>
+                )}
                 {board.played ? (
                   <span className="open-play-played-label">You played this board</span>
                 ) : (
@@ -464,6 +401,41 @@ export default function OpenPlayPage() {
           {loadingMore && <span>Loading more...</span>}
           {!hasMore && boards.length > 0 && <span>End of list</span>}
         </div>
+
+        {scoreboardBoard && (
+          <div className="open-play-modal-overlay" onClick={closeFullScoreboard}>
+            <div
+              className="open-play-modal open-play-scores-modal"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-labelledby="open-play-scores-title"
+            >
+              <h2 id="open-play-scores-title">
+                Board #{scoreboardBoard.id} — Full scoreboard
+              </h2>
+              <p className="open-play-scores-modal-meta">
+                {scoreboardBoard.player_count}{' '}
+                {scoreboardBoard.player_count === 1 ? 'player' : 'players'}
+              </p>
+              <div className="open-play-scores-modal-body">
+                {scoresLoading ? (
+                  <div className="loading-state">Loading scores...</div>
+                ) : (
+                  <OpenPlayScoresTable
+                    scores={fullScores}
+                    showBestWord={showBestWord}
+                    onToggleBestWord={handleToggleBestWord}
+                  />
+                )}
+              </div>
+              <div className="open-play-modal-actions">
+                <button type="button" onClick={closeFullScoreboard}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showNewGameModal && (
           <div className="open-play-modal-overlay" onClick={() => setShowNewGameModal(false)}>

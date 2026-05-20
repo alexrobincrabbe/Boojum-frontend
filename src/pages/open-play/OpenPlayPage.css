@@ -298,7 +298,30 @@
 
 .open-play-card-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.open-play-view-scores-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--color-yellow);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.open-play-view-scores-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #fff;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .open-play-played-label {
@@ -337,6 +360,27 @@
   padding: 24px;
   min-width: 280px;
   max-width: 90vw;
+}
+
+.open-play-scores-modal {
+  width: min(640px, 90vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.open-play-scores-modal-meta {
+  margin: -8px 0 16px;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 0.95rem;
+}
+
+.open-play-scores-modal-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  margin-bottom: 16px;
 }
 
 .open-play-modal h2 {
