@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { lobbyAPI, dashboardAPI } from '../../services/api';
 import { Username } from '../../components/Username';
 import { ProfilePicture } from '../../components/ProfilePicture';
+import { Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
 import './OpenPlayPage.css';
 import '../daily-boards/DailyBoardPage.css';
@@ -180,10 +181,12 @@ export default function OpenPlayPage() {
     return (
       <div className="open-play-page">
         <div className="open-play-container">
-          <h1 className="open-play-title">Open Play</h1>
-          <p className="open-play-login-prompt">
-            Please <Link to="/login">log in</Link> to play and create Open Play boards.
-          </p>
+          <div className="open-play-header">
+            <h1 className="open-play-title">Open Play</h1>
+            <p className="open-play-login-prompt">
+              Please <Link to="/login">log in</Link> to play and create Open Play boards.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -192,117 +195,112 @@ export default function OpenPlayPage() {
   return (
     <div className="open-play-page">
       <div className="open-play-container">
-        <div className="open-play-header-row">
+        <div className="open-play-header">
           <h1 className="open-play-title">Open Play</h1>
-          <button
-            type="button"
-            className="open-play-new-game-btn"
-            onClick={() => setShowNewGameModal(true)}
-          >
-            New Game
-          </button>
-        </div>
 
-        <p className="open-play-intro">
-          Start a New Game to create a board and play it, other players will be able to see the board on
-          this page and play it at any time. Or play an existing board created by another player below.
-        </p>
+          <p className="open-play-intro">
+            Start a New Game to create a board and play it, other players will be able to see the board on
+            this page and play it at any time. Or play an existing board created by another player below.
+          </p>
 
-        <div className="open-play-filters">
-          <select
-            value={timeLimitFilter}
-            onChange={(e) => setTimeLimitFilter(e.target.value)}
-            aria-label="Time limit filter"
-          >
-            <option value="">All timers</option>
-            <option value="90">90 seconds</option>
-            <option value="180">180 seconds</option>
-          </select>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            aria-label="Bonus filter"
-          >
-            <option value="">All rules</option>
-            <option value="normal">No bonus letters</option>
-            <option value="bonus">Bonus letters</option>
-          </select>
-          <select
-            value={playedFilter}
-            onChange={(e) => setPlayedFilter(e.target.value)}
-            aria-label="Played filter"
-          >
-            <option value="">All boards</option>
-            <option value="false">Not played by me</option>
-            <option value="true">Played by me</option>
-          </select>
-          <input
-            type="number"
-            min={0}
-            placeholder="Min words"
-            value={minWords}
-            onChange={(e) => setMinWords(e.target.value)}
-            className="open-play-filter-input"
-          />
-          <input
-            type="number"
-            min={0}
-            placeholder="Min points"
-            value={minPoints}
-            onChange={(e) => setMinPoints(e.target.value)}
-            className="open-play-filter-input"
-          />
-          <button type="button" className="open-play-apply-filters" onClick={() => fetchBoards(null, false)}>
-            Apply filters
-          </button>
-        </div>
-
-        <div className="open-play-user-filter">
-          <input
-            type="text"
-            placeholder="Filter by player who played..."
-            value={filterUserId ? filterUserLabel : userSearchQuery}
-            onChange={(e) => {
-              setFilterUserId(null);
-              setFilterUserLabel('');
-              setUserSearchQuery(e.target.value);
-            }}
-            className="open-play-user-search"
-          />
-          {filterUserId && (
-            <button
-              type="button"
-              className="open-play-clear-user"
-              onClick={() => {
-                setFilterUserId(null);
-                setFilterUserLabel('');
-                setUserSearchQuery('');
-                fetchBoards(null, false);
-              }}
+          <div className="open-play-filters">
+          <div className="open-play-filters-stack">
+            <select
+              value={timeLimitFilter}
+              onChange={(e) => setTimeLimitFilter(e.target.value)}
+              aria-label="Time limit filter"
             >
-              Clear player
-            </button>
-          )}
-          {userSearchResults.length > 0 && !filterUserId && (
-            <ul className="open-play-user-suggestions">
-              {userSearchResults.map((u) => (
-                <li key={u.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFilterUserId(u.id);
-                      setFilterUserLabel(u.display_name);
-                      setUserSearchQuery('');
-                      setUserSearchResults([]);
-                      setTimeout(() => fetchBoards(null, false), 0);
-                    }}
-                  >
-                    {u.display_name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+              <option value="">All timers</option>
+              <option value="90">90 seconds</option>
+              <option value="180">180 seconds</option>
+            </select>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              aria-label="Bonus filter"
+            >
+              <option value="">All rules</option>
+              <option value="normal">No bonus letters</option>
+              <option value="bonus">Bonus letters</option>
+            </select>
+            <select
+              value={playedFilter}
+              onChange={(e) => setPlayedFilter(e.target.value)}
+              aria-label="Played filter"
+            >
+              <option value="">All boards</option>
+              <option value="false">Not played by me</option>
+              <option value="true">Played by me</option>
+            </select>
+          </div>
+          <div className="open-play-filters-secondary">
+            <div className="open-play-filters-row">
+              <input
+                type="number"
+                min={0}
+                placeholder="Min words"
+                value={minWords}
+                onChange={(e) => setMinWords(e.target.value)}
+                className="open-play-filter-input"
+              />
+              <input
+                type="number"
+                min={0}
+                placeholder="Min points"
+                value={minPoints}
+                onChange={(e) => setMinPoints(e.target.value)}
+                className="open-play-filter-input"
+              />
+            </div>
+            <div className="open-play-user-filter">
+              <input
+                type="text"
+                placeholder="Filter by player who played..."
+                value={filterUserId ? filterUserLabel : userSearchQuery}
+                onChange={(e) => {
+                  setFilterUserId(null);
+                  setFilterUserLabel('');
+                  setUserSearchQuery(e.target.value);
+                }}
+                className="open-play-user-search"
+              />
+              {filterUserId && (
+                <button
+                  type="button"
+                  className="open-play-clear-user"
+                  onClick={() => {
+                    setFilterUserId(null);
+                    setFilterUserLabel('');
+                    setUserSearchQuery('');
+                    fetchBoards(null, false);
+                  }}
+                >
+                  Clear player
+                </button>
+              )}
+              {userSearchResults.length > 0 && !filterUserId && (
+                <ul className="open-play-user-suggestions">
+                  {userSearchResults.map((u) => (
+                    <li key={u.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFilterUserId(u.id);
+                          setFilterUserLabel(u.display_name);
+                          setUserSearchQuery('');
+                          setUserSearchResults([]);
+                          setTimeout(() => fetchBoards(null, false), 0);
+                        }}
+                      >
+                        {u.display_name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+          </div>
         </div>
 
         {loading && <div className="loading-state">Loading boards...</div>}
@@ -312,6 +310,14 @@ export default function OpenPlayPage() {
         )}
 
         <div className="open-play-boards-list">
+          <button
+            type="button"
+            className="open-play-new-game-list-btn"
+            onClick={() => setShowNewGameModal(true)}
+          >
+            <Plus size={20} aria-hidden />
+            <span>New Game</span>
+          </button>
           {boards.map((board) => (
             <article key={board.id} className="open-play-board-card">
               <div className="open-play-card-header">

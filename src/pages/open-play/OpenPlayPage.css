@@ -23,13 +23,12 @@
   width: 100%;
 }
 
-.open-play-header-row {
+.open-play-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 .open-play-intro {
@@ -50,7 +49,33 @@
   color: var(--color-yellow);
   text-shadow: var(--glow-yellow-text);
   font-size: 2rem;
-  margin: 0;
+  margin: 0 0 16px;
+}
+
+.open-play-new-game-list-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  background: transparent;
+  border: 2px solid var(--color-blue);
+  border-radius: 12px;
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.open-play-new-game-list-btn:hover {
+  background: rgba(113, 187, 233, 0.12);
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
 }
 
 .open-play-new-game-btn {
@@ -75,43 +100,90 @@
 
 .open-play-filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 auto;
+  max-width: 400px;
+  width: 100%;
+}
+
+.open-play-filters-stack {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-bottom: 16px;
+}
+
+.open-play-filters-stack select {
+  width: 100%;
+}
+
+.open-play-filters-secondary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.open-play-filters-row {
+  display: flex;
+  gap: 10px;
+}
+
+.open-play-filters-row .open-play-filter-input {
+  flex: 1;
+  min-width: 0;
 }
 
 .open-play-filters select,
-.open-play-filter-input {
+.open-play-filter-input,
+.open-play-user-search {
   background: rgba(19, 19, 42, 0.9);
   border: 1px solid var(--color-blue);
   color: var(--color-green);
   padding: 8px 12px;
   border-radius: 6px;
-  min-width: 120px;
-}
-
-.open-play-apply-filters {
-  background: var(--color-blue);
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .open-play-user-filter {
   position: relative;
-  margin-bottom: 24px;
 }
 
 .open-play-user-search {
   width: 100%;
   max-width: 400px;
-  background: rgba(19, 19, 42, 0.9);
-  border: 1px solid var(--color-blue);
-  color: var(--color-green);
-  padding: 8px 12px;
-  border-radius: 6px;
+}
+
+@media (min-width: 768px) {
+  .open-play-filters {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+    max-width: none;
+    width: fit-content;
+  }
+
+  .open-play-filters-stack {
+    flex: 0 0 280px;
+    max-width: 280px;
+  }
+
+  /* Invisible grouping box — layout only, no chrome */
+  .open-play-filters-secondary {
+    flex: 1;
+    min-width: 0;
+    max-width: 400px;
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+
+  .open-play-user-search {
+    max-width: none;
+  }
+
+  .open-play-user-suggestions {
+    max-width: none;
+  }
 }
 
 .open-play-clear-user {
@@ -232,7 +304,8 @@
 .open-play-login-prompt {
   color: var(--color-blue);
   text-align: center;
-  padding: 40px 20px;
+  margin: 0;
+  max-width: 720px;
 }
 
 .open-play-modal-overlay {

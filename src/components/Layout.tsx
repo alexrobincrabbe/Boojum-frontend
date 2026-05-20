@@ -1186,7 +1186,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </button>
               )}
             </div>
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Link
                 to="/open-play"
                 className={`nav-link ${location.pathname.startsWith('/open-play') ? 'active' : ''}`}
@@ -1196,6 +1196,10 @@ const Layout = ({ children }: LayoutProps) => {
               >
                 {leftSidebarOpen && <span>Open Play</span>}
               </Link>
+            ) : (
+              <span className="nav-link nav-link-locked" aria-disabled="true">
+                {leftSidebarOpen && <span>Open Play</span>}
+              </span>
             )}
             {isAuthenticated && (
               <Link
@@ -1209,10 +1213,12 @@ const Layout = ({ children }: LayoutProps) => {
               </Link>
             )}
           </div>
-          {isAuthenticated && user?.is_premium && (
-            <div className="nav-section">
-              {leftSidebarOpen && <div className="nav-section-title">Premium</div>}
-              <div className="nav-links-grid">
+          <div
+            className={`nav-section nav-section-premium${user?.is_premium ? '' : ' nav-section-premium-locked'}`}
+          >
+            {leftSidebarOpen && <div className="nav-section-title">Premium</div>}
+            <div className="nav-links-grid">
+              {user?.is_premium ? (
                 <Link
                   to="/daily-boards/archive"
                   className={`nav-link ${location.pathname.startsWith('/daily-boards/archive') ? 'active' : ''}`}
@@ -1222,36 +1228,58 @@ const Layout = ({ children }: LayoutProps) => {
                 >
                   {leftSidebarOpen && <span>Daily Board Archive</span>}
                 </Link>
-            <Link
-              to="/timeless-boards/archive?level=10"
-              className={`nav-link ${location.pathname.startsWith('/timeless-boards/archive') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Timeless Board Archive</span>}
-            </Link>
-            <Link
-              to="/minigames?archive=true"
-              className={`nav-link ${searchParams.get('archive') === 'true' ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Minigames Archive</span>}
-            </Link>
-            <Link
-              to="/custom-room"
-              className={`nav-link ${location.pathname === '/custom-room' ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && <span>Create Custom Room</span>}
-            </Link>
-              </div>
+              ) : (
+                <span className="nav-link nav-link-premium-disabled" aria-disabled="true">
+                  {leftSidebarOpen && <span>Daily Board Archive</span>}
+                </span>
+              )}
+              {user?.is_premium ? (
+                <Link
+                  to="/timeless-boards/archive?level=10"
+                  className={`nav-link ${location.pathname.startsWith('/timeless-boards/archive') ? 'active' : ''}`}
+                  onClick={() => {
+                    if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                  }}
+                >
+                  {leftSidebarOpen && <span>Timeless Board Archive</span>}
+                </Link>
+              ) : (
+                <span className="nav-link nav-link-premium-disabled" aria-disabled="true">
+                  {leftSidebarOpen && <span>Timeless Board Archive</span>}
+                </span>
+              )}
+              {user?.is_premium ? (
+                <Link
+                  to="/minigames?archive=true"
+                  className={`nav-link ${searchParams.get('archive') === 'true' ? 'active' : ''}`}
+                  onClick={() => {
+                    if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                  }}
+                >
+                  {leftSidebarOpen && <span>Minigames Archive</span>}
+                </Link>
+              ) : (
+                <span className="nav-link nav-link-premium-disabled" aria-disabled="true">
+                  {leftSidebarOpen && <span>Minigames Archive</span>}
+                </span>
+              )}
+              {user?.is_premium ? (
+                <Link
+                  to="/custom-room"
+                  className={`nav-link ${location.pathname === '/custom-room' ? 'active' : ''}`}
+                  onClick={() => {
+                    if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                  }}
+                >
+                  {leftSidebarOpen && <span>Create Custom Room</span>}
+                </Link>
+              ) : (
+                <span className="nav-link nav-link-premium-disabled" aria-disabled="true">
+                  {leftSidebarOpen && <span>Create Custom Room</span>}
+                </span>
+              )}
             </div>
-          )}
+          </div>
           <div className="nav-section">
             {leftSidebarOpen && <div className="nav-section-title">More</div>}
             <Link
@@ -1327,23 +1355,27 @@ const Layout = ({ children }: LayoutProps) => {
               <span>Dashboard</span>
             </Link>
             {isAuthenticated ? (
-              <>
-                <Link
-                  to={`/profile/${user?.username.toLowerCase()}`}
-                  className={`nav-link ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
-                  onClick={() => {
-                    if (!rightSidebarPinned) setRightSidebarOpen(false);
-                  }}
-                >
-                  <span>Profile</span>
-                </Link>
-                <button
-                  className="nav-link logout-link"
-                  onClick={handleLogout}
-                >
-                  <span>Logout</span>
-                </button>
-              </>
+              <Link
+                to={`/profile/${user?.username.toLowerCase()}`}
+                className={`nav-link ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!rightSidebarPinned) setRightSidebarOpen(false);
+                }}
+              >
+                <span>Profile</span>
+              </Link>
+            ) : (
+              <span className="nav-link nav-link-locked" aria-disabled="true">
+                <span>Profile</span>
+              </span>
+            )}
+            {isAuthenticated ? (
+              <button
+                className="nav-link logout-link"
+                onClick={handleLogout}
+              >
+                <span>Logout</span>
+              </button>
             ) : (
               <Link
                 to="/login"

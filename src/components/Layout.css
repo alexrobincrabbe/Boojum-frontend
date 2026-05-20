@@ -922,7 +922,8 @@
 .left-sidebar .nav-links-grid .nav-link[href="/daily-boards/archive"],
 .left-sidebar .nav-links-grid .nav-link[href*="/timeless-boards/archive"],
 .left-sidebar .nav-links-grid .nav-link[href="/minigames?archive=true"],
-.left-sidebar .nav-links-grid .nav-link[href*="/minigames?archive=true"] {
+.left-sidebar .nav-links-grid .nav-link[href*="/minigames?archive=true"],
+.left-sidebar .nav-section-premium:not(.nav-section-premium-locked) .nav-links-grid .nav-link[href="/custom-room"] {
   color: var(--color-yellow) !important;
 }
 
@@ -979,6 +980,32 @@
 /* Right sidebar grid links - all turn yellow on hover */
 .right-sidebar .nav-links-grid .nav-link:hover {
   color: var(--color-yellow) !important;
+}
+
+/* Locked nav links (guests, non-premium) — visible but disabled; must follow grid link colors */
+.left-sidebar .nav-links-grid .nav-link-locked,
+.right-sidebar .nav-links-grid .nav-link-locked,
+.left-sidebar .nav-link-locked,
+.right-sidebar .nav-link-locked,
+.nav-section-premium-locked .nav-section-title,
+.nav-section-premium-locked .nav-link-premium-disabled {
+  color: #6b6b8a !important;
+  font-style: italic;
+  opacity: 0.75;
+  cursor: not-allowed;
+  pointer-events: none;
+  text-shadow: none !important;
+}
+
+.left-sidebar .nav-links-grid .nav-link-locked:hover,
+.right-sidebar .nav-links-grid .nav-link-locked:hover,
+.left-sidebar .nav-link-locked:hover,
+.right-sidebar .nav-link-locked:hover,
+.nav-section-premium-locked .nav-link-premium-disabled:hover {
+  color: #6b6b8a !important;
+  transform: none;
+  background-color: transparent;
+  border-bottom-color: transparent;
 }
 
 .nav-links-grid .nav-link.active {
