@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { authAPI, lobbyAPI, dashboardAPI, forumAPI, tournamentAPI, teamTournamentAPI } from '../services/api';
-import { X, Bell, BarChart3, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy } from 'lucide-react';
+import { authAPI, lobbyAPI, dashboardAPI, forumAPI } from '../services/api';
+import { X, Bell, BarChart3, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy, CalendarDays, Clock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Joyride from 'react-joyride';
 
@@ -45,7 +45,18 @@ import NotificationDropdown from './NotificationDropdown';
 import { Username } from './Username';
 import { useDailyChallengeAlerts } from '../hooks/useDailyChallengeAlerts';
 import { useTournamentRegistrationAlerts } from '../hooks/useTournamentRegistrationAlerts';
+import { useBoardSubmissionAlerts } from '../hooks/useBoardSubmissionAlerts';
 import './Layout.css';
+
+const DISCORD_INVITE_URL = 'https://discord.gg/GGypyAW54t';
+
+function DiscordIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+    </svg>
+  );
+}
 
 // Component to convert anchor tags to React Router Links
 const ActivityDescription = ({ html, onLinkClick }: { html: string; onLinkClick: () => void }) => {
@@ -212,6 +223,7 @@ const Layout = ({ children }: LayoutProps) => {
     user?.username ?? null,
   );
   const { soloRegistrationOpen, teamRegistrationOpen } = useTournamentRegistrationAlerts();
+  const { dailyNeedsPlay, timelessNeedsPlay } = useBoardSubmissionAlerts();
   const { run, setRun } = useOnboarding();
   const [stepIndex, setStepIndex] = useState(0);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
@@ -255,8 +267,6 @@ const Layout = ({ children }: LayoutProps) => {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadForumPosts, setUnreadForumPosts] = useState(0);
-  const [tournamentBadge, setTournamentBadge] = useState<'register' | 'you-are-up' | null>(null);
-  const [teamTournamentBadge, setTeamTournamentBadge] = useState<'register' | 'you-are-up' | null>(null);
   const [guestsOnline, setGuestsOnline] = useState(0);
   const [mobileUsersDropdownOpen, setMobileUsersDropdownOpen] = useState(false);
   const [showPlaymatesOnly, setShowPlaymatesOnly] = useState(false);
@@ -482,58 +492,6 @@ const Layout = ({ children }: LayoutProps) => {
     const interval = setInterval(loadUnreadForumPosts, 30000); // Every 30 seconds
     return () => clearInterval(interval);
   }, [isAuthenticated]);
-
-  // Load tournament badge status
-  useEffect(() => {
-    const loadTournamentBadge = async () => {
-      if (!isAuthenticated || !user) {
-        setTournamentBadge(null);
-        return;
-      }
-      try {
-        const data = await tournamentAPI.getTournamentBadge();
-        setTournamentBadge(data.badge || null);
-      } catch (error: any) {
-        // Silently handle errors (tournament might not exist)
-        if (error?.response?.status === 404 || error?.response?.status === 401) {
-          setTournamentBadge(null);
-          return;
-        }
-        console.error('Error loading tournament badge:', error);
-        setTournamentBadge(null);
-      }
-    };
-
-    loadTournamentBadge();
-    const interval = setInterval(loadTournamentBadge, 30000); // Every 30 seconds
-    return () => clearInterval(interval);
-  }, [isAuthenticated, user]);
-
-  // Load team tournament badge status
-  useEffect(() => {
-    const loadTeamTournamentBadge = async () => {
-      if (!isAuthenticated || !user) {
-        setTeamTournamentBadge(null);
-        return;
-      }
-      try {
-        const data = await teamTournamentAPI.getTeamTournamentBadge();
-        setTeamTournamentBadge(data.badge || null);
-      } catch (error: any) {
-        // Silently handle errors (tournament might not exist)
-        if (error?.response?.status === 404 || error?.response?.status === 401) {
-          setTeamTournamentBadge(null);
-          return;
-        }
-        console.error('Error loading team tournament badge:', error);
-        setTeamTournamentBadge(null);
-      }
-    };
-
-    loadTeamTournamentBadge();
-    const interval = setInterval(loadTeamTournamentBadge, 30000); // Every 30 seconds
-    return () => clearInterval(interval);
-  }, [isAuthenticated, user]);
 
   // Load playmates filter preference for authenticated users (for filtering online list)
   useEffect(() => {
@@ -791,7 +749,7 @@ const Layout = ({ children }: LayoutProps) => {
     },
     {
       target: '[data-onboarding="navigation-menu"]',
-      content: 'This is the main navigation menu. Click here to access all games, daily challenges, tournaments, high scores and our forum.',
+      content: 'This is the main navigation menu. Use it for live games, open play, saved boards, and more.',
       placement: 'right',
     },
     {
@@ -801,15 +759,9 @@ const Layout = ({ children }: LayoutProps) => {
       disableScrolling: false,
     },
     {
-      target: '[data-onboarding="daily-challenges"]',
-      content: 'Daily Challenges include Everyday Board, Timeless Board, Mini-Games (Cluejums and Boojumbles) and Doodledum. These are updated every day.',
-      placement: 'right',
-      disableScrolling: false,
-    },
-    {
-      target: '[data-onboarding="tournament"]',
-      content: 'Participate in biweekly tournaments and team tournaments for a bit of friendly competition!',
-      placement: 'right',
+      target: '[data-onboarding="topbar-shortcuts"]',
+      content: 'The top bar links to daily boards, timeless boards, mini-games, doodles, tournaments, and polls. Icons light up when something needs your attention.',
+      placement: 'bottom',
       disableScrolling: false,
     },
   ];
@@ -886,14 +838,13 @@ const Layout = ({ children }: LayoutProps) => {
         return;
       }
       
-      // Keep left sidebar open for live games, daily challenges, and tournament steps (2, 3, 4)
-      if (newIndex >= 2 && newIndex <= 4 && !leftSidebarOpen && action === 'next') {
-        setLeftSidebarOpen(true);
+      // Close left sidebar before top bar shortcuts step
+      if (newIndex === 3 && leftSidebarOpen && action === 'next') {
+        setLeftSidebarOpen(false);
       }
       
       // Close left sidebar and open right sidebar after profile menu step
-      // For authenticated: profile menu is step 6 (index 6), for guests it's step 5 (index 5)
-      const profileMenuStepIndex = isAuthenticated ? 6 : 5;
+      const profileMenuStepIndex = isAuthenticated ? 5 : 4;
       if (newIndex === profileMenuStepIndex && action === 'next') {
         if (leftSidebarOpen) {
           setLeftSidebarOpen(false);
@@ -911,18 +862,46 @@ const Layout = ({ children }: LayoutProps) => {
       // For other steps, update normally
       setStepIndex(newIndex);
     } else if (type === 'step:before') {
-      // Ensure left sidebar is open for steps 2-4 (live games, daily challenges, tournament)
-      if (index >= 2 && index <= 4 && !leftSidebarOpen && action !== 'prev') {
+      // Ensure left sidebar is open for live games step
+      if (index === 2 && !leftSidebarOpen && action !== 'prev') {
         setLeftSidebarOpen(true);
       }
       
+      // Close left sidebar before top bar shortcuts step
+      if (index === 3 && leftSidebarOpen && action !== 'prev') {
+        setLeftSidebarOpen(false);
+      }
+      
       // Close left sidebar before showing profile menu step
-      const profileMenuStepIndex = isAuthenticated ? 6 : 5;
+      const profileMenuStepIndex = isAuthenticated ? 5 : 4;
       if (index === profileMenuStepIndex && leftSidebarOpen && action !== 'prev') {
         setLeftSidebarOpen(false);
       }
     }
   };
+
+  const renderBoardShortcuts = () => (
+    <>
+      <Link
+        to="/daily-boards"
+        className={`topbar-shortcut topbar-shortcut--daily-board${dailyNeedsPlay ? ' topbar-shortcut--active' : ''}`}
+        aria-label={dailyNeedsPlay ? "Today's daily board — play now" : 'Everyday Board'}
+      >
+        <CalendarDays size={20} />
+        <span className="topbar-shortcut-label">Daily</span>
+        {dailyNeedsPlay && <span className="topbar-shortcut-badge" />}
+      </Link>
+      <Link
+        to="/timeless-boards"
+        className={`topbar-shortcut topbar-shortcut--timeless-board${timelessNeedsPlay ? ' topbar-shortcut--active' : ''}`}
+        aria-label={timelessNeedsPlay ? "Today's timeless board — play now" : 'Timeless Board'}
+      >
+        <Clock size={20} />
+        <span className="topbar-shortcut-label">Timeless</span>
+        {timelessNeedsPlay && <span className="topbar-shortcut-badge" />}
+      </Link>
+    </>
+  );
 
   const renderShortcuts = () => (
     <>
@@ -1005,9 +984,26 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
         </div>
         <div className="top-bar-right">
-          <div className="topbar-shortcuts-group topbar-shortcuts-group--desktop">
+          <div className="topbar-shortcuts-group topbar-shortcuts-group--mobile-top">
+            {renderBoardShortcuts()}
+          </div>
+          <div
+            className="topbar-shortcuts-group topbar-shortcuts-group--desktop"
+            data-onboarding="topbar-shortcuts"
+          >
+            {renderBoardShortcuts()}
             {renderShortcuts()}
           </div>
+          <a
+            href={DISCORD_INVITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="discord-link"
+            aria-label="Join us on Discord"
+            title="Join us on Discord"
+          >
+            <DiscordIcon size={24} />
+          </a>
           {isAuthenticated && (
             <>
               {/* Mobile Users Online Button */}
@@ -1016,8 +1012,8 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => setMobileUsersDropdownOpen(!mobileUsersDropdownOpen)}
                 aria-label="Users online"
               >
-                <span className="mobile-users-count">{onlineCount}</span>
                 <span className="mobile-users-label">Online</span>
+                <span className="mobile-users-count">{onlineCount}</span>
               </button>
               <button
                 className="notification-button"
@@ -1179,7 +1175,6 @@ const Layout = ({ children }: LayoutProps) => {
                   onClick={() => {
                     const newPinnedState = !leftSidebarPinned;
                     setLeftSidebarPinned(newPinnedState);
-                    // If pinning, ensure sidebar is open
                     if (newPinnedState && !leftSidebarOpen) {
                       setLeftSidebarOpen(true);
                     }
@@ -1193,6 +1188,17 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
             {isAuthenticated && (
               <Link
+                to="/open-play"
+                className={`nav-link ${location.pathname.startsWith('/open-play') ? 'active' : ''}`}
+                onClick={() => {
+                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+                }}
+              >
+                {leftSidebarOpen && <span>Open Play</span>}
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link
                 to="/saved-boards"
                 className={`nav-link ${location.pathname.startsWith('/saved-boards') && !location.pathname.startsWith('/saved-boards/play') ? 'active' : ''}`}
                 onClick={() => {
@@ -1202,77 +1208,6 @@ const Layout = ({ children }: LayoutProps) => {
                 {leftSidebarOpen && <span>Saved Boards</span>}
               </Link>
             )}
-          </div>
-          <div className="nav-section" data-onboarding="daily-challenges">
-            {leftSidebarOpen && <div className="nav-section-title">Daily Challenges</div>}
-            <div className="nav-links-grid">
-              <Link
-                to="/minigames?tab=boojumble"
-                className={`nav-link ${location.pathname.startsWith('/minigames') && (searchParams.get('tab') === 'boojumble' || !searchParams.get('tab')) ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && (
-                  <span style={{ position: 'relative' }}>
-                    Boojumbles
-                    {boojumbleUnsolved && (
-                      <span className="forum-badge">!</span>
-                    )}
-                  </span>
-                )}
-              </Link>
-              <Link
-                to="/minigames?tab=cluejum"
-                className={`nav-link ${location.pathname.startsWith('/minigames') && searchParams.get('tab') === 'cluejum' ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && (
-                  <span style={{ position: 'relative' }}>
-                    Cluejums
-                    {cluejumUnsolved && (
-                      <span className="forum-badge">!</span>
-                    )}
-                  </span>
-                )}
-              </Link>
-              <Link
-                to="/doodledum"
-                className={`nav-link ${location.pathname.startsWith('/doodledum') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && (
-                  <span style={{ position: 'relative' }}>
-                    Doodledum
-                    {doodledumNeedsGuess && (
-                      <span className="forum-badge">!</span>
-                    )}
-                  </span>
-                )}
-              </Link>
-              <Link
-                to="/daily-boards"
-                className={`nav-link ${location.pathname.startsWith('/daily-boards') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && <span>Everyday Board</span>}
-              </Link>
-              <Link
-                to="/timeless-boards"
-                className={`nav-link ${location.pathname.startsWith('/timeless-boards') ? 'active' : ''}`}
-                onClick={() => {
-                  if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-                }}
-              >
-                {leftSidebarOpen && <span>Timeless Board</span>}
-              </Link>
-            </div>
           </div>
           {isAuthenticated && user?.is_premium && (
             <div className="nav-section">
@@ -1364,47 +1299,6 @@ const Layout = ({ children }: LayoutProps) => {
                 {leftSidebarOpen && <span>Admin</span>}
               </Link>
             )}
-          </div>
-          <div className="nav-section" data-onboarding="tournament">
-            {leftSidebarOpen && <div className="nav-section-title">Tournament</div>}
-            <Link
-              to="/tournament"
-              className={`nav-link ${location.pathname.startsWith('/tournament') && !location.pathname.startsWith('/tournament/test') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && (
-                <span style={{ position: 'relative' }}>
-                  Tournament (Biweekly)
-                  {tournamentBadge === 'register' && (
-                    <span className="tournament-badge">Register!</span>
-                  )}
-                  {tournamentBadge === 'you-are-up' && (
-                    <span className="tournament-badge">You are up!</span>
-                  )}
-                </span>
-              )}
-            </Link>
-            <Link
-              to="/team-tournament"
-              className={`nav-link ${location.pathname.startsWith('/team-tournament') && !location.pathname.startsWith('/team-tournament/test') ? 'active' : ''}`}
-              onClick={() => {
-                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
-              }}
-            >
-              {leftSidebarOpen && (
-                <span style={{ position: 'relative' }}>
-                  Team Tournament
-                  {teamTournamentBadge === 'register' && (
-                    <span className="team-tournament-badge">Register!</span>
-                  )}
-                  {teamTournamentBadge === 'you-are-up' && (
-                    <span className="team-tournament-badge">You are up!</span>
-                  )}
-                </span>
-              )}
-            </Link>
           </div>
         </nav>
       </aside>

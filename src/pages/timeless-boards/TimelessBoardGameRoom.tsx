@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { playBloop, playSound } from '../../utils/sounds';
 import { triggerBoardAnimation, triggerWordCounterAnimation } from '../game-room/utils/borderAnimation';
 import { usePageOnboarding } from '../../hooks/usePageOnboarding';
+import { notifyBoardScoresUpdated } from '../../utils/boardAlerts';
 
 // Helper function to show "Perfect!" message
 const showPerfect = (elementId: string) => {
@@ -979,12 +980,14 @@ export default function TimelessBoardGameRoom() {
 
       await Promise.all(submitPromises);
       
+      notifyBoardScoresUpdated();
       toast.success('Score submitted successfully!');
       navigate(`/timeless-boards?board=${timelessBoardId}`);
     } catch (error: unknown) {
       console.error('Error submitting score:', error);
       const axiosError = error as { response?: { data?: { score_exists?: string; board_expired?: string } } };
       if (axiosError.response?.data?.score_exists === 'yes') {
+        notifyBoardScoresUpdated();
         toast.error('You have already submitted a score for this board');
         navigate(`/timeless-boards?board=${timelessBoardId}`);
       } else if (axiosError.response?.data?.board_expired === 'yes') {

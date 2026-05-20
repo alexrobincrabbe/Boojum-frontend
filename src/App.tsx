@@ -36,6 +36,8 @@ import TimelessBoardsArchivePage from "./pages/timeless-boards/TimelessBoardsArc
 import TimelessBoardArchiveDetailPage from "./pages/timeless-boards/TimelessBoardArchiveDetailPage";
 import SavedBoardGameRoom from "./pages/saved-boards/SavedBoardGameRoom";
 import SavedBoardsPage from "./pages/saved-boards/SavedBoardsPage";
+import OpenPlayPage from "./pages/open-play/OpenPlayPage";
+import OpenPlayGameRoom from "./pages/open-play/OpenPlayGameRoom";
 import LeaderboardsPage from "./pages/leaderboards/LeaderboardsPage";
 import ForumPage from "./pages/forum/ForumPage";
 import ViewPostPage from "./pages/forum/ViewPostPage";
@@ -184,6 +186,8 @@ function App() {
               <Route path="/profile/:profileUrl" element={<ProfilePage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/lobby" element={<LobbyPage />} />
+              <Route path="/open-play" element={<OpenPlayPage />} />
+              <Route path="/open-play/play/:openPlayId" element={<OpenPlayGameRoom />} />
               <Route path="/daily-boards" element={<DailyBoardPage />} />
               <Route
                 path="/daily-boards/play/:dailyBoardId"

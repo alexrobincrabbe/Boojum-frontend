@@ -9,6 +9,7 @@ import { ScoresModal } from '../game-room/components/ScoresModal';
 // WordData unused here
 import { toast } from 'react-toastify';
 import { lobbyAPI } from '../../services/api';
+import { notifyBoardScoresUpdated } from '../../utils/boardAlerts';
 import '../game-room/GameRoom.css';
 
 export default function DailyBoardGameRoom() {
@@ -198,6 +199,7 @@ export default function DailyBoardGameRoom() {
     // Submit score when game status changes from 'playing' to 'finished'
     if (prevStatus === 'playing' && currentStatus === 'finished' && sendJson) {
       submitFinalScore(sendJson);
+      notifyBoardScoresUpdated();
     }
     
     prevGameStatusRef.current = currentStatus;

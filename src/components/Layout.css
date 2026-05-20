@@ -142,6 +142,10 @@
   min-width: 0;
 }
 
+.topbar-shortcuts-group--mobile-top {
+  display: none;
+}
+
 /* Mobile bottom bar — shortcuts moved off top bar */
 .mobile-bottom-bar {
   display: none;
@@ -259,6 +263,36 @@
   box-shadow: 0 0 6px rgba(94, 76, 176, 1), 0 0 10px rgba(94, 76, 176, 0.6);
 }
 
+/* Active: Daily board — yellow */
+.topbar-shortcut--daily-board.topbar-shortcut--active {
+  border-color: var(--color-yellow);
+  color: var(--color-yellow);
+}
+
+.topbar-shortcut--daily-board.topbar-shortcut--active:hover {
+  background-color: rgba(245, 206, 69, 0.15);
+}
+
+.topbar-shortcut--daily-board.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: var(--color-yellow);
+  box-shadow: 0 0 6px rgba(245, 206, 69, 1), 0 0 12px rgba(245, 206, 69, 0.6);
+}
+
+/* Active: Timeless board — pink */
+.topbar-shortcut--timeless-board.topbar-shortcut--active {
+  border-color: var(--color-pink);
+  color: var(--color-pink);
+}
+
+.topbar-shortcut--timeless-board.topbar-shortcut--active:hover {
+  background-color: rgba(235, 84, 151, 0.15);
+}
+
+.topbar-shortcut--timeless-board.topbar-shortcut--active .topbar-shortcut-badge {
+  background-color: var(--color-pink);
+  box-shadow: 0 0 6px rgba(235, 84, 151, 1), 0 0 12px rgba(235, 84, 151, 0.6);
+}
+
 /* Active: Poll — purple */
 .topbar-shortcut--poll.topbar-shortcut--active {
   border-color: var(--color-purple);
@@ -285,6 +319,31 @@
 
   .topbar-shortcuts-group--desktop {
     display: none !important;
+  }
+
+  .topbar-shortcuts-group--mobile-top {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .topbar-shortcuts-group--mobile-top .topbar-shortcut {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    border-width: 2px;
+    border-radius: 8px;
+    justify-content: center;
+  }
+
+  .topbar-shortcuts-group--mobile-top .topbar-shortcut svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .topbar-shortcuts-group--mobile-top .topbar-shortcut-label {
+    display: none;
   }
 
   .mobile-bottom-bar {
@@ -316,8 +375,8 @@
   }
 
   .mobile-bottom-bar .topbar-shortcut svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 24px !important;
+    height: 24px !important;
     flex-shrink: 0;
   }
 
@@ -354,17 +413,15 @@
     height: auto;
   }
 
+  .discord-link,
   .notification-button,
-  .profile-picture-button-top {
+  .profile-picture-button-top,
+  .mobile-users-button {
     width: 40px;
     height: 40px;
     flex-shrink: 0;
   }
 
-  .mobile-users-button {
-    padding: 6px 8px;
-    font-size: 0.8rem;
-  }
 }
 
 /* Mobile Users Online Button */
@@ -374,26 +431,34 @@
   border: 2px solid var(--color-blue);
   color: var(--color-blue);
   border-radius: 8px;
-  padding: 8px 12px;
+  width: 40px;
+  height: 40px;
+  padding: 2px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 1px;
+  flex-shrink: 0;
 }
 
 .mobile-users-button:hover {
   background-color: var(--bg-blue-transparent);
 }
 
-.mobile-users-count {
-  font-weight: bold;
-  font-size: 1rem;
+.mobile-users-label {
+  font-size: 0.5rem;
+  line-height: 1;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-.mobile-users-label {
-  font-size: 0.85rem;
+.mobile-users-count {
+  font-weight: bold;
+  font-size: 0.65rem;
+  line-height: 1;
 }
 
 @media (min-width: 1024px) {
@@ -406,6 +471,26 @@
   .mobile-users-button {
     display: flex;
   }
+}
+
+.discord-link {
+  background: transparent;
+  border: 2px solid #5865f2;
+  color: #5865f2;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.discord-link:hover {
+  background-color: rgba(88, 101, 242, 0.2);
+  transform: scale(1.1);
 }
 
 .notification-button {

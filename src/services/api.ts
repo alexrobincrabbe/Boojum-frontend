@@ -408,6 +408,17 @@ export const lobbyAPI = {
     const response = await api.get('/daily-boards/');
     return response.data;
   },
+  getOpenPlayBoards: async (params: Record<string, string | number | undefined>) => {
+    const response = await api.get('/open-play/', { params });
+    return response.data;
+  },
+  createOpenPlayBoard: async (timeLimit: number, bonus: boolean) => {
+    const response = await api.post('/open-play/create/', {
+      time_limit: timeLimit,
+      bonus,
+    });
+    return response.data;
+  },
   getDailyBoardsArchive: async (page: number = 1, perPage: number = 20) => {
     const response = await api.get('/daily-boards/archive/', {
       params: { page, per_page: perPage },
