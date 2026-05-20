@@ -1,4 +1,9 @@
+import type { SyntheticEvent } from 'react';
 import type { Player } from '../../../ws/protocol';
+import {
+  FALLBACK_PROFILE_IMAGE,
+  resolveProfilePictureUrl,
+} from '../../../utils/profilePictureUrl';
 import './PlayersList.css';
 
 interface PlayersListProps {
@@ -44,18 +49,15 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
     );
   }
 
-  // Desktop version
-  const getProfileImageUrl = (profilePictureUrl: string, isGuest: boolean) => {
-    // For guests, always use default.png
-    if (isGuest) {
-      return '/images/default.png';
-    }
-    if (!profilePictureUrl || profilePictureUrl.includes('placeholder')) {
-      return '/images/default.png';
-    }
-    const publicId = profilePictureUrl.split('/').pop()?.split('.')[0] || '';
-    return `https://res.cloudinary.com/df8lhl810/image/upload/q_auto,w_30,h_30,c_fill,g_face/r_100/${publicId}`;
-  };
+  const profileImgProps = (profilePictureUrl: string, isGuest: boolean) => ({
+    src: resolveProfilePictureUrl(isGuest ? null : profilePictureUrl, 30),
+    onError: (e: SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      if (img.src !== FALLBACK_PROFILE_IMAGE) {
+        img.src = FALLBACK_PROFILE_IMAGE;
+      }
+    },
+  });
 
   return (
     <div className="players-section-desktop">
@@ -81,7 +83,7 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
                   style={{ textDecoration: 'none' }}
                 >
                   <img
-                    src={getProfileImageUrl(profilePictureUrl, isGuest)}
+                    {...profileImgProps(profilePictureUrl, isGuest)}
                     alt={player.username}
                     className="rounded-circle high-score-img"
                     width={30}
@@ -91,7 +93,7 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
                 </a>
               ) : (
                 <img
-                  src={getProfileImageUrl(profilePictureUrl, isGuest)}
+                  {...profileImgProps(profilePictureUrl, isGuest)}
                   alt={player.username}
                   className="rounded-circle high-score-img guest-user"
                   width={30}

@@ -142,6 +142,7 @@ export function GameBoard({
       onRecordKeyboardWord, // Pass recording callback
       colorsOffOverride, // Pass colors override for timeless boards
       onExactMatch, // Pass exact match callback for clue deactivation
+      boardSize,
     });
 
   return (

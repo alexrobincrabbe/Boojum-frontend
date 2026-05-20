@@ -162,6 +162,22 @@ export function useKeyboardInput({
     }
   }, [board, boardWords, wordsFound, checkMatch, checkPartialMatch, checkAlreadyFound, onTileColorsUpdate, colorsOff, darkMode, onExactMatch]);
 
+  // Reset trace path when board size changes (e.g. 4x4 -> 5x5 between games)
+  const prevTotalCellsRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevTotalCellsRef.current === null) {
+      prevTotalCellsRef.current = totalCells;
+      return;
+    }
+    if (prevTotalCellsRef.current === totalCells) return;
+    prevTotalCellsRef.current = totalCells;
+    const emptyTracePath = Array(totalCells).fill(false);
+    setTracePath(emptyTracePath);
+    setCurrentWord('');
+    lastExactMatchRef.current = '';
+    updateTileColors('', emptyTracePath);
+  }, [totalCells, updateTileColors]);
+
   // Re-apply tile colors when colorsOff changes (e.g., when clue is activated/deactivated)
   useEffect(() => {
     if (currentWord && tracePath.some(v => v)) {

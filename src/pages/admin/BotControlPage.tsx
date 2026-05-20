@@ -422,22 +422,25 @@ const BotControlPage = () => {
                   <label className="bot-field bot-field-checkbox">
                     <input
                       type="checkbox"
-                      checked={
-                        (selected.trace_chat_enabled ?? true) &&
-                        (selected.trace_events_enabled ?? false)
+                      checked={selected.trace_chat_enabled ?? true}
+                      onChange={(e) =>
+                        updateSelected({ trace_chat_enabled: e.target.checked })
                       }
-                      onChange={(e) => {
-                        const on = e.target.checked;
-                        updateSelected({
-                          trace_chat_enabled: on,
-                          trace_events_enabled: on,
-                        });
-                      }}
                     />
-                    <span>Enable admin traces (chat + events)</span>
+                    <span>Trace chat replies</span>
+                  </label>
+                  <label className="bot-field bot-field-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selected.trace_events_enabled ?? false}
+                      onChange={(e) =>
+                        updateSelected({ trace_events_enabled: e.target.checked })
+                      }
+                    />
+                    <span>Trace round-end / player-join events</span>
                   </label>
                   <p className="bot-field-hint">
-                    Superusers see a trace link on each bot reply, or “(no response)” when a bot stays silent.
+                    Superusers see a trace link on bot replies, or “Round ended · Bot: (no response)” for silent event turns.
                   </p>
 
                   <label className="bot-field">
