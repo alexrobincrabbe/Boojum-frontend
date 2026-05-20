@@ -82,6 +82,13 @@ export default function OpenPlayGameRoom() {
     submitFinalScore,
   } = useWordTracking(gameState);
 
+  const handleWordSubmitForBoard = useCallback(
+    (word: string): string | void => {
+      handleWordSubmit(word);
+    },
+    [handleWordSubmit]
+  );
+
   const handleStartGame = useCallback(() => {
     if (sendJson && !gameStarted) {
       sendJson({ type: 'START_GAME' });
@@ -193,7 +200,7 @@ export default function OpenPlayGameRoom() {
                 hasBoardBeenShown={hasBoardBeenShown}
                 previousBoard={previousBoard}
                 timerState={timerState}
-                onWordSubmit={handleWordSubmit}
+                onWordSubmit={handleWordSubmitForBoard}
                 wordsFound={wordsFound}
                 boardWords={gameState.boardWords as string[] | undefined}
                 onShowScores={() => setIsScoresModalOpen(true)}
