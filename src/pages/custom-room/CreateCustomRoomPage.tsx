@@ -327,7 +327,7 @@ const CreateCustomRoomPage = () => {
                   onChange={() => setCustomRoomFormData({ ...customRoomFormData, use_special_boards: true, only_special_boards: false })}
                   disabled={customRoomFormData.language !== 'en'}
                 />
-                <span>Include Special Boards (mix with regular boards)</span>
+                <span>Include archived special boards (daily/timeless, 7+ days old)</span>
               </label>
               <label className="custom-room-radio-label">
                 <input
@@ -338,11 +338,17 @@ const CreateCustomRoomPage = () => {
                   onChange={() => setCustomRoomFormData({ ...customRoomFormData, use_special_boards: true, only_special_boards: true })}
                   disabled={customRoomFormData.language !== 'en'}
                 />
-                <span>Only Special Boards (exclusively use special boards)</span>
+                <span>Only archived special boards (daily/timeless, 7+ days old)</span>
               </label>
             </div>
             {customRoomFormData.language !== 'en' && (
               <small className="custom-room-help-text">Special boards are only available for English</small>
+            )}
+            {customRoomFormData.language === 'en' &&
+              (customRoomFormData.use_special_boards || customRoomFormData.only_special_boards) && (
+              <small className="custom-room-help-text">
+                Special boards are past daily or timeless boards only (assigned at least 7 days ago).
+              </small>
             )}
           </div>
 

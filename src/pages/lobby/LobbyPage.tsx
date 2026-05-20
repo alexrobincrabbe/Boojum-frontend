@@ -334,8 +334,8 @@ const LobbyPage = () => {
                         {room.language === 'en' && (room.use_special_boards || room.only_special_boards) && (
                           <div className="custom-room-special-boards">
                             <strong>Special Boards:</strong> {
-                              room.only_special_boards ? 'Only Special Boards' :
-                              room.use_special_boards ? 'Include Special Boards' :
+                              room.only_special_boards ? 'Only archived (7+ days)' :
+                              room.use_special_boards ? 'Include archived (7+ days)' :
                               'Exclude Special Boards'
                             }
                           </div>
