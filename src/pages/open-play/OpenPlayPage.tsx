@@ -215,11 +215,8 @@ export default function OpenPlayPage() {
 
           <div className="open-play-intro">
             <p>Press &ldquo;New Game&rdquo; to create boards.</p>
-            <p>
-              Play and compete in your own time.
-              <br />
-              These are not live games - anyone can join in and play whenever they like.
-            </p>
+            <p>Play and compete in your own time.</p>
+            <p>These are not live games - anyone can join in and play whenever they like.</p>
             <p>
               Boards created by other players will also appear on this page for everyone to play.
             </p>

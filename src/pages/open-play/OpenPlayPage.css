@@ -36,8 +36,16 @@
   text-shadow: var(--glow-blue-text);
   font-size: 1rem;
   line-height: 1.5;
-  margin: 0 0 24px;
+  margin: 0 auto 24px;
   max-width: 720px;
+  width: 100%;
+  align-self: center;
+  text-align: left;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  background: rgba(19, 19, 42, 0.85);
+  border: 2px solid var(--color-blue);
+  border-radius: 12px;
 }
 
 .open-play-intro p {
