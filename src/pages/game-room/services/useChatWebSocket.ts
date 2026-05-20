@@ -113,8 +113,6 @@ export function useChatWebSocket({
     setGuestName(name);
   }, [isGuest]);
 
-  const guestParam = isGuest ? guestName : "user";
-
   // ✅ Build WS url only when guestName is ready (for guests)
   const chatWsUrl = useMemo(() => {
     if (!roomId) return "";
