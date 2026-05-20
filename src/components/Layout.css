@@ -857,6 +857,24 @@
   color: var(--color-yellow) !important;
 }
 
+/* Live Games: Open Play - green */
+.left-sidebar .nav-link[href="/open-play"] {
+  color: var(--color-green) !important;
+}
+
+.left-sidebar .nav-link[href="/open-play"].active {
+  color: var(--color-green) !important;
+}
+
+/* Live Games: Saved Boards - purple */
+.left-sidebar .nav-link[href="/saved-boards"] {
+  color: var(--color-purple) !important;
+}
+
+.left-sidebar .nav-link[href="/saved-boards"].active {
+  color: var(--color-purple) !important;
+}
+
 /* Default hover state - only for left sidebar regular links */
 .left-sidebar .nav-link:hover {
   background-color: var(--bg-blue-20);
@@ -864,15 +882,16 @@
 }
 
 /* All non-yellow links turn yellow on hover */
-.left-sidebar .nav-link:hover:not([href="/daily-boards/archive"]):not([href*="/timeless-boards/archive"]):not([href="/minigames?archive=true"]):not([href*="/minigames?archive=true"]) {
+.left-sidebar .nav-link:hover:not([href="/daily-boards/archive"]):not([href*="/timeless-boards/archive"]):not([href="/minigames?archive=true"]):not([href*="/minigames?archive=true"]):not([href="/saved-boards"]) {
   color: var(--color-yellow) !important;
 }
 
-/* Yellow links (premium, tournament) turn white on hover - must come after general hover rule */
+/* Yellow links (premium, tournament) and purple links turn white on hover - must come after general hover rule */
 .left-sidebar .nav-link[href="/daily-boards/archive"]:hover,
 .left-sidebar .nav-link[href*="/timeless-boards/archive"]:hover,
 .left-sidebar .nav-link[href="/minigames?archive=true"]:hover,
 .left-sidebar .nav-link[href*="/minigames?archive=true"]:hover,
+.left-sidebar .nav-link[href="/saved-boards"]:hover,
 .left-sidebar .nav-section:last-child > .nav-link:hover {
   color: #fff !important;
 }

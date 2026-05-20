@@ -12,6 +12,7 @@ import '../daily-boards/DailyBoardPage.css';
 interface OpenPlayLeader {
   player_id: number;
   player_display_name: string;
+  player_profile_url: string;
   player_profile_picture: string;
   player_chat_color: string;
   score: number;
@@ -198,10 +199,17 @@ export default function OpenPlayPage() {
         <div className="open-play-header">
           <h1 className="open-play-title">Open Play</h1>
 
-          <p className="open-play-intro">
-            Start a New Game to create a board and play it, other players will be able to see the board on
-            this page and play it at any time. Or play an existing board created by another player below.
-          </p>
+          <div className="open-play-intro">
+            <p>Press &ldquo;New Game&rdquo; to create boards.</p>
+            <p>
+              Play and compete in your own time.
+              <br />
+              These are not live games - anyone can join in and play whenever they like.
+            </p>
+            <p>
+              Boards created by other players will also appear on this page for everyone to play.
+            </p>
+          </div>
 
           <div className="open-play-filters">
           <div className="open-play-filters-stack">
@@ -375,12 +383,14 @@ export default function OpenPlayPage() {
                               <div className="player-info">
                                 <ProfilePicture
                                   profilePictureUrl={leader.player_profile_picture}
+                                  profileUrl={leader.player_profile_url}
                                   chatColor={leader.player_chat_color}
                                   size={40}
                                   showBorder
                                 />
                                 <Username
                                   username={leader.player_display_name}
+                                  profileUrl={leader.player_profile_url}
                                   chatColor={leader.player_chat_color}
                                 />
                               </div>

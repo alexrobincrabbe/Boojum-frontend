@@ -252,15 +252,22 @@ export default function DailyBoardArchiveDetailPage() {
                     >
                       <td className="rank-col">{index + 1}</td>
                       <td className="player-col">
-                        <div className="player-info">
+                        <div
+                          className="player-info"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          role="presentation"
+                        >
                           <ProfilePicture
                             profilePictureUrl={score.player_profile_picture}
+                            profileUrl={score.player_profile_url}
                             chatColor={score.player_chat_color}
                             size={40}
                             showBorder={true}
                           />
                           <Username
                             username={score.player_display_name}
+                            profileUrl={score.player_profile_url}
                             chatColor={score.player_chat_color}
                           />
                         </div>

@@ -40,6 +40,14 @@
   max-width: 720px;
 }
 
+.open-play-intro p {
+  margin: 0 0 12px;
+}
+
+.open-play-intro p:last-child {
+  margin-bottom: 0;
+}
+
 .open-play-intro strong {
   color: var(--color-green);
   text-shadow: var(--glow-green-text);
@@ -61,36 +69,40 @@
   padding: 14px 20px;
   margin-bottom: 20px;
   background: transparent;
-  border: 2px solid var(--color-blue);
+  border: 2px solid var(--color-yellow);
   border-radius: 12px;
-  color: var(--color-blue);
-  text-shadow: var(--glow-blue-text);
+  color: var(--color-yellow);
+  text-shadow: var(--glow-yellow-text);
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .open-play-new-game-list-btn:hover {
-  background: rgba(113, 187, 233, 0.12);
-  border-color: var(--color-yellow);
-  color: var(--color-yellow);
-  text-shadow: var(--glow-yellow-text);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #fff;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .open-play-new-game-btn {
-  background: var(--color-green);
-  color: #1b1835;
-  border: none;
+  background: transparent;
+  color: var(--color-yellow);
+  border: 2px solid var(--color-yellow);
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  text-shadow: none;
+  text-shadow: var(--glow-yellow-text);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .open-play-new-game-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #fff;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .open-play-new-game-btn:disabled {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { lobbyAPI } from '../../../services/api';
 import './ScoresModal.css';
 
@@ -207,6 +208,54 @@ export function ScoresModal({
     return '/images/default.png';
   };
 
+  const renderPlayerCell = (player: FinalScore, displayName: string) => {
+    const profileImage = getProfileImage(player);
+    const isGuest = !player.profile_url;
+    const profilePath = player.profile_url ? `/profile/${player.profile_url}` : null;
+
+    const pic = (
+      <span className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}>
+        <img
+          src={profileImage}
+          alt={player.display_name}
+          className="rounded-circle high-score-img"
+          width={30}
+          height={30}
+          style={{
+            borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
+          }}
+        />
+      </span>
+    );
+
+    const name = (
+      <strong
+        className={`player ${isGuest ? 'guest-user' : ''}`}
+        style={{ color: isGuest ? '#808080' : (player.chat_color || 'white') }}
+      >
+        {displayName}
+      </strong>
+    );
+
+    if (profilePath) {
+      return (
+        <td className="player-container dark">
+          <Link to={profilePath} className="final-score-player-link" style={{ textDecoration: 'none' }}>
+            {pic}
+            {name}
+          </Link>
+        </td>
+      );
+    }
+
+    return (
+      <td className="player-container dark">
+        {pic}
+        {name}
+      </td>
+    );
+  };
+
   return (
     <div
       className={`modal ${isOpen ? 'show' : ''}`}
@@ -262,8 +311,6 @@ export function ScoresModal({
                 {scoresToDisplay.map(([playerId, player], index) => {
                   const rank = index + 1;
                   const bestWord = player.best_word?.word || 'none';
-                  const profileImage = getProfileImage(player);
-                  const isGuest = !player.profile_url;
                   const displayName = useSavedBoardScores && player.attempt_number
                     ? `${player.display_name} (#${player.attempt_number})`
                     : player.display_name;
@@ -275,28 +322,7 @@ export function ScoresModal({
                         <td className="pos">
                           <strong>{rank}</strong>
                         </td>
-                        <td className="player-container dark">
-                          <span
-                            className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}
-                          >
-                            <img
-                              src={profileImage}
-                              alt={player.display_name}
-                              className="rounded-circle high-score-img"
-                              width={30}
-                              height={30}
-                              style={{
-                                borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
-                              }}
-                            />
-                          </span>
-                          <strong
-                            className={`player ${isGuest ? 'guest-user' : ''}`}
-                            style={{ color: isGuest ? '#808080' : (player.chat_color || 'white') }}
-                          >
-                            {displayName}
-                          </strong>
-                        </td>
+                        {renderPlayerCell(player, displayName)}
                         <td className="dark best-word">{bestWord === "-" ? "-" : bestWord}</td>
                         <td className="final-score">{player.final_score === "-" ? "-" : player.final_score}</td>
                         <td className="one-shot-time">
@@ -311,28 +337,7 @@ export function ScoresModal({
                         <td className="pos">
                           <strong>{rank}</strong>
                         </td>
-                        <td className="player-container dark">
-                          <span
-                            className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}
-                          >
-                            <img
-                              src={profileImage}
-                              alt={player.display_name}
-                              className="rounded-circle high-score-img"
-                              width={30}
-                              height={30}
-                              style={{
-                                borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
-                              }}
-                            />
-                          </span>
-                          <strong
-                            className={`player ${isGuest ? 'guest-user' : ''}`}
-                            style={{ color: isGuest ? '#808080' : (player.chat_color || 'white') }}
-                          >
-                            {displayName}
-                          </strong>
-                        </td>
+                        {renderPlayerCell(player, displayName)}
                         <td className="number-of-words">
                           {player.number_of_words_found === "-" ? "-" : (player.number_of_words_found || 0)}
                         </td>
