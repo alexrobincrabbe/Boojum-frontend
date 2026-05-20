@@ -203,6 +203,11 @@ export default function OpenPlayPage() {
           </button>
         </div>
 
+        <p className="open-play-intro">
+          Start a New Game to create a board and play it, other players will be able to see the board on
+          this page and play it at any time. Or play an existing board created by another player below.
+        </p>
+
         <div className="open-play-filters">
           <select
             value={timeLimitFilter}

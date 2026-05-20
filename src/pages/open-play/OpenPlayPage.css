@@ -29,7 +29,21 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+}
+
+.open-play-intro {
+  color: var(--color-blue);
+  text-shadow: var(--glow-blue-text);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0 0 24px;
+  max-width: 720px;
+}
+
+.open-play-intro strong {
+  color: var(--color-green);
+  text-shadow: var(--glow-green-text);
 }
 
 .open-play-title {
