@@ -24,7 +24,7 @@ export interface GameBotRecord {
   room_name: string;
   room_slug: string;
   personality_prompt: string;
-  skill_level: number;
+  chat_enabled: boolean;
   words_per_minute: number;
   word_length_factor: number;
   congratulate_winner_chance: number;
@@ -56,6 +56,9 @@ const BotControlPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
+  const [isCreatingBot, setIsCreatingBot] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [newName, setNewName] = useState('');
   const [newRoomId, setNewRoomId] = useState<number | ''>('');
@@ -92,6 +95,7 @@ const BotControlPage = () => {
       toast.error('Name and room are required');
       return;
     }
+    setIsCreatingBot(true);
     try {
       const bot = await adminAPI.createBot({
         display_name: newName.trim(),
@@ -105,17 +109,20 @@ const BotControlPage = () => {
     } catch (e: unknown) {
       const err = e as { response?: { data?: { error?: string } } };
       toast.error(err.response?.data?.error || 'Failed to create bot');
+    } finally {
+      setIsCreatingBot(false);
     }
   };
 
   const handleSave = async () => {
-    if (!selected) return;
+    if (!selected || isSaving || isDeleting) return;
+    setIsSaving(true);
     try {
       const updated = await adminAPI.updateBot(selected.id, {
         display_name: selected.display_name,
         room_id: selected.room_id,
         personality_prompt: selected.personality_prompt,
-        skill_level: selected.skill_level,
+        chat_enabled: selected.chat_enabled,
         words_per_minute: selected.words_per_minute,
         word_length_factor: selected.word_length_factor,
         congratulate_winner_chance: selected.congratulate_winner_chance ?? 100,
@@ -129,11 +136,15 @@ const BotControlPage = () => {
       toast.success('Bot saved');
     } catch {
       toast.error('Failed to save bot');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
+    if (isSaving || isDeleting) return;
     if (!window.confirm('Delete this bot and its user account?')) return;
+    setIsDeleting(true);
     try {
       await adminAPI.deleteBot(id);
       toast.success('Bot deleted');
@@ -141,8 +152,12 @@ const BotControlPage = () => {
       await load();
     } catch {
       toast.error('Failed to delete bot');
+    } finally {
+      setIsDeleting(false);
     }
   };
+
+  const isBusy = isCreatingBot || isSaving || isDeleting;
 
   const updateSelected = (patch: Partial<GameBotRecord>) => {
     if (!selectedId) return;
@@ -171,7 +186,12 @@ const BotControlPage = () => {
         ) : (
           <div className="bot-control-layout">
             <aside className="bot-list-panel">
-              <button type="button" className="bot-create-btn" onClick={() => setCreating((v) => !v)}>
+              <button
+                type="button"
+                className="bot-create-btn"
+                disabled={isBusy}
+                onClick={() => setCreating((v) => !v)}
+              >
                 <Plus size={18} /> New bot
               </button>
               {creating && (
@@ -181,10 +201,12 @@ const BotControlPage = () => {
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     maxLength={20}
+                    disabled={isCreatingBot}
                   />
                   <select
                     value={newRoomId}
                     onChange={(e) => setNewRoomId(e.target.value ? Number(e.target.value) : '')}
+                    disabled={isCreatingBot}
                   >
                     <option value="">Select room…</option>
                     {rooms.map((r) => (
@@ -193,8 +215,13 @@ const BotControlPage = () => {
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={handleCreate}>
-                    Create
+                  <button
+                    type="button"
+                    className="bot-create-submit-btn"
+                    onClick={handleCreate}
+                    disabled={isCreatingBot}
+                  >
+                    {isCreatingBot ? 'Creating…' : 'Create bot'}
                   </button>
                 </div>
               )}
@@ -216,21 +243,48 @@ const BotControlPage = () => {
             </aside>
 
             <section className="bot-editor-panel">
-              {!selected ? (
+              {isCreatingBot ? (
+                <div className="bot-editor-status" role="status" aria-live="polite">
+                  <p className="bot-editor-status-title">Creating bot…</p>
+                  <p className="bot-editor-status-detail">
+                    Setting up the player account and opening the editor.
+                  </p>
+                </div>
+              ) : isDeleting ? (
+                <div className="bot-editor-status" role="status" aria-live="polite">
+                  <p className="bot-editor-status-title">Deleting bot…</p>
+                  <p className="bot-editor-status-detail">Removing the bot and its user account.</p>
+                </div>
+              ) : !selected ? (
                 <p className="bot-editor-empty">Select a bot to edit, or create a new one.</p>
               ) : (
                 <>
                   <div className="bot-editor-toolbar">
                     <h2>{selected.display_name}</h2>
                     <div className="bot-editor-actions">
-                      <button type="button" className="btn-save" onClick={handleSave}>
-                        <Save size={16} /> Save
+                      <button
+                        type="button"
+                        className="btn-save"
+                        onClick={handleSave}
+                        disabled={isBusy}
+                      >
+                        <Save size={16} /> {isSaving ? 'Saving…' : 'Save'}
                       </button>
-                      <button type="button" className="btn-delete" onClick={() => handleDelete(selected.id)}>
-                        <Trash2 size={16} /> Delete
+                      <button
+                        type="button"
+                        className="btn-delete"
+                        onClick={() => handleDelete(selected.id)}
+                        disabled={isBusy}
+                      >
+                        <Trash2 size={16} /> {isDeleting ? 'Deleting…' : 'Delete'}
                       </button>
                     </div>
                   </div>
+                  {isSaving && (
+                    <p className="bot-editor-inline-status" role="status" aria-live="polite">
+                      Saving changes…
+                    </p>
+                  )}
 
                   <label className="bot-field">
                     <span>Display name</span>
@@ -271,17 +325,13 @@ const BotControlPage = () => {
                     <span>Active (bot worker will join on schedule)</span>
                   </label>
 
-                  <label className="bot-field">
-                    <span>Chat skill (1–10)</span>
+                  <label className="bot-field bot-field-checkbox">
                     <input
-                      type="range"
-                      min={1}
-                      max={10}
-                      value={selected.skill_level}
-                      onChange={(e) => updateSelected({ skill_level: Number(e.target.value) })}
+                      type="checkbox"
+                      checked={selected.chat_enabled ?? true}
+                      onChange={(e) => updateSelected({ chat_enabled: e.target.checked })}
                     />
-                    <span className="bot-skill-value">{selected.skill_level}</span>
-                    <span className="bot-field-hint">LangGraph chat only</span>
+                    <span>Chat enabled (plays either way; when off, no messages)</span>
                   </label>
 
                   <label className="bot-field">
@@ -319,6 +369,14 @@ const BotControlPage = () => {
                     </span>
                   </label>
 
+                  {!selected.chat_enabled && (
+                    <p className="bot-field-hint">
+                      Chat is off — this bot will still join rooms and submit scores, but will not send messages.
+                    </p>
+                  )}
+
+                  {selected.chat_enabled && (
+                  <>
                   <label className="bot-field">
                     <span>Congratulate winner (%)</span>
                     <input
@@ -390,6 +448,8 @@ const BotControlPage = () => {
                       onChange={(e) => updateSelected({ personality_prompt: e.target.value })}
                     />
                   </label>
+                  </>
+                  )}
 
                   <div className="bot-schedules">
                     <h3>Schedule (UTC)</h3>

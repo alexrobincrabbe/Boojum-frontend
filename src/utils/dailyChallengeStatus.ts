@@ -14,7 +14,26 @@ export interface DoodledumCheckData {
   drawer?: string | null;
 }
 
-export function isBoojumbleSolved(boojumble: BoojumbleStatus): boolean {
+const boojumbleSolvedKey = (id: number) => `minigames-solved-${id}`;
+
+function normalizeSolutionWord(line: unknown): string {
+  if (typeof line === 'string') return line.trim().toUpperCase();
+  if (Array.isArray(line)) {
+    return line.map((c) => String(c)).join('').trim().toUpperCase();
+  }
+  return '';
+}
+
+function normalizeSolution(solution: unknown, n: number): string[] {
+  if (!Array.isArray(solution)) return [];
+  return solution.slice(0, n).map(normalizeSolutionWord);
+}
+
+export function markBoojumbleSolved(boojumbleId: number): void {
+  localStorage.setItem(boojumbleSolvedKey(boojumbleId), 'true');
+}
+
+export function isBoojumbleSolvedFromGrid(boojumble: BoojumbleStatus): boolean {
   const storedLetters = localStorage.getItem(`minigames-${boojumble.id}`);
   if (!storedLetters) return false;
 
@@ -33,7 +52,10 @@ export function isBoojumbleSolved(boojumble: BoojumbleStatus): boolean {
   for (let i = 0; i < boojumble.N; i++) {
     currentLetters.push([]);
     for (let j = 0; j < boojumble.N; j++) {
-      currentLetters[i].push(flatLetters[i * boojumble.N + j] || '');
+      const letter = flatLetters[i * boojumble.N + j];
+      currentLetters[i].push(
+        typeof letter === 'string' ? letter.trim().toUpperCase() : '',
+      );
     }
   }
 
@@ -52,13 +74,24 @@ export function isBoojumbleSolved(boojumble: BoojumbleStatus): boolean {
     colWords.push(colWord);
   }
 
-  const rows = Array.isArray(boojumble.rows) ? boojumble.rows : [];
-  const cols = Array.isArray(boojumble.cols) ? boojumble.cols : [];
+  const rows = normalizeSolution(boojumble.rows, boojumble.N);
+  const cols = normalizeSolution(boojumble.cols, boojumble.N);
 
-  return (
-    rowWords.every((word, idx) => word === rows[idx]) ||
-    colWords.every((word, idx) => word === cols[idx])
-  );
+  const rowsMatch =
+    rows.length === boojumble.N &&
+    rowWords.every((word, idx) => word === rows[idx]);
+  const colsMatch =
+    cols.length === boojumble.N &&
+    colWords.every((word, idx) => word === cols[idx]);
+
+  return rowsMatch || colsMatch;
+}
+
+export function isBoojumbleSolved(boojumble: BoojumbleStatus): boolean {
+  if (localStorage.getItem(boojumbleSolvedKey(boojumble.id)) === 'true') {
+    return true;
+  }
+  return isBoojumbleSolvedFromGrid(boojumble);
 }
 
 export function areAllBoojumblesSolved(boojumbles: BoojumbleStatus[]): boolean {

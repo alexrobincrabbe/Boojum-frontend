@@ -51,7 +51,7 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
       return '/images/default.png';
     }
     if (!profilePictureUrl || profilePictureUrl.includes('placeholder')) {
-      return 'https://res.cloudinary.com/df8lhl810/image/upload/v1/placeholder';
+      return '/images/default.png';
     }
     const publicId = profilePictureUrl.split('/').pop()?.split('.')[0] || '';
     return `https://res.cloudinary.com/df8lhl810/image/upload/q_auto,w_30,h_30,c_fill,g_face/r_100/${publicId}`;

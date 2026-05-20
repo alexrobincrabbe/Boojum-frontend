@@ -720,7 +720,7 @@ export const adminAPI = {
     });
     return response.data;
   },
-  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string; time_limit?: number }[], boardSize: number = 4) => {
+  createDailyBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string; time_limit?: number; gameboard_id?: number }[], boardSize: number = 4) => {
     const response = await api.post('/admin/create-daily-boards/', { 
       boards,
       board_size: boardSize,
@@ -728,7 +728,7 @@ export const adminAPI = {
     });
     return response.data;
   },
-  createTimelessBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string }[], boardSize: number = 4) => {
+  createTimelessBoards: async (boards: { board: string[][]; boojum: number[][]; title: string; date: string; gameboard_id?: number }[], boardSize: number = 4) => {
     const response = await api.post('/admin/create-timeless-boards/', { 
       boards,
       board_size: boardSize,
@@ -784,7 +784,7 @@ export const adminAPI = {
     display_name: string;
     room_id: number;
     personality_prompt?: string;
-    skill_level?: number;
+    chat_enabled?: boolean;
     words_per_minute?: number;
     word_length_factor?: number;
     schedules?: unknown[];

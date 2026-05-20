@@ -85,6 +85,8 @@ export function useChatWebSocket({
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const isManualCloseRef = useRef(false);
+  const showAdminTracesRef = useRef(showAdminTraces);
+  showAdminTracesRef.current = showAdminTraces;
 
   const maxReconnectAttempts = 10;
 
@@ -136,7 +138,7 @@ export function useChatWebSocket({
     if (token) url.searchParams.set("token", token);
 
     return url.toString();
-  }, [roomId, isGuest, guestName, guestParam, token, showAdminTraces]);
+  }, [roomId, isGuest, guestName, token]);
 
   // --- connect() uses a ref so scheduleReconnect can call it without lint errors
   const connectRef = useRef<() => void>(() => {});
@@ -214,9 +216,9 @@ export function useChatWebSocket({
               traceId: data.trace_id || undefined,
             };
             setMessages((prev) => [...prev, newMessage]);
-          } else if (showAdminTraces && data.event_type === "chat_trace" && data.trace) {
+          } else if (showAdminTracesRef.current && data.event_type === "chat_trace" && data.trace) {
             appendSessionTraceEvent(normalizeTracePayload(data.trace));
-          } else if (showAdminTraces && data.event_type === "bot_trace_decision" && data.trace_id) {
+          } else if (showAdminTracesRef.current && data.event_type === "bot_trace_decision" && data.trace_id) {
             const botName = data.bot_name || "Bot";
             const eventLabel = (data.event_label || "").trim();
             const decisionMessage: ChatMessage = {
@@ -244,20 +246,25 @@ export function useChatWebSocket({
       }
     };
 
-    ws.onerror = (error) => {
-      console.error("[ChatWS] WebSocket error:", error, {
-        url: chatWsUrl,
-        readyState: ws.readyState,
-      });
-      // onclose will handle reconnect
+    ws.onerror = () => {
+      // Browser only exposes a generic Event here; see onclose for code/reason.
     };
 
-      ws.onclose = (event) => {
+    ws.onclose = (event) => {
       if (wsRef.current === ws) wsRef.current = null;
 
       if (isManualCloseRef.current) {
         setConnectionState("closed");
         return;
+      }
+
+      if (event.code !== 1000) {
+        console.warn("[ChatWS] connection closed", {
+          code: event.code,
+          reason: event.reason || "(none)",
+          wasClean: event.wasClean,
+          url: chatWsUrl,
+        });
       }
 
       // 1008 often means auth/policy violation (don't spam reconnect)

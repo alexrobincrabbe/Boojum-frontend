@@ -1,5 +1,6 @@
 .bot-control-page {
   padding: 1.5rem 0 3rem;
+  color: #eee;
 }
 
 .bot-control-header h1 {
@@ -48,12 +49,57 @@
   justify-content: center;
   gap: 0.35rem;
   margin-bottom: 0.75rem;
-  padding: 0.5rem;
-  background: rgba(113, 187, 233, 0.15);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: linear-gradient(180deg, rgba(113, 187, 233, 0.35) 0%, rgba(113, 187, 233, 0.2) 100%);
   border: 1px solid #71bbe9;
-  color: #71bbe9;
+  color: #e8f6ff;
   border-radius: 6px;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(113, 187, 233, 0.2);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.bot-create-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(113, 187, 233, 0.5) 0%, rgba(113, 187, 233, 0.3) 100%);
+  box-shadow: 0 3px 12px rgba(113, 187, 233, 0.35);
+}
+
+.bot-create-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.bot-create-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bot-create-submit-btn {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #0d1a24;
+  background: linear-gradient(180deg, #8fd4ff 0%, #71bbe9 100%);
+  box-shadow: 0 2px 8px rgba(113, 187, 233, 0.35);
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.bot-create-submit-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.bot-create-submit-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.bot-create-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 .bot-create-form {
@@ -125,6 +171,37 @@
   color: #888;
 }
 
+.bot-editor-status {
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed rgba(113, 187, 233, 0.4);
+  border-radius: 8px;
+  background: rgba(113, 187, 233, 0.06);
+}
+
+.bot-editor-status-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #71bbe9;
+}
+
+.bot-editor-status-detail {
+  margin: 0;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.bot-editor-inline-status {
+  margin: -0.5rem 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(51, 193, 91, 0.12);
+  border: 1px solid rgba(51, 193, 91, 0.35);
+  color: #7ce7a8;
+  font-size: 0.9rem;
+}
+
 .bot-editor-toolbar {
   display: flex;
   justify-content: space-between;
@@ -150,12 +227,32 @@
 .btn-save {
   background: #33c15b;
   color: #111;
+  font-weight: 600;
+}
+
+.btn-save:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-save:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .btn-delete {
-  background: rgba(235, 84, 151, 0.2);
-  color: #eb5497;
+  background: rgba(235, 84, 151, 0.25);
+  color: #ffb3d4;
   border: 1px solid #eb5497 !important;
+  font-weight: 600;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: rgba(235, 84, 151, 0.4);
+}
+
+.btn-delete:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .bot-field {
@@ -174,10 +271,17 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+.bot-field-checkbox span {
+  color: #fff;
 }
 
 .bot-field-checkbox input {
   width: auto;
+  cursor: pointer;
 }
 
 .bot-skill-value {
@@ -195,6 +299,11 @@
 
 .bot-schedule-mode {
   margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.bot-schedule-mode span {
+  color: #fff;
 }
 
 .bot-add-slot-btn {
@@ -233,6 +342,16 @@
   font-size: 0.85rem;
   display: flex;
   align-items: center;
+  gap: 0.25rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+.bot-schedule-slot > label {
+  color: #fff;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
 }
 

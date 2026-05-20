@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
-import { notifyDailyChallengesUpdated } from '../../../utils/dailyChallengeStatus';
+import {
+  isBoojumbleSolvedFromGrid,
+  markBoojumbleSolved,
+  notifyDailyChallengesUpdated,
+} from '../../../utils/dailyChallengeStatus';
 import { playSound } from '../../../utils/sounds';
 import { usePageOnboarding } from '../../../hooks/usePageOnboarding';
 import './Boojumble.css';
@@ -104,6 +108,21 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       
       return hasChanges ? newLetters : prev;
     });
+  }, [boojumbles]);
+
+  // Sync solved flags for boards already completed (e.g. before solved-key existed)
+  useEffect(() => {
+    if (boojumbles.length === 0) return;
+    let anyNewlyMarked = false;
+    boojumbles.forEach((boojumble) => {
+      if (isBoojumbleSolvedFromGrid(boojumble)) {
+        markBoojumbleSolved(boojumble.id);
+        anyNewlyMarked = true;
+      }
+    });
+    if (anyNewlyMarked) {
+      notifyDailyChallengesUpdated();
+    }
   }, [boojumbles]);
 
   // Note: Words found are loaded directly from localStorage when needed in checkAndInit
@@ -732,7 +751,9 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
                   colWords.every((word, idx) => word === cols[idx]);
 
     if (solved) {
+      markBoojumbleSolved(currentBoojumble.id);
       minigamesAPI.setBoojumbleAchievement(String(N)).catch(console.error);
+      notifyDailyChallengesUpdated();
     }
   };
 

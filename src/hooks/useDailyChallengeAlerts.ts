@@ -5,6 +5,8 @@ import {
   boojumbleNeedsAttention,
   cluejumNeedsAttention,
   DAILY_CHALLENGES_UPDATED_EVENT,
+  isBoojumbleSolvedFromGrid,
+  markBoojumbleSolved,
   needsDoodledumGuess,
   type BoojumbleStatus,
 } from '../utils/dailyChallengeStatus';
@@ -21,6 +23,11 @@ export function useDailyChallengeAlerts(username?: string | null) {
   const hasWordClueRef = useRef(false);
 
   const applyLocalPuzzleStatus = useCallback(() => {
+    boojumblesRef.current.forEach((boojumble) => {
+      if (isBoojumbleSolvedFromGrid(boojumble)) {
+        markBoojumbleSolved(boojumble.id);
+      }
+    });
     setBoojumbleUnsolved(boojumbleNeedsAttention(boojumblesRef.current));
     setCluejumUnsolved(cluejumNeedsAttention(hasWordClueRef.current));
   }, []);
@@ -64,6 +71,7 @@ export function useDailyChallengeAlerts(username?: string | null) {
     const onStorage = (event: StorageEvent) => {
       const key = event.key;
       if (
+        key?.startsWith('minigames-solved-') ||
         key?.startsWith('minigames-') ||
         key?.startsWith('wordClues-') ||
         key?.startsWith('cluejumScore-')

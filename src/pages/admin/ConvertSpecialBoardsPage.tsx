@@ -417,14 +417,20 @@ const ConvertSpecialBoardsPage = () => {
       const firstBoard = availableBoards.find(b => selectedBoardIds.has(b.id));
       const boardSize = firstBoard?.letters?.length || 4;
 
-      // Create daily boards
+      // Create daily boards (reuse existing special GameBoard via gameboard_id)
       if (dailyBoards.length > 0) {
-        await adminAPI.createDailyBoards(dailyBoards.map(({ boardId, ...rest }) => rest), boardSize);
+        await adminAPI.createDailyBoards(
+          dailyBoards.map(({ boardId, ...rest }) => ({ ...rest, gameboard_id: boardId })),
+          boardSize
+        );
       }
 
-      // Create timeless boards
+      // Create timeless boards (reuse existing special GameBoard via gameboard_id)
       if (timelessBoards.length > 0) {
-        await adminAPI.createTimelessBoards(timelessBoards.map(({ boardId, ...rest }) => rest), boardSize);
+        await adminAPI.createTimelessBoards(
+          timelessBoards.map(({ boardId, ...rest }) => ({ ...rest, gameboard_id: boardId })),
+          boardSize
+        );
       }
 
       toast.success(`Successfully converted ${selectedBoardIds.size} board(s)!`);
