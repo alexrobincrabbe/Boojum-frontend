@@ -27,13 +27,6 @@ h2 {
   padding-top: 0;
 }
 
-.profile-bot-notice {
-  margin: 0.35rem 0 0;
-  font-size: 0.9rem;
-  color: #888;
-  font-style: italic;
-}
-
 #profile-name {
   text-align: center;
   color: #f5ce45;
