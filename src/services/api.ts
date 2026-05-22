@@ -830,6 +830,24 @@ export const adminAPI = {
     const response = await api.get(`/admin/bots/traces/${encodeURIComponent(traceId)}/`);
     return response.data;
   },
+  listBotMemoryUsers: async (): Promise<{ users: string[] }> => {
+    const response = await api.get('/admin/bots/memories/users/');
+    return response.data;
+  },
+  listBotMemoriesForUser: async (
+    username: string,
+    limit = 200
+  ): Promise<{ username: string; memories: Array<{ id: number; memoryText: string; metadata: Record<string, unknown> }> }> => {
+    const response = await api.get(
+      `/admin/bots/memories/${encodeURIComponent(username)}/`,
+      { params: { limit } }
+    );
+    return response.data;
+  },
+  clearBotMemoriesForUser: async (username: string): Promise<{ username: string; deleted: number }> => {
+    const response = await api.delete(`/admin/bots/memories/${encodeURIComponent(username)}/`);
+    return response.data;
+  },
 };
 
 export default api;

@@ -59,6 +59,7 @@ import TimelessBoardWordsPage from "./pages/admin/TimelessBoardWordsPage";
 import DeleteBoardsPage from "./pages/admin/DeleteBoardsPage";
 import BotControlPage from "./pages/admin/BotControlPage";
 import BotTracePage from "./pages/admin/BotTracePage";
+import BotMemoriesPage from "./pages/admin/BotMemoriesPage";
 import CreateCustomRoomPage from "./pages/custom-room/CreateCustomRoomPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -235,6 +236,7 @@ function App() {
               <Route path="/admin/delete-boards" element={<DeleteBoardsPage />} />
               <Route path="/admin/bot-control" element={<BotControlPage />} />
               <Route path="/admin/bot-trace" element={<BotTracePage />} />
+              <Route path="/admin/bot-memories" element={<BotMemoriesPage />} />
               <Route path="/custom-room" element={<CreateCustomRoomPage />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />

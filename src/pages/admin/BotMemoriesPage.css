@@ -1,0 +1,152 @@
+.bot-memories-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  color: #e8eaed;
+}
+
+.bot-memories-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #71bbe9;
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+}
+
+.bot-memories-back:hover {
+  text-decoration: underline;
+}
+
+.bot-memories-page .page-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.bot-memories-page .muted {
+  color: #9aa0a6;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.bot-memories-error {
+  color: #f28b82;
+  margin: 0 0 1rem;
+}
+
+.bot-memories-page .layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .bot-memories-page .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bot-memories-page .card {
+  background: #1e2228;
+  border: 1px solid #3c4043;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.bot-memories-page .card-elevated {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.bot-memories-page .card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.memory-user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.memory-user-list li {
+  margin-bottom: 0.35rem;
+}
+
+.memory-user-list button {
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #e8eaed;
+  cursor: pointer;
+}
+
+.memory-user-list button:hover {
+  background: rgba(113, 187, 233, 0.12);
+}
+
+.memory-user-list .memory-user-selected {
+  background: rgba(113, 187, 233, 0.22);
+  border-color: rgba(113, 187, 233, 0.45);
+}
+
+.memory-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.memory-detail-header h2 {
+  margin: 0;
+}
+
+.bot-memories-page .btn-danger {
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(235, 84, 151, 0.5);
+  background: rgba(235, 84, 151, 0.2);
+  color: #ffb3d4;
+  cursor: pointer;
+}
+
+.bot-memories-page .btn-danger:hover:not(:disabled) {
+  background: rgba(235, 84, 151, 0.35);
+}
+
+.bot-memories-page .btn-danger:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.memory-record-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.memory-record-list li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #3c4043;
+}
+
+.memory-record-list li:last-child {
+  border-bottom: none;
+}
+
+.memory-record-list p {
+  margin: 0 0 0.25rem;
+}
+
+.memory-record-list small {
+  color: #9aa0a6;
+  word-break: break-word;
+}
