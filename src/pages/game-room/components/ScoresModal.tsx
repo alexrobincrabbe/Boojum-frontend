@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { lobbyAPI } from '../../../services/api';
+import {
+  FALLBACK_PROFILE_IMAGE,
+  resolveProfilePictureUrl,
+} from '../../../utils/profilePictureUrl';
 import './ScoresModal.css';
 
 interface FinalScore {
@@ -197,20 +201,12 @@ export function ScoresModal({
     scoresToDisplay = [];
   }
 
-  const getProfileImage = (player: FinalScore) => {
-    if (player.profile_url && !player.profile_picture?.includes('placeholder')) {
-      const fullImageUrl = player.profile_picture || '';
-      const publicId = fullImageUrl.split('/').pop()?.split('.')[0];
-      if (publicId) {
-        return `https://res.cloudinary.com/df8lhl810/image/upload/q_auto,w_30,h_30,c_fill,g_face/r_100/${publicId}`;
-      }
-    }
-    return '/images/default.png';
-  };
-
   const renderPlayerCell = (player: FinalScore, displayName: string) => {
-    const profileImage = getProfileImage(player);
     const isGuest = !player.profile_url;
+    const profileImage = resolveProfilePictureUrl(
+      isGuest ? null : player.profile_picture,
+      30
+    );
     const profilePath = player.profile_url ? `/profile/${player.profile_url}` : null;
 
     const pic = (
@@ -223,6 +219,12 @@ export function ScoresModal({
           height={30}
           style={{
             borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
+          }}
+          onError={(e: SyntheticEvent<HTMLImageElement>) => {
+            const img = e.currentTarget;
+            if (img.src !== FALLBACK_PROFILE_IMAGE) {
+              img.src = FALLBACK_PROFILE_IMAGE;
+            }
           }}
         />
       </span>
