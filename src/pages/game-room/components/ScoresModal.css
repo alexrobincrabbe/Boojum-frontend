@@ -166,13 +166,21 @@ tbody tr:last-child td:last-child {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  text-align: center;
+}
+
+.final-score-player-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  max-width: 110px;
 }
 
 .player {
-  display: inline-block;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  display: block;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;

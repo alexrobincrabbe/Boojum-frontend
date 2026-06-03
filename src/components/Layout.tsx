@@ -888,7 +888,7 @@ const Layout = ({ children }: LayoutProps) => {
         aria-label={dailyNeedsPlay ? "Today's daily board — play now" : 'Everyday Board'}
       >
         <CalendarDays size={20} />
-        <span className="topbar-shortcut-label">Daily</span>
+        <span className="topbar-shortcut-label">Every Day</span>
         {dailyNeedsPlay && <span className="topbar-shortcut-badge" />}
       </Link>
       <Link
@@ -903,8 +903,9 @@ const Layout = ({ children }: LayoutProps) => {
     </>
   );
 
-  const renderShortcuts = () => (
+  const renderShortcuts = ({ includeBoards = false, includeTeamPoll = true } = {}) => (
     <>
+      {includeBoards && renderBoardShortcuts()}
       <Link
         to="/minigames?tab=boojumble"
         className={`topbar-shortcut topbar-shortcut--boojumble${boojumbleUnsolved ? ' topbar-shortcut--active' : ''}`}
@@ -941,26 +942,30 @@ const Layout = ({ children }: LayoutProps) => {
         <span className="topbar-shortcut-label">Tournament</span>
         {soloRegistrationOpen && <span className="topbar-shortcut-badge" />}
       </Link>
-      <Link
-        to="/team-tournament"
-        className={`topbar-shortcut topbar-shortcut--tournament${teamRegistrationOpen ? ' topbar-shortcut--active' : ''}`}
-        aria-label={teamRegistrationOpen ? 'Team tournament registration open' : 'Team tournament'}
-      >
-        <Trophy size={20} />
-        <span className="topbar-shortcut-label">Team</span>
-        {teamRegistrationOpen && <span className="topbar-shortcut-badge" />}
-      </Link>
-      {poll && (
-        <button
-          type="button"
-          className={`topbar-shortcut topbar-shortcut--poll${pollNeedsVote ? ' topbar-shortcut--active' : ''}`}
-          onClick={() => setPollModalOpen(!pollModalOpen)}
-          aria-label={pollModalOpen ? 'Close poll' : pollNeedsVote ? 'Poll — vote now' : 'Open poll'}
-        >
-          <BarChart3 size={20} />
-          <span className="topbar-shortcut-label">Poll</span>
-          {pollNeedsVote && <span className="topbar-shortcut-badge" />}
-        </button>
+      {includeTeamPoll && (
+        <>
+          <Link
+            to="/team-tournament"
+            className={`topbar-shortcut topbar-shortcut--tournament${teamRegistrationOpen ? ' topbar-shortcut--active' : ''}`}
+            aria-label={teamRegistrationOpen ? 'Team tournament registration open' : 'Team tournament'}
+          >
+            <Trophy size={20} />
+            <span className="topbar-shortcut-label">Team</span>
+            {teamRegistrationOpen && <span className="topbar-shortcut-badge" />}
+          </Link>
+          {poll && (
+            <button
+              type="button"
+              className={`topbar-shortcut topbar-shortcut--poll${pollNeedsVote ? ' topbar-shortcut--active' : ''}`}
+              onClick={() => setPollModalOpen(!pollModalOpen)}
+              aria-label={pollModalOpen ? 'Close poll' : pollNeedsVote ? 'Poll — vote now' : 'Open poll'}
+            >
+              <BarChart3 size={20} />
+              <span className="topbar-shortcut-label">Poll</span>
+              {pollNeedsVote && <span className="topbar-shortcut-badge" />}
+            </button>
+          )}
+        </>
       )}
     </>
   );
@@ -984,9 +989,6 @@ const Layout = ({ children }: LayoutProps) => {
           </button>
         </div>
         <div className="top-bar-right">
-          <div className="topbar-shortcuts-group topbar-shortcuts-group--mobile-top">
-            {renderBoardShortcuts()}
-          </div>
           <div
             className="topbar-shortcuts-group topbar-shortcuts-group--desktop"
             data-onboarding="topbar-shortcuts"
@@ -1510,10 +1512,10 @@ const Layout = ({ children }: LayoutProps) => {
         />
       )}
 
-      {/* Mobile bottom bar — daily shortcuts */}
+      {/* Mobile bottom bar — board + daily shortcuts (no team/poll on mobile) */}
       <nav className="mobile-bottom-bar" aria-label="Quick links">
         <div className="mobile-bottom-bar-inner">
-          {renderShortcuts()}
+          {renderShortcuts({ includeBoards: true, includeTeamPoll: false })}
         </div>
       </nav>
 

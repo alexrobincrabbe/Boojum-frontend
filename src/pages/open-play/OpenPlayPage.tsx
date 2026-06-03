@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { lobbyAPI, dashboardAPI } from '../../services/api';
 import { Plus } from 'lucide-react';
@@ -29,6 +29,7 @@ interface UserSearchResult {
 export default function OpenPlayPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [boards, setBoards] = useState<OpenPlayBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,9 +55,12 @@ export default function OpenPlayPage() {
   const [scoreboardBoard, setScoreboardBoard] = useState<OpenPlayBoardItem | null>(null);
   const [fullScores, setFullScores] = useState<OpenPlayScoreRow[]>([]);
   const [scoresLoading, setScoresLoading] = useState(false);
+  const [highlightBoardId, setHighlightBoardId] = useState<number | null>(null);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const fetchingRef = useRef(false);
+  const scrollTargetBoardId = searchParams.get('board');
+  const scrolledToBoardRef = useRef<string | null>(null);
 
   const buildParams = useCallback(
     (cursor?: number | null) => {
@@ -138,6 +142,53 @@ export default function OpenPlayPage() {
     }, 300);
     return () => clearTimeout(t);
   }, [userSearchQuery]);
+
+  useEffect(() => {
+    if (!scrollTargetBoardId || loading) return;
+
+    const boardId = parseInt(scrollTargetBoardId, 10);
+    if (Number.isNaN(boardId)) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    if (scrolledToBoardRef.current === scrollTargetBoardId) return;
+
+    const boardElement = document.getElementById(`open-play-board-${boardId}`);
+    if (boardElement) {
+      scrolledToBoardRef.current = scrollTargetBoardId;
+      boardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightBoardId(boardId);
+      const highlightTimeout = setTimeout(() => {
+        setHighlightBoardId(null);
+        setSearchParams({}, { replace: true });
+      }, 2500);
+      return () => clearTimeout(highlightTimeout);
+    }
+
+    const boardInList = boards.some((board) => board.id === boardId);
+    if (!boardInList && hasMore && nextCursor && !loadingMore && !fetchingRef.current) {
+      fetchBoards(nextCursor, true);
+      return;
+    }
+
+    if (!boardInList && !hasMore && !loading && !loadingMore) {
+      setSearchParams({}, { replace: true });
+    }
+  }, [
+    scrollTargetBoardId,
+    boards,
+    loading,
+    hasMore,
+    nextCursor,
+    loadingMore,
+    fetchBoards,
+    setSearchParams,
+  ]);
+
+  useEffect(() => {
+    scrolledToBoardRef.current = null;
+  }, [scrollTargetBoardId]);
 
   const handleCreateGame = async () => {
     if (!isAuthenticated) {
@@ -338,7 +389,11 @@ export default function OpenPlayPage() {
             <span>New Game</span>
           </button>
           {boards.map((board) => (
-            <article key={board.id} className="open-play-board-card">
+            <article
+              key={board.id}
+              id={`open-play-board-${board.id}`}
+              className={`open-play-board-card${highlightBoardId === board.id ? ' open-play-board-card--highlighted' : ''}`}
+            >
               <div className="open-play-card-header">
                 <div>
                   <span className="open-play-card-id">Board #{board.id}</span>

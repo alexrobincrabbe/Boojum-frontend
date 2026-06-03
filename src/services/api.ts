@@ -408,6 +408,10 @@ export const lobbyAPI = {
     const response = await api.get('/daily-boards/');
     return response.data;
   },
+  getBoardSubmissionAlerts: async () => {
+    const response = await api.get('/daily-boards/alerts/');
+    return response.data;
+  },
   getOpenPlayBoards: async (params: Record<string, string | number | undefined>) => {
     const response = await api.get('/open-play/', { params });
     return response.data;

@@ -11,7 +11,7 @@ import {
   type BoojumbleStatus,
 } from '../utils/dailyChallengeStatus';
 
-const DOODLE_POLL_MS = 15000;
+const CHALLENGE_POLL_MS = 15000;
 
 export function useDailyChallengeAlerts(username?: string | null) {
   const location = useLocation();
@@ -21,6 +21,7 @@ export function useDailyChallengeAlerts(username?: string | null) {
 
   const boojumblesRef = useRef<BoojumbleStatus[]>([]);
   const hasWordClueRef = useRef(false);
+  const wordClueDateRef = useRef<string | null>(null);
 
   const applyLocalPuzzleStatus = useCallback(() => {
     boojumblesRef.current.forEach((boojumble) => {
@@ -29,7 +30,7 @@ export function useDailyChallengeAlerts(username?: string | null) {
       }
     });
     setBoojumbleUnsolved(boojumbleNeedsAttention(boojumblesRef.current));
-    setCluejumUnsolved(cluejumNeedsAttention(hasWordClueRef.current));
+    setCluejumUnsolved(cluejumNeedsAttention(hasWordClueRef.current, wordClueDateRef.current));
   }, []);
 
   const fetchMinigamesMetadata = useCallback(async () => {
@@ -37,6 +38,7 @@ export function useDailyChallengeAlerts(username?: string | null) {
       const minigamesData = await minigamesAPI.getMinigamesData();
       boojumblesRef.current = (minigamesData.boojumbles || []) as BoojumbleStatus[];
       hasWordClueRef.current = Boolean(minigamesData.word_clue);
+      wordClueDateRef.current = minigamesData.word_clue?.date ?? null;
       applyLocalPuzzleStatus();
     } catch (error) {
       console.error('Error loading minigames metadata for alerts:', error);
@@ -58,9 +60,12 @@ export function useDailyChallengeAlerts(username?: string | null) {
   }, [fetchMinigamesMetadata, pollDoodledum]);
 
   useEffect(() => {
-    const interval = setInterval(pollDoodledum, DOODLE_POLL_MS);
+    const interval = setInterval(() => {
+      void fetchMinigamesMetadata();
+      void pollDoodledum();
+    }, CHALLENGE_POLL_MS);
     return () => clearInterval(interval);
-  }, [pollDoodledum]);
+  }, [fetchMinigamesMetadata, pollDoodledum]);
 
   useEffect(() => {
     const onUpdated = () => {

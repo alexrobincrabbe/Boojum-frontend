@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { minigamesAPI } from "../../../services/api";
 import { notifyDailyChallengesUpdated } from "../../../utils/dailyChallengeStatus";
 import "./Cluejum.css";
@@ -75,11 +75,12 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
   const messageRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
-  const today = useMemo(() => getTodayString(), []);
+  const puzzleDate = wordClue?.date ?? null;
+  const storageDate = puzzleDate ?? getTodayString();
 
-  // Load minimal progress (stage only)
+  // Load minimal progress (stage only) — keyed to the puzzle's server date, not local midnight
   useEffect(() => {
-    const savedStage = localStorage.getItem(`wordClues-${today}`);
+    const savedStage = localStorage.getItem(`wordClues-${storageDate}`);
     if (!savedStage) return;
     setLoadedFromStorage(true);
     const saved = parseInt(savedStage, 10);
@@ -92,7 +93,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
         setGameOver(true);
       }
     }
-  }, [today]);
+  }, [storageDate]);
 
   // Focus first input for stage 1
   useEffect(() => {
@@ -154,13 +155,13 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
   }
 
   const saveStage = (s: number) => {
-    localStorage.setItem(`wordClues-${today}`, String(s));
+    localStorage.setItem(`wordClues-${storageDate}`, String(s));
     if (s === 3) {
       notifyDailyChallengesUpdated();
     }
   };
   const setScore = (s: number, score: number) =>
-    localStorage.setItem(`cluejumScore-${today}-${s}`, String(score));
+    localStorage.setItem(`cluejumScore-${storageDate}-${s}`, String(score));
 
   /* ---------- Stage 1 logic ---------- */
   const handleStage1Submit = () => {
@@ -295,8 +296,8 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       setScore(3, attempt);
       if (messageRef.current) typeText(messageRef.current, getSuccessMessage(3, attempt), 70);
       // Attempt to submit achievement
-      const s1Score = Number(localStorage.getItem(`cluejumScore-${today}-1`)) || attempt;
-      const s2Score = Number(localStorage.getItem(`cluejumScore-${today}-2`)) || attempt;
+      const s1Score = Number(localStorage.getItem(`cluejumScore-${storageDate}-1`)) || attempt;
+      const s2Score = Number(localStorage.getItem(`cluejumScore-${storageDate}-2`)) || attempt;
       minigamesAPI.setCluejumAchievement(s1Score, s2Score, attempt).catch(console.error);
       return;
     }

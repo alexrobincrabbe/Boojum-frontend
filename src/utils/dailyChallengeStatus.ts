@@ -1,5 +1,3 @@
-import { getTodayString } from '../pages/minigames/utils/cluejum.utils';
-
 export interface BoojumbleStatus {
   id: number;
   N: number;
@@ -99,8 +97,9 @@ export function areAllBoojumblesSolved(boojumbles: BoojumbleStatus[]): boolean {
   return boojumbles.every(isBoojumbleSolved);
 }
 
-export function isCluejumSolved(today = getTodayString()): boolean {
-  return localStorage.getItem(`wordClues-${today}`) === '3';
+export function isCluejumSolved(puzzleDate?: string | null): boolean {
+  if (!puzzleDate) return false;
+  return localStorage.getItem(`wordClues-${puzzleDate}`) === '3';
 }
 
 export function needsDoodledumGuess(
@@ -126,8 +125,11 @@ export function boojumbleNeedsAttention(boojumbles: BoojumbleStatus[]): boolean 
   return boojumbles.length > 0 && !areAllBoojumblesSolved(boojumbles);
 }
 
-export function cluejumNeedsAttention(hasWordClue: boolean): boolean {
-  return hasWordClue && !isCluejumSolved();
+export function cluejumNeedsAttention(
+  hasWordClue: boolean,
+  puzzleDate?: string | null,
+): boolean {
+  return hasWordClue && !isCluejumSolved(puzzleDate);
 }
 
 export const DAILY_CHALLENGES_UPDATED_EVENT = 'daily-challenges-updated';

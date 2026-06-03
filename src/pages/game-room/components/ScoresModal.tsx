@@ -40,6 +40,18 @@ interface SavedBoardScore {
   created_at: string;
 }
 
+interface OpenPlayBoardScore {
+  player_id: number;
+  player_display_name: string;
+  player_profile_url: string;
+  player_profile_picture: string;
+  player_chat_color: string;
+  score: number;
+  best_word: string | null;
+  best_word_score: number | string | null;
+  number_of_words: number;
+}
+
 interface ScoresModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,6 +59,7 @@ interface ScoresModalProps {
   totalPoints?: number;
   isOneShot?: boolean;
   savedBoardId?: number; // If provided, fetch and display saved board scores
+  openPlayBoardId?: number; // If provided, fetch and display all open play board scores
 }
 
 export function ScoresModal({
@@ -56,6 +69,7 @@ export function ScoresModal({
   totalPoints,
   isOneShot = false,
   savedBoardId,
+  openPlayBoardId,
 }: ScoresModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const scoresRef = useRef<HTMLDivElement>(null);
@@ -63,6 +77,8 @@ export function ScoresModal({
   const [savedBoardScores, setSavedBoardScores] = useState<SavedBoardScore[] | null>(null);
   const [isLoadingSavedScores, setIsLoadingSavedScores] = useState(false);
   const [savedBoardOneShot, setSavedBoardOneShot] = useState<boolean | undefined>(undefined);
+  const [openPlayScores, setOpenPlayScores] = useState<OpenPlayBoardScore[] | null>(null);
+  const [isLoadingOpenPlayScores, setIsLoadingOpenPlayScores] = useState(false);
 
   // Fetch saved board scores when modal opens and savedBoardId is provided
   useEffect(() => {
@@ -85,6 +101,25 @@ export function ScoresModal({
     }
   }, [isOpen, savedBoardId]);
 
+  // Fetch all open play scores when modal opens
+  useEffect(() => {
+    if (isOpen && openPlayBoardId) {
+      setIsLoadingOpenPlayScores(true);
+      lobbyAPI.getOpenPlayBoardScores(openPlayBoardId)
+        .then((data) => {
+          setOpenPlayScores(data.scores || []);
+        })
+        .catch(() => {
+          setOpenPlayScores([]);
+        })
+        .finally(() => {
+          setIsLoadingOpenPlayScores(false);
+        });
+    } else if (!openPlayBoardId) {
+      setOpenPlayScores(null);
+    }
+  }, [isOpen, openPlayBoardId]);
+
   useEffect(() => {
     if (isOpen && scoresRef.current) {
       scoresRef.current.scrollTop = 0;
@@ -95,14 +130,20 @@ export function ScoresModal({
     }
   }, [isOpen]);
 
-  // If savedBoardId is provided, always use saved board scores instead of finalScores
-  // Wait for scores to load before displaying
+  // If savedBoardId or openPlayBoardId is provided, fetch scores instead of using finalScores
   const useSavedBoardScores = !!savedBoardId;
+  const useOpenPlayScores = !!openPlayBoardId;
+  const useFetchedScores = useSavedBoardScores || useOpenPlayScores;
+  const isLoadingFetchedScores = useSavedBoardScores
+    ? isLoadingSavedScores
+    : useOpenPlayScores
+      ? isLoadingOpenPlayScores
+      : false;
 
   if (!isOpen) return null;
   
-  // For saved boards, wait for scores to load
-  if (useSavedBoardScores && isLoadingSavedScores) {
+  // For fetched score sources, wait for scores to load
+  if (useFetchedScores && isLoadingFetchedScores) {
     return (
       <div className={`modal ${isOpen ? 'show' : ''}`} id="scoresModal" tabIndex={-1} role="dialog">
         <div className="modal-dialog" role="document">
@@ -118,7 +159,28 @@ export function ScoresModal({
     );
   }
 
-  // If using saved board scores but no scores available, show message
+  // If using open play scores but none available, fall back to finalScores or show message
+  if (useOpenPlayScores && openPlayScores && openPlayScores.length === 0 && !finalScores) {
+    return (
+      <div className={`modal ${isOpen ? 'show' : ''}`} id="scoresModal" tabIndex={-1} role="dialog">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+                <span id="scores-header">No scores yet</span>
+              </h5>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn yellow-button" onClick={onClose}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (useSavedBoardScores && savedBoardScores && savedBoardScores.length === 0) {
     return (
       <div className={`modal ${isOpen ? 'show' : ''}`} id="scoresModal" tabIndex={-1} role="dialog">
@@ -140,7 +202,23 @@ export function ScoresModal({
     );
   }
 
-  // If using saved board scores but they haven't loaded yet, show loading
+  // If using fetched scores but they haven't loaded yet, show loading
+  if (useFetchedScores && !isLoadingFetchedScores && useOpenPlayScores && openPlayScores === null) {
+    return (
+      <div className={`modal ${isOpen ? 'show' : ''}`} id="scoresModal" tabIndex={-1} role="dialog">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+                <span id="scores-header">Loading scores...</span>
+              </h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (useSavedBoardScores && savedBoardScores === null) {
     return (
       <div className={`modal ${isOpen ? 'show' : ''}`} id="scoresModal" tabIndex={-1} role="dialog">
@@ -158,15 +236,40 @@ export function ScoresModal({
   }
 
   // If using regular finalScores and they're not available, return null
-  if (!useSavedBoardScores && !finalScores) return null;
+  if (!useFetchedScores && !finalScores) return null;
 
-  // Convert saved board scores to FinalScore format, or use regular finalScores
+  // Convert fetched scores to FinalScore format, or use regular finalScores
   let scoresToDisplay: Array<[string, FinalScore]>;
   // Use saved board one_shot setting if available, otherwise use prop
   // For one-shot/unicorn games, ensure we don't show number_of_words_found column
   let actualIsOneShot = useSavedBoardScores && savedBoardOneShot !== undefined ? savedBoardOneShot : isOneShot;
 
-  if (useSavedBoardScores && savedBoardScores) {
+  if (useOpenPlayScores && openPlayScores && openPlayScores.length > 0) {
+    scoresToDisplay = openPlayScores.map((score) => {
+      const playerKey = String(score.player_id);
+      const bestWordScore =
+        typeof score.best_word_score === 'number'
+          ? score.best_word_score
+          : parseInt(String(score.best_word_score ?? 0), 10) || 0;
+      return [playerKey, {
+        display_name: score.player_display_name,
+        final_score: score.score,
+        number_of_words_found: score.number_of_words,
+        best_word: {
+          word: score.best_word || '',
+          score: bestWordScore,
+        },
+        profile_picture: score.player_profile_picture,
+        chat_color: score.player_chat_color,
+        profile_url: score.player_profile_url,
+      } as FinalScore];
+    });
+    scoresToDisplay.sort((a, b) => {
+      const scoreA = typeof a[1].final_score === 'number' ? a[1].final_score : 0;
+      const scoreB = typeof b[1].final_score === 'number' ? b[1].final_score : 0;
+      return scoreB - scoreA;
+    });
+  } else if (useSavedBoardScores && savedBoardScores) {
     // Convert saved board scores array to the format expected by the rendering logic
     scoresToDisplay = savedBoardScores.map((score) => {
       const playerKey = `${score.user_id}_${score.attempt_number}`; // Unique key per attempt

@@ -2,12 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { lobbyAPI } from '../services/api';
-import {
-  BOARD_SCORES_UPDATED_EVENT,
-  dailyBoardNeedsPlay,
-  timelessBoardNeedsPlay,
-  type BoardSummary,
-} from '../utils/boardAlerts';
+import { BOARD_SCORES_UPDATED_EVENT } from '../utils/boardAlerts';
 
 const BOARD_POLL_MS = 15000;
 
@@ -25,20 +20,9 @@ export function useBoardSubmissionAlerts() {
     }
 
     try {
-      const [dailyData, timelessData] = await Promise.all([
-        lobbyAPI.getDailyBoards(),
-        lobbyAPI.getTimelessBoardsAll([4, 7, 10]),
-      ]);
-
-      const dailyBoards = (dailyData.boards || []) as BoardSummary[];
-      setDailyNeedsPlay(dailyBoardNeedsPlay(dailyBoards, true));
-
-      const boardsByLevel: Record<number, BoardSummary[]> = {
-        4: timelessData?.data?.['4']?.boards ?? [],
-        7: timelessData?.data?.['7']?.boards ?? [],
-        10: timelessData?.data?.['10']?.boards ?? [],
-      };
-      setTimelessNeedsPlay(timelessBoardNeedsPlay(boardsByLevel, true));
+      const data = await lobbyAPI.getBoardSubmissionAlerts();
+      setDailyNeedsPlay(Boolean(data.daily));
+      setTimelessNeedsPlay(Boolean(data.timeless));
     } catch (error) {
       console.error('Error polling board submission alerts:', error);
     }

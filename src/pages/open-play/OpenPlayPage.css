@@ -254,6 +254,13 @@
   border: 2px solid var(--color-blue);
   border-radius: 12px;
   padding: 16px;
+  scroll-margin-top: 100px;
+  scroll-margin-bottom: 80px;
+}
+
+.open-play-board-card--highlighted {
+  border-color: var(--color-yellow);
+  box-shadow: 0 0 16px rgba(245, 206, 69, 0.35);
 }
 
 .open-play-card-header {

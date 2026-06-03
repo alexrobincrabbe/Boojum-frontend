@@ -159,7 +159,7 @@ export default function OpenPlayGameRoom() {
               <div className="pagination-left-container">
                 <button
                   className="pagination-btn"
-                  onClick={() => navigate('/open-play')}
+                  onClick={() => navigate(`/open-play?board=${openPlayId}`)}
                   aria-label="Back to Open Play"
                 />
                 <span className="pagination-text">Back to Open Play</span>
@@ -232,6 +232,7 @@ export default function OpenPlayGameRoom() {
         finalScores={gameState?.finalScores || null}
         totalPoints={gameState?.totalPoints}
         isOneShot={false}
+        openPlayBoardId={openPlayId ? parseInt(openPlayId, 10) : undefined}
       />
     </div>
   );
