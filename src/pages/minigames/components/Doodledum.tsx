@@ -8,6 +8,12 @@ import { Loading } from '../../../components/Loading';
 import DoodleFullscreenModal from '../../profile/DoodleFullscreenModal';
 import CommentBadge from '../../../components/CommentBadge';
 import './Doodledum.css';
+import {
+  assembleDoodleGuess,
+  buildDoodleGuessWordGroups,
+  createEmptyGuessLetters,
+  countDoodleGuessLetters,
+} from '../utils/doodledumGuess.utils';
 
 interface FeedItem {
   is_doodle: boolean;
@@ -315,10 +321,9 @@ const Doodledum: React.FC = () => {
           setDrawingWord(null);
         }
       } else if (data.is_drawn === 'yes') {
-        // When a doodle is drawn and waiting to be guessed, set up input boxes based on word length
+        // When a doodle is drawn and waiting to be guessed, set up letter inputs (spaces are visual gaps only)
         if (data.word) {
-          const wordLength = data.word.length;
-          setGuessLetters(new Array(wordLength).fill(''));
+          setGuessLetters(createEmptyGuessLetters(data.word));
         }
         setIsDrawing(false);
         setDrawingWord(null);
@@ -1107,7 +1112,10 @@ const Doodledum: React.FC = () => {
   };
 
   const handleGuess = async () => {
-    const guessString = guessLetters.join('').trim();
+    const answerWord = activeDoodledum?.word ?? '';
+    const guessString = answerWord
+      ? assembleDoodleGuess(answerWord, guessLetters).trim()
+      : guessLetters.join('').trim();
     if (!guessString || isSubmittingGuess) {
       if (!guessString) {
         toast.error('Please enter a guess');
@@ -1115,8 +1123,7 @@ const Doodledum: React.FC = () => {
       return;
     }
 
-    // Check if all letters have been entered
-    const allLettersFilled = guessLetters.every(letter => letter.trim() !== '');
+    const allLettersFilled = guessLetters.every((letter) => letter.trim() !== '');
     if (!allLettersFilled) {
       toast.error('Please enter all letters before submitting');
       return;
@@ -1125,14 +1132,12 @@ const Doodledum: React.FC = () => {
     setIsSubmittingGuess(true);
     try {
       await minigamesAPI.makeDoodledumGuess(guessString);
-      // Reset based on current word length if available, otherwise clear
-      const wordLength = activeDoodledum?.word?.length || 0;
-      setGuessLetters(wordLength > 0 ? new Array(wordLength).fill('') : []);
+      const letterCount = answerWord ? countDoodleGuessLetters(answerWord) : 0;
+      setGuessLetters(letterCount > 0 ? createEmptyGuessLetters(answerWord) : []);
       toast.success('Guess submitted!');
       notifyDailyChallengesUpdated();
       await Promise.all([loadFeed(), checkDoodledum()]);
-      // Only focus first input if not loading a doodle modal
-      if (!isLoadingDoodle && wordLength > 0) {
+      if (!isLoadingDoodle && letterCount > 0) {
         setTimeout(() => {
           const firstInput = document.getElementById('doodle-guess-input-0') as HTMLInputElement | null;
           firstInput?.focus();
@@ -1204,42 +1209,52 @@ const Doodledum: React.FC = () => {
           );
         }
         
+        const guessWordGroups = activeDoodledum.word
+          ? buildDoodleGuessWordGroups(activeDoodledum.word)
+          : [{ key: 'word-0', letterIndices: guessLetters.map((_, i) => i) }];
+
         return (
           <div id="guess-button-container">
             <div id="doodledum-guess" className="word-clue-guess">
-              {guessLetters.map((letter, i) => (
-                <input
-                  key={i}
-                  id={`doodle-guess-input-${i}`}
-                  type="text"
-                  maxLength={1}
-                  className="letter-input"
-                  value={letter}
-                  disabled={isSubmittingGuess || isLoadingDoodle}
-                  onChange={(e) => {
-                    handleGuessLetterChange(i, e.target.value);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Backspace') {
-                      e.preventDefault();
-                      handleGuessBackspace(i);
-                    }
-                  }}
-                  onKeyUp={(e) => {
-                    if (e.key === 'Enter' && !isSubmittingGuess) {
-                      handleGuess();
-                    }
-                  }}
-                  autoFocus={i === 0 && !isLoadingDoodle}
-                />
-              ))}
+              <div className="doodle-guess-words">
+                {guessWordGroups.map((group) => (
+                  <div key={group.key} className="doodle-guess-word">
+                    {group.letterIndices.map((letterIndex) => (
+                      <input
+                        key={`letter-${letterIndex}`}
+                        id={`doodle-guess-input-${letterIndex}`}
+                        type="text"
+                        maxLength={1}
+                        className="letter-input"
+                        value={guessLetters[letterIndex] ?? ''}
+                        disabled={isSubmittingGuess || isLoadingDoodle}
+                        onChange={(e) => {
+                          handleGuessLetterChange(letterIndex, e.target.value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace') {
+                            e.preventDefault();
+                            handleGuessBackspace(letterIndex);
+                          }
+                        }}
+                        onKeyUp={(e) => {
+                          if (e.key === 'Enter' && !isSubmittingGuess) {
+                            handleGuess();
+                          }
+                        }}
+                        autoFocus={letterIndex === 0 && !isLoadingDoodle}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
               <img
                 id="submit-doodledum"
                 className="enter-button"
                 src="/images/enter-button.svg"
                 alt="Submit"
                 onClick={handleGuess}
-                style={{ 
+                style={{
                   cursor: (isSubmittingGuess || !guessLetters.every(letter => letter.trim() !== '')) ? 'not-allowed' : 'pointer',
                   opacity: (isSubmittingGuess || !guessLetters.every(letter => letter.trim() !== '')) ? 0.5 : 1
                 }}
