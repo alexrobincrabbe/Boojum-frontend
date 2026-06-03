@@ -19,13 +19,12 @@
 }
 
 #doodledum-guess {
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-flex;
+  flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  gap: 8px 12px;
-  position: relative;
-  width: 100%;
+  gap: 8px;
+  width: auto;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -35,8 +34,7 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 8px 16px;
-  max-width: 100%;
+  gap: 8px 24px;
 }
 
 .doodle-guess-word {
@@ -45,8 +43,7 @@
   justify-content: center;
   align-items: center;
   gap: 2px;
-  flex: 0 1 auto;
-  max-width: 100%;
+  flex: 0 0 auto;
 }
 
 #draw-button-container {
@@ -129,10 +126,7 @@
 .enter-button {
   width: 42px;
   height: 42px;
-  position: absolute;
-  left: calc(100% + 8px);
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
   cursor: pointer;
 }
 
@@ -589,8 +583,10 @@
     padding: 0 8px;
   }
   #doodledum-guess {
+    display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
   }
   .doodle-guess-words {
     flex-direction: column;
@@ -603,8 +599,6 @@
     justify-content: center;
   }
   .enter-button {
-    position: static;
-    transform: none;
     margin-top: 4px;
   }
 }
