@@ -244,14 +244,15 @@
   box-shadow: 0 0 6px rgba(245, 206, 69, 1), 0 0 10px rgba(245, 206, 69, 0.6);
 }
 
-/* Active: Tournament — purple */
+/* Active: Tournament — purple with flash */
 .topbar-shortcut--tournament.topbar-shortcut--active {
   border-color: var(--color-purple);
   color: var(--color-purple);
+  animation: tournament-shortcut-flash 1.6s ease-in-out infinite;
 }
 
 .topbar-shortcut--tournament.topbar-shortcut--active:hover {
-  background-color: var(--bg-purple-transparent);
+  background-color: rgba(94, 76, 176, 0.2);
 }
 
 .topbar-shortcut--tournament.topbar-shortcut--active .topbar-shortcut-badge {
@@ -507,6 +508,17 @@
   50% {
     transform: scale(1.1);
     opacity: 0.9;
+  }
+}
+
+@keyframes tournament-shortcut-flash {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(94, 76, 176, 0.3);
+    background-color: transparent;
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(94, 76, 176, 0.9), 0 0 22px rgba(94, 76, 176, 0.5);
+    background-color: rgba(94, 76, 176, 0.2);
   }
 }
 
