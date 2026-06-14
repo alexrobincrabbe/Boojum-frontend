@@ -222,7 +222,7 @@ const Layout = ({ children }: LayoutProps) => {
   const { doodledumNeedsGuess, boojumbleUnsolved, cluejumUnsolved } = useDailyChallengeAlerts(
     user?.username ?? null,
   );
-  const { soloRegistrationOpen, teamRegistrationOpen } = useTournamentRegistrationAlerts();
+  const { soloTournamentActive, teamTournamentActive } = useTournamentRegistrationAlerts();
   const { dailyNeedsPlay, timelessNeedsPlay } = useBoardSubmissionAlerts();
   const { run, setRun } = useOnboarding();
   const [stepIndex, setStepIndex] = useState(0);
@@ -618,36 +618,53 @@ const Layout = ({ children }: LayoutProps) => {
     }
   };
 
-  // Track when sidebar was opened to prevent auto-scroll to bottom immediately after
-  const sidebarOpenedTimeRef = useRef<number>(0);
   const shouldAutoScrollRef = useRef<boolean>(false);
+  const prevChatMessageCountRef = useRef<number>(0);
 
-  // Scroll chat messages container to bottom when sidebar opens
-  useEffect(() => {
-    if (rightSidebarOpen) {
-      // Record when sidebar opened and enable auto-scroll
-      sidebarOpenedTimeRef.current = Date.now();
-      shouldAutoScrollRef.current = true;
-      // Small delay to ensure the sidebar and chat messages are rendered
-      setTimeout(() => {
-        if (chatMessagesContainerRef.current) {
-          chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
-        }
-      }, 100);
-    } else if (!rightSidebarOpen) {
-      // Disable auto-scroll when sidebar closes
-      shouldAutoScrollRef.current = false;
-    }
-  }, [rightSidebarOpen]);
-
-  // Scroll chat messages container to bottom when messages change, but only if sidebar has been open and auto-scroll is enabled
-  useEffect(() => {
-    // Only auto-scroll if sidebar is open and auto-scroll is enabled
-    if (!rightSidebarOpen || !shouldAutoScrollRef.current) {
-      return;
-    }
+  const scrollChatToBottom = () => {
     if (chatMessagesContainerRef.current) {
       chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Scroll to bottom when sidebar opens
+  useEffect(() => {
+    if (rightSidebarOpen) {
+      shouldAutoScrollRef.current = true;
+      const timeoutId = setTimeout(scrollChatToBottom, 100);
+      return () => clearTimeout(timeoutId);
+    }
+    shouldAutoScrollRef.current = false;
+    prevChatMessageCountRef.current = chatMessages.length;
+  }, [rightSidebarOpen]);
+
+  // Disable auto-scroll when user scrolls up; re-enable when they return to bottom
+  useEffect(() => {
+    const container = chatMessagesContainerRef.current;
+    if (!container || !rightSidebarOpen) return;
+
+    const handleScroll = () => {
+      const isAtBottom =
+        container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      shouldAutoScrollRef.current = isAtBottom;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [rightSidebarOpen]);
+
+  // Auto-scroll only when new messages arrive and user is already at the bottom
+  useEffect(() => {
+    if (!rightSidebarOpen) {
+      prevChatMessageCountRef.current = chatMessages.length;
+      return;
+    }
+
+    const countIncreased = chatMessages.length > prevChatMessageCountRef.current;
+    prevChatMessageCountRef.current = chatMessages.length;
+
+    if (shouldAutoScrollRef.current && countIncreased) {
+      scrollChatToBottom();
     }
   }, [chatMessages, rightSidebarOpen]);
 
@@ -935,23 +952,23 @@ const Layout = ({ children }: LayoutProps) => {
       </Link>
       <Link
         to="/tournament"
-        className={`topbar-shortcut topbar-shortcut--tournament${soloRegistrationOpen ? ' topbar-shortcut--active' : ''}`}
-        aria-label={soloRegistrationOpen ? 'Tournament registration open' : 'Tournament'}
+        className={`topbar-shortcut topbar-shortcut--tournament${soloTournamentActive ? ' topbar-shortcut--active' : ''}`}
+        aria-label={soloTournamentActive ? 'Tournament needs your attention' : 'Tournament'}
       >
         <Trophy size={20} />
         <span className="topbar-shortcut-label">Tournament</span>
-        {soloRegistrationOpen && <span className="topbar-shortcut-badge" />}
+        {soloTournamentActive && <span className="topbar-shortcut-badge" />}
       </Link>
       {includeTeamPoll && (
         <>
           <Link
             to="/team-tournament"
-            className={`topbar-shortcut topbar-shortcut--tournament${teamRegistrationOpen ? ' topbar-shortcut--active' : ''}`}
-            aria-label={teamRegistrationOpen ? 'Team tournament registration open' : 'Team tournament'}
+            className={`topbar-shortcut topbar-shortcut--tournament${teamTournamentActive ? ' topbar-shortcut--active' : ''}`}
+            aria-label={teamTournamentActive ? 'Team tournament needs your attention' : 'Team tournament'}
           >
             <Trophy size={20} />
             <span className="topbar-shortcut-label">Team</span>
-            {teamRegistrationOpen && <span className="topbar-shortcut-badge" />}
+            {teamTournamentActive && <span className="topbar-shortcut-badge" />}
           </Link>
           {poll && (
             <button

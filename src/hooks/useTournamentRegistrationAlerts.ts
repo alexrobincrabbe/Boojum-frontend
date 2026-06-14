@@ -8,16 +8,16 @@ const TOURNAMENT_POLL_MS = 15000;
 export function useTournamentRegistrationAlerts() {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  const [soloRegistrationOpen, setSoloRegistrationOpen] = useState(false);
-  const [teamRegistrationOpen, setTeamRegistrationOpen] = useState(false);
+  const [soloTournamentActive, setSoloTournamentActive] = useState(false);
+  const [teamTournamentActive, setTeamTournamentActive] = useState(false);
 
   const poll = useCallback(async () => {
     try {
       const data = await tournamentAPI.getRegistrationAlerts();
-      setSoloRegistrationOpen(Boolean(data.solo));
-      setTeamRegistrationOpen(Boolean(data.team));
+      setSoloTournamentActive(Boolean(data.solo));
+      setTeamTournamentActive(Boolean(data.team));
     } catch (error) {
-      console.error('Error polling tournament registration alerts:', error);
+      console.error('Error polling tournament alerts:', error);
     }
   }, []);
 
@@ -31,5 +31,5 @@ export function useTournamentRegistrationAlerts() {
     poll();
   }, [location.pathname, isAuthenticated, poll]);
 
-  return { soloRegistrationOpen, teamRegistrationOpen };
+  return { soloTournamentActive, teamTournamentActive };
 }
