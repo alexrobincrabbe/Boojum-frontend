@@ -26,6 +26,9 @@ interface UserSearchResult {
   display_name: string;
 }
 
+const OPEN_PLAY_TIME_LIMITS = [90, 120, 150, 180, 240] as const;
+type OpenPlayTimeLimit = (typeof OPEN_PLAY_TIME_LIMITS)[number];
+
 export default function OpenPlayPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -48,7 +51,7 @@ export default function OpenPlayPage() {
   const [userSearchResults, setUserSearchResults] = useState<UserSearchResult[]>([]);
 
   const [showNewGameModal, setShowNewGameModal] = useState(false);
-  const [newTimeLimit, setNewTimeLimit] = useState<90 | 180>(90);
+  const [newTimeLimit, setNewTimeLimit] = useState<OpenPlayTimeLimit>(90);
   const [newBonus, setNewBonus] = useState(false);
   const [creating, setCreating] = useState(false);
   const [showBestWord, setShowBestWord] = useState(true);
@@ -281,8 +284,11 @@ export default function OpenPlayPage() {
               aria-label="Time limit filter"
             >
               <option value="">All timers</option>
-              <option value="90">90 seconds</option>
-              <option value="180">180 seconds</option>
+              {OPEN_PLAY_TIME_LIMITS.map((seconds) => (
+                <option key={seconds} value={String(seconds)}>
+                  {seconds} seconds
+                </option>
+              ))}
             </select>
             <select
               value={typeFilter}
@@ -502,10 +508,15 @@ export default function OpenPlayPage() {
                 Time limit
                 <select
                   value={newTimeLimit}
-                  onChange={(e) => setNewTimeLimit(Number(e.target.value) as 90 | 180)}
+                  onChange={(e) =>
+                    setNewTimeLimit(Number(e.target.value) as OpenPlayTimeLimit)
+                  }
                 >
-                  <option value={90}>90 seconds</option>
-                  <option value={180}>180 seconds</option>
+                  {OPEN_PLAY_TIME_LIMITS.map((seconds) => (
+                    <option key={seconds} value={seconds}>
+                      {seconds} seconds
+                    </option>
+                  ))}
                 </select>
               </label>
               <label className="open-play-modal-field open-play-checkbox">
