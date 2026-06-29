@@ -15,6 +15,7 @@ import { useRouteActivityTracking } from "./hooks/useRouteActivityTracking";
 import { ProfilePicture } from "./components/ProfilePicture";
 import { authAPI } from "./services/api";
 import { useState, useEffect } from "react";
+import { Users, Grid3x3, Lightbulb, CalendarDays, Clock, Palette, Trophy, Play } from "lucide-react";
 import LoginPage from "./pages/login/LoginPage";
 import RegisterPage from "./pages/register/RegisterPage";
 import GoogleUsernamePageWrapper from "./pages/google-username/GoogleUsernamePageWrapper";
@@ -64,6 +65,8 @@ import CreateCustomRoomPage from "./pages/custom-room/CreateCustomRoomPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react"
+
+const DISCORD_INVITE_URL = "https://discord.gg/GGypyAW54t";
 
 const HomePage = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -145,13 +148,122 @@ const HomePage = () => {
             </div>
           </div>
         ) : (
-          <p className="text-white mb-6">
-            Welcome! You can browse the site as a guest or{" "}
-            <Link to="/login" className="text-yellow-400 hover:underline">
-              login
-            </Link>{" "}
-            to access your account.
-          </p>
+          <div className="home-page-content">
+            <p className="home-page-guest-intro">
+              Welcome! You can browse the site as a guest or{" "}
+              <Link to="/login" className="home-page-link home-page-link-yellow">
+                log in
+              </Link>{" "}
+              to access your account. Here's a taste of what you can play:
+            </p>
+            <div className="home-page-features">
+              <Link to="/lobby" className="home-page-feature-card home-page-feature-card--white">
+                <div className="home-page-feature-icon">
+                  <Users size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Live Games</h3>
+                  <p className="home-page-feature-desc">
+                    Join other players in real-time game rooms—compete for a spot on the
+                    leaderboards or just play for fun.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to="/open-play" className="home-page-feature-card home-page-feature-card--blue">
+                <div className="home-page-feature-icon">
+                  <Play size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Open Play</h3>
+                  <p className="home-page-feature-desc">
+                    Set up casual games on your own boards and invite others to join.
+                  </p>
+                  <span className="home-page-feature-login">Log in to start a game →</span>
+                </div>
+              </Link>
+
+              <Link to="/daily-boards" className="home-page-feature-card home-page-feature-card--yellow">
+                <div className="home-page-feature-icon">
+                  <CalendarDays size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Everyday Board</h3>
+                  <p className="home-page-feature-desc">
+                    A brand-new, hand-crafted board to solve every day.
+                  </p>
+                  <span className="home-page-feature-login">Log in to play and save your scores →</span>
+                </div>
+              </Link>
+
+              <Link to="/timeless-boards" className="home-page-feature-card home-page-feature-card--pink">
+                <div className="home-page-feature-icon">
+                  <Clock size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Timeless Board</h3>
+                  <p className="home-page-feature-desc">
+                    Hand-crafted classic boards you can play any time, at your own pace.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to="/minigames?tab=boojumble" className="home-page-feature-card home-page-feature-card--green">
+                <div className="home-page-feature-icon">
+                  <Grid3x3 size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Boojumble</h3>
+                  <p className="home-page-feature-desc">
+                    A fresh daily word-grid puzzle—untangle the jumble to find all the
+                    hidden words.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to="/minigames?tab=cluejum" className="home-page-feature-card home-page-feature-card--purple">
+                <div className="home-page-feature-icon">
+                  <Lightbulb size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Cluejum</h3>
+                  <p className="home-page-feature-desc">
+                    A daily clue-based word challenge—use the hints to crack the answer.
+                  </p>
+                </div>
+              </Link>
+
+              <Link to="/doodledum" className="home-page-feature-card home-page-feature-card--yellow">
+                <div className="home-page-feature-icon">
+                  <Palette size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Doodledum</h3>
+                  <p className="home-page-feature-desc">
+                    Guess the doodle, or draw your own for others to puzzle over.
+                  </p>
+                </div>
+              </Link>
+
+              <a
+                href={DISCORD_INVITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="home-page-feature-card home-page-feature-card--purple"
+              >
+                <div className="home-page-feature-icon">
+                  <Trophy size={26} />
+                </div>
+                <div className="home-page-feature-body">
+                  <h3 className="home-page-feature-title">Tournament</h3>
+                  <p className="home-page-feature-desc">
+                    Compete in scheduled tournaments and battle your way through the brackets.
+                  </p>
+                  <span className="home-page-feature-login">Join our Discord to get notified →</span>
+                </div>
+              </a>
+            </div>
+          </div>
         )}
       </div>
     </div>

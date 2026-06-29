@@ -136,6 +136,106 @@
   color: #d9468a;
 }
 
+/* Guest welcome — feature links */
+.home-page-guest-intro {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #fff;
+  margin-bottom: 28px;
+}
+
+.home-page-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.home-page-feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 2px solid var(--color-blue);
+  border-radius: 12px;
+  background-color: rgba(113, 187, 233, 0.06);
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.home-page-feature-card:hover {
+  transform: translateY(-2px);
+  border-color: #71bbe9;
+  background-color: rgba(113, 187, 233, 0.12);
+  box-shadow: 0 6px 18px rgba(113, 187, 233, 0.25);
+}
+
+.home-page-feature-card {
+  --feature-color: var(--color-blue);
+}
+
+.home-page-feature-card--white {
+  --feature-color: #ffffff;
+}
+
+.home-page-feature-card--blue {
+  --feature-color: var(--color-blue);
+}
+
+.home-page-feature-card--green {
+  --feature-color: var(--color-green);
+}
+
+.home-page-feature-card--yellow {
+  --feature-color: var(--color-yellow);
+}
+
+.home-page-feature-card--pink {
+  --feature-color: var(--color-pink);
+}
+
+.home-page-feature-card--purple {
+  --feature-color: var(--color-purple);
+}
+
+.home-page-feature-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--feature-color);
+  background-color: color-mix(in srgb, var(--feature-color) 14%, transparent);
+}
+
+.home-page-feature-body {
+  min-width: 0;
+}
+
+.home-page-feature-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--feature-color);
+  margin: 0 0 6px;
+}
+
+.home-page-feature-desc {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #c9d4e0;
+  margin: 0;
+}
+
+.home-page-feature-login {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #febe38;
+}
+
 /* Larger screens - profile picture on left */
 @media (min-width: 768px) {
   .home-page-welcome-section {
@@ -145,5 +245,9 @@
 
   .home-page-welcome-text {
     text-align: left;
+  }
+
+  .home-page-features {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

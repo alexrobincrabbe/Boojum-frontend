@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
 import { authAPI, lobbyAPI, dashboardAPI, forumAPI } from '../services/api';
-import { X, Bell, BarChart3, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy, CalendarDays, Clock } from 'lucide-react';
+import { X, Bell, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy, CalendarDays, Clock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Joyride from 'react-joyride';
 
@@ -222,7 +222,7 @@ const Layout = ({ children }: LayoutProps) => {
   const { doodledumNeedsGuess, boojumbleUnsolved, cluejumUnsolved } = useDailyChallengeAlerts(
     user?.username ?? null,
   );
-  const { soloTournamentActive, teamTournamentActive } = useTournamentRegistrationAlerts();
+  const { soloTournamentActive } = useTournamentRegistrationAlerts();
   const { dailyNeedsPlay, timelessNeedsPlay } = useBoardSubmissionAlerts();
   const { run, setRun } = useOnboarding();
   const [stepIndex, setStepIndex] = useState(0);
@@ -530,8 +530,6 @@ const Layout = ({ children }: LayoutProps) => {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  const pollNeedsVote = Boolean(poll && isAuthenticated && poll.user_vote == null);
-
   // Load notifications
   useEffect(() => {
     if (!isAuthenticated) {
@@ -777,7 +775,7 @@ const Layout = ({ children }: LayoutProps) => {
     },
     {
       target: '[data-onboarding="topbar-shortcuts"]',
-      content: 'The top bar links to daily boards, timeless boards, mini-games, doodles, tournaments, and polls. Icons light up when something needs your attention.',
+      content: 'The top bar links to daily boards, timeless boards, mini-games, doodles, and tournaments. Icons light up when something needs your attention.',
       placement: 'bottom',
       disableScrolling: false,
     },
@@ -897,93 +895,86 @@ const Layout = ({ children }: LayoutProps) => {
     }
   };
 
-  const renderBoardShortcuts = () => (
-    <>
-      <Link
-        to="/daily-boards"
-        className={`topbar-shortcut topbar-shortcut--daily-board${dailyNeedsPlay ? ' topbar-shortcut--active' : ''}`}
-        aria-label={dailyNeedsPlay ? "Today's daily board — play now" : 'Everyday Board'}
-      >
-        <CalendarDays size={20} />
-        <span className="topbar-shortcut-label">Every Day</span>
-        {dailyNeedsPlay && <span className="topbar-shortcut-badge" />}
-      </Link>
-      <Link
-        to="/timeless-boards"
-        className={`topbar-shortcut topbar-shortcut--timeless-board${timelessNeedsPlay ? ' topbar-shortcut--active' : ''}`}
-        aria-label={timelessNeedsPlay ? "Today's timeless board — play now" : 'Timeless Board'}
-      >
-        <Clock size={20} />
-        <span className="topbar-shortcut-label">Timeless</span>
-        {timelessNeedsPlay && <span className="topbar-shortcut-badge" />}
-      </Link>
-    </>
+  const renderDailyShortcut = () => (
+    <Link
+      to="/daily-boards"
+      className={`topbar-shortcut topbar-shortcut--daily-board${dailyNeedsPlay ? ' topbar-shortcut--active' : ''}`}
+      aria-label={dailyNeedsPlay ? "Today's daily board — play now" : 'Everyday Board'}
+    >
+      <CalendarDays size={20} />
+      <span className="topbar-shortcut-label">Every Day</span>
+      {dailyNeedsPlay && <span className="topbar-shortcut-badge" />}
+    </Link>
   );
 
-  const renderShortcuts = ({ includeBoards = false, includeTeamPoll = true } = {}) => (
+  const renderTimelessShortcut = () => (
+    <Link
+      to="/timeless-boards"
+      className={`topbar-shortcut topbar-shortcut--timeless-board${timelessNeedsPlay ? ' topbar-shortcut--active' : ''}`}
+      aria-label={timelessNeedsPlay ? "Today's timeless board — play now" : 'Timeless Board'}
+    >
+      <Clock size={20} />
+      <span className="topbar-shortcut-label">Timeless</span>
+      {timelessNeedsPlay && <span className="topbar-shortcut-badge" />}
+    </Link>
+  );
+
+  const renderBoojumbleShortcut = () => (
+    <Link
+      to="/minigames?tab=boojumble"
+      className={`topbar-shortcut topbar-shortcut--boojumble${boojumbleUnsolved ? ' topbar-shortcut--active' : ''}`}
+      aria-label={boojumbleUnsolved ? 'Unsolved Boojumbles' : 'Boojumbles'}
+    >
+      <Grid3x3 size={20} />
+      <span className="topbar-shortcut-label">Boojumble</span>
+      {boojumbleUnsolved && <span className="topbar-shortcut-badge" />}
+    </Link>
+  );
+
+  const renderCluejumShortcut = () => (
+    <Link
+      to="/minigames?tab=cluejum"
+      className={`topbar-shortcut topbar-shortcut--cluejum${cluejumUnsolved ? ' topbar-shortcut--active' : ''}`}
+      aria-label={cluejumUnsolved ? 'Unsolved Cluejum' : 'Cluejum'}
+    >
+      <Lightbulb size={20} />
+      <span className="topbar-shortcut-label">Cluejum</span>
+      {cluejumUnsolved && <span className="topbar-shortcut-badge" />}
+    </Link>
+  );
+
+  const renderDoodleShortcut = () => (
+    <Link
+      to="/doodledum"
+      className={`topbar-shortcut topbar-shortcut--doodle${doodledumNeedsGuess ? ' topbar-shortcut--active' : ''}`}
+      aria-label={doodledumNeedsGuess ? 'Unsolved doodle to guess' : 'Doodledum'}
+    >
+      <Palette size={20} />
+      <span className="topbar-shortcut-label">Doodle</span>
+      {doodledumNeedsGuess && <span className="topbar-shortcut-badge" />}
+    </Link>
+  );
+
+  const renderTournamentShortcut = () => (
+    <Link
+      to="/tournament"
+      className={`topbar-shortcut topbar-shortcut--tournament${soloTournamentActive ? ' topbar-shortcut--active' : ''}`}
+      aria-label={soloTournamentActive ? 'Tournament needs your attention' : 'Tournament'}
+    >
+      <Trophy size={20} />
+      <span className="topbar-shortcut-label">Tournament</span>
+      {soloTournamentActive && <span className="topbar-shortcut-badge" />}
+    </Link>
+  );
+
+  const renderMobileShortcuts = () => (
     <>
-      {includeBoards && renderBoardShortcuts()}
-      <Link
-        to="/minigames?tab=boojumble"
-        className={`topbar-shortcut topbar-shortcut--boojumble${boojumbleUnsolved ? ' topbar-shortcut--active' : ''}`}
-        aria-label={boojumbleUnsolved ? 'Unsolved Boojumbles' : 'Boojumbles'}
-      >
-        <Grid3x3 size={20} />
-        <span className="topbar-shortcut-label">Boojumble</span>
-        {boojumbleUnsolved && <span className="topbar-shortcut-badge" />}
-      </Link>
-      <Link
-        to="/minigames?tab=cluejum"
-        className={`topbar-shortcut topbar-shortcut--cluejum${cluejumUnsolved ? ' topbar-shortcut--active' : ''}`}
-        aria-label={cluejumUnsolved ? 'Unsolved Cluejum' : 'Cluejum'}
-      >
-        <Lightbulb size={20} />
-        <span className="topbar-shortcut-label">Cluejum</span>
-        {cluejumUnsolved && <span className="topbar-shortcut-badge" />}
-      </Link>
-      <Link
-        to="/doodledum"
-        className={`topbar-shortcut topbar-shortcut--doodle${doodledumNeedsGuess ? ' topbar-shortcut--active' : ''}`}
-        aria-label={doodledumNeedsGuess ? 'Unsolved doodle to guess' : 'Doodledum'}
-      >
-        <Palette size={20} />
-        <span className="topbar-shortcut-label">Doodle</span>
-        {doodledumNeedsGuess && <span className="topbar-shortcut-badge" />}
-      </Link>
-      <Link
-        to="/tournament"
-        className={`topbar-shortcut topbar-shortcut--tournament${soloTournamentActive ? ' topbar-shortcut--active' : ''}`}
-        aria-label={soloTournamentActive ? 'Tournament needs your attention' : 'Tournament'}
-      >
-        <Trophy size={20} />
-        <span className="topbar-shortcut-label">Tournament</span>
-        {soloTournamentActive && <span className="topbar-shortcut-badge" />}
-      </Link>
-      {includeTeamPoll && (
-        <>
-          <Link
-            to="/team-tournament"
-            className={`topbar-shortcut topbar-shortcut--tournament${teamTournamentActive ? ' topbar-shortcut--active' : ''}`}
-            aria-label={teamTournamentActive ? 'Team tournament needs your attention' : 'Team tournament'}
-          >
-            <Trophy size={20} />
-            <span className="topbar-shortcut-label">Team</span>
-            {teamTournamentActive && <span className="topbar-shortcut-badge" />}
-          </Link>
-          {poll && (
-            <button
-              type="button"
-              className={`topbar-shortcut topbar-shortcut--poll${pollNeedsVote ? ' topbar-shortcut--active' : ''}`}
-              onClick={() => setPollModalOpen(!pollModalOpen)}
-              aria-label={pollModalOpen ? 'Close poll' : pollNeedsVote ? 'Poll — vote now' : 'Open poll'}
-            >
-              <BarChart3 size={20} />
-              <span className="topbar-shortcut-label">Poll</span>
-              {pollNeedsVote && <span className="topbar-shortcut-badge" />}
-            </button>
-          )}
-        </>
-      )}
+      {renderDailyShortcut()}
+      {renderTimelessShortcut()}
+      {renderBoojumbleShortcut()}
+      {renderCluejumShortcut()}
+      {renderDoodleShortcut()}
+      {renderTournamentShortcut()}
     </>
   );
 
@@ -1004,14 +995,28 @@ const Layout = ({ children }: LayoutProps) => {
               <span className="burger-line burger-line-green"></span>
             </div>
           </button>
+          <div className="topbar-shortcuts-group topbar-shortcuts-group--desktop">
+            <div className="topbar-shortcut-group">
+              {renderDailyShortcut()}
+              {renderTimelessShortcut()}
+              {renderBoojumbleShortcut()}
+              {renderCluejumShortcut()}
+            </div>
+          </div>
+        </div>
+        <div className="top-bar-center topbar-shortcuts-group--desktop">
+          <div className="topbar-shortcut-group">
+            {renderDoodleShortcut()}
+          </div>
         </div>
         <div className="top-bar-right">
           <div
             className="topbar-shortcuts-group topbar-shortcuts-group--desktop"
             data-onboarding="topbar-shortcuts"
           >
-            {renderBoardShortcuts()}
-            {renderShortcuts()}
+            <div className="topbar-shortcut-group">
+              {renderTournamentShortcut()}
+            </div>
           </div>
           <a
             href={DISCORD_INVITE_URL}
@@ -1532,7 +1537,7 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Mobile bottom bar — board + daily shortcuts (no team/poll on mobile) */}
       <nav className="mobile-bottom-bar" aria-label="Quick links">
         <div className="mobile-bottom-bar-inner">
-          {renderShortcuts({ includeBoards: true, includeTeamPoll: false })}
+          {renderMobileShortcuts()}
         </div>
       </nav>
 
