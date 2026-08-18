@@ -1059,9 +1059,9 @@ const Layout = ({ children }: LayoutProps) => {
 
   const renderPointsShortcut = () => (
     <Link
-      to="/leaderboards?gameType=points&period=weekly"
-      className={`topbar-shortcut topbar-shortcut--points${location.pathname.startsWith('/leaderboards') && searchParams.get('gameType') === 'points' ? ' topbar-shortcut--active' : ''}`}
-      aria-label="Points leaderboard"
+      to="/points?period=weekly"
+      className={`topbar-shortcut topbar-shortcut--points${location.pathname.startsWith('/points') ? ' topbar-shortcut--current' : ''}`}
+      aria-label="Points"
     >
       <Star size={20} />
       <span className="topbar-shortcut-label">Points</span>
@@ -1435,6 +1435,15 @@ const Layout = ({ children }: LayoutProps) => {
               }}
             >
               {leftSidebarOpen && <span>High Scores</span>}
+            </Link>
+            <Link
+              to="/points"
+              className={`nav-link ${location.pathname.startsWith('/points') ? 'active' : ''}`}
+              onClick={() => {
+                if (!isDesktop && !leftSidebarPinned) setLeftSidebarOpen(false);
+              }}
+            >
+              {leftSidebarOpen && <span>Points</span>}
             </Link>
             <Link
               to="/forum"

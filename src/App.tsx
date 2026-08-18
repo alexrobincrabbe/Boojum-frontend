@@ -40,6 +40,7 @@ import SavedBoardsPage from "./pages/saved-boards/SavedBoardsPage";
 import OpenPlayPage from "./pages/open-play/OpenPlayPage";
 import OpenPlayGameRoom from "./pages/open-play/OpenPlayGameRoom";
 import LeaderboardsPage from "./pages/leaderboards/LeaderboardsPage";
+import PointsPage from "./pages/points/PointsPage";
 import ForumPage from "./pages/forum/ForumPage";
 import ViewPostPage from "./pages/forum/ViewPostPage";
 import NewPostPage from "./pages/forum/NewPostPage";
@@ -327,6 +328,7 @@ function App() {
                 element={<SavedBoardGameRoom />}
               />
               <Route path="/leaderboards" element={<LeaderboardsPage />} />
+              <Route path="/points" element={<PointsPage />} />
               <Route path="/forum/new-post" element={<NewPostPage />} />
               <Route path="/forum/:slug" element={<ViewPostPage />} />
               <Route path="/forum" element={<ForumPage />} />
