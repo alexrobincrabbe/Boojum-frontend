@@ -59,11 +59,20 @@ const BotControlPage = () => {
   const [isCreatingBot, setIsCreatingBot] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [wpmDraft, setWpmDraft] = useState('');
 
   const [newName, setNewName] = useState('');
   const [newRoomId, setNewRoomId] = useState<number | ''>('');
 
   const selected = bots.find((b) => b.id === selectedId) ?? null;
+
+  useEffect(() => {
+    if (!selected) {
+      setWpmDraft('');
+      return;
+    }
+    setWpmDraft(String(selected.words_per_minute ?? 54));
+  }, [selected]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -116,6 +125,15 @@ const BotControlPage = () => {
 
   const handleSave = async () => {
     if (!selected || isSaving || isDeleting) return;
+    const parsedWpm = Number(wpmDraft);
+    if (!Number.isInteger(parsedWpm)) {
+      toast.error('Words per minute must be an integer');
+      return;
+    }
+    if (parsedWpm < 5 || parsedWpm > 200) {
+      toast.error('Words per minute must be between 5 and 200');
+      return;
+    }
     setIsSaving(true);
     try {
       const updated = await adminAPI.updateBot(selected.id, {
@@ -123,7 +141,7 @@ const BotControlPage = () => {
         room_id: selected.room_id,
         personality_prompt: selected.personality_prompt,
         chat_enabled: selected.chat_enabled,
-        words_per_minute: selected.words_per_minute,
+        words_per_minute: parsedWpm,
         word_length_factor: selected.word_length_factor,
         congratulate_winner_chance: selected.congratulate_winner_chance ?? 100,
         congratulate_best_word_chance: selected.congratulate_best_word_chance ?? 50,
@@ -133,6 +151,7 @@ const BotControlPage = () => {
         schedules: selected.schedules,
       });
       setBots((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+      setWpmDraft(String(updated.words_per_minute ?? 54));
       toast.success('Bot saved');
     } catch {
       toast.error('Failed to save bot');
@@ -354,15 +373,11 @@ const BotControlPage = () => {
                       type="number"
                       min={5}
                       max={200}
-                      value={selected.words_per_minute ?? 54}
-                      onChange={(e) =>
-                        updateSelected({
-                          words_per_minute: Math.max(5, Math.min(200, Number(e.target.value) || 54)),
-                        })
-                      }
+                      value={wpmDraft}
+                      onChange={(e) => setWpmDraft(e.target.value)}
                     />
                     <span className="bot-field-hint">
-                      Average find rate; capped by board size (never all words).
+                      Average find rate; validated on save and capped by board size.
                     </span>
                   </label>
 
