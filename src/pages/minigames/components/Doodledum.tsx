@@ -4,6 +4,7 @@ import { minigamesAPI, authAPI } from '../../../services/api';
 import { notifyDailyChallengesUpdated } from '../../../utils/dailyChallengeStatus';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
+import { showPointsToasts } from '../../../utils/pointsToasts';
 import { Loading } from '../../../components/Loading';
 import DoodleFullscreenModal from '../../profile/DoodleFullscreenModal';
 import CommentBadge from '../../../components/CommentBadge';
@@ -25,6 +26,7 @@ interface FeedItem {
   user: string;
   chat_color: string;
   comment_count?: number;
+  points_tier?: string;
 }
 
 interface DoodleForModal {
@@ -905,7 +907,8 @@ const Doodledum: React.FC = () => {
     }
     const dataUrl = canvas.toDataURL('image/png');
     try {
-      await minigamesAPI.uploadDrawing(dataUrl);
+      const data = await minigamesAPI.uploadDrawing(dataUrl);
+      showPointsToasts(data?.points);
       toast.success('Drawing submitted!');
       setIsDrawing(false);
       setDrawingWord(null);
@@ -1131,10 +1134,11 @@ const Doodledum: React.FC = () => {
 
     setIsSubmittingGuess(true);
     try {
-      await minigamesAPI.makeDoodledumGuess(guessString);
+      const data = await minigamesAPI.makeDoodledumGuess(guessString);
       const letterCount = answerWord ? countDoodleGuessLetters(answerWord) : 0;
       setGuessLetters(letterCount > 0 ? createEmptyGuessLetters(answerWord) : []);
       toast.success('Guess submitted!');
+      showPointsToasts(data?.points);
       notifyDailyChallengesUpdated();
       await Promise.all([loadFeed(), checkDoodledum()]);
       if (!isLoadingDoodle && letterCount > 0) {
@@ -1533,7 +1537,9 @@ const Doodledum: React.FC = () => {
                 <div key={index} className="feed-item">
                   {item.is_doodle ? (
                     <div>
-                      <span style={{ color: item.chat_color }}>{item.user}</span>{' '}
+                      <span style={{ color: item.chat_color }}>
+                        {item.user}
+                      </span>{' '}
                       {(() => {
                         const message = getRandomDrawMessage();
                         return <>{message.prefix}{message.suffix}</>;
@@ -1567,7 +1573,9 @@ const Doodledum: React.FC = () => {
                     </div>
                   ) : (
                     <div>
-                      <span style={{ color: item.chat_color }}>{item.user}</span> guessed{' '}
+                      <span style={{ color: item.chat_color }}>
+                        {item.user}
+                      </span> guessed{' '}
                       <span className="blue" style={{ textTransform: 'uppercase' }}>{item.guess}</span>
                       {item.correct ? (
                         <span className="green" style={{ fontWeight: 'bold' }}> ✓ CORRECT!</span>

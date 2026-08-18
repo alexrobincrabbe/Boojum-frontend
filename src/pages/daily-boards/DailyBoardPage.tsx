@@ -22,6 +22,7 @@ interface DailyBoardScore {
   best_word_score: string | null;
   number_of_words: number;
   is_current_user: boolean;
+  points_tier?: string;
 }
 
 interface WordData {
@@ -326,6 +327,7 @@ export default function DailyBoardPage() {
                             chatColor={score.player_chat_color}
                             size={40}
                             showBorder={true}
+                            pointsTier={score.points_tier}
                           />
                           <Username
                             username={score.player_display_name}

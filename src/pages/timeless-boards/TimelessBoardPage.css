@@ -542,7 +542,8 @@
 }
 
 .timeless-scores-table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   border: none;
   margin: 0 auto;
   width: 700px;
@@ -567,8 +568,7 @@
 }
 
 .timeless-scores-table td:first-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   white-space: nowrap;
 }
 
@@ -582,15 +582,12 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+  overflow: visible;
 }
 
-.player-info span,
-.player-info a {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-  display: inline-block;
+.player-info .points-star-badge-wrap {
+  overflow: visible !important;
+  flex-shrink: 0;
 }
 
 .player-info .profile-pic-standard {

@@ -7,6 +7,7 @@ import {
 } from '../../../utils/dailyChallengeStatus';
 import { playSound } from '../../../utils/sounds';
 import { usePageOnboarding } from '../../../hooks/usePageOnboarding';
+import { showPointsToasts } from '../../../utils/pointsToasts';
 import './Boojumble.css';
 
 interface BoojumbleData {
@@ -752,7 +753,9 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
 
     if (solved) {
       markBoojumbleSolved(currentBoojumble.id);
-      minigamesAPI.setBoojumbleAchievement(String(N)).catch(console.error);
+      minigamesAPI.completeBoojumble(currentBoojumble.id, N)
+        .then((data) => showPointsToasts(data?.points))
+        .catch(console.error);
       notifyDailyChallengesUpdated();
     }
   };

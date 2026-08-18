@@ -5,6 +5,7 @@ import {
   FALLBACK_PROFILE_IMAGE,
   resolveProfilePictureUrl,
 } from '../../../utils/profilePictureUrl';
+import { PointsStarBadge } from '../../../components/PointsStarBadge';
 import './ScoresModal.css';
 
 interface FinalScore {
@@ -20,6 +21,7 @@ interface FinalScore {
   chat_color?: string;
   profile_url?: string;
   attempt_number?: number; // For saved boards
+  points_tier?: string;
 }
 
 interface SavedBoardScore {
@@ -50,6 +52,7 @@ interface OpenPlayBoardScore {
   best_word: string | null;
   best_word_score: number | string | null;
   number_of_words: number;
+  points_tier?: string;
 }
 
 interface ScoresModalProps {
@@ -262,6 +265,7 @@ export function ScoresModal({
         profile_picture: score.player_profile_picture,
         chat_color: score.player_chat_color,
         profile_url: score.player_profile_url,
+        points_tier: score.points_tier,
       } as FinalScore];
     });
     scoresToDisplay.sort((a, b) => {
@@ -313,24 +317,26 @@ export function ScoresModal({
     const profilePath = player.profile_url ? `/profile/${player.profile_url}` : null;
 
     const pic = (
-      <span className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}>
-        <img
-          src={profileImage}
-          alt={player.display_name}
-          className="rounded-circle high-score-img"
-          width={30}
-          height={30}
-          style={{
-            borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
-          }}
-          onError={(e: SyntheticEvent<HTMLImageElement>) => {
-            const img = e.currentTarget;
-            if (img.src !== FALLBACK_PROFILE_IMAGE) {
-              img.src = FALLBACK_PROFILE_IMAGE;
-            }
-          }}
-        />
-      </span>
+      <PointsStarBadge tier={isGuest ? undefined : player.points_tier} size={30}>
+        <span className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}>
+          <img
+            src={profileImage}
+            alt={player.display_name}
+            className="rounded-circle high-score-img"
+            width={30}
+            height={30}
+            style={{
+              borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
+            }}
+            onError={(e: SyntheticEvent<HTMLImageElement>) => {
+              const img = e.currentTarget;
+              if (img.src !== FALLBACK_PROFILE_IMAGE) {
+                img.src = FALLBACK_PROFILE_IMAGE;
+              }
+            }}
+          />
+        </span>
+      </PointsStarBadge>
     );
 
     const name = (

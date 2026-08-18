@@ -12,6 +12,7 @@ export interface OpenPlayScoreRow {
   best_word_score: number | string | null;
   number_of_words: number;
   is_current_user: boolean;
+  points_tier?: string;
 }
 
 interface OpenPlayScoresTableProps {
@@ -65,6 +66,7 @@ export function OpenPlayScoresTable({
                     chatColor={leader.player_chat_color}
                     size={40}
                     showBorder
+                    pointsTier={leader.points_tier}
                   />
                   <Username
                     username={leader.player_display_name}

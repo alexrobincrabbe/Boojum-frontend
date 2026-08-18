@@ -125,6 +125,13 @@ function normalizeInboundMessage(raw: any): InboundMessage | null {
         timestamp: Date.now(),
       } as any;
 
+    case 'points_awarded':
+      return {
+        type: 'POINTS_AWARDED',
+        user_id: raw.user_id,
+        points: raw.points || {},
+      } as any;
+
     case 'redirect':
       // Tournament consumer sends redirect event when player already played
       return {

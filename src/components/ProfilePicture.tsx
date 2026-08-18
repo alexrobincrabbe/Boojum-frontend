@@ -3,6 +3,7 @@ import {
   FALLBACK_PROFILE_IMAGE,
   resolveProfilePictureUrl,
 } from '../utils/profilePictureUrl';
+import { PointsStarBadge } from './PointsStarBadge';
 
 interface ProfilePictureProps {
   profilePictureUrl: string | null;
@@ -11,6 +12,7 @@ interface ProfilePictureProps {
   size?: number;
   className?: string;
   showBorder?: boolean;
+  pointsTier?: string | null;
 }
 
 export function ProfilePicture({
@@ -20,6 +22,7 @@ export function ProfilePicture({
   size = 30,
   className = '',
   showBorder = true,
+  pointsTier,
 }: ProfilePictureProps) {
   const imageUrl = resolveProfilePictureUrl(profilePictureUrl, size);
 
@@ -57,20 +60,22 @@ export function ProfilePicture({
     transition: 'transform 0.3s ease'
   };
 
-  if (profileUrl) {
-    return (
-      <div className="profile-pic-standard" style={wrapperStyle}>
-        <Link to={`/profile/${profileUrl}`} style={{ textDecoration: 'none', display: 'block' }}>
-          {imageElement}
-        </Link>
-      </div>
-    );
-  }
-
-  return (
+  const picture = profileUrl ? (
+    <div className="profile-pic-standard" style={wrapperStyle}>
+      <Link to={`/profile/${profileUrl}`} style={{ textDecoration: 'none', display: 'block' }}>
+        {imageElement}
+      </Link>
+    </div>
+  ) : (
     <div className="profile-pic-standard" style={wrapperStyle}>
       {imageElement}
     </div>
+  );
+
+  return (
+    <PointsStarBadge tier={pointsTier} size={size}>
+      {picture}
+    </PointsStarBadge>
   );
 }
 

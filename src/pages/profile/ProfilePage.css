@@ -381,6 +381,13 @@ h2 {
   width: 100%;
 }
 
+.profile-points-totals {
+  text-align: center;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
 /* Ensure row uses flexbox for ordering */
 .profile-content-row {
   display: flex;

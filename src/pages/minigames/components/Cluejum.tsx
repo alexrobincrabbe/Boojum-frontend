@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { minigamesAPI } from "../../../services/api";
 import { notifyDailyChallengesUpdated } from "../../../utils/dailyChallengeStatus";
+import { showPointsToasts } from "../../../utils/pointsToasts";
 import "./Cluejum.css";
 import { getClue, getSuccessMessage, getTodayString, isLetterMatch } from "../utils/cluejum.utils";
 
@@ -77,6 +78,12 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
 
   const puzzleDate = wordClue?.date ?? null;
   const storageDate = puzzleDate ?? getTodayString();
+
+  const reportSection = (section: number, attempts: number) => {
+    minigamesAPI.completeCluejumSection(section, attempts, storageDate)
+      .then((data) => showPointsToasts(data?.points))
+      .catch(console.error);
+  };
 
   // Load minimal progress (stage only) — keyed to the puzzle's server date, not local midnight
   useEffect(() => {
@@ -182,6 +189,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       setShowNext(true);
       saveStage(1);
       setScore(1, attempt);
+      reportSection(1, attempt);
       if (messageRef.current) typeText(messageRef.current, getSuccessMessage(1, attempt), 70);
       return;
     }
@@ -246,6 +254,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       setShowNext(true);
       saveStage(2);
       setScore(2, attempt);
+      reportSection(2, attempt);
       if (messageRef.current) typeText(messageRef.current, getSuccessMessage(2, attempt), 70);
       return;
     }
@@ -295,10 +304,7 @@ const Cluejum: React.FC<CluejumProps> = ({ wordClue, definition, synonym }) => {
       saveStage(3);
       setScore(3, attempt);
       if (messageRef.current) typeText(messageRef.current, getSuccessMessage(3, attempt), 70);
-      // Attempt to submit achievement
-      const s1Score = Number(localStorage.getItem(`cluejumScore-${storageDate}-1`)) || attempt;
-      const s2Score = Number(localStorage.getItem(`cluejumScore-${storageDate}-2`)) || attempt;
-      minigamesAPI.setCluejumAchievement(s1Score, s2Score, attempt).catch(console.error);
+      reportSection(3, attempt);
       return;
     }
 

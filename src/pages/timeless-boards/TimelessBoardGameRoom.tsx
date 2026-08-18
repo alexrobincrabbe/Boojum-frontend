@@ -6,6 +6,7 @@ import { WordLists } from '../game-room/components/WordLists';
 import { calculateWordScore } from '../game-room/utils/scoreCalculation';
 import { lobbyAPI } from '../../services/api';
 import { toast } from 'react-toastify';
+import { showPointsToasts } from '../../utils/pointsToasts';
 import { playBloop, playSound } from '../../utils/sounds';
 import { triggerBoardAnimation, triggerWordCounterAnimation } from '../game-room/utils/borderAnimation';
 import { usePageOnboarding } from '../../hooks/usePageOnboarding';
@@ -978,7 +979,10 @@ export default function TimelessBoardGameRoom() {
         );
       });
 
-      await Promise.all(submitPromises);
+      const submitResults = await Promise.all(submitPromises);
+      for (const result of submitResults) {
+        showPointsToasts(result?.points);
+      }
       
       notifyBoardScoresUpdated();
       toast.success('Score submitted successfully!');

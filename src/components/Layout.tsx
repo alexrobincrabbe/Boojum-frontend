@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useOnboarding } from '../contexts/OnboardingContext';
-import { authAPI, lobbyAPI, dashboardAPI, forumAPI } from '../services/api';
-import { X, Bell, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy, CalendarDays, Clock } from 'lucide-react';
+import { authAPI, lobbyAPI, dashboardAPI, forumAPI, pointsAPI } from '../services/api';
+import {
+  POINTS_AWARDED_EVENT,
+  formatCompactPoints,
+  type PointsPayload,
+} from '../utils/pointsToasts';
+import { playSound } from '../utils/sounds';
+import { X, Bell, Pin, PinOff, Grid3x3, Lightbulb, Palette, Trophy, CalendarDays, Clock, Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Joyride from 'react-joyride';
 
@@ -43,6 +50,7 @@ const STATUS = {
 import { PollModal } from './PollModal';
 import NotificationDropdown from './NotificationDropdown';
 import { Username } from './Username';
+import { PointsStarBadge } from './PointsStarBadge';
 import { useDailyChallengeAlerts } from '../hooks/useDailyChallengeAlerts';
 import { useTournamentRegistrationAlerts } from '../hooks/useTournamentRegistrationAlerts';
 import { useBoardSubmissionAlerts } from '../hooks/useBoardSubmissionAlerts';
@@ -195,6 +203,7 @@ interface UserOnline {
   time_ago: string;
   playing: string;
   activity: string;
+  points_tier?: string;
 }
 
 interface PollOption {
@@ -227,6 +236,21 @@ const Layout = ({ children }: LayoutProps) => {
   const { run, setRun } = useOnboarding();
   const [stepIndex, setStepIndex] = useState(0);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+  const [pointsTier, setPointsTier] = useState<string>('white');
+  const [pointsAllTime, setPointsAllTime] = useState(0);
+  const [pointsFlashKey, setPointsFlashKey] = useState(0);
+  const [pointsFlyers, setPointsFlyers] = useState<Array<{
+    id: number;
+    delta: number;
+    allTime?: number;
+    tier?: string;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  }>>([]);
+  const profileAvatarRef = useRef<HTMLSpanElement>(null);
+  const pointsFlyerIdRef = useRef(0);
 
   // Reset step index when tour starts
   useEffect(() => {
@@ -281,9 +305,22 @@ const Layout = ({ children }: LayoutProps) => {
         try {
           const profile = await authAPI.getProfile(user.username.toLowerCase());
           setProfilePictureUrl(profile.profile_picture_url);
+          setPointsTier(profile.points_tier || 'white');
+          if (typeof profile.points_all_time === 'number') {
+            setPointsAllTime(profile.points_all_time);
+          }
         } catch (error) {
           // Profile might not exist yet, use default
           setProfilePictureUrl(null);
+        }
+        try {
+          const me = await pointsAPI.getMe();
+          setPointsAllTime(me.all_time || 0);
+          if (me.tier) {
+            setPointsTier(me.tier);
+          }
+        } catch {
+          // Points endpoint may be unavailable before migrations
         }
       }
     };
@@ -307,6 +344,57 @@ const Layout = ({ children }: LayoutProps) => {
       window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate);
     };
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setPointsAllTime(0);
+      setPointsFlyers([]);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handlePointsAwarded = (event: Event) => {
+      const points = (event as CustomEvent<PointsPayload>).detail;
+      if (!points) {
+        return;
+      }
+      const delta = Math.max(0, Math.floor(Number(points.delta) || 0));
+      if (!points.awarded || delta <= 0) {
+        if (typeof points.all_time === 'number') {
+          setPointsAllTime((prev) => Math.max(prev, points.all_time || 0));
+        }
+        if (points.tier) {
+          setPointsTier(points.tier);
+        }
+        return;
+      }
+      const avatar = profileAvatarRef.current?.getBoundingClientRect();
+      const endX = avatar ? avatar.left + avatar.width / 2 : window.innerWidth - 36;
+      const endY = avatar ? avatar.top + avatar.height / 2 : 35;
+      const jitterX = (Math.random() - 0.5) * 48;
+      const jitterY = (Math.random() - 0.5) * 28;
+      pointsFlyerIdRef.current += 1;
+      playSound('pop');
+      setPointsFlyers((prev) => [
+        ...prev,
+        {
+          id: pointsFlyerIdRef.current,
+          delta,
+          allTime: typeof points.all_time === 'number' ? points.all_time : undefined,
+          tier: points.tier,
+          startX: window.innerWidth / 2 + jitterX,
+          startY: Math.min(window.innerHeight * 0.4, window.innerHeight / 2) + jitterY,
+          endX,
+          endY,
+        },
+      ]);
+    };
+
+    window.addEventListener(POINTS_AWARDED_EVENT, handlePointsAwarded);
+    return () => {
+      window.removeEventListener(POINTS_AWARDED_EVENT, handlePointsAwarded);
+    };
+  }, []);
 
   // Update ref when sidebar state changes
   useEffect(() => {
@@ -967,6 +1055,17 @@ const Layout = ({ children }: LayoutProps) => {
     </Link>
   );
 
+  const renderPointsShortcut = () => (
+    <Link
+      to="/leaderboards?gameType=points&period=weekly"
+      className={`topbar-shortcut topbar-shortcut--points${location.pathname.startsWith('/leaderboards') && searchParams.get('gameType') === 'points' ? ' topbar-shortcut--active' : ''}`}
+      aria-label="Points leaderboard"
+    >
+      <Star size={20} />
+      <span className="topbar-shortcut-label">Points</span>
+    </Link>
+  );
+
   const renderMobileShortcuts = () => (
     <>
       {renderDailyShortcut()}
@@ -975,6 +1074,7 @@ const Layout = ({ children }: LayoutProps) => {
       {renderCluejumShortcut()}
       {renderDoodleShortcut()}
       {renderTournamentShortcut()}
+      {renderPointsShortcut()}
     </>
   );
 
@@ -1016,6 +1116,7 @@ const Layout = ({ children }: LayoutProps) => {
           >
             <div className="topbar-shortcut-group">
               {renderTournamentShortcut()}
+              {renderPointsShortcut()}
             </div>
           </div>
           <a
@@ -1059,26 +1160,42 @@ const Layout = ({ children }: LayoutProps) => {
             </>
           )}
           <button
-            className="profile-picture-button-top"
+            className={`profile-picture-button-top${isAuthenticated ? ' has-points-total' : ''}`}
             onClick={handleRightSidebarToggle}
-            aria-label="Toggle profile menu"
+            aria-label={
+              isAuthenticated
+                ? `Toggle profile menu, ${formatCompactPoints(pointsAllTime)} points`
+                : 'Toggle profile menu'
+            }
             data-onboarding="profile-menu"
           >
-            {isAuthenticated && profilePictureUrl ? (
-              <img
-                src={profilePictureUrl}
-                alt="Profile"
-                className="profile-button-image"
-              />
-            ) : (
-              <img
-                src="/images/default.png"
-                alt={isAuthenticated ? "Profile" : "Guest"}
-                className="profile-button-image"
-              />
-            )}
-            {hasNewChatMessages && (
-              <img src="/images/chat.png" alt="Chat" className="chat-badge" />
+            <span className="profile-picture-avatar-wrap" ref={profileAvatarRef}>
+              {isAuthenticated ? (
+                <PointsStarBadge tier={pointsTier} size={32}>
+                  <img
+                    src={profilePictureUrl || '/images/default.png'}
+                    alt="Profile"
+                    className="profile-button-image"
+                  />
+                </PointsStarBadge>
+              ) : (
+                <img
+                  src="/images/default.png"
+                  alt="Guest"
+                  className="profile-button-image"
+                />
+              )}
+              {hasNewChatMessages && (
+                <img src="/images/chat.png" alt="Chat" className="chat-badge" />
+              )}
+            </span>
+            {isAuthenticated && (
+              <span
+                key={pointsFlashKey}
+                className={`profile-points-total${pointsFlashKey > 0 ? ' is-flashing' : ''}`}
+              >
+                {formatCompactPoints(pointsAllTime)}
+              </span>
             )}
           </button>
         </div>
@@ -1592,6 +1709,39 @@ const Layout = ({ children }: LayoutProps) => {
           skip: 'Skip tour',
         }}
       />
+      {pointsFlyers.length > 0 &&
+        createPortal(
+          <div className="points-flyers-layer" aria-hidden="true">
+            {pointsFlyers.map((flyer) => (
+              <span
+                key={flyer.id}
+                className="points-flyer"
+                style={{
+                  left: flyer.startX,
+                  top: flyer.startY,
+                  ['--dx' as string]: `${flyer.endX - flyer.startX}px`,
+                  ['--dy' as string]: `${flyer.endY - flyer.startY}px`,
+                }}
+                onAnimationEnd={() => {
+                  setPointsFlyers((prev) => prev.filter((item) => item.id !== flyer.id));
+                  setPointsAllTime((prev) => {
+                    if (typeof flyer.allTime === 'number') {
+                      return Math.max(prev, flyer.allTime);
+                    }
+                    return prev + flyer.delta;
+                  });
+                  if (flyer.tier) {
+                    setPointsTier(flyer.tier);
+                  }
+                  setPointsFlashKey((key) => key + 1);
+                }}
+              >
+                +{flyer.delta}
+              </span>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

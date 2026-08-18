@@ -1,0 +1,16 @@
+.points-star-badge-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.points-star-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
+}

@@ -4,6 +4,7 @@ import {
   FALLBACK_PROFILE_IMAGE,
   resolveProfilePictureUrl,
 } from '../../../utils/profilePictureUrl';
+import { PointsStarBadge } from '../../../components/PointsStarBadge';
 import './PlayersList.css';
 
 interface PlayersListProps {
@@ -69,6 +70,18 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
           const chatColor = player.chatColor || '#71bbe9';
           const profileUrl = player.profileUrl || '';
           const isGuest = !profileUrl || !player.userId;
+          const avatar = (
+            <PointsStarBadge tier={isGuest ? undefined : player.pointsTier} size={30}>
+              <img
+                {...profileImgProps(profilePictureUrl, isGuest)}
+                alt={player.username}
+                className="rounded-circle high-score-img"
+                width={30}
+                height={30}
+                style={{ borderColor: isGuest ? '#808080' : chatColor }}
+              />
+            </PointsStarBadge>
+          );
 
           return (
             <div key={player.id} className="chat-user-container">
@@ -79,24 +92,10 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'none' }}
                 >
-                  <img
-                    {...profileImgProps(profilePictureUrl, isGuest)}
-                    alt={player.username}
-                    className="rounded-circle high-score-img"
-                    width={30}
-                    height={30}
-                    style={{ borderColor: chatColor }}
-                  />
+                  {avatar}
                 </a>
               ) : (
-                <img
-                  {...profileImgProps(profilePictureUrl, isGuest)}
-                  alt={player.username}
-                  className="rounded-circle high-score-img guest-user"
-                  width={30}
-                  height={30}
-                  style={{ borderColor: '#808080' }}
-                />
+                avatar
               )}
               <span
                 className="user-list-username"

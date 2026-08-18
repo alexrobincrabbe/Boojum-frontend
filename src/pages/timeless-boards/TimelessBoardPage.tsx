@@ -24,6 +24,7 @@ interface TimelessBoardScore {
   number_of_words: number;
   is_current_user: boolean;
   which_words_found?: string[]; // Array of words found by this player
+  points_tier?: string;
 }
 
 interface WordData {
@@ -376,6 +377,7 @@ setBoardsByLevel({
                           profileUrl={score.player_profile_url}
                           chatColor={score.player_chat_color}
                           size={30}
+                          pointsTier={score.points_tier}
                           showBorder={true}
                         />
                         <Username

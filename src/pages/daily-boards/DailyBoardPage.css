@@ -409,12 +409,15 @@
 
 .scores-table-container {
   overflow-x: auto;
+  overflow-y: visible;
+  padding-top: 8px;
   border-radius: 8px;
 }
 
 .scores-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 600px;
   border: none;
 }
@@ -502,6 +505,10 @@ border-bottom: 2px solid #71bbe9;
   border: none;
 }
 
+.scores-table td.player-col {
+  overflow: visible;
+}
+
 .scores-table td.rank-col {
   text-align: center;
   font-weight: bold;
@@ -533,6 +540,7 @@ border-bottom: 2px solid #71bbe9;
   display: flex;
   align-items: center;
   gap: 10px;
+  overflow: visible;
 }
 
 .player-avatar {

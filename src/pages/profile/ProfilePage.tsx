@@ -24,6 +24,7 @@ import DoodlesGallery from './DoodlesGallery';
 import { SortableSection } from './SortableSection';
 import ImageCropModal from './ImageCropModal';
 import { usePageOnboarding, type Step } from '../../hooks/usePageOnboarding';
+import { PointsStarBadge } from '../../components/PointsStarBadge';
 import './ProfilePage.css';
 
 interface GameScore {
@@ -78,6 +79,9 @@ interface Profile {
   profile_section_order?: string[];
   is_bot?: boolean;
   game_bot_id?: number | null;
+  points_all_time?: number;
+  points_weekly?: number;
+  points_tier?: string;
 }
 
 const ProfilePage = () => {
@@ -625,7 +629,12 @@ const ProfilePage = () => {
               isEditMode={isEditMode}
               onFileChange={handleFileChange}
               chatColor={profile.chat_color}
+              pointsTier={profile.points_tier}
             />
+            <div className="profile-points-totals">
+              <div><strong>All-time points:</strong> {(profile.points_all_time || 0).toLocaleString()}</div>
+              <div><strong>This week:</strong> {(profile.points_weekly || 0).toLocaleString()}</div>
+            </div>
             {showCropModal && imageToCrop && (
               <ImageCropModal
                 imageSrc={imageToCrop}
@@ -740,19 +749,22 @@ const ProfilePicture = ({
   isOwnProfile,
   isEditMode,
   onFileChange,
-  chatColor
+  chatColor,
+  pointsTier,
 }: { 
   profilePictureUrl: string | null;
   isOwnProfile: boolean;
   isEditMode: boolean;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   chatColor?: string;
+  pointsTier?: string;
 }) => {
   const hasPlaceholder = !profilePictureUrl || profilePictureUrl.includes('placeholder');
   const borderColor = chatColor || '#71bbe9';
   const boxShadow = `0 0 20px ${borderColor}`;
   
   return (
+    <PointsStarBadge tier={pointsTier || 'white'} size={140}>
     <div 
       id="profile-pic"
       style={{
@@ -786,10 +798,9 @@ const ProfilePicture = ({
         </label>
       )}
     </div>
+    </PointsStarBadge>
   );
 };
-
-// Game Stats Components (unchanged)
 const NormalGameStats = ({ 
   gameStats, 
   gameScores 

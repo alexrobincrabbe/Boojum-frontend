@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { useGameSocket } from '../../../ws/useGameSocket';
 import type { InboundMessage, GameState, OutboundMessage } from '../../../ws/protocol';
+import { showPointsToasts } from '../../../utils/pointsToasts';
 
 interface TimerState {
     displayTime: number | null;
@@ -480,6 +481,11 @@ export function useGameWebSocket({
                     if (onScoreInChat) {
                         onScoreInChat(message.playerName, message.score);
                     }
+                    break;
+                }
+
+                case 'POINTS_AWARDED': {
+                    showPointsToasts(message.points);
                     break;
                 }
 

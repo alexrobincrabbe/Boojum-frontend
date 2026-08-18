@@ -625,6 +625,21 @@ export const leaderboardsAPI = {
     const response = await api.get('/leaderboards/all/');
     return response.data;
   },
+  getPointsLeaderboard: async (period: 'weekly' | 'all-time' = 'weekly', limit: number = 50) => {
+    const response = await api.get('/points/leaderboard/', { params: { period, limit } });
+    return response.data;
+  },
+};
+
+export const pointsAPI = {
+  getMe: async () => {
+    const response = await api.get('/points/me/');
+    return response.data;
+  },
+  getLeaderboard: async (period: 'weekly' | 'all-time' = 'weekly', limit: number = 50) => {
+    const response = await api.get('/points/leaderboard/', { params: { period, limit } });
+    return response.data;
+  },
 };
 
 export const forumAPI = {
@@ -713,12 +728,15 @@ export const minigamesAPI = {
     const response = await api.post('/minigames/doodledum/guess/', { guess });
     return response.data;
   },
-  setCluejumAchievement: async (stage1: number, stage2: number, stage3: number) => {
-    const response = await api.post('/minigames/cluejum/achievement/', { stage1, stage2, stage3 });
+  completeCluejumSection: async (section: number, attempts: number, date?: string) => {
+    const response = await api.post('/minigames/cluejum/complete/', { section, attempts, date });
     return response.data;
   },
-  setBoojumbleAchievement: async (level: string) => {
-    const response = await api.post('/minigames/boojumble/achievement/', { boojumble_level: level });
+  completeBoojumble: async (puzzleId: number, level: number) => {
+    const response = await api.post('/minigames/boojumble/complete/', {
+      puzzle_id: puzzleId,
+      level,
+    });
     return response.data;
   },
 };

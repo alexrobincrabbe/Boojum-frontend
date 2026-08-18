@@ -32,7 +32,8 @@ export type InboundMessage =
   | { type: 'ERROR'; code: string; message: string }
   | { type: 'PONG' }
   | { type: 'FINAL_SCORES'; seq: number; finalScores: Record<string, FinalScore>; totalPoints?: number; wordsByLength?: Record<string, Record<string, WordData>> }
-  | { type: 'SHOW_BACK_BUTTON' };
+  | { type: 'SHOW_BACK_BUTTON' }
+  | { type: 'POINTS_AWARDED'; user_id: number; points: { awarded?: boolean; delta?: number; all_time?: number; weekly?: number; new_milestones?: number[]; tier?: string } };
 
 // ============================================================================
 // Game State Types
@@ -78,6 +79,11 @@ export interface Player {
   isReady: boolean;
   isConnected: boolean;
   isBot?: boolean;
+  profilePictureUrl?: string;
+  chatColor?: string;
+  profileUrl?: string;
+  pointsTier?: string;
+  pointsAllTime?: number;
 }
 
 export interface ScoreUpdate {
@@ -99,6 +105,8 @@ export interface FinalScore {
   chat_color?: string;
   profile_url?: string;
   which_words_found?: number[]; // Array indicating which words this player found
+  points_tier?: string;
+  points_all_time?: number;
 }
 
 export interface WordData {
