@@ -9,3 +9,22 @@
 .points-page-load-more {
   height: 1px;
 }
+
+.points-page-guide-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 2px solid var(--color-yellow);
+  color: var(--color-yellow);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.points-page-guide-button:hover {
+  background-color: rgba(245, 206, 69, 0.15);
+  color: #fff;
+}

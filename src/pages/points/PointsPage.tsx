@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { HelpCircle } from 'lucide-react';
 import { pointsAPI } from '../../services/api';
 import { ProfilePicture } from '../../components/ProfilePicture';
 import { Username } from '../../components/Username';
 import { Loading } from '../../components/Loading';
+import { PointsGuideModal } from '../../components/PointsGuideModal';
 import '../leaderboards/LeaderboardsPage.css';
 import './PointsPage.css';
 
@@ -32,6 +34,7 @@ export default function PointsPage() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [nextOffset, setNextOffset] = useState<number | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const fetchingRef = useRef(false);
@@ -117,6 +120,15 @@ export default function PointsPage() {
             <option value="all-time">All-Time</option>
           </select>
         </div>
+        <button
+          type="button"
+          className="points-page-guide-button"
+          onClick={() => setGuideOpen(true)}
+          aria-label="How points work"
+        >
+          <HelpCircle size={18} />
+          How points work
+        </button>
       </div>
 
       <div id="leaderboard-wrapper" style={{ position: 'relative' }}>
@@ -177,6 +189,7 @@ export default function PointsPage() {
           </div>
         )}
       </div>
+      <PointsGuideModal isOpen={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   );
 }
