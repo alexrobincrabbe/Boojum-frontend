@@ -48,6 +48,7 @@ const STATUS = {
   ERROR: 'error',
 } as const;
 import { PollModal } from './PollModal';
+import { PointsGuideModal } from './PointsGuideModal';
 import NotificationDropdown from './NotificationDropdown';
 import { Username } from './Username';
 import { PointsStarBadge } from './PointsStarBadge';
@@ -298,6 +299,7 @@ const Layout = ({ children }: LayoutProps) => {
   // Poll state
   const [poll, setPoll] = useState<Poll | null>(null);
   const [pollModalOpen, setPollModalOpen] = useState(false);
+  const [pointsGuideOpen, setPointsGuideOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfilePicture = async () => {
@@ -1159,45 +1161,47 @@ const Layout = ({ children }: LayoutProps) => {
               />
             </>
           )}
-          <button
-            className={`profile-picture-button-top${isAuthenticated ? ' has-points-total' : ''}`}
-            onClick={handleRightSidebarToggle}
-            aria-label={
-              isAuthenticated
-                ? `Toggle profile menu, ${formatCompactPoints(pointsAllTime)} points`
-                : 'Toggle profile menu'
-            }
-            data-onboarding="profile-menu"
-          >
-            <span className="profile-picture-avatar-wrap" ref={profileAvatarRef}>
-              {isAuthenticated ? (
-                <PointsStarBadge tier={pointsTier} size={32}>
+          <div className={`profile-picture-cluster${isAuthenticated ? ' has-points-total' : ''}`}>
+            <button
+              className="profile-picture-button-top"
+              onClick={handleRightSidebarToggle}
+              aria-label="Toggle profile menu"
+              data-onboarding="profile-menu"
+            >
+              <span className="profile-picture-avatar-wrap" ref={profileAvatarRef}>
+                {isAuthenticated ? (
+                  <PointsStarBadge tier={pointsTier} size={32}>
+                    <img
+                      src={profilePictureUrl || '/images/default.png'}
+                      alt="Profile"
+                      className="profile-button-image"
+                    />
+                  </PointsStarBadge>
+                ) : (
                   <img
-                    src={profilePictureUrl || '/images/default.png'}
-                    alt="Profile"
+                    src="/images/default.png"
+                    alt="Guest"
                     className="profile-button-image"
                   />
-                </PointsStarBadge>
-              ) : (
-                <img
-                  src="/images/default.png"
-                  alt="Guest"
-                  className="profile-button-image"
-                />
-              )}
-              {hasNewChatMessages && (
-                <img src="/images/chat.png" alt="Chat" className="chat-badge" />
-              )}
-            </span>
+                )}
+                {hasNewChatMessages && (
+                  <img src="/images/chat.png" alt="Chat" className="chat-badge" />
+                )}
+              </span>
+            </button>
             {isAuthenticated && (
-              <span
+              <button
+                type="button"
                 key={pointsFlashKey}
                 className={`profile-points-total${pointsFlashKey > 0 ? ' is-flashing' : ''}`}
+                onClick={() => setPointsGuideOpen(true)}
+                aria-label={`${formatCompactPoints(pointsAllTime)} points. Open points guide`}
+                title="How points work"
               >
                 {formatCompactPoints(pointsAllTime)}
-              </span>
+              </button>
             )}
-          </button>
+          </div>
         </div>
       </nav>
 
@@ -1665,6 +1669,10 @@ const Layout = ({ children }: LayoutProps) => {
         onClose={() => setPollModalOpen(false)}
         onVote={handlePollVote}
         isAuthenticated={isAuthenticated}
+      />
+      <PointsGuideModal
+        isOpen={pointsGuideOpen}
+        onClose={() => setPointsGuideOpen(false)}
       />
 
       {/* Onboarding Tour */}

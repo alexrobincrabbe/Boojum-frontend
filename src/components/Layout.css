@@ -365,6 +365,97 @@
   box-shadow: 0 0 6px rgba(94, 76, 176, 1), 0 0 10px rgba(94, 76, 176, 0.6);
 }
 
+/* Tablet / smaller desktop: shrink shortcuts so the centred Doodle doesn't overlap */
+@media (max-width: 1180px) and (min-width: 769px) {
+  .top-bar {
+    padding: 0 12px;
+  }
+
+  .top-bar-left {
+    gap: 10px;
+  }
+
+  .top-bar-right {
+    gap: 8px;
+  }
+
+  .top-bar-center {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    flex: 0 0 auto;
+    margin: 0 6px;
+  }
+
+  .topbar-shortcuts-group--desktop {
+    gap: 10px;
+  }
+
+  .topbar-shortcut-group {
+    gap: 5px;
+  }
+
+  .topbar-shortcuts-group--desktop .topbar-shortcut {
+    padding: 6px 8px;
+    gap: 5px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+  }
+
+  .topbar-shortcuts-group--desktop .topbar-shortcut-label {
+    font-size: 0.78rem;
+  }
+
+  .topbar-shortcuts-group--desktop .topbar-shortcut svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 960px) and (min-width: 769px) {
+  .top-bar {
+    padding: 0 8px;
+  }
+
+  .top-bar-left {
+    gap: 8px;
+  }
+
+  .top-bar-center {
+    margin: 0 4px;
+  }
+
+  .topbar-shortcuts-group--desktop {
+    gap: 6px;
+  }
+
+  .topbar-shortcut-group {
+    gap: 4px;
+  }
+
+  .topbar-shortcuts-group--desktop .topbar-shortcut {
+    padding: 5px 6px;
+    gap: 4px;
+    border-width: 1.5px;
+    font-size: 0.7rem;
+  }
+
+  .topbar-shortcuts-group--desktop .topbar-shortcut-label {
+    font-size: 0.7rem;
+  }
+
+  .topbar-shortcuts-group--desktop .topbar-shortcut svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .discord-link svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 @media (max-width: 768px) {
   .top-bar {
     padding: 0 10px;
@@ -455,7 +546,7 @@
 
   .discord-link,
   .notification-button,
-  .profile-picture-button-top:not(.has-points-total),
+  .profile-picture-button-top,
   .profile-picture-avatar-wrap,
   .mobile-users-button {
     width: 40px;
@@ -463,9 +554,9 @@
     flex-shrink: 0;
   }
 
-  .profile-picture-button-top.has-points-total {
-    width: auto;
-    height: auto;
+  .profile-picture-cluster.has-points-total .profile-picture-avatar-wrap {
+    width: 40px;
+    height: 40px;
   }
 
 }
@@ -608,6 +699,14 @@
   }
 }
 
+.profile-picture-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
 .profile-picture-button-top {
   width: 45px;
   height: 45px;
@@ -627,34 +726,15 @@
   flex-shrink: 0;
 }
 
-.profile-picture-button-top.has-points-total {
-  width: auto;
-  height: auto;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  gap: 2px;
-}
-
 .profile-picture-avatar-wrap {
-  width: 45px;
-  height: 45px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 3px solid var(--color-blue);
-  box-shadow: 0 0 15px var(--bg-blue-50);
   overflow: visible;
   position: relative;
   display: block;
   flex-shrink: 0;
   box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.profile-picture-button-top:not(.has-points-total) .profile-picture-avatar-wrap {
-  width: 100%;
-  height: 100%;
-  border: none;
-  box-shadow: none;
 }
 
 .profile-picture-button-top:hover {
@@ -662,12 +742,25 @@
   box-shadow: 0 0 20px var(--bg-blue-80);
 }
 
-.profile-picture-button-top.has-points-total:hover {
+.profile-picture-cluster.has-points-total .profile-picture-button-top {
+  border: none;
+  box-shadow: none;
+}
+
+.profile-picture-cluster.has-points-total .profile-picture-avatar-wrap {
+  width: 45px;
+  height: 45px;
+  border: 3px solid var(--color-blue);
+  box-shadow: 0 0 15px var(--bg-blue-50);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-picture-cluster.has-points-total .profile-picture-button-top:hover {
   transform: none;
   box-shadow: none;
 }
 
-.profile-picture-button-top.has-points-total:hover .profile-picture-avatar-wrap {
+.profile-picture-cluster.has-points-total .profile-picture-button-top:hover .profile-picture-avatar-wrap {
   transform: scale(1.1);
   box-shadow: 0 0 20px var(--bg-blue-80);
 }
@@ -679,8 +772,18 @@
   color: var(--color-yellow);
   text-shadow: 0 0 6px rgba(0, 0, 0, 0.85), 0 0 8px rgba(245, 206, 69, 0.45);
   letter-spacing: 0.02em;
-  pointer-events: none;
   white-space: nowrap;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 6px;
+}
+
+.profile-points-total:hover {
+  color: #fff;
 }
 
 .profile-points-total.is-flashing {

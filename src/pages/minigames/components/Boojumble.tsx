@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
 import {
   isBoojumbleSolvedFromGrid,
+  isBoojumbleWordsSolved,
   markBoojumbleSolved,
   notifyDailyChallengesUpdated,
 } from '../../../utils/dailyChallengeStatus';
@@ -27,8 +28,22 @@ interface BoojumbleProps {
 const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
   const [selectedLevel, setSelectedLevel] = useState<number>(3);
   const [letters, setLetters] = useState<{ [key: number]: string[][] }>({});
+  const reportedSolveIds = useRef<Set<number>>(new Set());
   const boardRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const dragInitialized = useRef<{ [key: number]: boolean }>({});
+
+  const reportBoojumbleSolved = (puzzleId: number, level: number) => {
+    if (!puzzleId || reportedSolveIds.current.has(puzzleId)) {
+      return;
+    }
+    reportedSolveIds.current.add(puzzleId);
+    minigamesAPI.completeBoojumble(puzzleId, level)
+      .then((data) => showPointsToasts(data?.points))
+      .catch((error) => {
+        reportedSolveIds.current.delete(puzzleId);
+        console.error(error);
+      });
+  };
 
   // Initialize letters for all boojumbles
   useEffect(() => {
@@ -118,6 +133,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     boojumbles.forEach((boojumble) => {
       if (isBoojumbleSolvedFromGrid(boojumble)) {
         markBoojumbleSolved(boojumble.id);
+        reportBoojumbleSolved(boojumble.id, boojumble.N);
         anyNewlyMarked = true;
       }
     });
@@ -542,8 +558,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
 
       // Check if solved
-      const solved = rowWords.every((word, idx) => word === rows[idx]) ||
-                    colWords.every((word, idx) => word === cols[idx]);
+      const solved = isBoojumbleWordsSolved(rowWords, colWords, rows, cols, selectedLevel);
 
       if (solved) {
         // Reconstruct letters for saving
@@ -748,14 +763,11 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     const rows = Array.isArray(currentBoojumble.rows) ? currentBoojumble.rows : [];
     const cols = Array.isArray(currentBoojumble.cols) ? currentBoojumble.cols : [];
     
-    const solved = rowWords.every((word, idx) => word === rows[idx]) ||
-                  colWords.every((word, idx) => word === cols[idx]);
+    const solved = isBoojumbleWordsSolved(rowWords, colWords, rows, cols, N);
 
     if (solved) {
       markBoojumbleSolved(currentBoojumble.id);
-      minigamesAPI.completeBoojumble(currentBoojumble.id, N)
-        .then((data) => showPointsToasts(data?.points))
-        .catch(console.error);
+      reportBoojumbleSolved(currentBoojumble.id, N);
       notifyDailyChallengesUpdated();
     }
   };

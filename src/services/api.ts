@@ -636,6 +636,10 @@ export const pointsAPI = {
     const response = await api.get('/points/me/');
     return response.data;
   },
+  getToday: async () => {
+    const response = await api.get('/points/today/');
+    return response.data;
+  },
   getLeaderboard: async (period: 'weekly' | 'all-time' = 'weekly', limit: number = 50) => {
     const response = await api.get('/points/leaderboard/', { params: { period, limit } });
     return response.data;

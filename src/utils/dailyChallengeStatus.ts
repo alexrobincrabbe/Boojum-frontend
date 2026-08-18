@@ -75,14 +75,26 @@ export function isBoojumbleSolvedFromGrid(boojumble: BoojumbleStatus): boolean {
   const rows = normalizeSolution(boojumble.rows, boojumble.N);
   const cols = normalizeSolution(boojumble.cols, boojumble.N);
 
-  const rowsMatch =
-    rows.length === boojumble.N &&
-    rowWords.every((word, idx) => word === rows[idx]);
-  const colsMatch =
-    cols.length === boojumble.N &&
-    colWords.every((word, idx) => word === cols[idx]);
+  return isBoojumbleWordsSolved(rowWords, colWords, rows, cols, boojumble.N);
+}
 
-  return rowsMatch || colsMatch;
+/** Original orientation or the transpose (the UI treats both as solved). */
+export function isBoojumbleWordsSolved(
+  rowWords: string[],
+  colWords: string[],
+  rows: string[],
+  cols: string[],
+  n: number,
+): boolean {
+  if (rows.length !== n || cols.length !== n || rowWords.length !== n) {
+    return false;
+  }
+  const currentRows = rowWords.map((word) => word.trim().toUpperCase());
+  const solutionRows = rows.map((word) => word.trim().toUpperCase());
+  const solutionCols = cols.map((word) => word.trim().toUpperCase());
+  const original = currentRows.every((word, idx) => word === solutionRows[idx]);
+  const transposed = currentRows.every((word, idx) => word === solutionCols[idx]);
+  return original || transposed;
 }
 
 export function isBoojumbleSolved(boojumble: BoojumbleStatus): boolean {

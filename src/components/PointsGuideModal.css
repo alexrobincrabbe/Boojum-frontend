@@ -1,0 +1,165 @@
+.points-guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10010;
+}
+
+.points-guide-content {
+  background-color: #13132a;
+  border: 3px solid #71bbe9;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 520px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.points-guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #71bbe9;
+  padding-bottom: 10px;
+}
+
+.points-guide-title {
+  color: #f5ce45;
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: bold;
+}
+
+.points-guide-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.points-guide-close:hover {
+  color: #f5ce45;
+}
+
+.points-guide-body {
+  color: #fff;
+}
+
+.points-guide-intro {
+  margin: 0 0 16px;
+  color: #cfd6e4;
+  font-size: 0.95rem;
+}
+
+.points-guide-section {
+  margin-bottom: 18px;
+}
+
+.points-guide-section h4 {
+  margin: 0 0 10px;
+  color: #71bbe9;
+  font-size: 1.05rem;
+}
+
+.points-guide-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: -4px 0 12px;
+  color: #cfd6e4;
+  font-size: 0.8rem;
+}
+
+.points-guide-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.points-guide-muted {
+  margin: 0;
+  color: #cfd6e4;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.points-guide-rows,
+.points-guide-subrows,
+.points-guide-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.points-guide-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.points-guide-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.points-guide-row.is-nested {
+  padding-left: 2px;
+}
+
+.points-guide-subrows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0 0 6px;
+}
+
+.points-guide-row-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+.points-guide-row-meta {
+  color: #f5ce45;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.points-guide-star {
+  flex-shrink: 0;
+}
+
+.points-guide-star.is-empty {
+  opacity: 0.85;
+}
+
+.points-guide-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.points-guide-rules li {
+  color: #cfd6e4;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.points-guide-rules strong {
+  color: #fff;
+}
