@@ -558,7 +558,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
 
       // Check if solved
-      const solved = isBoojumbleWordsSolved(rowWords, colWords, rows, cols, selectedLevel);
+      const solved = isBoojumbleWordsSolved(rowWords, rows, cols, selectedLevel);
 
       if (solved) {
         // Reconstruct letters for saving
@@ -763,7 +763,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     const rows = Array.isArray(currentBoojumble.rows) ? currentBoojumble.rows : [];
     const cols = Array.isArray(currentBoojumble.cols) ? currentBoojumble.cols : [];
     
-    const solved = isBoojumbleWordsSolved(rowWords, colWords, rows, cols, N);
+    const solved = isBoojumbleWordsSolved(rowWords, rows, cols, N);
 
     if (solved) {
       markBoojumbleSolved(currentBoojumble.id);

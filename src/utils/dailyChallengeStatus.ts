@@ -58,30 +58,20 @@ export function isBoojumbleSolvedFromGrid(boojumble: BoojumbleStatus): boolean {
   }
 
   const rowWords: string[] = [];
-  const colWords: string[] = [];
 
   for (let i = 0; i < boojumble.N; i++) {
     rowWords.push(currentLetters[i].join(''));
   }
 
-  for (let j = 0; j < boojumble.N; j++) {
-    let colWord = '';
-    for (let i = 0; i < boojumble.N; i++) {
-      colWord += currentLetters[i][j] || '';
-    }
-    colWords.push(colWord);
-  }
-
   const rows = normalizeSolution(boojumble.rows, boojumble.N);
   const cols = normalizeSolution(boojumble.cols, boojumble.N);
 
-  return isBoojumbleWordsSolved(rowWords, colWords, rows, cols, boojumble.N);
+  return isBoojumbleWordsSolved(rowWords, rows, cols, boojumble.N);
 }
 
 /** Original orientation or the transpose (the UI treats both as solved). */
 export function isBoojumbleWordsSolved(
   rowWords: string[],
-  colWords: string[],
   rows: string[],
   cols: string[],
   n: number,
