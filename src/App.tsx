@@ -63,11 +63,18 @@ import BotControlPage from "./pages/admin/BotControlPage";
 import BotTracePage from "./pages/admin/BotTracePage";
 import BotMemoriesPage from "./pages/admin/BotMemoriesPage";
 import CreateCustomRoomPage from "./pages/custom-room/CreateCustomRoomPage";
+import PrivacyPolicyPage from "./pages/privacy-policy/PrivacyPolicyPage";
 import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
+import CookieBanner, { getStoredConsent, type CookieConsent } from "./components/CookieBanner";
 
 const DISCORD_INVITE_URL = "https://discord.gg/GGypyAW54t";
+
+function useConsent() {
+  const [consent, setConsent] = useState<CookieConsent | null>(() => getStoredConsent());
+  return { consent, setConsent };
+}
 
 const HomePage = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -109,8 +116,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen p-8">
-      <SpeedInsights />
-      <Analytics />
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-yellow-400">
           Welcome to Boojum Games!
@@ -283,10 +288,19 @@ const LayoutWrapper = () => {
 };
 
 function App() {
+  const { consent, setConsent } = useConsent();
+
   return (
     <AuthProvider>
       <OnboardingProvider>
         <BoardThemeProvider>
+          {consent?.analytics && (
+            <>
+              <Analytics />
+              <SpeedInsights />
+            </>
+          )}
+          <CookieBanner onConsent={setConsent} />
           <Router>
           <Routes>
             <Route element={<LayoutWrapper />}>
@@ -352,6 +366,7 @@ function App() {
               <Route path="/admin/bot-trace" element={<BotTracePage />} />
               <Route path="/admin/bot-memories" element={<BotMemoriesPage />} />
               <Route path="/custom-room" element={<CreateCustomRoomPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/rooms/guest/:roomId/" element={<GameRoom />} />
               <Route path="/" element={<HomePage />} />
             </Route>
