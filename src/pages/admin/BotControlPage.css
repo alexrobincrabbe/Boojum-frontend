@@ -388,3 +388,29 @@
   font-size: 0.85rem;
   color: #888;
 }
+
+.bot-chat-color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.bot-chat-color-item {
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0.4rem 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.bot-chat-color-item:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.bot-chat-color-item.selected {
+  border-color: currentColor;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}

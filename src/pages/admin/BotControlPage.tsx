@@ -20,11 +20,13 @@ export interface GameBotRecord {
   username: string;
   display_name: string;
   profile_url: string;
+  chat_color: string;
   room_id: number;
   room_name: string;
   room_slug: string;
   personality_prompt: string;
   chat_enabled: boolean;
+  play_chance: number;
   words_per_minute: number;
   word_length_factor: number;
   congratulate_winner_chance: number;
@@ -33,6 +35,11 @@ export interface GameBotRecord {
   trace_events_enabled: boolean;
   is_active: boolean;
   schedules: BotScheduleSlot[];
+}
+
+interface ChatColorChoice {
+  value: string;
+  label: string;
 }
 
 interface LiveRoom {
@@ -53,6 +60,7 @@ const BotControlPage = () => {
   const { user } = useAuth();
   const [bots, setBots] = useState<GameBotRecord[]>([]);
   const [rooms, setRooms] = useState<LiveRoom[]>([]);
+  const [chatColorChoices, setChatColorChoices] = useState<ChatColorChoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
@@ -80,6 +88,7 @@ const BotControlPage = () => {
       const data = await adminAPI.listBots();
       setBots(data.bots || []);
       setRooms(data.rooms || []);
+      setChatColorChoices(data.chat_color_choices || []);
     } catch {
       toast.error('Failed to load bots');
     } finally {
@@ -138,9 +147,11 @@ const BotControlPage = () => {
     try {
       const updated = await adminAPI.updateBot(selected.id, {
         display_name: selected.display_name,
+        chat_color: selected.chat_color,
         room_id: selected.room_id,
         personality_prompt: selected.personality_prompt,
         chat_enabled: selected.chat_enabled,
+        play_chance: selected.play_chance ?? 100,
         words_per_minute: parsedWpm,
         word_length_factor: selected.word_length_factor,
         congratulate_winner_chance: selected.congratulate_winner_chance ?? 100,
@@ -366,6 +377,42 @@ const BotControlPage = () => {
                     />
                     <span>Chat enabled (plays either way; when off, no messages)</span>
                   </label>
+
+                  <label className="bot-field">
+                    <span>Play chance ({selected.play_chance ?? 100}%)</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={selected.play_chance ?? 100}
+                      onChange={(e) =>
+                        updateSelected({ play_chance: Number(e.target.value) })
+                      }
+                    />
+                    <span className="bot-field-hint">
+                      Chance this bot submits a score each round. 100 = every game, 0 = spectate only.
+                      Skipped rounds still clear quickly so the room is not delayed.
+                    </span>
+                  </label>
+
+                  <div className="bot-field">
+                    <span>Chat colour</span>
+                    <div className="bot-chat-color-list">
+                      {chatColorChoices.map((choice) => (
+                        <button
+                          key={choice.value}
+                          type="button"
+                          className={`bot-chat-color-item${
+                            (selected.chat_color || '#71bbe9') === choice.value ? ' selected' : ''
+                          }`}
+                          style={{ color: choice.value }}
+                          onClick={() => updateSelected({ chat_color: choice.value })}
+                        >
+                          {choice.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   <label className="bot-field">
                     <span>Words per minute (5–200)</span>
