@@ -147,7 +147,7 @@ const BotControlPage = () => {
     try {
       const updated = await adminAPI.updateBot(selected.id, {
         display_name: selected.display_name,
-        chat_color: selected.chat_color,
+        chat_color: selected.chat_color || 'white',
         room_id: selected.room_id,
         personality_prompt: selected.personality_prompt,
         chat_enabled: selected.chat_enabled,
@@ -403,7 +403,7 @@ const BotControlPage = () => {
                           key={choice.value}
                           type="button"
                           className={`bot-chat-color-item${
-                            (selected.chat_color || '#71bbe9') === choice.value ? ' selected' : ''
+                            (selected.chat_color || 'white') === choice.value ? ' selected' : ''
                           }`}
                           style={{ color: choice.value }}
                           onClick={() => updateSelected({ chat_color: choice.value })}
