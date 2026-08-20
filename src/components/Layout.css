@@ -2063,7 +2063,6 @@
   
   .online-text {
     color: var(--color-green);
-    font-weight:bold;
   }
   
   .offline-text {
