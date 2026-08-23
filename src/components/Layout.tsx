@@ -1072,10 +1072,10 @@ const Layout = ({ children }: LayoutProps) => {
   const renderPointsShortcut = () => (
     <Link
       to="/points?period=weekly"
-      className={`topbar-shortcut topbar-shortcut--points${location.pathname.startsWith('/points') ? ' topbar-shortcut--current' : ''}`}
+      className="topbar-shortcut topbar-shortcut--points"
       aria-label="Points"
     >
-      <Star size={20} />
+      <Star size={20} fill="#33c15b" stroke="#33c15b" aria-hidden />
       <span className="topbar-shortcut-label">Points</span>
     </Link>
   );
