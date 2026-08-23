@@ -20,6 +20,8 @@ interface PointsEntry {
   points: number;
   points_all_time?: number;
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 const PAGE_SIZE = 50;
@@ -161,6 +163,8 @@ export default function PointsPage() {
                                 chatColor={entry.chat_color}
                                 size={30}
                                 pointsTier={entry.points_tier}
+                                crownJewels={entry.crown_jewels}
+                                sceptreJewels={entry.sceptre_jewels}
                               />
                             </td>
                             <td className="player-name">

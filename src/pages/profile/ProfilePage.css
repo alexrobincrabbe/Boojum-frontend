@@ -371,6 +371,7 @@ h2 {
   display: flex;
   justify-content: center;
   margin-bottom: 30px;
+  overflow: visible;
 }
 
 #profile-pic-container-top {
@@ -379,6 +380,41 @@ h2 {
   align-items: center;
   gap: 15px;
   width: 100%;
+  overflow: visible;
+}
+
+/* Room for crown peaks so they don't overlap the username */
+#profile-pic-container-top.has-avatar-badges,
+#profile-pic-container-top.has-crown-badge {
+  padding-top: clamp(36px, 9vw, 64px);
+}
+
+/* Profile-only badge tuning */
+#profile-pic-container-top .crown-badge-wrap {
+  padding-top: calc(var(--crown-size, 20px) * 0.52);
+  margin-top: 0;
+}
+
+#profile-pic-container-top .crown-badge-layer {
+  top: calc(var(--crown-size, 20px) * 0.06);
+}
+
+#profile-pic-container-top .points-star-badge-wrap {
+  padding-top: calc(var(--points-star-size, 12px) * 0.18);
+  padding-right: calc(var(--points-star-size, 12px) * 0.18);
+  margin-top: calc(var(--points-star-size, 12px) * -0.18);
+  margin-right: calc(var(--points-star-size, 12px) * -0.18);
+}
+
+#profile-pic-container-top .points-star-badge-link {
+  top: calc(var(--points-star-size, 12px) * 0.14);
+  right: calc(var(--points-star-size, 12px) * 0.14);
+  transform: scale(0.72);
+  transform-origin: top right;
+}
+
+#profile-pic-container-top .points-star-badge-link .points-star-badge {
+  transform: none;
 }
 
 .profile-points-totals {

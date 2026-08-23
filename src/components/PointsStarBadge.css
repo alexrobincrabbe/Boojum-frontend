@@ -4,13 +4,58 @@
   overflow: visible !important;
   vertical-align: middle;
   flex-shrink: 0;
+  z-index: 4;
+  /* Scale with avatar so large profile pics match small-list proportions */
+  padding-top: calc(var(--points-star-size, 12px) * 0.33);
+  padding-right: calc(var(--points-star-size, 12px) * 0.33);
+  margin-top: calc(var(--points-star-size, 12px) * -0.33);
+  margin-right: calc(var(--points-star-size, 12px) * -0.33);
 }
 
 .points-star-badge {
   position: absolute;
-  top: -3px;
-  right: -3px;
-  z-index: 2;
+  top: 0;
+  right: 0;
+  z-index: 4;
   pointer-events: none;
+  fill: var(--points-star-color) !important;
+  stroke: var(--points-star-color) !important;
+  color: var(--points-star-color) !important;
   filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
+}
+
+.points-star-badge-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  line-height: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.points-star-badge-link .points-star-badge {
+  position: static;
+  pointer-events: none;
+}
+
+.points-star-badge-link:hover .points-star-badge {
+  filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 4px rgba(255, 255, 255, 0.45));
+}
+
+.points-star-badge-link:focus-visible {
+  outline: 2px solid #71bbe9;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Allow badge stars to extend outside clipping containers used across the site */
+.user-list .chat-user-container,
+.leaderboard_table td,
+.player-container,
+.final-score-pic {
+  overflow: visible;
 }

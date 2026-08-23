@@ -6,6 +6,8 @@ import {
   resolveProfilePictureUrl,
 } from '../../../utils/profilePictureUrl';
 import { PointsStarBadge } from '../../../components/PointsStarBadge';
+import { CrownBadge } from '../../../components/CrownBadge';
+import { FrameBadge } from '../../../components/FrameBadge';
 import './ScoresModal.css';
 
 interface FinalScore {
@@ -22,6 +24,8 @@ interface FinalScore {
   profile_url?: string;
   attempt_number?: number; // For saved boards
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 interface SavedBoardScore {
@@ -53,6 +57,8 @@ interface OpenPlayBoardScore {
   best_word_score: number | string | null;
   number_of_words: number;
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 interface ScoresModalProps {
@@ -266,6 +272,8 @@ export function ScoresModal({
         chat_color: score.player_chat_color,
         profile_url: score.player_profile_url,
         points_tier: score.points_tier,
+        crown_jewels: score.crown_jewels,
+        sceptre_jewels: score.sceptre_jewels,
       } as FinalScore];
     });
     scoresToDisplay.sort((a, b) => {
@@ -317,26 +325,30 @@ export function ScoresModal({
     const profilePath = player.profile_url ? `/profile/${player.profile_url}` : null;
 
     const pic = (
-      <PointsStarBadge tier={isGuest ? undefined : player.points_tier} size={30}>
-        <span className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}>
-          <img
-            src={profileImage}
-            alt={player.display_name}
-            className="rounded-circle high-score-img"
-            width={30}
-            height={30}
-            style={{
-              borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
-            }}
-            onError={(e: SyntheticEvent<HTMLImageElement>) => {
-              const img = e.currentTarget;
-              if (img.src !== FALLBACK_PROFILE_IMAGE) {
-                img.src = FALLBACK_PROFILE_IMAGE;
-              }
-            }}
-          />
-        </span>
-      </PointsStarBadge>
+      <CrownBadge jewels={isGuest ? undefined : player.crown_jewels} size={30}>
+        <PointsStarBadge tier={isGuest ? undefined : player.points_tier} size={30}>
+          <FrameBadge jewels={isGuest ? undefined : player.sceptre_jewels} size={30}>
+            <span className={`final-score-pic ${isGuest ? 'guest-user' : ''}`}>
+              <img
+                src={profileImage}
+                alt={player.display_name}
+                className="rounded-circle high-score-img"
+                width={30}
+                height={30}
+                style={{
+                  borderColor: isGuest ? '#808080' : (player.chat_color || 'grey'),
+                }}
+                onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                  const img = e.currentTarget;
+                  if (img.src !== FALLBACK_PROFILE_IMAGE) {
+                    img.src = FALLBACK_PROFILE_IMAGE;
+                  }
+                }}
+              />
+            </span>
+          </FrameBadge>
+        </PointsStarBadge>
+      </CrownBadge>
     );
 
     const name = (

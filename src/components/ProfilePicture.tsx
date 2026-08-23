@@ -3,6 +3,8 @@ import {
   FALLBACK_PROFILE_IMAGE,
   resolveProfilePictureUrl,
 } from '../utils/profilePictureUrl';
+import { CrownBadge, type CrownJewel } from './CrownBadge';
+import { FrameBadge } from './FrameBadge';
 import { PointsStarBadge } from './PointsStarBadge';
 
 interface ProfilePictureProps {
@@ -13,6 +15,9 @@ interface ProfilePictureProps {
   className?: string;
   showBorder?: boolean;
   pointsTier?: string | null;
+  crownJewels?: CrownJewel[] | null;
+  sceptreJewels?: CrownJewel[] | null;
+  badgeLinkable?: boolean;
 }
 
 export function ProfilePicture({
@@ -23,6 +28,9 @@ export function ProfilePicture({
   className = '',
   showBorder = true,
   pointsTier,
+  crownJewels,
+  sceptreJewels,
+  badgeLinkable = false,
 }: ProfilePictureProps) {
   const imageUrl = resolveProfilePictureUrl(profilePictureUrl, size);
 
@@ -73,9 +81,12 @@ export function ProfilePicture({
   );
 
   return (
-    <PointsStarBadge tier={pointsTier} size={size}>
-      {picture}
-    </PointsStarBadge>
+    <CrownBadge jewels={crownJewels} size={size} linkable={badgeLinkable}>
+      <PointsStarBadge tier={pointsTier} size={size} linkable={badgeLinkable}>
+        <FrameBadge jewels={sceptreJewels} size={size} linkable={badgeLinkable}>
+          {picture}
+        </FrameBadge>
+      </PointsStarBadge>
+    </CrownBadge>
   );
 }
-

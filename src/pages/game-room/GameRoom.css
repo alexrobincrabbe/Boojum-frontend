@@ -220,7 +220,7 @@ white-space: nowrap;
   flex-direction: column;
   height: 93%;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   width: fit-content;
   padding: 5px 20px 20px 20px;
   margin-bottom: 0px;

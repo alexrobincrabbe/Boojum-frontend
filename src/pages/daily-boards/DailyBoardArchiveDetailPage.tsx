@@ -23,6 +23,8 @@ interface DailyBoardScore {
   number_of_words: number;
   is_current_user: boolean;
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 interface WordData {
@@ -266,6 +268,8 @@ export default function DailyBoardArchiveDetailPage() {
                             size={40}
                             showBorder={true}
                             pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                           />
                           <Username
                             username={score.player_display_name}

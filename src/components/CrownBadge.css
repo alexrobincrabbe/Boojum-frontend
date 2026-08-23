@@ -1,0 +1,84 @@
+.crown-badge-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: middle;
+  flex-shrink: 0;
+  z-index: 5;
+  /* Sit the crown on top of the avatar (protrudes above) */
+  padding-top: calc(var(--crown-size, 20px) * 0.62);
+  margin-top: calc(var(--crown-size, 20px) * -0.62);
+}
+
+.crown-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+}
+
+.crown-badge-layer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--crown-display-width, var(--crown-size, 20px));
+  height: var(--crown-display-height, calc(var(--crown-size, 20px) * 0.78));
+  z-index: 5;
+  pointer-events: none;
+}
+
+.crown-badge-layer .crown-badge {
+  position: static;
+  transform: none;
+  display: block;
+}
+
+.crown-badge-jewel-links {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crown-badge-wrap--linkable .crown-badge-jewel-links {
+  pointer-events: auto;
+}
+
+.crown-badge-jewel-link {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 4;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.crown-badge-jewel-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.crown-badge-jewel-link:focus-visible {
+  outline: 2px solid #71bbe9;
+  outline-offset: 2px;
+}
+
+.crown-badge-base {
+  fill: #f0c94a;
+  stroke: #1a1428;
+  stroke-width: 0.7;
+  stroke-linejoin: round;
+}
+
+.crown-badge-band {
+  fill: #d4a82e;
+  stroke: #1a1428;
+  stroke-width: 0.45;
+}
+
+.crown-badge-jewel {
+  filter: drop-shadow(0 0 0.6px rgba(0, 0, 0, 0.85));
+}

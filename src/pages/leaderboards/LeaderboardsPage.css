@@ -238,6 +238,10 @@
   border: none;
 }
 
+.table-container td:has(.points-star-badge-wrap) {
+  overflow: visible;
+}
+
 .table-container td.player-name {
     margin-bottom: 0 !important;
     font-size: 1rem !important;

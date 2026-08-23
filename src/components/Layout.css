@@ -319,6 +319,14 @@
   width: 100%;
   height: 100%;
   display: block;
+  padding: 0;
+  margin: 0;
+  overflow: visible !important;
+}
+
+.profile-picture-button-top .crown-badge-wrap {
+  display: block;
+  overflow: visible !important;
 }
 
 /* Active: Daily board — yellow */

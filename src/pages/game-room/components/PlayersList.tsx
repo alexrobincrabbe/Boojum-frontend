@@ -5,6 +5,8 @@ import {
   resolveProfilePictureUrl,
 } from '../../../utils/profilePictureUrl';
 import { PointsStarBadge } from '../../../components/PointsStarBadge';
+import { CrownBadge } from '../../../components/CrownBadge';
+import { FrameBadge } from '../../../components/FrameBadge';
 import './PlayersList.css';
 
 interface PlayersListProps {
@@ -71,16 +73,20 @@ export function PlayersList({ players, variant = 'desktop', roomId, roomColor }:
           const profileUrl = player.profileUrl || '';
           const isGuest = !profileUrl || !player.userId;
           const avatar = (
-            <PointsStarBadge tier={isGuest ? undefined : player.pointsTier} size={30}>
-              <img
-                {...profileImgProps(profilePictureUrl, isGuest)}
-                alt={player.username}
-                className="rounded-circle high-score-img"
-                width={30}
-                height={30}
-                style={{ borderColor: isGuest ? '#808080' : chatColor }}
-              />
-            </PointsStarBadge>
+            <CrownBadge jewels={isGuest ? undefined : player.crownJewels} size={30}>
+              <PointsStarBadge tier={isGuest ? undefined : player.pointsTier} size={30}>
+                <FrameBadge jewels={isGuest ? undefined : player.sceptreJewels} size={30}>
+                  <img
+                    {...profileImgProps(profilePictureUrl, isGuest)}
+                    alt={player.username}
+                    className="rounded-circle high-score-img"
+                    width={30}
+                    height={30}
+                    style={{ borderColor: isGuest ? '#808080' : chatColor }}
+                  />
+                </FrameBadge>
+              </PointsStarBadge>
+            </CrownBadge>
           );
 
           return (

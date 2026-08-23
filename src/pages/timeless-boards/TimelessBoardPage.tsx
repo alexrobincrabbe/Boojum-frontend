@@ -25,6 +25,8 @@ interface TimelessBoardScore {
   is_current_user: boolean;
   which_words_found?: string[]; // Array of words found by this player
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 interface WordData {
@@ -378,6 +380,8 @@ setBoardsByLevel({
                           chatColor={score.player_chat_color}
                           size={30}
                           pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                           showBorder={true}
                         />
                         <Username

@@ -21,6 +21,8 @@ interface LeaderboardEntry {
   time?: number;
   unicorn?: boolean;
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 interface LeaderboardData {
@@ -151,6 +153,8 @@ function LeaderboardsContent({
                           chatColor={score.chat_color}
                           size={30}
                           pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                         />
                       </td>
                       <td className="player-name">
@@ -194,6 +198,8 @@ function LeaderboardsContent({
                           chatColor={score.chat_color}
                           size={30}
                           pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                         />
                       </td>
                       <td className="player-name">
@@ -246,6 +252,8 @@ function LeaderboardsContent({
                           chatColor={score.chat_color}
                           size={30}
                           pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                         />
                       </td>
                       <td className="player-name">
@@ -283,6 +291,8 @@ function LeaderboardsContent({
                           chatColor={score.chat_color}
                           size={30}
                           pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                         />
                       </td>
                       <td className="player-name">
@@ -323,6 +333,8 @@ function LeaderboardsContent({
                           chatColor={score.chat_color}
                           size={30}
                           pointsTier={score.points_tier}
+                          crownJewels={score.crown_jewels}
+                          sceptreJewels={score.sceptre_jewels}
                         />
                       </td>
                       <td className="player-name">

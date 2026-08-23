@@ -13,6 +13,8 @@ export interface OpenPlayScoreRow {
   number_of_words: number;
   is_current_user: boolean;
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 interface OpenPlayScoresTableProps {
@@ -67,6 +69,8 @@ export function OpenPlayScoresTable({
                     size={40}
                     showBorder
                     pointsTier={leader.points_tier}
+                    crownJewels={leader.crown_jewels}
+                    sceptreJewels={leader.sceptre_jewels}
                   />
                   <Username
                     username={leader.player_display_name}

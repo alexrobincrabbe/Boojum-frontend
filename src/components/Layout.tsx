@@ -52,6 +52,8 @@ import { PointsGuideModal } from './PointsGuideModal';
 import NotificationDropdown from './NotificationDropdown';
 import { Username } from './Username';
 import { PointsStarBadge } from './PointsStarBadge';
+import { CrownBadge } from './CrownBadge';
+import { FrameBadge } from './FrameBadge';
 import { useDailyChallengeAlerts } from '../hooks/useDailyChallengeAlerts';
 import { useTournamentRegistrationAlerts } from '../hooks/useTournamentRegistrationAlerts';
 import { useBoardSubmissionAlerts } from '../hooks/useBoardSubmissionAlerts';
@@ -238,6 +240,8 @@ const Layout = ({ children }: LayoutProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [pointsTier, setPointsTier] = useState<string>('white');
+  const [crownJewels, setCrownJewels] = useState<string[]>([]);
+  const [sceptreJewels, setSceptreJewels] = useState<string[]>([]);
   const [pointsAllTime, setPointsAllTime] = useState(0);
   const [pointsFlashKey, setPointsFlashKey] = useState(0);
   const [pointsFlyers, setPointsFlyers] = useState<Array<{
@@ -308,6 +312,8 @@ const Layout = ({ children }: LayoutProps) => {
           const profile = await authAPI.getProfile(user.username.toLowerCase());
           setProfilePictureUrl(profile.profile_picture_url);
           setPointsTier(profile.points_tier || 'white');
+          setCrownJewels(Array.isArray(profile.crown_jewels) ? profile.crown_jewels : []);
+          setSceptreJewels(Array.isArray(profile.sceptre_jewels) ? profile.sceptre_jewels : []);
           if (typeof profile.points_all_time === 'number') {
             setPointsAllTime(profile.points_all_time);
           }
@@ -320,6 +326,12 @@ const Layout = ({ children }: LayoutProps) => {
           setPointsAllTime(me.all_time || 0);
           if (me.tier) {
             setPointsTier(me.tier);
+          }
+          if (Array.isArray(me.crown_jewels)) {
+            setCrownJewels(me.crown_jewels);
+          }
+          if (Array.isArray(me.sceptre_jewels)) {
+            setSceptreJewels(me.sceptre_jewels);
           }
         } catch {
           // Points endpoint may be unavailable before migrations
@@ -1170,13 +1182,17 @@ const Layout = ({ children }: LayoutProps) => {
             >
               <span className="profile-picture-avatar-wrap" ref={profileAvatarRef}>
                 {isAuthenticated ? (
-                  <PointsStarBadge tier={pointsTier} size={32}>
-                    <img
-                      src={profilePictureUrl || '/images/default.png'}
-                      alt="Profile"
-                      className="profile-button-image"
-                    />
-                  </PointsStarBadge>
+                  <CrownBadge jewels={crownJewels} size={32}>
+                    <PointsStarBadge tier={pointsTier} size={32}>
+                      <FrameBadge jewels={sceptreJewels} size={32}>
+                        <img
+                          src={profilePictureUrl || '/images/default.png'}
+                          alt="Profile"
+                          className="profile-button-image"
+                        />
+                      </FrameBadge>
+                    </PointsStarBadge>
+                  </CrownBadge>
                 ) : (
                   <img
                     src="/images/default.png"

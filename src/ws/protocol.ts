@@ -84,6 +84,8 @@ export interface Player {
   profileUrl?: string;
   pointsTier?: string;
   pointsAllTime?: number;
+  crownJewels?: string[];
+  sceptreJewels?: string[];
 }
 
 export interface ScoreUpdate {
@@ -107,6 +109,8 @@ export interface FinalScore {
   which_words_found?: number[]; // Array indicating which words this player found
   points_tier?: string;
   points_all_time?: number;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 export interface WordData {

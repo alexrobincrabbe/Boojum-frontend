@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -25,6 +25,8 @@ import { SortableSection } from './SortableSection';
 import ImageCropModal from './ImageCropModal';
 import { usePageOnboarding, type Step } from '../../hooks/usePageOnboarding';
 import { PointsStarBadge } from '../../components/PointsStarBadge';
+import { CrownBadge } from '../../components/CrownBadge';
+import { FrameBadge } from '../../components/FrameBadge';
 import './ProfilePage.css';
 
 interface GameScore {
@@ -82,6 +84,8 @@ interface Profile {
   points_all_time?: number;
   points_weekly?: number;
   points_tier?: string;
+  crown_jewels?: string[];
+  sceptre_jewels?: string[];
 }
 
 const ProfilePage = () => {
@@ -622,7 +626,14 @@ const ProfilePage = () => {
       {/* Profile Picture Row */}
       <div className="row">
         <div className="col-12 profile-pic-row">
-          <div id="profile-pic-container-top">
+          <div
+            id="profile-pic-container-top"
+            className={
+              profile.crown_jewels?.length || profile.sceptre_jewels?.length
+                ? 'has-avatar-badges'
+                : undefined
+            }
+          >
             <ProfilePicture 
               profilePictureUrl={previewImageUrl || profile.profile_picture_url}
               isOwnProfile={canEditProfile}
@@ -630,6 +641,8 @@ const ProfilePage = () => {
               onFileChange={handleFileChange}
               chatColor={profile.chat_color}
               pointsTier={profile.points_tier}
+              crownJewels={profile.crown_jewels}
+              sceptreJewels={profile.sceptre_jewels}
             />
             <div className="profile-points-totals">
               <div><strong>All-time points:</strong> {(profile.points_all_time || 0).toLocaleString()}</div>
@@ -751,6 +764,8 @@ const ProfilePicture = ({
   onFileChange,
   chatColor,
   pointsTier,
+  crownJewels,
+  sceptreJewels,
 }: { 
   profilePictureUrl: string | null;
   isOwnProfile: boolean;
@@ -758,15 +773,40 @@ const ProfilePicture = ({
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   chatColor?: string;
   pointsTier?: string;
+  crownJewels?: string[];
+  sceptreJewels?: string[];
 }) => {
+  const picRef = useRef<HTMLDivElement>(null);
+  const [avatarSize, setAvatarSize] = useState(200);
+
+  useEffect(() => {
+    const el = picRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const width = el.getBoundingClientRect().width;
+      if (width > 0) {
+        setAvatarSize(Math.round(width));
+      }
+    };
+
+    updateSize();
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const hasPlaceholder = !profilePictureUrl || profilePictureUrl.includes('placeholder');
   const borderColor = chatColor || '#71bbe9';
   const boxShadow = `0 0 20px ${borderColor}`;
   
   return (
-    <PointsStarBadge tier={pointsTier || 'white'} size={140}>
+    <CrownBadge jewels={crownJewels} size={avatarSize} linkable>
+    <PointsStarBadge tier={pointsTier || 'white'} size={avatarSize} linkable>
+    <FrameBadge jewels={sceptreJewels} size={avatarSize} linkable>
     <div 
       id="profile-pic"
+      ref={picRef}
       style={{
         border: `5px solid ${borderColor}`,
         boxShadow: boxShadow
@@ -798,7 +838,9 @@ const ProfilePicture = ({
         </label>
       )}
     </div>
+    </FrameBadge>
     </PointsStarBadge>
+    </CrownBadge>
   );
 };
 const NormalGameStats = ({ 

@@ -1,0 +1,72 @@
+.frame-badge-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: middle;
+  flex-shrink: 0;
+  z-index: 1;
+  /* Room for the ribbon under the avatar */
+  padding-bottom: var(--ribbon-overhang, 8px);
+  margin-bottom: calc(var(--ribbon-overhang, 8px) * -1);
+}
+
+.frame-badge-layer {
+  position: absolute;
+  top: calc(var(--frame-inset, 2px) * -1);
+  left: calc(var(--frame-inset, 2px) * -1);
+  right: calc(var(--frame-inset, 2px) * -1);
+  bottom: calc(var(--ribbon-overhang, 8px) * -0.15);
+  width: auto;
+  height: auto;
+  /* Below star (4) and crown (5) so those stay visible */
+  z-index: 1;
+  pointer-events: none;
+}
+
+.frame-badge {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
+.frame-badge-jewel {
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.frame-badge-jewel-links {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.frame-badge-wrap--linkable .frame-badge-jewel-links {
+  pointer-events: auto;
+}
+
+.frame-badge-jewel-link {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.frame-badge-jewel-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.frame-badge-jewel-link:focus-visible {
+  outline: 2px solid #71bbe9;
+  outline-offset: 2px;
+}
+
+.user-list .chat-user-container,
+.leaderboard_table td,
+.player-container,
+.final-score-pic,
+#profile-pic-container-top {
+  overflow: visible;
+}
