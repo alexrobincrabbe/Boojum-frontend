@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, type JSX } from 'react';
 import { minigamesAPI } from '../../../services/api';
 import {
-  isBoojumbleSolvedFromGrid,
+  isBoojumbleSolved,
   isBoojumbleWordsSolved,
   markBoojumbleSolved,
   notifyDailyChallengesUpdated,
@@ -131,7 +131,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     if (boojumbles.length === 0) return;
     let anyNewlyMarked = false;
     boojumbles.forEach((boojumble) => {
-      if (isBoojumbleSolvedFromGrid(boojumble)) {
+      if (isBoojumbleSolved(boojumble)) {
         markBoojumbleSolved(boojumble.id);
         reportBoojumbleSolved(boojumble.id, boojumble.N);
         anyNewlyMarked = true;
