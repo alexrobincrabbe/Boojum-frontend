@@ -356,10 +356,15 @@ export function useWordTracking(
     (sendJson: (message: any) => void, currentGameState?: typeof gameState) => {
       // Use passed gameState or fallback to closure gameState
       const stateToUse = currentGameState || gameState;
-      
+
+      const inScoreWindow =
+        stateToUse?.gameStatus === "finished" ||
+        (stateToUse?.gameStatus === "waiting" &&
+          stateToUse?.phase === "intermission");
+
       if (
         !stateToUse?.boardWords ||
-        stateToUse.gameStatus !== "finished" ||
+        !inScoreWindow ||
         scoreSubmittedRef.current
       ) {
         return;

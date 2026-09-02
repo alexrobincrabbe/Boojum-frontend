@@ -241,7 +241,8 @@ export default function GameRoom() {
     gameState,
     submitFinalScore,
     sendJson,
-    setIsScoresModalOpen
+    setIsScoresModalOpen,
+    connectionState
   );
   useWordTrackingRef(wordTrackingRef, initializeWordLists);
   useScoresModal(gameState, setIsScoresModalOpen, addChatSystemMessage);
