@@ -104,7 +104,7 @@ export default function CookieBanner({ onConsent }: Props) {
           />
           <CookieRow
             title="Analytics cookies"
-            description="Anonymous usage data via Vercel Analytics — helps us improve the game. No personal data is shared."
+            description="Anonymous usage data via Vercel Analytics and Google Analytics — helps us improve the game."
             checked={analyticsChecked}
             onChange={setAnalyticsChecked}
           />

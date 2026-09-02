@@ -47,6 +47,20 @@
     
     <!-- Mobile Web App -->
     <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Google Analytics (GA4) — consent defaults denied until cookie banner accept -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RD9WQXRB98"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500
+      });
+      gtag('js', new Date());
+      gtag('config', 'G-RD9WQXRB98', { send_page_view: false });
+    </script>
   </head>
   <body>
     <div id="root"></div>

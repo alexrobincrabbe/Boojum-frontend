@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p style={{ color: "#94a3b8", marginBottom: "40px" }}>
-          Last updated: 19 August 2026
+          Last updated: 2 September 2026
         </p>
 
         <Section title="1. Who we are">
@@ -64,14 +64,18 @@ export default function PrivacyPolicyPage() {
 
           <SubHeading>Analytics data (with your consent only)</SubHeading>
           <p>
-            If you accept analytics cookies, Vercel Analytics and Vercel Speed
-            Insights collect <strong>anonymous</strong> usage data: page views,
-            navigation paths, and performance metrics. No personal identifiers are
-            included. This data is processed by{" "}
+            If you accept analytics cookies, we collect <strong>anonymous</strong>{" "}
+            usage data (page views, navigation paths, and performance metrics) via
+            Vercel Analytics, Vercel Speed Insights, and Google Analytics (GA4).
+            This data is processed by{" "}
             <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" style={linkStyle}>
               Vercel Inc.
             </a>{" "}
-            under their privacy policy.
+            and{" "}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={linkStyle}>
+              Google LLC
+            </a>{" "}
+            under their respective privacy policies.
           </p>
         </Section>
 
@@ -109,6 +113,12 @@ export default function PrivacyPolicyPage() {
                 <Td>Anonymous analytics (Vercel)</Td>
                 <Td>Analytics (consent required)</Td>
                 <Td>Up to 1 year</Td>
+              </Tr>
+              <Tr>
+                <Td><code>_ga</code> / <code>_ga_*</code></Td>
+                <Td>Anonymous analytics (Google Analytics)</Td>
+                <Td>Analytics (consent required)</Td>
+                <Td>Up to 2 years</Td>
               </Tr>
             </tbody>
           </table>
@@ -149,7 +159,8 @@ export default function PrivacyPolicyPage() {
               </a>
             </li>
             <li>
-              <strong>Google</strong> — optional Google Sign-In via OAuth 2.0.{" "}
+              <strong>Google</strong> — optional Google Sign-In via OAuth 2.0, and
+              (with consent) Google Analytics.{" "}
               <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={linkStyle}>
                 Google Privacy Policy
               </a>

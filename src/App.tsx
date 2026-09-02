@@ -68,6 +68,7 @@ import "./App.css";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 import CookieBanner, { getStoredConsent, type CookieConsent } from "./components/CookieBanner";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 const DISCORD_INVITE_URL = "https://discord.gg/GGypyAW54t";
 
@@ -302,6 +303,7 @@ function App() {
           )}
           <CookieBanner onConsent={setConsent} />
           <Router>
+          {consent?.analytics && <GoogleAnalytics />}
           <Routes>
             <Route element={<LayoutWrapper />}>
               <Route path="/login" element={<LoginPage />} />
