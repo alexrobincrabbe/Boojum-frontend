@@ -160,15 +160,33 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
     let width = 0;
     let height = 0;
     let overlapTarget: HTMLElement | null = null;
+    let activePointerId: number | null = null;
+    const supportsPointerEvents = typeof window !== 'undefined' && 'PointerEvent' in window;
     
     // Define handler functions - these must be defined before cleanup
-    const getClientXY = (event: MouseEvent | TouchEvent) => {
-      if ('touches' in event && event.touches.length > 0) {
+    const getClientXY = (event: MouseEvent | TouchEvent | PointerEvent) => {
+      if ('pointerId' in event) {
         return {
-          clientX: event.touches[0].clientX,
-          clientY: event.touches[0].clientY,
-          pageX: event.touches[0].pageX,
-          pageY: event.touches[0].pageY,
+          clientX: event.clientX,
+          clientY: event.clientY,
+          pageX: event.pageX,
+          pageY: event.pageY,
+        };
+      }
+      if ('touches' in event) {
+        const touch =
+          (activePointerId != null &&
+            Array.from(event.touches).find((t) => t.identifier === activePointerId)) ||
+          event.touches[0] ||
+          event.changedTouches[0];
+        if (!touch) {
+          return { clientX: 0, clientY: 0, pageX: 0, pageY: 0 };
+        }
+        return {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          pageX: touch.pageX,
+          pageY: touch.pageY,
         };
       }
       const e = event as MouseEvent;
@@ -180,13 +198,66 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       };
     };
 
+    const clearDragStyles = (el: HTMLElement) => {
+      el.classList.remove('dragging');
+      el.style.position = '';
+      el.style.zIndex = '';
+      el.style.left = '';
+      el.style.top = '';
+      el.style.width = '';
+      el.style.height = '';
+      el.style.minWidth = '';
+      el.style.minHeight = '';
+      el.style.maxWidth = '';
+      el.style.maxHeight = '';
+    };
+
+    const removeDragListeners = () => {
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerUp);
+      document.removeEventListener('mousemove', onPointerMove as any);
+      document.removeEventListener('mouseup', onPointerUp as any);
+      document.removeEventListener('touchmove', onPointerMove as any);
+      document.removeEventListener('touchend', onPointerUp);
+      document.removeEventListener('touchcancel', onPointerUp);
+    };
+
+    /** Return a mid-drag tile to the board so multi-touch cannot orphan letters on <body>. */
+    const restoreDraggedToPlaceholder = () => {
+      if (!draggedElement) return;
+      if (placeholderElement?.parentNode) {
+        placeholderElement.replaceWith(draggedElement);
+      } else if (currentBoard && !currentBoard.contains(draggedElement)) {
+        currentBoard.appendChild(draggedElement);
+      }
+      clearDragStyles(draggedElement);
+      if (placeholderElement?.parentNode) {
+        placeholderElement.remove();
+      }
+      if (overlapTarget) {
+        overlapTarget.querySelector('.letter-child')?.classList.remove('highlight');
+      }
+      draggedElement = placeholderElement = overlapTarget = null;
+      activePointerId = null;
+    };
+
     const moveAt = (pageX: number, pageY: number) => {
       if (!draggedElement) return;
       draggedElement.style.left = `${pageX - startX}px`;
       draggedElement.style.top = `${pageY - startY}px`;
     };
 
-    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+    const onPointerDown = (event: MouseEvent | TouchEvent | PointerEvent) => {
+      // One tile at a time: a second finger must not lift another letter off the board.
+      if (draggedElement) return;
+
+      // Ignore non-primary mouse buttons; allow touch/pen through Pointer Events.
+      if ('button' in event) {
+        const pointerType = 'pointerType' in event ? event.pointerType : 'mouse';
+        if (pointerType === 'mouse' && event.button !== 0) return;
+      }
+
       const { clientX, clientY, pageX, pageY } = getClientXY(event);
       const target = event.target as HTMLElement;
       // Find the boojumble-letter element - could be clicked directly or on a child
@@ -199,6 +270,19 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       
       event.preventDefault();
       event.stopPropagation();
+
+      if ('pointerId' in event) {
+        activePointerId = event.pointerId;
+        try {
+          letterElement.setPointerCapture(event.pointerId);
+        } catch {
+          // Capture is optional; document listeners still track the drag.
+        }
+      } else if ('changedTouches' in event && event.changedTouches[0]) {
+        activePointerId = event.changedTouches[0].identifier;
+      } else {
+        activePointerId = -1;
+      }
       
       draggedElement = letterElement;
       // Add dragging class immediately to prevent default active styles
@@ -239,11 +323,17 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       // Move to current pointer position
       moveAt(pageX, pageY);
 
-      document.addEventListener('pointermove', onPointerMove);
-      document.addEventListener('pointerup', onPointerUp);
-      document.addEventListener('touchmove', onPointerMove as any, { passive: false });
-      document.addEventListener('touchend', onPointerUp);
-      document.addEventListener('touchcancel', onPointerUp);
+      if (supportsPointerEvents) {
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+        document.addEventListener('pointercancel', onPointerUp);
+      } else {
+        document.addEventListener('mousemove', onPointerMove as any);
+        document.addEventListener('mouseup', onPointerUp as any);
+        document.addEventListener('touchmove', onPointerMove as any, { passive: false });
+        document.addEventListener('touchend', onPointerUp);
+        document.addEventListener('touchcancel', onPointerUp);
+      }
     };
 
     const checkOverlap = () => {
@@ -584,22 +674,42 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
     };
 
-    const onPointerMove = (event: MouseEvent | TouchEvent) => {
+    const onPointerMove = (event: MouseEvent | TouchEvent | PointerEvent) => {
       if (!draggedElement) return;
+      if ('pointerId' in event && activePointerId != null && event.pointerId !== activePointerId) {
+        return;
+      }
+      if ('changedTouches' in event && activePointerId != null && activePointerId >= 0) {
+        const touch =
+          Array.from(event.touches).find((t) => t.identifier === activePointerId) ||
+          Array.from(event.changedTouches).find((t) => t.identifier === activePointerId);
+        if (!touch) return;
+      }
       const { pageX, pageY } = getClientXY(event);
       event.preventDefault();
       moveAt(pageX, pageY);
       checkOverlap();
     };
 
-    const onPointerUp = (_event: MouseEvent | TouchEvent) => {
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
-      document.removeEventListener('touchmove', onPointerMove as any);
-      document.removeEventListener('touchend', onPointerUp);
-      document.removeEventListener('touchcancel', onPointerUp);
+    const onPointerUp = (event: MouseEvent | TouchEvent | PointerEvent) => {
+      if (!draggedElement) return;
 
-      if (!draggedElement || !placeholderElement || !currentBoard) return;
+      if ('pointerId' in event && activePointerId != null && event.pointerId !== activePointerId) {
+        return;
+      }
+      if ('changedTouches' in event && activePointerId != null && activePointerId >= 0) {
+        const ended = Array.from(event.changedTouches).some(
+          (t) => t.identifier === activePointerId
+        );
+        if (!ended) return;
+      }
+
+      removeDragListeners();
+
+      if (!placeholderElement || !currentBoard) {
+        restoreDraggedToPlaceholder();
+        return;
+      }
 
       // Perform swap or snap-back
       if (overlapTarget && overlapTarget !== draggedElement && overlapTarget !== placeholderElement) {
@@ -629,17 +739,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       }
 
       // Cleanup styles
-      draggedElement.classList.remove('dragging');
-      draggedElement.style.position = '';
-      draggedElement.style.zIndex = '';
-      draggedElement.style.left = '';
-      draggedElement.style.top = '';
-      draggedElement.style.width = '';
-      draggedElement.style.height = '';
-      draggedElement.style.minWidth = '';
-      draggedElement.style.minHeight = '';
-      draggedElement.style.maxWidth = '';
-      draggedElement.style.maxHeight = '';
+      clearDragStyles(draggedElement);
       
       if (overlapTarget) {
         overlapTarget.querySelector('.letter-child')?.classList.remove('highlight');
@@ -674,6 +774,7 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       storeBoojumbleState(reconstructed, selectedLevel);
 
       draggedElement = placeholderElement = overlapTarget = null;
+      activePointerId = null;
     };
 
     // Wait for letter elements to be in the DOM (they might not be ready yet)
@@ -688,8 +789,13 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
       // Mark as initialized before adding listeners
       dragInitialized.current[selectedLevel] = true;
       
-      currentBoard.addEventListener('pointerdown', onPointerDown);
-      currentBoard.addEventListener('touchstart', onPointerDown as any, { passive: false });
+      // Prefer Pointer Events alone — registering touchstart + pointerdown double-fires on many devices.
+      if (supportsPointerEvents) {
+        currentBoard.addEventListener('pointerdown', onPointerDown);
+      } else {
+        currentBoard.addEventListener('mousedown', onPointerDown as any);
+        currentBoard.addEventListener('touchstart', onPointerDown as any, { passive: false });
+      }
       
       // Apply highlighting classes on page load
       highlightRowsAndColumns();
@@ -700,18 +806,15 @@ const Boojumble: React.FC<BoojumbleProps> = ({ boojumbles }) => {
 
     return () => {
       dragInitialized.current[selectedLevel] = false;
-      // Cleanup: remove all event listeners
-      // The functions are defined in this scope, so they should be accessible
+      // Put any in-flight letter back on the board before tearing listeners down.
+      restoreDraggedToPlaceholder();
+      removeDragListeners();
       try {
         if (currentBoard) {
           currentBoard.removeEventListener('pointerdown', onPointerDown);
+          currentBoard.removeEventListener('mousedown', onPointerDown as any);
           currentBoard.removeEventListener('touchstart', onPointerDown as any);
         }
-        document.removeEventListener('pointermove', onPointerMove);
-        document.removeEventListener('pointerup', onPointerUp);
-        document.removeEventListener('touchmove', onPointerMove as any);
-        document.removeEventListener('touchend', onPointerUp);
-        document.removeEventListener('touchcancel', onPointerUp);
       } catch (e) {
         // Silently fail if listeners weren't added yet
         console.warn('Error removing drag listeners:', e);
