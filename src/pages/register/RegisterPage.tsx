@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useAuth } from '../../contexts/AuthContext';
+import { authAPI } from '../../services/api';
 import './RegisterPage.css';
 
 const RegisterPage = () => {
@@ -8,10 +10,19 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
+  const [siteKey, setSiteKey] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    authAPI.getCaptchaSiteKey()
+      .then((key) => setSiteKey(key))
+      .catch(() => setSiteKey(null));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +33,15 @@ const RegisterPage = () => {
       return;
     }
 
+    if (siteKey && !turnstileToken) {
+      setError('Please complete the CAPTCHA verification');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await register(username, email, password, password2);
-      // Registration successful - redirect to email verification page
+      await register(username, email, password, password2, turnstileToken ?? undefined);
       navigate('/verify-email-sent', { state: { email } });
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.response?.data?.detail;
@@ -35,6 +50,8 @@ const RegisterPage = () => {
       } else {
         setError(errorMessage || 'Registration failed. Please try again.');
       }
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -45,13 +62,10 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       const result = await loginWithGoogle();
-      // If username is required, navigate to username selection page
       if (result && 'username_required' in result && result.username_required) {
-        // Store registration data in sessionStorage temporarily
         sessionStorage.setItem('google_registration', JSON.stringify(result));
         navigate('/google-username');
       } else {
-        // User already exists, login complete
         navigate('/');
       }
     } catch (err: any) {
@@ -126,6 +140,18 @@ const RegisterPage = () => {
             value={password2}
             onChange={(e) => setPassword2(e.target.value)}
           />
+
+          {siteKey && (
+            <div className="register-turnstile">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={siteKey}
+                onSuccess={setTurnstileToken}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => setTurnstileToken(null)}
+              />
+            </div>
+          )}
 
           <button type="submit" disabled={loading} className="register-button">
             {loading ? 'Creating account...' : 'Sign up'}

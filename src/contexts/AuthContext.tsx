@@ -21,7 +21,13 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, password2: string) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+    password2: string,
+    turnstileToken?: string
+  ) => Promise<void>;
   loginWithGoogle: () => Promise<GoogleRegistrationData | void>;
   completeGoogleRegistration: (username: string, email: string, googleId: string, accessToken: string) => Promise<void>;
   logout: () => void;
@@ -87,8 +93,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (username: string, email: string, password: string, password2: string) => {
-    const response = await authAPI.register(username, email, password, password2);
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+    password2: string,
+    turnstileToken?: string
+  ) => {
+    const response = await authAPI.register(username, email, password, password2, turnstileToken);
     // Registration now requires email verification - don't auto-login
     return response;
   };

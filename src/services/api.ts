@@ -79,14 +79,26 @@ export const authAPI = {
     return response.data;
   },
 
-  register: async (username: string, email: string, password: string, password2: string) => {
+  register: async (
+    username: string,
+    email: string,
+    password: string,
+    password2: string,
+    turnstileToken?: string
+  ) => {
     const response = await api.post('/register/', {
       username,
       email,
       password,
       password2,
+      turnstile_token: turnstileToken,
     });
     return response.data;
+  },
+
+  getCaptchaSiteKey: async () => {
+    const response = await api.get('/captcha/site-key/');
+    return response.data.site_key as string | null;
   },
 
   getUserInfo: async () => {
