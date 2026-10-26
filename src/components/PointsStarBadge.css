@@ -18,10 +18,89 @@
   right: 0;
   z-index: 4;
   pointer-events: none;
+  overflow: visible;
   fill: var(--points-star-color) !important;
   stroke: var(--points-star-color) !important;
   color: var(--points-star-color) !important;
   filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
+}
+
+/* Moons and the sun paint their own gradients; don't let the star fill wash them out. */
+.points-star-badge--moon,
+.points-star-badge--sun {
+  fill: none !important;
+  stroke: none !important;
+}
+
+.points-star-badge--red {
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2.5px rgba(190, 18, 60, 0.7));
+}
+
+.points-star-badge--violet {
+  filter:
+    drop-shadow(0 0 1px #000)
+    drop-shadow(0 0 2px #f3e8ff)
+    drop-shadow(0 0 5px rgba(139, 92, 246, 0.95))
+    drop-shadow(0 0 9px rgba(94, 76, 176, 0.85));
+}
+
+.points-star-badge--sun {
+  filter:
+    drop-shadow(0 0 1px #000)
+    drop-shadow(0 0 2px #fff4c4)
+    drop-shadow(0 0 6px rgba(245, 180, 40, 0.98))
+    drop-shadow(0 0 11px rgba(255, 150, 20, 0.75));
+}
+
+.points-badge-aura {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: points-aura-pulse 2.4s ease-in-out infinite;
+}
+
+.points-badge-aura--violet {
+  fill: #d8b4fe;
+  opacity: 0.8;
+  filter: blur(var(--points-aura-blur, 2px));
+}
+
+.points-badge-aura--sun {
+  fill: #ffd56a;
+  opacity: 0.85;
+  filter: blur(var(--points-aura-blur, 3px));
+}
+
+.points-glitter-sheen {
+  animation: points-glitter-sheen 2.15s ease-in-out infinite;
+}
+
+.points-moon-sparkle {
+  animation: points-sparkle 1.7s ease-in-out infinite;
+}
+
+.points-sun-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: points-sun-spin 14s linear infinite;
+}
+
+@keyframes points-aura-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes points-glitter-sheen {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(30px); }
+}
+
+@keyframes points-sparkle {
+  0%, 100% { opacity: 0.25; }
+  45% { opacity: 1; }
+}
+
+@keyframes points-sun-spin {
+  to { transform: rotate(360deg); }
 }
 
 .points-star-badge-link {
@@ -42,8 +121,49 @@
   pointer-events: none;
 }
 
-.points-star-badge-link:hover .points-star-badge {
+.points-star-badge-link:hover .points-star-badge:not(.points-star-badge--red):not(.points-star-badge--violet):not(.points-star-badge--sun) {
   filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 4px rgba(255, 255, 255, 0.45));
+}
+
+.points-star-badge-link:hover .points-star-badge--red {
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 4px rgba(255, 190, 200, 0.9));
+}
+
+.points-star-badge-link:hover .points-star-badge--violet {
+  filter:
+    drop-shadow(0 0 1px #000)
+    drop-shadow(0 0 4px #faf5ff)
+    drop-shadow(0 0 8px rgba(192, 132, 252, 1))
+    drop-shadow(0 0 14px rgba(109, 40, 217, 0.95));
+}
+
+.points-star-badge-link:hover .points-star-badge--sun {
+  filter:
+    drop-shadow(0 0 1px #000)
+    drop-shadow(0 0 4px #fff7d6)
+    drop-shadow(0 0 9px rgba(255, 205, 70, 1))
+    drop-shadow(0 0 16px rgba(255, 150, 20, 0.9));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .points-badge-aura,
+  .points-glitter-sheen,
+  .points-moon-sparkle,
+  .points-sun-rays {
+    animation: none;
+  }
+
+  .points-badge-aura {
+    opacity: 0.85;
+  }
+
+  .points-moon-sparkle {
+    opacity: 0.9;
+  }
+
+  .points-glitter-sheen {
+    display: none;
+  }
 }
 
 .points-star-badge-link:focus-visible {
