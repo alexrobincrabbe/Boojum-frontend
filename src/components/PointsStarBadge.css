@@ -12,6 +12,20 @@
   margin-right: calc(var(--points-star-size, 12px) * -0.33);
 }
 
+/* Moons/sun sit further outside the avatar so crowns/frames don't cover them */
+.points-star-badge-wrap--outset {
+  padding-top: calc(var(--points-star-size, 12px) * 0.55);
+  padding-right: calc(var(--points-star-size, 12px) * 0.55);
+  margin-top: calc(var(--points-star-size, 12px) * -0.55);
+  margin-right: calc(var(--points-star-size, 12px) * -0.55);
+}
+
+.points-star-badge-wrap--outset .points-star-badge,
+.points-star-badge-wrap--outset .points-star-badge-link {
+  top: calc(var(--points-star-size, 12px) * -0.12);
+  right: calc(var(--points-star-size, 12px) * -0.12);
+}
+
 .points-star-badge {
   position: absolute;
   top: 0;

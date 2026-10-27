@@ -406,11 +406,23 @@ h2 {
   margin-right: calc(var(--points-star-size, 12px) * -0.18);
 }
 
+#profile-pic-container-top .points-star-badge-wrap--outset {
+  padding-top: calc(var(--points-star-size, 12px) * 0.38);
+  padding-right: calc(var(--points-star-size, 12px) * 0.38);
+  margin-top: calc(var(--points-star-size, 12px) * -0.38);
+  margin-right: calc(var(--points-star-size, 12px) * -0.38);
+}
+
 #profile-pic-container-top .points-star-badge-link {
   top: calc(var(--points-star-size, 12px) * 0.14);
   right: calc(var(--points-star-size, 12px) * 0.14);
   transform: scale(0.72);
   transform-origin: top right;
+}
+
+#profile-pic-container-top .points-star-badge-wrap--outset .points-star-badge-link {
+  top: calc(var(--points-star-size, 12px) * -0.06);
+  right: calc(var(--points-star-size, 12px) * -0.06);
 }
 
 #profile-pic-container-top .points-star-badge-link .points-star-badge {

@@ -393,8 +393,14 @@ export function PointsStarBadge({ tier, size = 30, linkable = false, children }:
     );
   }
 
+  const wrapClass = [
+    'points-star-badge-wrap',
+    linkable ? 'points-star-badge-wrap--linkable' : '',
+    kind === 'moon' || kind === 'sun' ? 'points-star-badge-wrap--outset' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <span className={`points-star-badge-wrap${linkable ? ' points-star-badge-wrap--linkable' : ''}`} data-tier={tier}>
+    <span className={wrapClass} data-tier={tier}>
       {children}
       {linkable ? (
         <Link to={POINTS_STAR_LINK} className="points-star-badge-link" aria-label="Points leaderboard">
