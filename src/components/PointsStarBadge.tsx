@@ -10,7 +10,7 @@ export const POINTS_STAR_COLORS: Record<string, string> = {
   yellow: '#f5ce45',
   pink: '#ff5596',
   purple: '#5e4cb0',
-  crimson: '#e11d48',
+  crimson: '#c8102e',
 };
 
 /** Crescent used by every moon tier. Horns face up-right. */
@@ -70,13 +70,14 @@ const MOON_SPARKLES = [
   { x: 7.6, y: 17.2, scale: 0.62, delay: '0.2s' },
 ];
 
+/* Oversized sparkles that poke outside the star so glitter still reads at ~12px. */
 const STAR_SPARKLES = [
-  { x: 12, y: 5.2, scale: 0.95, delay: '0s' },
-  { x: 7.2, y: 9.4, scale: 0.72, delay: '0.35s' },
-  { x: 16.4, y: 9.8, scale: 0.8, delay: '0.7s' },
-  { x: 9.6, y: 14.8, scale: 0.68, delay: '1.05s' },
-  { x: 14.2, y: 15.1, scale: 0.9, delay: '1.4s' },
-  { x: 12, y: 11.2, scale: 0.55, delay: '0.2s' },
+  { x: 12, y: 1.4, scale: 1.85, delay: '0s' },
+  { x: 21.2, y: 8.4, scale: 1.55, delay: '0.4s' },
+  { x: 2.8, y: 8.6, scale: 1.45, delay: '0.8s' },
+  { x: 18.6, y: 18.8, scale: 1.7, delay: '1.2s' },
+  { x: 5.2, y: 18.6, scale: 1.5, delay: '0.25s' },
+  { x: 12, y: 11.2, scale: 1.05, delay: '0.65s' },
 ];
 
 export type PointsTier = keyof typeof POINTS_STAR_COLORS | string;
@@ -278,17 +279,20 @@ function CrimsonStarBadge({
       style={style}
     >
       <defs>
-        <linearGradient id={fillId} x1="15%" y1="0%" x2="90%" y2="100%">
-          <stop offset="0%" stopColor="#ffd0da" />
-          <stop offset="28%" stopColor="#ff4d6a" />
-          <stop offset="62%" stopColor="#e11d48" />
-          <stop offset="100%" stopColor="#9f1239" />
-        </linearGradient>
+        <radialGradient id={fillId} cx="38%" cy="32%" r="78%">
+          <stop offset="0%" stopColor="#ff6b6b" />
+          <stop offset="42%" stopColor="#dc143c" />
+          <stop offset="78%" stopColor="#9b0f24" />
+          <stop offset="100%" stopColor="#6b0a18" />
+        </radialGradient>
       </defs>
-      <path d={STAR_PATH} fill={`url(#${fillId})`} />
+      {/* Soft aura so it reads as glittery red, not flat pink, even when tiny */}
+      <path className="points-badge-aura points-badge-aura--crimson" d={STAR_PATH} />
+      <path d={STAR_PATH} fill={`url(#${fillId})`} stroke="#5c0612" strokeWidth="0.7" strokeLinejoin="round" />
       <GlitterLayer maskId={maskId} sheenId={sheenId} path={STAR_PATH} sparkles={STAR_SPARKLES} />
-      <circle cx="12" cy="9.2" r="0.45" fill="#fff" opacity="0.95" />
-      <circle cx="9.4" cy="13.2" r="0.32" fill="#ffe08a" opacity="0.9" />
+      <circle cx="12" cy="8.6" r="0.7" fill="#fff" opacity="0.95" />
+      <circle cx="9.1" cy="12.8" r="0.45" fill="#ffe08a" opacity="0.95" />
+      <circle cx="15.2" cy="13.4" r="0.38" fill="#fff" opacity="0.85" />
     </svg>
   );
 }
@@ -358,7 +362,7 @@ export function PointsStarBadge({ tier, size = 30, linkable = false, children }:
 
   const kind = badgeKind(tier);
   const color = POINTS_STAR_COLORS[tier] || POINTS_STAR_COLORS.white;
-  const scale = kind === 'sun' ? 0.62 : kind === 'moon' ? 0.6 : 0.42;
+  const scale = kind === 'sun' ? 0.62 : kind === 'moon' ? 0.6 : kind === 'glitter-star' ? 0.5 : 0.42;
   const iconSize = Math.max(10, Math.round(size * scale));
   const style = {
     '--points-star-color': color,
