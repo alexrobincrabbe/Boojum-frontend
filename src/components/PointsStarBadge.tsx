@@ -70,15 +70,29 @@ const MOON_SPARKLES = [
   { x: 7.6, y: 17.2, scale: 0.62, delay: '0.2s' },
 ];
 
-/* Oversized sparkles that poke outside the star so glitter still reads at ~12px. */
-const STAR_SPARKLES = [
-  { x: 12, y: 1.4, scale: 1.85, delay: '0s' },
-  { x: 21.2, y: 8.4, scale: 1.55, delay: '0.4s' },
-  { x: 2.8, y: 8.6, scale: 1.45, delay: '0.8s' },
-  { x: 18.6, y: 18.8, scale: 1.7, delay: '1.2s' },
-  { x: 5.2, y: 18.6, scale: 1.5, delay: '0.25s' },
-  { x: 12, y: 11.2, scale: 1.05, delay: '0.65s' },
-];
+/** Sequin mosaic for the ruby star — staggered rows of facets with catch-lights. */
+const RUBY_SEQUINS: Array<{ x: number; y: number; r: number; tone: 0 | 1 | 2 | 3 }> = (() => {
+  const sequins: Array<{ x: number; y: number; r: number; tone: 0 | 1 | 2 | 3 }> = [];
+  let i = 0;
+  for (let row = 0; row < 9; row += 1) {
+    const y = 3.2 + row * 2.05;
+    const offset = row % 2 === 0 ? 0 : 1.05;
+    for (let col = 0; col < 9; col += 1) {
+      const x = 3.1 + offset + col * 2.1;
+      if (x < 2.4 || x > 21.6 || y < 2.6 || y > 21.2) continue;
+      sequins.push({
+        x,
+        y,
+        r: 0.72 + ((i * 17) % 5) * 0.06,
+        tone: (i % 4) as 0 | 1 | 2 | 3,
+      });
+      i += 1;
+    }
+  }
+  return sequins;
+})();
+
+const RUBY_TONES = ['#7a0a1a', '#b0122c', '#e11d48', '#ff6b81'] as const;
 
 export type PointsTier = keyof typeof POINTS_STAR_COLORS | string;
 
@@ -266,7 +280,7 @@ function CrimsonStarBadge({
 }) {
   const fillId = `crimson-fill-${gradientId}`;
   const maskId = `crimson-mask-${gradientId}`;
-  const sheenId = `crimson-sheen-${gradientId}`;
+  const glossId = `crimson-gloss-${gradientId}`;
 
   return (
     <svg
@@ -279,18 +293,38 @@ function CrimsonStarBadge({
       style={style}
     >
       <defs>
-        <radialGradient id={fillId} cx="38%" cy="32%" r="78%">
-          <stop offset="0%" stopColor="#ff6b6b" />
-          <stop offset="42%" stopColor="#dc143c" />
-          <stop offset="78%" stopColor="#9b0f24" />
-          <stop offset="100%" stopColor="#6b0a18" />
+        <radialGradient id={fillId} cx="40%" cy="30%" r="78%">
+          <stop offset="0%" stopColor="#c91834" />
+          <stop offset="55%" stopColor="#9b0f24" />
+          <stop offset="100%" stopColor="#5c0612" />
         </radialGradient>
+        <radialGradient id={glossId} cx="35%" cy="28%" r="55%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="45%" stopColor="#ffb3c1" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <mask id={maskId}>
+          <rect width="24" height="24" fill="#000" />
+          <path d={STAR_PATH} fill="#fff" />
+        </mask>
       </defs>
-      <path d={STAR_PATH} fill={`url(#${fillId})`} stroke="#5c0612" strokeWidth="0.7" strokeLinejoin="round" />
-      <GlitterLayer maskId={maskId} sheenId={sheenId} path={STAR_PATH} sparkles={STAR_SPARKLES} />
-      <circle cx="12" cy="8.6" r="0.7" fill="#fff" opacity="0.95" />
-      <circle cx="9.1" cy="12.8" r="0.45" fill="#ffe08a" opacity="0.95" />
-      <circle cx="15.2" cy="13.4" r="0.38" fill="#fff" opacity="0.85" />
+      <path d={STAR_PATH} fill={`url(#${fillId})`} stroke="#3d040c" strokeWidth="0.75" strokeLinejoin="round" />
+      <g mask={`url(#${maskId})`} className="points-ruby-mosaic">
+        {RUBY_SEQUINS.map((sequin, index) => (
+          <g key={`${sequin.x}-${sequin.y}`}>
+            <circle cx={sequin.x} cy={sequin.y} r={sequin.r} fill={RUBY_TONES[sequin.tone]} />
+            {/* Tiny specular catch-light on each sequin */}
+            <circle
+              cx={sequin.x - sequin.r * 0.28}
+              cy={sequin.y - sequin.r * 0.32}
+              r={sequin.r * (index % 3 === 0 ? 0.38 : 0.28)}
+              fill={index % 5 === 0 ? '#fff8e8' : '#ffffff'}
+              opacity={index % 3 === 0 ? 0.95 : 0.55}
+            />
+          </g>
+        ))}
+        <path d={STAR_PATH} fill={`url(#${glossId})`} />
+      </g>
     </svg>
   );
 }
