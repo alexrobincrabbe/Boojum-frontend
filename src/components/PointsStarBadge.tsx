@@ -330,8 +330,6 @@ function CrimsonStarBadge({
             transform={`translate(${hex.x} ${hex.y})`}
             d={HEX_PATH}
             fill={hex.tone === 0 ? HEX_TONES.dark : HEX_TONES.light}
-            stroke="#4c0519"
-            strokeWidth="0.2"
           />
         ))}
       </g>
