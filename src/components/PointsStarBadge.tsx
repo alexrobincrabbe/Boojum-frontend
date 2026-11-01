@@ -86,9 +86,15 @@ const HEX_PATH = hexPath(HEX_R);
 const HEX_W = HEX_R * Math.sqrt(3);
 const HEX_H = HEX_R * 1.5;
 
+/** Deterministic scramble so tones look random but stay stable across renders. */
+function hexTone(row: number, col: number): 0 | 1 {
+  const n = Math.imul(row + 11, 374761393) ^ Math.imul(col + 17, 668265263);
+  const mixed = Math.imul(n ^ (n >>> 13), 1274126177);
+  return ((mixed >>> 0) & 1) as 0 | 1;
+}
+
 const STAR_HEXES: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = (() => {
   const hexes: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = [];
-  let i = 0;
   for (let row = -1; row < 10; row += 1) {
     const y = 2.2 + row * HEX_H;
     const xOffset = row % 2 === 0 ? 0 : HEX_W / 2;
@@ -98,10 +104,9 @@ const STAR_HEXES: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = 
       hexes.push({
         x,
         y,
-        tone: (i % 2) as 0 | 1,
-        delay: `${((i * 0.18) % 1.6).toFixed(2)}s`,
+        tone: hexTone(row, col),
+        delay: `${(((Math.imul(row + 3, col + 5) >>> 0) % 160) / 100).toFixed(2)}s`,
       });
-      i += 1;
     }
   }
   return hexes;
