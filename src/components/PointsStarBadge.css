@@ -112,6 +112,10 @@
   animation: points-sparkle 1.7s ease-in-out infinite;
 }
 
+.points-star-glitter {
+  animation: points-star-glitter 1.5s ease-in-out infinite;
+}
+
 .points-sun-rays {
   transform-box: fill-box;
   transform-origin: center;
@@ -137,6 +141,12 @@
 @keyframes points-sparkle {
   0%, 100% { opacity: 0.25; }
   45% { opacity: 1; }
+}
+
+@keyframes points-star-glitter {
+  0%, 100% { opacity: 0.2; }
+  40% { opacity: 1; }
+  60% { opacity: 0.45; }
 }
 
 @keyframes points-sun-spin {
@@ -205,6 +215,7 @@
   .points-glitter-sheen,
   .points-shiny-sheen,
   .points-moon-sparkle,
+  .points-star-glitter,
   .points-sun-rays {
     animation: none;
   }
@@ -213,8 +224,9 @@
     opacity: 0.85;
   }
 
-  .points-moon-sparkle {
-    opacity: 0.9;
+  .points-moon-sparkle,
+  .points-star-glitter {
+    opacity: 0.85;
   }
 
   .points-glitter-sheen,

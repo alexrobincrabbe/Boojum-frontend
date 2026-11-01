@@ -70,29 +70,24 @@ const MOON_SPARKLES = [
   { x: 7.6, y: 17.2, scale: 0.62, delay: '0.2s' },
 ];
 
-/** Sequin mosaic for the ruby star — staggered rows of facets with catch-lights. */
-const RUBY_SEQUINS: Array<{ x: number; y: number; r: number; tone: 0 | 1 | 2 | 3 }> = (() => {
-  const sequins: Array<{ x: number; y: number; r: number; tone: 0 | 1 | 2 | 3 }> = [];
-  let i = 0;
-  for (let row = 0; row < 9; row += 1) {
-    const y = 3.2 + row * 2.05;
-    const offset = row % 2 === 0 ? 0 : 1.05;
-    for (let col = 0; col < 9; col += 1) {
-      const x = 3.1 + offset + col * 2.1;
-      if (x < 2.4 || x > 21.6 || y < 2.6 || y > 21.2) continue;
-      sequins.push({
-        x,
-        y,
-        r: 0.72 + ((i * 17) % 5) * 0.06,
-        tone: (i % 4) as 0 | 1 | 2 | 3,
-      });
-      i += 1;
-    }
-  }
-  return sequins;
-})();
-
-const RUBY_TONES = ['#7a0a1a', '#b0122c', '#e11d48', '#ff6b81'] as const;
+/** Highlight dots scattered across the crimson star; they twinkle independently. */
+const STAR_HIGHLIGHTS = [
+  { x: 12.0, y: 5.2, r: 0.55, delay: '0s' },
+  { x: 9.4, y: 7.6, r: 0.4, delay: '0.25s' },
+  { x: 14.6, y: 7.4, r: 0.45, delay: '0.5s' },
+  { x: 7.2, y: 10.2, r: 0.5, delay: '0.75s' },
+  { x: 12.0, y: 10.0, r: 0.35, delay: '1s' },
+  { x: 16.8, y: 10.0, r: 0.48, delay: '0.15s' },
+  { x: 8.8, y: 13.0, r: 0.42, delay: '0.4s' },
+  { x: 12.8, y: 12.6, r: 0.52, delay: '0.65s' },
+  { x: 15.6, y: 13.2, r: 0.38, delay: '0.9s' },
+  { x: 6.4, y: 15.6, r: 0.4, delay: '0.2s' },
+  { x: 10.2, y: 15.8, r: 0.46, delay: '0.55s' },
+  { x: 14.0, y: 15.6, r: 0.36, delay: '0.8s' },
+  { x: 17.4, y: 15.4, r: 0.44, delay: '1.1s' },
+  { x: 9.0, y: 18.2, r: 0.4, delay: '0.35s' },
+  { x: 15.0, y: 18.0, r: 0.42, delay: '0.7s' },
+];
 
 export type PointsTier = keyof typeof POINTS_STAR_COLORS | string;
 
@@ -280,7 +275,6 @@ function CrimsonStarBadge({
 }) {
   const fillId = `crimson-fill-${gradientId}`;
   const maskId = `crimson-mask-${gradientId}`;
-  const glossId = `crimson-gloss-${gradientId}`;
 
   return (
     <svg
@@ -294,36 +288,28 @@ function CrimsonStarBadge({
     >
       <defs>
         <radialGradient id={fillId} cx="40%" cy="30%" r="78%">
-          <stop offset="0%" stopColor="#c91834" />
-          <stop offset="55%" stopColor="#9b0f24" />
-          <stop offset="100%" stopColor="#5c0612" />
-        </radialGradient>
-        <radialGradient id={glossId} cx="35%" cy="28%" r="55%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
-          <stop offset="45%" stopColor="#ffb3c1" stopOpacity="0.12" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0%" stopColor="#e11d48" />
+          <stop offset="55%" stopColor="#be123c" />
+          <stop offset="100%" stopColor="#7f1d1d" />
         </radialGradient>
         <mask id={maskId}>
           <rect width="24" height="24" fill="#000" />
           <path d={STAR_PATH} fill="#fff" />
         </mask>
       </defs>
-      <path d={STAR_PATH} fill={`url(#${fillId})`} stroke="#3d040c" strokeWidth="0.75" strokeLinejoin="round" />
-      <g mask={`url(#${maskId})`} className="points-ruby-mosaic">
-        {RUBY_SEQUINS.map((sequin, index) => (
-          <g key={`${sequin.x}-${sequin.y}`}>
-            <circle cx={sequin.x} cy={sequin.y} r={sequin.r} fill={RUBY_TONES[sequin.tone]} />
-            {/* Tiny specular catch-light on each sequin */}
-            <circle
-              cx={sequin.x - sequin.r * 0.28}
-              cy={sequin.y - sequin.r * 0.32}
-              r={sequin.r * (index % 3 === 0 ? 0.38 : 0.28)}
-              fill={index % 5 === 0 ? '#fff8e8' : '#ffffff'}
-              opacity={index % 3 === 0 ? 0.95 : 0.55}
-            />
-          </g>
+      <path d={STAR_PATH} fill={`url(#${fillId})`} />
+      <g mask={`url(#${maskId})`}>
+        {STAR_HIGHLIGHTS.map((dot) => (
+          <circle
+            key={`${dot.x}-${dot.y}`}
+            className="points-star-glitter"
+            style={{ animationDelay: dot.delay }}
+            cx={dot.x}
+            cy={dot.y}
+            r={dot.r}
+            fill="#fff8f0"
+          />
         ))}
-        <path d={STAR_PATH} fill={`url(#${glossId})`} />
       </g>
     </svg>
   );
