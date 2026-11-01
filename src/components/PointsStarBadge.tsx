@@ -86,30 +86,74 @@ const HEX_PATH = hexPath(HEX_R);
 const HEX_W = HEX_R * Math.sqrt(3);
 const HEX_H = HEX_R * 1.5;
 
-/** Deterministic scramble so tones look random but stay stable across renders. */
-function hexTone(row: number, col: number): 0 | 1 {
-  const n = Math.imul(row + 11, 374761393) ^ Math.imul(col + 17, 668265263);
-  const mixed = Math.imul(n ^ (n >>> 13), 1274126177);
-  return ((mixed >>> 0) & 1) as 0 | 1;
+/** Seeded PRNG so the mix is random-looking but identical every render. */
+function mulberry32(seed: number) {
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6d2b79f5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 const STAR_HEXES: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = (() => {
-  const hexes: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = [];
+  const positions: Array<{ x: number; y: number; row: number; col: number }> = [];
   for (let row = -1; row < 10; row += 1) {
     const y = 2.2 + row * HEX_H;
     const xOffset = row % 2 === 0 ? 0 : HEX_W / 2;
     for (let col = -1; col < 10; col += 1) {
       const x = 1.6 + xOffset + col * HEX_W;
       if (x < -1 || x > 25 || y < -1 || y > 25) continue;
-      hexes.push({
-        x,
-        y,
-        tone: hexTone(row, col),
-        delay: `${(((Math.imul(row + 3, col + 5) >>> 0) % 160) / 100).toFixed(2)}s`,
-      });
+      positions.push({ x, y, row, col });
     }
   }
-  return hexes;
+
+  const rand = mulberry32(0xa5f00d);
+  const order = positions.map((_, index) => index);
+  for (let i = order.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rand() * (i + 1));
+    const tmp = order[i];
+    order[i] = order[j];
+    order[j] = tmp;
+  }
+
+  // Color in random order; bias against matching already-colored neighbors.
+  const tones = new Map<string, 0 | 1>();
+  const keyOf = (row: number, col: number) => `${row},${col}`;
+  const neighborOffsets = (row: number): Array<[number, number]> => (
+    row % 2 === 0
+      ? [[0, -1], [0, 1], [-1, -1], [-1, 0], [1, -1], [1, 0]]
+      : [[0, -1], [0, 1], [-1, 0], [-1, 1], [1, 0], [1, 1]]
+  );
+
+  for (const index of order) {
+    const { row, col } = positions[index];
+    let dark = 0;
+    let light = 0;
+    for (const [dr, dc] of neighborOffsets(row)) {
+      const tone = tones.get(keyOf(row + dr, col + dc));
+      if (tone === 0) dark += 1;
+      if (tone === 1) light += 1;
+    }
+    let tone: 0 | 1;
+    if (dark === light) {
+      tone = rand() < 0.5 ? 0 : 1;
+    } else if (dark > light) {
+      // Prefer light, with a little noise so it doesn't become a checkerboard.
+      tone = rand() < 0.78 ? 1 : 0;
+    } else {
+      tone = rand() < 0.78 ? 0 : 1;
+    }
+    tones.set(keyOf(row, col), tone);
+  }
+
+  return positions.map((pos) => ({
+    x: pos.x,
+    y: pos.y,
+    tone: tones.get(`${pos.row},${pos.col}`) ?? 0,
+    delay: `${(rand() * 1.6).toFixed(2)}s`,
+  }));
 })();
 
 const HEX_TONES = {
