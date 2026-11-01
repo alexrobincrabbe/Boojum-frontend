@@ -286,8 +286,6 @@ function CrimsonStarBadge({
           <stop offset="100%" stopColor="#6b0a18" />
         </radialGradient>
       </defs>
-      {/* Soft aura so it reads as glittery red, not flat pink, even when tiny */}
-      <path className="points-badge-aura points-badge-aura--crimson" d={STAR_PATH} />
       <path d={STAR_PATH} fill={`url(#${fillId})`} stroke="#5c0612" strokeWidth="0.7" strokeLinejoin="round" />
       <GlitterLayer maskId={maskId} sheenId={sheenId} path={STAR_PATH} sparkles={STAR_SPARKLES} />
       <circle cx="12" cy="8.6" r="0.7" fill="#fff" opacity="0.95" />

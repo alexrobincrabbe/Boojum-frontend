@@ -61,22 +61,9 @@
     drop-shadow(0 0 4px rgba(212, 168, 46, 0.55));
 }
 
-.points-star-badge--crimson {
-  filter:
-    drop-shadow(0 0 1px #000)
-    drop-shadow(0 0 1.5px #fff5f5)
-    drop-shadow(0 0 3px rgba(255, 80, 80, 0.95))
-    drop-shadow(0 0 5px rgba(180, 10, 30, 0.85));
-}
-
+.points-star-badge--crimson,
 .points-star-badge--red {
-  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2.5px rgba(190, 18, 60, 0.7));
-}
-
-.points-badge-aura--crimson {
-  fill: #ff3b4a;
-  opacity: 0.75;
-  filter: blur(var(--points-aura-blur, 2px));
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px rgba(0, 0, 0, 0.7));
 }
 
 .points-star-badge--violet {
@@ -192,16 +179,9 @@
     drop-shadow(0 0 7px rgba(240, 180, 40, 0.75));
 }
 
-.points-star-badge-link:hover .points-star-badge--crimson {
-  filter:
-    drop-shadow(0 0 1px #000)
-    drop-shadow(0 0 2px #fff)
-    drop-shadow(0 0 5px rgba(255, 100, 100, 1))
-    drop-shadow(0 0 9px rgba(200, 20, 40, 0.95));
-}
-
+.points-star-badge-link:hover .points-star-badge--crimson,
 .points-star-badge-link:hover .points-star-badge--red {
-  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 4px rgba(255, 190, 200, 0.9));
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
 }
 
 .points-star-badge-link:hover .points-star-badge--violet {
