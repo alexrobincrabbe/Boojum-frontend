@@ -70,24 +70,47 @@ const MOON_SPARKLES = [
   { x: 7.6, y: 17.2, scale: 0.62, delay: '0.2s' },
 ];
 
-/** Highlight dots scattered across the crimson star; they twinkle independently. */
-const STAR_HIGHLIGHTS = [
-  { x: 12.0, y: 5.2, r: 0.55, delay: '0s' },
-  { x: 9.4, y: 7.6, r: 0.4, delay: '0.25s' },
-  { x: 14.6, y: 7.4, r: 0.45, delay: '0.5s' },
-  { x: 7.2, y: 10.2, r: 0.5, delay: '0.75s' },
-  { x: 12.0, y: 10.0, r: 0.35, delay: '1s' },
-  { x: 16.8, y: 10.0, r: 0.48, delay: '0.15s' },
-  { x: 8.8, y: 13.0, r: 0.42, delay: '0.4s' },
-  { x: 12.8, y: 12.6, r: 0.52, delay: '0.65s' },
-  { x: 15.6, y: 13.2, r: 0.38, delay: '0.9s' },
-  { x: 6.4, y: 15.6, r: 0.4, delay: '0.2s' },
-  { x: 10.2, y: 15.8, r: 0.46, delay: '0.55s' },
-  { x: 14.0, y: 15.6, r: 0.36, delay: '0.8s' },
-  { x: 17.4, y: 15.4, r: 0.44, delay: '1.1s' },
-  { x: 9.0, y: 18.2, r: 0.4, delay: '0.35s' },
-  { x: 15.0, y: 18.0, r: 0.42, delay: '0.7s' },
-];
+/** Pointy-top hexagon vertices centered at origin, radius r. */
+function hexPath(r: number): string {
+  const pts: string[] = [];
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI / 180) * (60 * i - 30);
+    pts.push(`${(Math.cos(angle) * r).toFixed(2)},${(Math.sin(angle) * r).toFixed(2)}`);
+  }
+  return `M${pts.join('L')}Z`;
+}
+
+const HEX_R = 1.85;
+const HEX_PATH = hexPath(HEX_R);
+/** Flat-to-flat width / vertical row pitch for a pointy-top hex grid. */
+const HEX_W = HEX_R * Math.sqrt(3);
+const HEX_H = HEX_R * 1.5;
+
+const STAR_HEXES: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = (() => {
+  const hexes: Array<{ x: number; y: number; tone: 0 | 1; delay: string }> = [];
+  let i = 0;
+  for (let row = -1; row < 10; row += 1) {
+    const y = 2.2 + row * HEX_H;
+    const xOffset = row % 2 === 0 ? 0 : HEX_W / 2;
+    for (let col = -1; col < 10; col += 1) {
+      const x = 1.6 + xOffset + col * HEX_W;
+      if (x < -1 || x > 25 || y < -1 || y > 25) continue;
+      hexes.push({
+        x,
+        y,
+        tone: (i % 2) as 0 | 1,
+        delay: `${((i * 0.18) % 1.6).toFixed(2)}s`,
+      });
+      i += 1;
+    }
+  }
+  return hexes;
+})();
+
+const HEX_TONES = {
+  dark: '#7f1d1d',
+  light: '#fb7185',
+} as const;
 
 export type PointsTier = keyof typeof POINTS_STAR_COLORS | string;
 
@@ -298,16 +321,17 @@ function CrimsonStarBadge({
         </mask>
       </defs>
       <path d={STAR_PATH} fill={`url(#${fillId})`} />
-      <g mask={`url(#${maskId})`}>
-        {STAR_HIGHLIGHTS.map((dot) => (
-          <circle
-            key={`${dot.x}-${dot.y}`}
-            className="points-star-glitter"
-            style={{ animationDelay: dot.delay }}
-            cx={dot.x}
-            cy={dot.y}
-            r={dot.r}
-            fill="#fff8f0"
+      <g mask={`url(#${maskId})`} className="points-hex-mosaic">
+        {STAR_HEXES.map((hex) => (
+          <path
+            key={`${hex.x}-${hex.y}`}
+            className={`points-hex-tile points-hex-tile--${hex.tone === 0 ? 'dark' : 'light'}`}
+            style={{ animationDelay: hex.delay }}
+            transform={`translate(${hex.x} ${hex.y})`}
+            d={HEX_PATH}
+            fill={hex.tone === 0 ? HEX_TONES.dark : HEX_TONES.light}
+            stroke="#4c0519"
+            strokeWidth="0.2"
           />
         ))}
       </g>

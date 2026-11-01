@@ -112,8 +112,12 @@
   animation: points-sparkle 1.7s ease-in-out infinite;
 }
 
-.points-star-glitter {
-  animation: points-star-glitter 1.5s ease-in-out infinite;
+.points-hex-tile--dark {
+  animation: points-hex-shimmer-dark 2.2s ease-in-out infinite;
+}
+
+.points-hex-tile--light {
+  animation: points-hex-shimmer-light 2.2s ease-in-out infinite;
 }
 
 .points-sun-rays {
@@ -143,10 +147,14 @@
   45% { opacity: 1; }
 }
 
-@keyframes points-star-glitter {
-  0%, 100% { opacity: 0.2; }
-  40% { opacity: 1; }
-  60% { opacity: 0.45; }
+@keyframes points-hex-shimmer-dark {
+  0%, 100% { fill: #7f1d1d; }
+  50% { fill: #be123c; }
+}
+
+@keyframes points-hex-shimmer-light {
+  0%, 100% { fill: #fb7185; }
+  50% { fill: #ffe4e6; }
 }
 
 @keyframes points-sun-spin {
@@ -215,7 +223,8 @@
   .points-glitter-sheen,
   .points-shiny-sheen,
   .points-moon-sparkle,
-  .points-star-glitter,
+  .points-hex-tile--dark,
+  .points-hex-tile--light,
   .points-sun-rays {
     animation: none;
   }
@@ -224,8 +233,7 @@
     opacity: 0.85;
   }
 
-  .points-moon-sparkle,
-  .points-star-glitter {
+  .points-moon-sparkle {
     opacity: 0.85;
   }
 
