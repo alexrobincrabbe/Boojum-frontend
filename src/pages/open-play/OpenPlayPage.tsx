@@ -26,7 +26,7 @@ interface UserSearchResult {
   display_name: string;
 }
 
-const OPEN_PLAY_TIME_LIMITS = [90, 120, 150, 180, 240] as const;
+const OPEN_PLAY_TIME_LIMITS = [90, 120, 150, 180, 240, 300] as const;
 type OpenPlayTimeLimit = (typeof OPEN_PLAY_TIME_LIMITS)[number];
 
 export default function OpenPlayPage() {
